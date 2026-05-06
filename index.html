@@ -587,12 +587,12 @@ const tbody = document.getElementById("stocksTbody");
   tbody.innerHTML = rows.map(s => `
     <tr>
       <td>
-        <a href="[https://tw.tradingview.com/chart/?symbol=TWSE:$](https://tw.tradingview.com/chart/?symbol=TWSE:$){s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
+        <a href="https://tw.tradingview.com/chart/?symbol=TWSE:${s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
           ${s.code}
         </a>
       </td>
       <td>
-        <a href="[https://tw.tradingview.com/chart/?symbol=TWSE:$](https://tw.tradingview.com/chart/?symbol=TWSE:$){s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
+        <a href="https://tw.tradingview.com/chart/?symbol=TWSE:${s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
           ${s.name}
         </a>
       </td>
