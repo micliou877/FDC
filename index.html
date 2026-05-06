@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+  <!-- 讓網頁可以被安裝並全螢幕顯示 (PWA) -->
+<link rel="manifest" href="manifest.json">
+<!-- 針對 iOS 的設定 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="台股AI輪動">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台股 AI 族群資金輪動追蹤 (FinMind 版)</title>
@@ -576,16 +583,20 @@ function renderStocks() {
 
   rows.sort((a,b) => stockSortDir * ((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999)));
 
-  const tbody = document.getElementById("stocksTbody");
+const tbody = document.getElementById("stocksTbody");
   tbody.innerHTML = rows.map(s => `
     <tr>
-      <td>${s.code}</td>
-      <td>${s.name}</td>
+      <td>
+        <a href="[https://tw.tradingview.com/chart/?symbol=TWSE:$](https://tw.tradingview.com/chart/?symbol=TWSE:$){s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
+          ${s.code}
+        </a>
+      </td>
+      <td>
+        <a href="[https://tw.tradingview.com/chart/?symbol=TWSE:$](https://tw.tradingview.com/chart/?symbol=TWSE:$){s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
+          ${s.name}
+        </a>
+      </td>
       <td style="text-align:right">${s.price?.toFixed(2) ?? "-"}</td>
-      <td style="text-align:right" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
-      <td style="text-align:right" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
-      <td style="text-align:right" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
-      <td style="text-align:right">${s.amount?.toFixed(1) ?? "-"}</td>
     </tr>
   `).join("");
 }
