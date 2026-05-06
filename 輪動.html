@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台股 AI 族群資金輪動追蹤 (FinMind 版)</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: #0f1419;
+  color: #e6e6e6;
+  padding: 16px;
+  min-height: 100vh;
+}
+h1 { font-size: 20px; margin-bottom: 4px; color: #fff; }
+.subtitle { font-size: 12px; color: #888; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;}
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #2a3138;
+  overflow-x: auto;
+}
+.tab {
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.tab.active { color: #fff; border-bottom-color: #4a9eff; }
+.tab:hover:not(.active) { color: #ccc; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Heatmap */
+.heatmap-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+gap: 6px;
+margin-bottom: 16px;
+}
+.sector-cell {
+padding: 12px 10px;
+border-radius: 6px;
+cursor: pointer;
+transition: transform 0.15s;
+position: relative;
+min-height: 80px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+}
+.sector-cell:hover { transform: scale(1.03); z-index: 2; }
+.sector-name { font-size: 13px; font-weight: 600; color: #fff; }
+.sector-pct { font-size: 18px; font-weight: 700; color: #fff; }
+.sector-meta { font-size: 10px; color: rgba(255,255,255,0.85); }
+
+/* Bar chart */
+.ranking-bars { display: flex; flex-direction: column; gap: 6px; }
+.bar-row {
+display: grid;
+grid-template-columns: 110px 1fr 60px;
+gap: 8px;
+align-items: center;
+padding: 6px 0;
+cursor: pointer;
+border-bottom: 1px solid #1a2026;
+}
+.bar-row:hover { background: #1a2026; }
+.bar-name { font-size: 13px; color: #ddd; }
+.bar-track {
+position: relative;
+height: 22px;
+background: #1a2026;
+border-radius: 3px;
+overflow: hidden;
+}
+.bar-fill {
+height: 100%;
+display: flex;
+align-items: center;
+padding: 0 8px;
+font-size: 11px;
+color: #fff;
+font-weight: 600;
+white-space: nowrap;
+}
+.bar-fill.pos { background: linear-gradient(90deg, #d63031, #ff6b6b); justify-content: flex-start; }
+.bar-fill.neg { background: linear-gradient(90deg, #2d8659, #4a9d6f); justify-content: flex-end; }
+.bar-pct { font-size: 13px; font-weight: 600; text-align: right; }
+
+/* Stocks table */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; flex-wrap: wrap; gap: 8px; }
+.section-title { font-size: 16px; font-weight: 600; color: #fff; }
+.controls { display: flex; gap: 6px; flex-wrap: wrap; }
+select, button.btn, input { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+input { cursor: text; }
+button.btn:hover, select:hover { border-color: #4a9eff; }
+button.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
+
+.stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.stocks-table th { background: #1a2026; padding: 8px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; }
+.stocks-table th:hover { color: #4a9eff; }
+.stocks-table td { padding: 8px 6px; border-bottom: 1px solid #1a2026; white-space: nowrap; }
+.stocks-table tbody tr:hover { background: #1a2026; }
+.pos-text { color: #ff6b6b; font-weight: 600; }
+.neg-text { color: #4a9d6f; font-weight: 600; }
+.flat-text { color: #888; }
+.volume-spike { background: #ff6b6b; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.volume-low { background: #555; color: #ccc; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+
+/* Data input panel */
+.data-panel { background: #1a2026; border-radius: 6px; padding: 14px; margin-bottom: 16px; }
+.data-panel h3 { font-size: 14px; color: #fff; margin-bottom: 8px; }
+.data-panel p { font-size: 12px; color: #aaa; margin-bottom: 10px; line-height: 1.5; }
+textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: Consolas, monospace; font-size: 11px; resize: vertical; }
+.button-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+.summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.summary-card { background: #1a2026; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #4a9eff; }
+.summary-card .label { font-size: 11px; color: #888; }
+.summary-card .value { font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px; }
+.summary-card .sub { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+.empty-state { text-align: center; padding: 40px 20px; color: #666; font-size: 13px; }
+.empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.3; }
+
+.legend { display: flex; gap: 12px; align-items: center; font-size: 11px; color: #aaa; margin-bottom: 8px; flex-wrap: wrap; }
+.legend-box { display: inline-block; width: 14px; height: 14px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+
+/* Fetch Status */
+#fetchStatus { margin-top: 10px; font-size: 12px; color: #4a9eff; }
+.progress-bar-container { width: 100%; height: 6px; background: #2a3138; border-radius: 3px; margin-top: 8px; overflow: hidden; display: none;}
+.progress-bar { height: 100%; background: #4a9eff; width: 0%; transition: width 0.3s; }
+</style>
+</head>
+<body>
+
+<h1>📊 台股 AI 族群資金輪動追蹤</h1>
+<div class="subtitle">
+  <span id="lastUpdate">尚未匯入資料</span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="overview">族群總覽</button>
+  <button class="tab" data-tab="ranking">族群排行</button>
+  <button class="tab" data-tab="stocks">個股下鑽</button>
+  <button class="tab" data-tab="data">資料匯入 & FinMind</button>
+</div>
+
+<!-- 族群總覽 -->
+<div class="panel active" id="overview">
+  <div class="summary-cards" id="summaryCards"></div>
+  <div class="legend">
+    <span><span class="legend-box" style="background:#d63031"></span>>5%</span>
+    <span><span class="legend-box" style="background:#ff6b6b"></span>2-5%</span>
+    <span><span class="legend-box" style="background:#ff9999"></span>0-2%</span>
+    <span><span class="legend-box" style="background:#888"></span>0%</span>
+    <span><span class="legend-box" style="background:#7fb89a"></span>0至-2%</span>
+    <span><span class="legend-box" style="background:#4a9d6f"></span>-2至-5%</span>
+    <span><span class="legend-box" style="background:#2d8659"></span>&lt;-5%</span>
+  </div>
+  <div class="heatmap-grid" id="heatmap"></div>
+</div>
+
+<!-- 族群排行 -->
+<div class="panel" id="ranking">
+  <div class="section-header">
+    <div class="section-title">族群排行榜</div>
+    <div class="controls">
+      <select id="rankingSort">
+        <option value="pct10">近10日漲跌幅</option>
+        <option value="pct5">近5日漲跌幅</option>
+        <option value="pct1">當日漲跌幅</option>
+        <option value="amount">成交金額</option>
+      </select>
+    </div>
+  </div>
+  <div class="ranking-bars" id="rankingBars"></div>
+</div>
+
+<!-- 個股下鑽 -->
+<div class="panel" id="stocks">
+  <div class="section-header">
+    <div class="section-title" id="stocksTitle">選擇族群查看個股</div>
+    <div class="controls">
+      <select id="sectorSelect"></select>
+      <select id="stockSort">
+        <option value="pct10">近10日漲跌幅</option>
+        <option value="pct1">當日漲跌幅</option>
+        <option value="amount">成交金額</option>
+      </select>
+    </div>
+  </div>
+  <div style="overflow-x: auto;">
+    <table class="stocks-table" id="stocksTable">
+      <thead>
+        <tr>
+          <th data-sort="code">代號</th>
+          <th data-sort="name">公司</th>
+          <th data-sort="price" style="text-align:right">收盤</th>
+          <th data-sort="pct1" style="text-align:right">當日%</th>
+          <th data-sort="pct5" style="text-align:right">5日%</th>
+          <th data-sort="pct10" style="text-align:right">10日%</th>
+          <th data-sort="amount" style="text-align:right">成交金額(億)</th>
+        </tr>
+      </thead>
+      <tbody id="stocksTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 資料匯入 -->
+<div class="panel" id="data">
+  
+  <div class="data-panel">
+    <h3>🔄 FinMind API 即時資料抓取</h3>
+    <p>透過 FinMind API 自動抓取各族群個股的最新收盤價與量能。為了避免觸發免費用戶 API 限制 (300次/小時)，程式會採逐筆延遲抓取。</p>
+    <div style="margin-bottom: 8px;">
+      <input type="text" id="apiToken" placeholder="FinMind Token (選填，免費用戶留白)" style="width: 250px;">
+    </div>
+    <div class="button-row">
+      <button class="btn primary" id="fetchFinMindBtn">🚀 開始抓取最新股價</button>
+      <button class="btn" id="loadDemoBtn">🎯 載入範例資料（立即試用）</button>
+      <button class="btn" id="clearDataBtn">🗑 清空資料</button>
+    </div>
+    <div class="progress-bar-container" id="progressContainer">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="fetchStatus"></div>
+  </div>
+
+  <div class="data-panel">
+    <h3>個股資料庫預覽</h3>
+    <p>共 <strong id="dbCount">0</strong> 檔個股有資料 | 涵蓋族群 <strong id="dbSectors">0</strong> 個</p>
+    <textarea id="dataView" readonly placeholder="匯入資料後將顯示在此"></textarea>
+  </div>
+</div>
+
+<script>
+// ==================== 2026 最新族群分類 ====================
+const SECTORS = {
+  "AI晶片設計與IP": [
+    {code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3661",name:"世芯-KY"},
+    {code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"}
+  ],
+  "先進封裝/封測": [
+    {code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},
+    {code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"}
+  ],
+  "AI伺服器ODM": [
+    {code:"2317",name:"鴻海"},{code:"2382",name:"廣達"},{code:"3231",name:"緯創"},
+    {code:"6669",name:"緯穎"},{code:"2356",name:"英業達"},{code:"2376",name:"技嘉"},{code:"3706",name:"神達"}
+  ],
+  "散熱液冷": [
+    {code:"3017",name:"奇鋐"},{code:"3324",name:"雙鴻"},{code:"3653",name:"健策"},
+    {code:"2308",name:"台達電"},{code:"6805",name:"富世達"},{code:"3013",name:"晟銘電"},
+    {code:"8996",name:"高力"},{code:"2421",name:"建準"},{code:"6788",name:"尼得科超眾"},
+    {code:"3483",name:"力致"},{code:"6125",name:"廣運"},{code:"2059",name:"川湖"}
+  ],
+  "記憶體循環": [
+    {code:"2408",name:"南亞科"},{code:"2344",name:"華邦電"},{code:"6770",name:"力積電"},
+    {code:"2337",name:"旺宏"},{code:"3006",name:"晶豪科"},{code:"8299",name:"群聯"},
+    {code:"3260",name:"威剛"},{code:"4967",name:"十銓"},{code:"2451",name:"創見"}
+  ],
+  "伺服器機殼": [
+    {code:"8210",name:"勤誠"},{code:"3013",name:"晟銘電"},{code:"3693",name:"營邦"},
+    {code:"6117",name:"迎廣"},{code:"3032",name:"偉訓"}
+  ],
+  "被動元件": [
+    {code:"2327",name:"國巨*"},{code:"2492",name:"華新科"},{code:"3026",name:"禾伸堂"},
+    {code:"3357",name:"臺慶科"},{code:"2375",name:"凱美"},{code:"2428",name:"興勤"},
+    {code:"2472",name:"立隆電"},{code:"2478",name:"大毅"},{code:"5328",name:"華容"},
+    {code:"6155",name:"鈞寶"},{code:"6173",name:"信昌電"},{code:"9802",name:"鈺邦"}
+  ],
+  "PCB/CCL載板": [
+    {code:"8046",name:"南電"},{code:"3037",name:"欣興"},{code:"2368",name:"金像電"},
+    {code:"4958",name:"臻鼎-KY"},{code:"3044",name:"健鼎"},{code:"6213",name:"聯茂"},
+    {code:"2383",name:"台光電"},{code:"6274",name:"台燿"},{code:"8101",name:"華冠"}
+  ],
+  "CPO光通訊": [
+    {code:"3081",name:"聯亞"},{code:"3363",name:"上詮"},{code:"4971",name:"IET-KY"},
+    {code:"3163",name:"波若威"},{code:"3450",name:"聯鈞"},{code:"2455",name:"全新"},
+    {code:"6271",name:"啟碁"},{code:"2491",name:"光聖"},{code:"4906",name:"正文"},{code:"4991",name:"環宇-KY"}
+  ],
+  "AI電源/BBU": [
+    {code:"2308",name:"台達電"},{code:"1504",name:"東元"},{code:"1519",name:"華城"},
+    {code:"3211",name:"順達"},{code:"4931",name:"新盛力"}
+  ],
+  "機構件/滑軌": [
+    {code:"2059",name:"川湖"},{code:"3376",name:"新日興"},{code:"2474",name:"可成"}
+  ],
+  "廠務無塵室工程": [
+    {code:"2404",name:"漢唐"},{code:"6139",name:"亞翔"},{code:"6196",name:"帆宣"},
+    {code:"6691",name:"洋基工程"},{code:"5536",name:"聖暉*"},{code:"6667",name:"信紘科"},
+    {code:"7703",name:"銳澤"},{code:"3402",name:"漢科"}
+  ],
+  "半導體設備": [
+    {code:"3131",name:"弘塑"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},
+    {code:"2467",name:"志聖"},{code:"5443",name:"均豪"},{code:"6640",name:"均華"},
+    {code:"3413",name:"京鼎"},{code:"7769",name:"鴻勁"},{code:"6223",name:"旺矽"},
+    {code:"2360",name:"致茂"},{code:"3680",name:"家登"},{code:"1560",name:"中砂"},
+    {code:"3551",name:"世禾"},{code:"3167",name:"大量"}
+  ],
+  "面板與轉型": [
+    {code:"2409",name:"友達"},{code:"3481",name:"群創"},{code:"6147",name:"頎邦"},
+    {code:"2489",name:"瑞軒"},{code:"3673",name:"TPK-KY"},{code:"6278",name:"台表科"},{code:"8069",name:"元太"}
+  ],
+  "資安概念股": [
+    {code:"6690",name:"安碁資訊"},{code:"2471",name:"資通"},{code:"4953",name:"緯軟"},
+    {code:"3558",name:"神準"},{code:"6561",name:"是方"},{code:"6245",name:"立端"}
+  ],
+  "AI軟體與雲端": [
+    {code:"6214",name:"精誠"},{code:"6811",name:"宏碁資訊"},{code:"6689",name:"伊雲谷"},
+    {code:"8077",name:"大世科"},{code:"3029",name:"零壹"},{code:"6112",name:"邁達特"},
+    {code:"2480",name:"敦陽科"},{code:"5285",name:"凌群"}
+  ],
+  "邊緣AI與工業電腦": [
+    {code:"2395",name:"研華"},{code:"6414",name:"樺漢"},{code:"6166",name:"凌華"},
+    {code:"8234",name:"新漢"},{code:"6245",name:"立端"},{code:"3088",name:"艾訊"},
+    {code:"3005",name:"神基"},{code:"6680",name:"鑫創電子"},{code:"6206",name:"飛捷"},
+    {code:"3479",name:"安勤"},{code:"8114",name:"振樺電"},{code:"8050",name:"廣積"},
+    {code:"3022",name:"威強電"},{code:"2397",name:"友通"},{code:"3416",name:"融程電"},
+    {code:"5258",name:"虹堡"},{code:"3594",name:"磐儀"},{code:"3564",name:"其陽"}
+  ]
+};
+
+// 建立全域代號對應名稱的字典，方便後續查找
+const STOCK_NAMES = {};
+Object.values(SECTORS).flat().forEach(s => STOCK_NAMES[s.code] = s.name);
+
+// ==================== 資料庫狀態 ====================
+let stockData = {};
+let lastUpdateTime = null;
+let currentSector = null;
+let stockSortKey = "pct10";
+let stockSortDir = -1;
+
+// ==================== 儲存與讀取 (已修正為 localStorage) ====================
+function saveData() {
+  try {
+    localStorage.setItem("ai_stocks_data", JSON.stringify({
+      data: stockData,
+      time: lastUpdateTime
+    }));
+  } catch(e) { console.error("Save error", e); }
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem("ai_stocks_data");
+    if (raw) {
+      const obj = JSON.parse(raw);
+      stockData = obj.data || {};
+      lastUpdateTime = obj.time;
+      updateUI();
+    }
+  } catch(e) {}
+}
+
+// ==================== FinMind API 抓取邏輯 ====================
+async function fetchFinMindData() {
+  const token = document.getElementById("apiToken").value.trim();
+  const btn = document.getElementById("fetchFinMindBtn");
+  const statusEl = document.getElementById("fetchStatus");
+  const progContainer = document.getElementById("progressContainer");
+  const progBar = document.getElementById("progressBar");
+  
+  // 取得所有不重複的股票代碼
+  const uniqueCodes = Object.keys(STOCK_NAMES);
+  
+  // 計算過去 20 天作為 start_date 以確保能抓到前10個交易日
+  const today = new Date();
+  const pastDate = new Date(today);
+  pastDate.setDate(pastDate.getDate() - 25);
+  const start_date = pastDate.toISOString().split('T')[0];
+
+  btn.disabled = true;
+  progContainer.style.display = "block";
+  stockData = {}; // 清空舊資料
+  
+  let successCount = 0;
+  for (let i = 0; i < uniqueCodes.length; i++) {
+    const code = uniqueCodes[i];
+    statusEl.textContent = `抓取中: ${code} ${STOCK_NAMES[code]} (${i+1}/${uniqueCodes.length})...`;
+    progBar.style.width = `${((i+1) / uniqueCodes.length) * 100}%`;
+    
+    let url = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockPrice&data_id=${code}&start_date=${start_date}`;
+    if (token) url += `&token=${token}`;
+
+    try {
+      const res = await fetch(url);
+      const json = await res.json();
+      
+      if (json.msg === "success" && json.data.length > 0) {
+        const data = json.data;
+        const latest = data[data.length - 1]; // 最新一天
+        
+        // 取得前 1, 5, 10 個交易日的收盤價
+        const getClose = (offset) => {
+          const index = data.length - 1 - offset;
+          return index >= 0 ? data[index].close : latest.close;
+        }
+
+        const prev1 = getClose(1);
+        const prev5 = getClose(5);
+        const prev10 = getClose(10);
+
+        const price = latest.close;
+        const pct1 = prev1 ? ((price - prev1) / prev1) * 100 : 0;
+        const pct5 = prev5 ? ((price - prev5) / prev5) * 100 : 0;
+        const pct10 = prev10 ? ((price - prev10) / prev10) * 100 : 0;
+        const vol = latest.Trading_Volume / 1000; // 轉換為「張」
+        const amount = (price * vol) / 10000; // 轉換為「億」
+
+        stockData[code] = {
+          price: price,
+          pct1: parseFloat(pct1.toFixed(2)),
+          pct5: parseFloat(pct5.toFixed(2)),
+          pct10: parseFloat(pct10.toFixed(2)),
+          amount: parseFloat(amount.toFixed(2))
+        };
+        successCount++;
+      } else {
+         console.warn(`${code} 無資料或回傳錯誤`, json);
+      }
+    } catch (e) {
+      console.error(`Fetch error for ${code}`, e);
+    }
+
+    // 若無 Token，強制延遲 300ms 避免觸發 Rate Limit
+    if (!token) await new Promise(r => setTimeout(r, 300));
+  }
+
+  lastUpdateTime = new Date().toISOString();
+  saveData();
+  updateUI();
+  
+  statusEl.textContent = `✅ 抓取完成！成功更新 ${successCount} 檔個股。`;
+  btn.disabled = false;
+  setTimeout(() => { progContainer.style.display = "none"; statusEl.textContent = ""; }, 5000);
+}
+
+// ==================== 計算族群指標 ====================
+function calcSectorStats() {
+  const stats = {};
+  Object.entries(SECTORS).forEach(([sector, stocks]) => {
+    const valid = stocks.filter(s => stockData[s.code]);
+    if (valid.length === 0) {
+      stats[sector] = null;
+      return;
+    }
+    const sum = (key) => valid.reduce((a, s) => a + (stockData[s.code][key] || 0), 0);
+    const avg = (key) => sum(key) / valid.length;
+    stats[sector] = {
+      pct1: avg("pct1"),
+      pct5: avg("pct5"),
+      pct10: avg("pct10"),
+      amount: sum("amount"),
+      count: valid.length,
+      total: stocks.length
+    };
+  });
+  return stats;
+}
+
+// ==================== 顏色與格式 ====================
+function pctColor(pct) {
+  if (pct == null || isNaN(pct)) return "#444";
+  if (pct >= 5) return "#d63031";
+  if (pct >= 2) return "#ff6b6b";
+  if (pct > 0) return "#ff9999";
+  if (pct === 0) return "#888";
+  if (pct > -2) return "#7fb89a";
+  if (pct > -5) return "#4a9d6f";
+  return "#2d8659";
+}
+
+function pctClass(pct) {
+  if (pct == null || isNaN(pct)) return "flat-text";
+  if (pct > 0) return "pos-text";
+  if (pct < 0) return "neg-text";
+  return "flat-text";
+}
+
+function fmtPct(pct) {
+  if (pct == null || isNaN(pct)) return "-";
+  return (pct > 0 ? "+" : "") + pct.toFixed(2) + "%";
+}
+
+// ==================== 渲染功能 ====================
+function renderOverview() {
+  const stats = calcSectorStats();
+  const grid = document.getElementById("heatmap");
+  grid.innerHTML = "";
+
+  const validStats = Object.values(stats).filter(s => s);
+  const totalAmount = validStats.reduce((a, s) => a + (s.amount || 0), 0);
+  const avg10d = validStats.length ? validStats.reduce((a,s)=>a+s.pct10,0)/validStats.length : 0;
+  
+  document.getElementById("summaryCards").innerHTML = `
+    <div class="summary-card"><div class="label">族群平均10日漲幅</div><div class="value ${pctClass(avg10d)}">${fmtPct(avg10d)}</div><div class="sub">共 ${validStats.length} 個族群</div></div>
+    <div class="summary-card"><div class="label">總成交金額</div><div class="value">${(totalAmount).toFixed(0)} 億</div><div class="sub">追蹤族群合計</div></div>
+    <div class="summary-card"><div class="label">資料庫覆蓋</div><div class="value">${Object.keys(stockData).length}</div><div class="sub">已匯入個股檔數</div></div>
+  `;
+
+  const sorted = Object.entries(stats).filter(([_,s]) => s).sort((a,b) => b[1].pct10 - a[1].pct10);
+  if (sorted.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">📊</div><div>尚未匯入資料</div></div>`;
+    return;
+  }
+
+  sorted.forEach(([sector, s]) => {
+    const cell = document.createElement("div");
+    cell.className = "sector-cell";
+    cell.style.background = pctColor(s.pct10);
+    cell.innerHTML = `
+      <div class="sector-name">${sector}</div>
+      <div class="sector-pct">${fmtPct(s.pct10)}</div>
+      <div class="sector-meta">${s.count}/${s.total} 檔 | ${s.amount.toFixed(0)}億</div>
+    `;
+    cell.onclick = () => { currentSector = sector; switchTab("stocks"); renderStocks(); };
+    grid.appendChild(cell);
+  });
+}
+
+function renderRanking() {
+  const stats = calcSectorStats();
+  const sortKey = document.getElementById("rankingSort").value;
+  const sorted = Object.entries(stats).filter(([_,s]) => s).sort((a,b) => (b[1][sortKey] || 0) - (a[1][sortKey] || 0));
+  
+  const container = document.getElementById("rankingBars");
+  container.innerHTML = "";
+
+  if (sorted.length === 0) return;
+
+  const isPct = sortKey.startsWith("pct");
+  const maxAbs = Math.max(...sorted.map(([_,s]) => Math.abs(s[sortKey] || 0)), 1);
+
+  sorted.forEach(([sector, s]) => {
+    const val = s[sortKey] || 0;
+    const row = document.createElement("div");
+    row.className = "bar-row";
+
+    let barWidth = (Math.abs(val) / maxAbs * 100).toFixed(1);
+    let barClass = isPct ? (val >= 0 ? "pos" : "neg") : "pos";
+    let displayVal = isPct ? fmtPct(val) : val.toFixed(0) + "億";
+
+    row.innerHTML = `
+      <div class="bar-name">${sector}</div>
+      <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${barWidth}%">${displayVal}</div></div>
+      <div class="bar-pct ${pctClass(isPct ? val : 0)}">${s.count}/${s.total}</div>
+    `;
+    row.onclick = () => { currentSector = sector; switchTab("stocks"); renderStocks(); };
+    container.appendChild(row);
+  });
+}
+
+function renderStocks() {
+  const select = document.getElementById("sectorSelect");
+  if (select.options.length === 0) {
+    select.innerHTML = '<option value="__all__">— 全部族群 —</option>' + Object.keys(SECTORS).map(s => `<option value="${s}">${s}</option>`).join("");
+  }
+  select.value = currentSector || "__all__";
+  document.getElementById("stocksTitle").textContent = currentSector ? currentSector + " 個股" : "全部個股";
+
+  let stocks = currentSector && currentSector !== "__all__" ? SECTORS[currentSector] : Object.values(SECTORS).flat().filter((v,i,a)=>a.findIndex(t=>(t.code === v.code))===i);
+  let rows = stocks.map(s => ({...s, ...stockData[s.code]})).filter(s => s.price != null);
+
+  rows.sort((a,b) => stockSortDir * ((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999)));
+
+  const tbody = document.getElementById("stocksTbody");
+  tbody.innerHTML = rows.map(s => `
+    <tr>
+      <td>${s.code}</td>
+      <td>${s.name}</td>
+      <td style="text-align:right">${s.price?.toFixed(2) ?? "-"}</td>
+      <td style="text-align:right" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+      <td style="text-align:right" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+      <td style="text-align:right" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+      <td style="text-align:right">${s.amount?.toFixed(1) ?? "-"}</td>
+    </tr>
+  `).join("");
+}
+
+function renderDataPanel() {
+  const lines = Object.entries(stockData).map(([code, d]) => {
+    return `${code} ${STOCK_NAMES[code] || ""}\t收盤:${d.price}\t當日:${d.pct1}%\t10日:${d.pct10}%\t金額:${d.amount}億`;
+  });
+  document.getElementById("dataView").value = lines.join("\n") || "（尚無資料）";
+  document.getElementById("dbCount").textContent = Object.keys(stockData).length;
+}
+
+function updateUI() {
+  if (lastUpdateTime) {
+    document.getElementById("lastUpdate").textContent = "最後更新：" + new Date(lastUpdateTime).toLocaleString("zh-TW");
+  } else {
+    document.getElementById("lastUpdate").textContent = "尚未匯入資料";
+  }
+  renderOverview(); renderRanking(); renderStocks(); renderDataPanel();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === tab));
+  if(tab === "overview") renderOverview();
+  if(tab === "ranking") renderRanking();
+  if(tab === "stocks") renderStocks();
+}
+
+// ==================== 事件綁定 ====================
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => switchTab(t.dataset.tab));
+document.getElementById("rankingSort").onchange = renderRanking;
+document.getElementById("stockSort").onchange = (e) => { stockSortKey = e.target.value; stockSortDir = -1; renderStocks(); };
+document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.target.value === "__all__" ? null : e.target.value; renderStocks(); };
+document.querySelectorAll(".stocks-table th").forEach(th => {
+  th.onclick = () => {
+    const key = th.dataset.sort;
+    if (stockSortKey === key) stockSortDir *= -1;
+    else { stockSortKey = key; stockSortDir = -1; }
+    renderStocks();
+  };
+});
+
+document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
+document.getElementById("clearDataBtn").onclick = () => {
+  if (!confirm("確定清空資料？")) return;
+  stockData = {}; lastUpdateTime = null; saveData(); updateUI();
+};
+
+document.getElementById("loadDemoBtn").onclick = () => {
+  stockData = {
+    "2330":{price:1450,pct1:1.10,pct5:3.2,pct10:5.8,amount:464},
+    "2382":{price:412,pct1:2.3,pct5:4.1,pct10:6.5,amount:103},
+    "3017":{price:1380,pct1:2.3,pct5:5.8,pct10:14.5,amount:207},
+    "2327":{price:348.5,pct1:1.75,pct5:5.2,pct10:12.3,amount:135},
+    "2408":{price:325,pct1:-2.1,pct5:-5.8,pct10:-3.2,amount:137},
+    "2404":{price:980,pct1:1.5,pct5:3.8,pct10:7.5,amount:18},
+    "3131":{price:2875,pct1:8.15,pct5:14.5,pct10:25.5,amount:38},
+    "6690":{price:167,pct1:-3.47,pct5:-1.5,pct10:5.2,amount:2}
+  };
+  lastUpdateTime = new Date().toISOString();
+  saveData(); updateUI(); switchTab("overview");
+};
+
+// 啟動
+loadData();
+updateUI();
+</script>
+</body>
+</html>
