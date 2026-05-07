@@ -597,6 +597,10 @@ const tbody = document.getElementById("stocksTbody");
         </a>
       </td>
       <td style="text-align:right">${s.price?.toFixed(2) ?? "-"}</td>
+      <td style="text-align:right" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+      <td style="text-align:right" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+      <td style="text-align:right" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+      <td style="text-align:right">${s.amount?.toFixed(1) ?? "-"}</td>
     </tr>
   `).join("");
 }
