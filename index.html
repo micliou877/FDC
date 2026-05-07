@@ -1,154 +1,181 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <!-- 讓網頁可以被安裝並全螢幕顯示 (PWA) -->
-<link rel="manifest" href="manifest.json">
-<!-- 針對 iOS 的設定 -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="台股AI輪動">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>台股 AI 族群資金輪動追蹤 (FinMind 版)</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
-  background: #0f1419;
-  color: #e6e6e6;
-  padding: 16px;
-  min-height: 100vh;
-}
-h1 { font-size: 20px; margin-bottom: 4px; color: #fff; }
-.subtitle { font-size: 12px; color: #888; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;}
-.tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #2a3138;
-  overflow-x: auto;
-}
-.tab {
-  padding: 10px 16px;
-  background: transparent;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  font-size: 14px;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  font-weight: 500;
-}
-.tab.active { color: #fff; border-bottom-color: #4a9eff; }
-.tab:hover:not(.active) { color: #ccc; }
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="台股AI輪動">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台股 AI 族群資金輪動追蹤</title>
+  
+  <style>
+    /* 下拉刷新的提示橫幅 */
+    #pullToRefresh {
+      position: fixed;
+      top: -60px; /* 預設藏在畫面最上方 */
+      left: 0;
+      width: 100%;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #4a9eff;
+      font-size: 13px;
+      font-weight: bold;
+      z-index: 1000;
+      background-color: rgba(26, 32, 38, 0.9);
+      transition: top 0.3s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+    }
+    
+    /* 防止 iPhone 原生的網頁回彈效果干擾 */
+    body {
+      overscroll-behavior-y: none; 
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: #0f1419;
+      color: #e6e6e6;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 20px; margin-bottom: 4px; color: #fff; }
+    .subtitle { font-size: 12px; color: #888; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;}
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #2a3138;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 10px 16px;
+      background: transparent;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+    .tab.active { color: #fff; border-bottom-color: #4a9eff; }
+    .tab:hover:not(.active) { color: #ccc; }
 
-.panel { display: none; }
-.panel.active { display: block; }
+    .panel { display: none; }
+    .panel.active { display: block; }
 
-/* Heatmap */
-.heatmap-grid {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-gap: 6px;
-margin-bottom: 16px;
-}
-.sector-cell {
-padding: 12px 10px;
-border-radius: 6px;
-cursor: pointer;
-transition: transform 0.15s;
-position: relative;
-min-height: 80px;
-display: flex;
-flex-direction: column;
-justify-content: space-between;
-}
-.sector-cell:hover { transform: scale(1.03); z-index: 2; }
-.sector-name { font-size: 13px; font-weight: 600; color: #fff; }
-.sector-pct { font-size: 18px; font-weight: 700; color: #fff; }
-.sector-meta { font-size: 10px; color: rgba(255,255,255,0.85); }
+    /* Heatmap */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .sector-cell {
+      padding: 12px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.15s;
+      position: relative;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sector-cell:hover { transform: scale(1.03); z-index: 2; }
+    .sector-name { font-size: 13px; font-weight: 600; color: #fff; }
+    .sector-pct { font-size: 18px; font-weight: 700; color: #fff; }
+    .sector-meta { font-size: 10px; color: rgba(255,255,255,0.85); }
 
-/* Bar chart */
-.ranking-bars { display: flex; flex-direction: column; gap: 6px; }
-.bar-row {
-display: grid;
-grid-template-columns: 110px 1fr 60px;
-gap: 8px;
-align-items: center;
-padding: 6px 0;
-cursor: pointer;
-border-bottom: 1px solid #1a2026;
-}
-.bar-row:hover { background: #1a2026; }
-.bar-name { font-size: 13px; color: #ddd; }
-.bar-track {
-position: relative;
-height: 22px;
-background: #1a2026;
-border-radius: 3px;
-overflow: hidden;
-}
-.bar-fill {
-height: 100%;
-display: flex;
-align-items: center;
-padding: 0 8px;
-font-size: 11px;
-color: #fff;
-font-weight: 600;
-white-space: nowrap;
-}
-.bar-fill.pos { background: linear-gradient(90deg, #d63031, #ff6b6b); justify-content: flex-start; }
-.bar-fill.neg { background: linear-gradient(90deg, #2d8659, #4a9d6f); justify-content: flex-end; }
-.bar-pct { font-size: 13px; font-weight: 600; text-align: right; }
+    /* Bar chart */
+    .ranking-bars { display: flex; flex-direction: column; gap: 6px; }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 60px;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 0;
+      cursor: pointer;
+      border-bottom: 1px solid #1a2026;
+    }
+    .bar-row:hover { background: #1a2026; }
+    .bar-name { font-size: 13px; color: #ddd; }
+    .bar-track {
+      position: relative;
+      height: 22px;
+      background: #1a2026;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 11px;
+      color: #fff;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .bar-fill.pos { background: linear-gradient(90deg, #d63031, #ff6b6b); justify-content: flex-start; }
+    .bar-fill.neg { background: linear-gradient(90deg, #2d8659, #4a9d6f); justify-content: flex-end; }
+    .bar-pct { font-size: 13px; font-weight: 600; text-align: right; }
 
-/* Stocks table */
-.section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; flex-wrap: wrap; gap: 8px; }
-.section-title { font-size: 16px; font-weight: 600; color: #fff; }
-.controls { display: flex; gap: 6px; flex-wrap: wrap; }
-select, button.btn, input { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-input { cursor: text; }
-button.btn:hover, select:hover { border-color: #4a9eff; }
-button.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
+    /* Stocks table */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; flex-wrap: wrap; gap: 8px; }
+    .section-title { font-size: 16px; font-weight: 600; color: #fff; }
+    .controls { display: flex; gap: 6px; flex-wrap: wrap; }
+    select, button.btn, input { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    input { cursor: text; }
+    button.btn:hover, select:hover { border-color: #4a9eff; }
+    button.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
 
-.stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-.stocks-table th { background: #1a2026; padding: 8px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; }
-.stocks-table th:hover { color: #4a9eff; }
-.stocks-table td { padding: 8px 6px; border-bottom: 1px solid #1a2026; white-space: nowrap; }
-.stocks-table tbody tr:hover { background: #1a2026; }
-.pos-text { color: #ff6b6b; font-weight: 600; }
-.neg-text { color: #4a9d6f; font-weight: 600; }
-.flat-text { color: #888; }
-.volume-spike { background: #ff6b6b; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; }
-.volume-low { background: #555; color: #ccc; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+    .stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    .stocks-table th { background: #1a2026; padding: 8px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; }
+    .stocks-table th:hover { color: #4a9eff; }
+    .stocks-table td { padding: 8px 6px; border-bottom: 1px solid #1a2026; white-space: nowrap; }
+    .stocks-table tbody tr:hover { background: #1a2026; }
+    .pos-text { color: #ff6b6b; font-weight: 600; }
+    .neg-text { color: #4a9d6f; font-weight: 600; }
+    .flat-text { color: #888; }
+    .volume-spike { background: #ff6b6b; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+    .volume-low { background: #555; color: #ccc; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
 
-/* Data input panel */
-.data-panel { background: #1a2026; border-radius: 6px; padding: 14px; margin-bottom: 16px; }
-.data-panel h3 { font-size: 14px; color: #fff; margin-bottom: 8px; }
-.data-panel p { font-size: 12px; color: #aaa; margin-bottom: 10px; line-height: 1.5; }
-textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: Consolas, monospace; font-size: 11px; resize: vertical; }
-.button-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    /* Data input panel */
+    .data-panel { background: #1a2026; border-radius: 6px; padding: 14px; margin-bottom: 16px; }
+    .data-panel h3 { font-size: 14px; color: #fff; margin-bottom: 8px; }
+    .data-panel p { font-size: 12px; color: #aaa; margin-bottom: 10px; line-height: 1.5; }
+    textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: Consolas, monospace; font-size: 11px; resize: vertical; }
+    .button-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 
-.summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
-.summary-card { background: #1a2026; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #4a9eff; }
-.summary-card .label { font-size: 11px; color: #888; }
-.summary-card .value { font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px; }
-.summary-card .sub { font-size: 10px; color: #aaa; margin-top: 2px; }
+    .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
+    .summary-card { background: #1a2026; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #4a9eff; }
+    .summary-card .label { font-size: 11px; color: #888; }
+    .summary-card .value { font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px; }
+    .summary-card .sub { font-size: 10px; color: #aaa; margin-top: 2px; }
 
-.empty-state { text-align: center; padding: 40px 20px; color: #666; font-size: 13px; }
-.empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.3; }
+    .empty-state { text-align: center; padding: 40px 20px; color: #666; font-size: 13px; }
+    .empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.3; }
 
-.legend { display: flex; gap: 12px; align-items: center; font-size: 11px; color: #aaa; margin-bottom: 8px; flex-wrap: wrap; }
-.legend-box { display: inline-block; width: 14px; height: 14px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+    .legend { display: flex; gap: 12px; align-items: center; font-size: 11px; color: #aaa; margin-bottom: 8px; flex-wrap: wrap; }
+    .legend-box { display: inline-block; width: 14px; height: 14px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
 
-/* Fetch Status */
-#fetchStatus { margin-top: 10px; font-size: 12px; color: #4a9eff; }
-.progress-bar-container { width: 100%; height: 6px; background: #2a3138; border-radius: 3px; margin-top: 8px; overflow: hidden; display: none;}
-.progress-bar { height: 100%; background: #4a9eff; width: 0%; transition: width 0.3s; }
-</style>
+    /* Fetch Status */
+    #fetchStatus { margin-top: 10px; font-size: 12px; color: #4a9eff; }
+    .progress-bar-container { width: 100%; height: 6px; background: #2a3138; border-radius: 3px; margin-top: 8px; overflow: hidden; display: none;}
+    .progress-bar { height: 100%; background: #4a9eff; width: 0%; transition: width 0.3s; }
+  </style>
 </head>
 <body>
+
+<div id="pullToRefresh">↓ 下拉以更新最新股價...</div>
 
 <h1>📊 台股 AI 族群資金輪動追蹤</h1>
 <div class="subtitle">
@@ -162,7 +189,6 @@ textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; 
   <button class="tab" data-tab="data">資料匯入 & FinMind</button>
 </div>
 
-<!-- 族群總覽 -->
 <div class="panel active" id="overview">
   <div class="summary-cards" id="summaryCards"></div>
   <div class="legend">
@@ -177,7 +203,6 @@ textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; 
   <div class="heatmap-grid" id="heatmap"></div>
 </div>
 
-<!-- 族群排行 -->
 <div class="panel" id="ranking">
   <div class="section-header">
     <div class="section-title">族群排行榜</div>
@@ -193,7 +218,6 @@ textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; 
   <div class="ranking-bars" id="rankingBars"></div>
 </div>
 
-<!-- 個股下鑽 -->
 <div class="panel" id="stocks">
   <div class="section-header">
     <div class="section-title" id="stocksTitle">選擇族群查看個股</div>
@@ -224,9 +248,7 @@ textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; 
   </div>
 </div>
 
-<!-- 資料匯入 -->
 <div class="panel" id="data">
-  
   <div class="data-panel">
     <h3>🔄 FinMind API 即時資料抓取</h3>
     <p>透過 FinMind API 自動抓取各族群個股的最新收盤價與量能。為了避免觸發免費用戶 API 限制 (300次/小時)，程式會採逐筆延遲抓取。</p>
@@ -339,7 +361,6 @@ const SECTORS = {
   ]
 };
 
-// 建立全域代號對應名稱的字典，方便後續查找
 const STOCK_NAMES = {};
 Object.values(SECTORS).flat().forEach(s => STOCK_NAMES[s.code] = s.name);
 
@@ -350,7 +371,7 @@ let currentSector = null;
 let stockSortKey = "pct10";
 let stockSortDir = -1;
 
-// ==================== 儲存與讀取 (已修正為 localStorage) ====================
+// ==================== 儲存與讀取 ====================
 function saveData() {
   try {
     localStorage.setItem("ai_stocks_data", JSON.stringify({
@@ -380,10 +401,7 @@ async function fetchFinMindData() {
   const progContainer = document.getElementById("progressContainer");
   const progBar = document.getElementById("progressBar");
   
-  // 取得所有不重複的股票代碼
   const uniqueCodes = Object.keys(STOCK_NAMES);
-  
-  // 計算過去 20 天作為 start_date 以確保能抓到前10個交易日
   const today = new Date();
   const pastDate = new Date(today);
   pastDate.setDate(pastDate.getDate() - 25);
@@ -391,7 +409,7 @@ async function fetchFinMindData() {
 
   btn.disabled = true;
   progContainer.style.display = "block";
-  stockData = {}; // 清空舊資料
+  stockData = {}; 
   
   let successCount = 0;
   for (let i = 0; i < uniqueCodes.length; i++) {
@@ -408,9 +426,8 @@ async function fetchFinMindData() {
       
       if (json.msg === "success" && json.data.length > 0) {
         const data = json.data;
-        const latest = data[data.length - 1]; // 最新一天
+        const latest = data[data.length - 1]; 
         
-        // 取得前 1, 5, 10 個交易日的收盤價
         const getClose = (offset) => {
           const index = data.length - 1 - offset;
           return index >= 0 ? data[index].close : latest.close;
@@ -424,8 +441,8 @@ async function fetchFinMindData() {
         const pct1 = prev1 ? ((price - prev1) / prev1) * 100 : 0;
         const pct5 = prev5 ? ((price - prev5) / prev5) * 100 : 0;
         const pct10 = prev10 ? ((price - prev10) / prev10) * 100 : 0;
-        const vol = latest.Trading_Volume / 1000; // 轉換為「張」
-        const amount = (price * vol) / 10000; // 轉換為「億」
+        const vol = latest.Trading_Volume / 1000; 
+        const amount = (price * vol) / 10000; 
 
         stockData[code] = {
           price: price,
@@ -435,14 +452,11 @@ async function fetchFinMindData() {
           amount: parseFloat(amount.toFixed(2))
         };
         successCount++;
-      } else {
-         console.warn(`${code} 無資料或回傳錯誤`, json);
       }
     } catch (e) {
       console.error(`Fetch error for ${code}`, e);
     }
 
-    // 若無 Token，強制延遲 300ms 避免觸發 Rate Limit
     if (!token) await new Promise(r => setTimeout(r, 300));
   }
 
@@ -455,7 +469,7 @@ async function fetchFinMindData() {
   setTimeout(() => { progContainer.style.display = "none"; statusEl.textContent = ""; }, 5000);
 }
 
-// ==================== 計算族群指標 ====================
+// ==================== 計算與渲染功能 ====================
 function calcSectorStats() {
   const stats = {};
   Object.entries(SECTORS).forEach(([sector, stocks]) => {
@@ -478,7 +492,6 @@ function calcSectorStats() {
   return stats;
 }
 
-// ==================== 顏色與格式 ====================
 function pctColor(pct) {
   if (pct == null || isNaN(pct)) return "#444";
   if (pct >= 5) return "#d63031";
@@ -502,7 +515,6 @@ function fmtPct(pct) {
   return (pct > 0 ? "+" : "") + pct.toFixed(2) + "%";
 }
 
-// ==================== 渲染功能 ====================
 function renderOverview() {
   const stats = calcSectorStats();
   const grid = document.getElementById("heatmap");
@@ -583,7 +595,7 @@ function renderStocks() {
 
   rows.sort((a,b) => stockSortDir * ((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999)));
 
-const tbody = document.getElementById("stocksTbody");
+  const tbody = document.getElementById("stocksTbody");
   tbody.innerHTML = rows.map(s => `
     <tr>
       <td>
@@ -665,7 +677,70 @@ document.getElementById("loadDemoBtn").onclick = () => {
   saveData(); updateUI(); switchTab("overview");
 };
 
-// 啟動
+// ==================== 下拉刷新 (Pull-to-Refresh) 邏輯 ====================
+let startY = 0;
+let currentY = 0;
+const ptrIndicator = document.getElementById("pullToRefresh");
+const pullThreshold = 70; // 下拉超過 70px 就觸發更新
+let isRefreshing = false;
+
+document.addEventListener('touchstart', (e) => {
+  // 只有在網頁最頂端，且沒有正在更新時，才記錄手指初始位置
+  if (window.scrollY === 0 && !isRefreshing) {
+    startY = e.touches[0].clientY;
+  } else {
+    startY = 0;
+  }
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  if (startY === 0 || isRefreshing) return;
+  currentY = e.touches[0].clientY;
+  const deltaY = currentY - startY;
+
+  // 如果是往下拉
+  if (deltaY > 0) {
+    ptrIndicator.style.transition = 'none'; // 讓橫幅跟著手指移動
+    ptrIndicator.style.top = Math.min(deltaY - 60, 10) + 'px'; 
+    
+    if (deltaY > pullThreshold) {
+      ptrIndicator.textContent = "↻ 鬆開手指即可更新...";
+    } else {
+      ptrIndicator.textContent = "↓ 下拉以更新最新股價...";
+    }
+  }
+}, { passive: false });
+
+document.addEventListener('touchend', (e) => {
+  if (startY === 0 || isRefreshing) return;
+  const deltaY = currentY - startY;
+
+  ptrIndicator.style.transition = 'top 0.3s'; // 恢復動畫效果
+  
+  if (deltaY > pullThreshold) {
+    // 觸發更新！
+    isRefreshing = true;
+    ptrIndicator.style.top = '0px';
+    ptrIndicator.textContent = "🚀 正在抓取 FinMind 最新資料...";
+    
+    // 呼叫原本寫好的 FinMind 抓取函數
+    fetchFinMindData().then(() => {
+      // 抓完後把橫幅收回去
+      setTimeout(() => {
+        ptrIndicator.style.top = '-60px';
+        isRefreshing = false;
+      }, 1000); // 稍微停留1秒讓你看見完成
+    });
+  } else {
+    // 拉的距離不夠，直接收回橫幅
+    ptrIndicator.style.top = '-60px';
+  }
+  
+  startY = 0;
+  currentY = 0;
+});
+
+// 啟動載入資料
 loadData();
 updateUI();
 </script>
