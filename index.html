@@ -12,163 +12,64 @@
   <title>台股 26 族群資金輪動追蹤</title>
   
   <style>
-    /* 下拉刷新的提示橫幅 */
-    #pullToRefresh {
-      position: fixed;
-      top: -60px; 
-      left: 0;
-      width: 100%;
-      height: 60px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #4a9eff;
-      font-size: 13px;
-      font-weight: bold;
-      z-index: 1000;
-      background-color: rgba(26, 32, 38, 0.9);
-      transition: top 0.3s;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
-    }
-    
-    /* 防止 iPhone 原生的網頁回彈效果干擾 */
-    body { overscroll-behavior-y: none; }
-    
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      background: #0f1419;
-      color: #e6e6e6;
-      padding: 16px;
-      min-height: 100vh;
-    }
+    #pullToRefresh { position: fixed; top: -60px; left: 0; width: 100%; height: 60px; display: flex; justify-content: center; align-items: center; color: #4a9eff; font-size: 13px; font-weight: bold; z-index: 1000; background-color: rgba(26, 32, 38, 0.9); transition: top 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+    body { overscroll-behavior-y: none; margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; background: #0f1419; color: #e6e6e6; padding: 16px; min-height: 100vh; }
     h1 { font-size: 20px; margin-bottom: 4px; color: #fff; }
     .subtitle { font-size: 12px; color: #888; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;}
-    .tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 16px;
-      border-bottom: 1px solid #2a3138;
-      overflow-x: auto;
-    }
-    .tab {
-      padding: 10px 16px;
-      background: transparent;
-      border: none;
-      color: #888;
-      cursor: pointer;
-      font-size: 14px;
-      border-bottom: 2px solid transparent;
-      white-space: nowrap;
-      font-weight: 500;
-    }
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid #2a3138; overflow-x: auto; }
+    .tab { padding: 10px 16px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; font-weight: 500; }
     .tab.active { color: #fff; border-bottom-color: #4a9eff; }
     .tab:hover:not(.active) { color: #ccc; }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    /* Heatmap */
-    .heatmap-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 6px;
-      margin-bottom: 16px;
-    }
-    .sector-cell {
-      padding: 12px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: transform 0.15s;
-      position: relative;
-      min-height: 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
+    .panel { display: none; } .panel.active { display: block; }
+    
+    .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 8px; margin-bottom: 16px; }
+    .sector-cell { padding: 12px 10px; border-radius: 6px; cursor: pointer; transition: transform 0.15s; position: relative; min-height: 85px; display: flex; flex-direction: column; justify-content: space-between; }
     .sector-cell:hover { transform: scale(1.03); z-index: 2; }
-    .sector-name { font-size: 13px; font-weight: 600; color: #fff; display: flex; justify-content: space-between;}
-    .sector-pct { font-size: 18px; font-weight: 700; color: #fff; }
-    .sector-meta { font-size: 10px; color: rgba(255,255,255,0.85); }
+    .sector-name { font-size: 13px; font-weight: 600; color: #fff; display: flex; justify-content: space-between; margin-bottom: 4px;}
+    .sector-pct { font-size: 20px; font-weight: 700; color: #fff; }
+    .sector-meta { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px;}
+    .sector-vs { font-size: 11px; font-weight: bold; margin-top: 2px; }
 
-    /* 動能圖例 */
-    .trend-legend {
-      margin-top: 8px; font-size: 11px; color: #aaa; display: flex; flex-wrap: wrap; gap: 10px; background: #1a2026; padding: 8px 12px; border-radius: 6px;
-    }
-
-    /* Bar chart */
+    .trend-legend { margin-top: 8px; font-size: 11px; color: #aaa; display: flex; flex-wrap: wrap; gap: 10px; background: #1a2026; padding: 8px 12px; border-radius: 6px; }
     .ranking-bars { display: flex; flex-direction: column; gap: 6px; }
-    .bar-row {
-      display: grid;
-      grid-template-columns: 140px 1fr 60px;
-      gap: 8px;
-      align-items: center;
-      padding: 6px 0;
-      cursor: pointer;
-      border-bottom: 1px solid #1a2026;
-    }
+    .bar-row { display: grid; grid-template-columns: 140px 1fr 60px; gap: 8px; align-items: center; padding: 6px 0; cursor: pointer; border-bottom: 1px solid #1a2026; }
     .bar-row:hover { background: #1a2026; }
     .bar-name { font-size: 13px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-    .bar-track {
-      position: relative;
-      height: 22px;
-      background: #1a2026;
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      padding: 0 8px;
-      font-size: 11px;
-      color: #fff;
-      font-weight: 600;
-      white-space: nowrap;
-    }
+    .bar-track { position: relative; height: 22px; background: #1a2026; border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; display: flex; align-items: center; padding: 0 8px; font-size: 11px; color: #fff; font-weight: 600; white-space: nowrap; }
     .bar-fill.pos { background: linear-gradient(90deg, #d63031, #ff6b6b); justify-content: flex-start; }
     .bar-fill.neg { background: linear-gradient(90deg, #2d8659, #4a9d6f); justify-content: flex-end; }
     .bar-pct { font-size: 13px; font-weight: 600; text-align: right; }
 
-    /* Stocks table */
     .section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; flex-wrap: wrap; gap: 8px; }
     .section-title { font-size: 16px; font-weight: 600; color: #fff; }
     .controls { display: flex; gap: 6px; flex-wrap: wrap; }
     select, button.btn, input { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-    input { cursor: text; }
-    button.btn:hover, select:hover { border-color: #4a9eff; }
     button.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
-
+    
     .stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
     .stocks-table th { background: #1a2026; padding: 8px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; }
-    .stocks-table th:hover { color: #4a9eff; }
     .stocks-table td { padding: 8px 6px; border-bottom: 1px solid #1a2026; white-space: nowrap; }
     .stocks-table tbody tr:hover { background: #1a2026; }
     .pos-text { color: #ff6b6b; font-weight: 600; }
     .neg-text { color: #4a9d6f; font-weight: 600; }
     .flat-text { color: #888; }
-
-    /* Data input panel */
+    
     .data-panel { background: #1a2026; border-radius: 6px; padding: 14px; margin-bottom: 16px; }
     .data-panel h3 { font-size: 14px; color: #fff; margin-bottom: 8px; }
     .data-panel p { font-size: 12px; color: #aaa; margin-bottom: 10px; line-height: 1.5; }
     textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: Consolas, monospace; font-size: 11px; resize: vertical; }
     .button-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-
+    
     .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
     .summary-card { background: #1a2026; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #4a9eff; }
     .summary-card .label { font-size: 11px; color: #888; }
     .summary-card .value { font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px; }
     .summary-card .sub { font-size: 10px; color: #aaa; margin-top: 2px; }
-
+    
     .empty-state { text-align: center; padding: 40px 20px; color: #666; font-size: 13px; }
-    .empty-state .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.3; }
-
     .legend { display: flex; gap: 12px; align-items: center; font-size: 11px; color: #aaa; margin-bottom: 8px; flex-wrap: wrap; }
     .legend-box { display: inline-block; width: 14px; height: 14px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
-
-    /* Fetch Status */
     #fetchStatus { margin-top: 10px; font-size: 12px; color: #4a9eff; }
     .progress-bar-container { width: 100%; height: 6px; background: #2a3138; border-radius: 3px; margin-top: 8px; overflow: hidden; display: none;}
     .progress-bar { height: 100%; background: #4a9eff; width: 0%; transition: width 0.3s; }
@@ -179,9 +80,7 @@
 <div id="pullToRefresh">↓ 下拉以更新最新股價...</div>
 
 <h1>📊 台股 26 族群資金輪動追蹤</h1>
-<div class="subtitle">
-  <span id="lastUpdate">尚未匯入資料</span>
-</div>
+<div class="subtitle"><span id="lastUpdate">尚未匯入資料</span></div>
 
 <div class="tabs">
   <button class="tab active" data-tab="overview">族群總覽</button>
@@ -205,8 +104,7 @@
   <div class="trend-legend">
     <span><strong>🔥轉強:</strong> 近5日表現優於前5日，且今日上漲</span>
     <span><strong>❄️轉弱:</strong> 近5日表現劣於前5日，且今日下跌</span>
-    <span><strong>↗️偏多:</strong> 短線波動向上</span>
-    <span><strong>↘️偏空:</strong> 短線波動向下</span>
+    <span><strong>相對大盤:</strong> 顯示與 0050 的漲跌幅差距</span>
   </div>
 </div>
 
@@ -247,7 +145,7 @@
           <th data-sort="pct1" style="text-align:right">當日%</th>
           <th data-sort="pct5" style="text-align:right">5日%</th>
           <th data-sort="pct10" style="text-align:right">10日%</th>
-          <th data-sort="amount" style="text-align:right">成交金額(億)</th>
+          <th data-sort="amount" style="text-align:right">金額(億)</th>
         </tr>
       </thead>
       <tbody id="stocksTbody"></tbody>
@@ -258,7 +156,7 @@
 <div class="panel" id="data">
   <div class="data-panel">
     <h3>🔄 FinMind API 即時資料抓取</h3>
-    <p>透過 FinMind API 自動抓取 26 族群（約250檔）的最新股價。由於檔數較多，為避免觸發免費 API 限制，程式會採逐筆延遲抓取，請耐心等候進度條跑完。</p>
+    <p>透過 FinMind API 自動抓取大盤(0050)與各族群最新股價。採延遲抓取防封鎖，請耐心等候。</p>
     <div style="margin-bottom: 8px;">
       <input type="text" id="apiToken" placeholder="FinMind Token (選填，免費用戶留白)" style="width: 250px;">
     </div>
@@ -267,12 +165,9 @@
       <button class="btn" id="loadDemoBtn">🎯 載入範例資料（立即試用）</button>
       <button class="btn" id="clearDataBtn">🗑 清空資料</button>
     </div>
-    <div class="progress-bar-container" id="progressContainer">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
+    <div class="progress-bar-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
     <div id="fetchStatus"></div>
   </div>
-
   <div class="data-panel">
     <h3>個股資料庫預覽</h3>
     <p>共 <strong id="dbCount">0</strong> 檔個股有資料 | 涵蓋族群 <strong id="dbSectors">0</strong> 個</p>
@@ -281,7 +176,7 @@
 </div>
 
 <script>
-// ==================== 台股 26 大族群分類 (2026最新擴充版) ====================
+// ==================== 台股 26 大族群分類 ====================
 const SECTORS = {
   "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"5471",name:"松翰"}],
   "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"8038",name:"長園科"}],
@@ -314,21 +209,18 @@ const SECTORS = {
 const STOCK_NAMES = {};
 Object.values(SECTORS).flat().forEach(s => STOCK_NAMES[s.code] = s.name);
 
-// ==================== 資料庫狀態 ====================
+// ==================== 關鍵：將大盤 (0050) 強制加入名單 ====================
+STOCK_NAMES["0050"] = "大盤(0050)";
+
 let stockData = {};
 let lastUpdateTime = null;
 let currentSector = null;
 let stockSortKey = "pct10";
 let stockSortDir = -1;
 
-// ==================== 儲存與讀取 ====================
 function saveData() {
-  try {
-    localStorage.setItem("ai_stocks_data", JSON.stringify({
-      data: stockData,
-      time: lastUpdateTime
-    }));
-  } catch(e) { console.error("Save error", e); }
+  try { localStorage.setItem("ai_stocks_data", JSON.stringify({ data: stockData, time: lastUpdateTime })); } 
+  catch(e) { console.error("Save error", e); }
 }
 
 function loadData() {
@@ -343,7 +235,6 @@ function loadData() {
   } catch(e) {}
 }
 
-// ==================== FinMind API 抓取邏輯 (含上櫃自動判斷) ====================
 async function fetchFinMindData() {
   const token = document.getElementById("apiToken").value.trim();
   const btn = document.getElementById("fetchFinMindBtn");
@@ -351,7 +242,10 @@ async function fetchFinMindData() {
   const progContainer = document.getElementById("progressContainer");
   const progBar = document.getElementById("progressBar");
   
+  // 加入大盤代碼
   const uniqueCodes = Object.keys(STOCK_NAMES);
+  if (!uniqueCodes.includes("0050")) uniqueCodes.unshift("0050");
+  
   const today = new Date();
   const pastDate = new Date(today);
   pastDate.setDate(pastDate.getDate() - 25);
@@ -367,7 +261,6 @@ async function fetchFinMindData() {
     statusEl.textContent = `抓取中: ${code} ${STOCK_NAMES[code]} (${i+1}/${uniqueCodes.length})...`;
     progBar.style.width = `${((i+1) / uniqueCodes.length) * 100}%`;
     
-    // 預設先找上市 (TWSE)
     let market = "TWSE";
     let dataset = "TaiwanStockPrice";
     let url = `https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${start_date}`;
@@ -377,7 +270,6 @@ async function fetchFinMindData() {
       let res = await fetch(url);
       let json = await res.json();
       
-      // 如果上市找不到資料，自動切換到上櫃 (TPEX) 抓取
       if (json.msg === "success" && (!json.data || json.data.length === 0)) {
          market = "TPEX";
          dataset = "TaiwanOTCStockPrice";
@@ -413,14 +305,13 @@ async function fetchFinMindData() {
           pct5: parseFloat(pct5.toFixed(2)),
           pct10: parseFloat(pct10.toFixed(2)),
           amount: parseFloat(amount.toFixed(2)),
-          market: market // 紀錄是上市還上櫃，供 TradingView 使用
+          market: market 
         };
         successCount++;
       }
     } catch (e) {
       console.error(`Fetch error for ${code}`, e);
     }
-
     if (!token) await new Promise(r => setTimeout(r, 300));
   }
 
@@ -433,15 +324,16 @@ async function fetchFinMindData() {
   setTimeout(() => { progContainer.style.display = "none"; statusEl.textContent = ""; }, 5000);
 }
 
-// ==================== 計算族群動能與指標 ====================
+// ==================== 計算與大盤比較邏輯 ====================
 function calcSectorStats() {
   const stats = {};
+  // 取得大盤數據(0050)，若無則預設為0
+  const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
+  
   Object.entries(SECTORS).forEach(([sector, stocks]) => {
     const valid = stocks.filter(s => stockData[s.code]);
-    if (valid.length === 0) {
-      stats[sector] = null;
-      return;
-    }
+    if (valid.length === 0) { stats[sector] = null; return; }
+    
     const sum = (key) => valid.reduce((a, s) => a + (stockData[s.code][key] || 0), 0);
     const avg = (key) => sum(key) / valid.length;
     
@@ -449,32 +341,25 @@ function calcSectorStats() {
     let pct5 = avg("pct5");
     let pct10 = avg("pct10");
     
+    // 計算相對大盤績效
+    let vsMarket10 = pct10 - market.pct10;
+    
     // 動能偵測邏輯
-    let past5 = pct10 - pct5; // 前5日表現
-    let recent5 = pct5;       // 近5日表現
+    let past5 = pct10 - pct5; 
+    let recent5 = pct5;       
+    let trendIcon = "➡️"; let trendText = "盤整";
     
-    let trendIcon = "➡️";
-    let trendText = "盤整";
-    
-    if (recent5 > past5 && pct1 > 0) {
-       trendIcon = "🔥"; trendText = "轉強";
-    } else if (recent5 < past5 && pct1 < 0) {
-       trendIcon = "❄️"; trendText = "轉弱";
-    } else if (pct1 > 0) {
-       trendIcon = "↗️"; trendText = "偏多";
-    } else if (pct1 < 0) {
-       trendIcon = "↘️"; trendText = "偏空";
-    }
+    if (recent5 > past5 && pct1 > 0) { trendIcon = "🔥"; trendText = "轉強"; } 
+    else if (recent5 < past5 && pct1 < 0) { trendIcon = "❄️"; trendText = "轉弱"; } 
+    else if (pct1 > 0) { trendIcon = "↗️"; trendText = "偏多"; } 
+    else if (pct1 < 0) { trendIcon = "↘️"; trendText = "偏空"; }
 
     stats[sector] = {
-      pct1: pct1,
-      pct5: pct5,
-      pct10: pct10,
+      pct1: pct1, pct5: pct5, pct10: pct10,
+      vsMarket10: vsMarket10, // 新增大盤比較
       amount: sum("amount"),
-      count: valid.length,
-      total: stocks.length,
-      trendIcon: trendIcon,
-      trendText: trendText
+      count: valid.length, total: stocks.length,
+      trendIcon: trendIcon, trendText: trendText
     };
   });
   return stats;
@@ -497,7 +382,6 @@ function pctClass(pct) {
   if (pct < 0) return "neg-text";
   return "flat-text";
 }
-
 function fmtPct(pct) {
   if (pct == null || isNaN(pct)) return "-";
   return (pct > 0 ? "+" : "") + pct.toFixed(2) + "%";
@@ -511,12 +395,16 @@ function renderOverview() {
 
   const validStats = Object.values(stats).filter(s => s);
   const totalAmount = validStats.reduce((a, s) => a + (s.amount || 0), 0);
-  const avg10d = validStats.length ? validStats.reduce((a,s)=>a+s.pct10,0)/validStats.length : 0;
+  const market = stockData["0050"];
+  const mktPct = market ? market.pct10 : 0;
+  
+  // 計算有多少族群贏過大盤
+  const beatMarketCount = validStats.filter(s => s.vsMarket10 > 0).length;
   
   document.getElementById("summaryCards").innerHTML = `
-    <div class="summary-card"><div class="label">族群平均10日漲幅</div><div class="value ${pctClass(avg10d)}">${fmtPct(avg10d)}</div><div class="sub">共 ${validStats.length} 個族群</div></div>
+    <div class="summary-card"><div class="label">大盤(0050) 10日漲幅</div><div class="value ${pctClass(mktPct)}">${fmtPct(mktPct)}</div><div class="sub">作為市場基準</div></div>
+    <div class="summary-card"><div class="label">打敗大盤族群數</div><div class="value pos-text">${beatMarketCount} <span style="font-size:12px">/ ${validStats.length}</span></div><div class="sub">動能優於加權指數</div></div>
     <div class="summary-card"><div class="label">總成交金額</div><div class="value">${(totalAmount).toFixed(0)} 億</div><div class="sub">追蹤族群合計</div></div>
-    <div class="summary-card"><div class="label">資料庫覆蓋</div><div class="value">${Object.keys(stockData).length}</div><div class="sub">已匯入個股檔數</div></div>
   `;
 
   const sorted = Object.entries(stats).filter(([_,s]) => s).sort((a,b) => b[1].pct10 - a[1].pct10);
@@ -529,12 +417,18 @@ function renderOverview() {
     const cell = document.createElement("div");
     cell.className = "sector-cell";
     cell.style.background = pctColor(s.pct10);
+    
+    // 大盤比較文字顏色
+    const vsColor = s.vsMarket10 >= 0 ? '#ff6b6b' : '#4a9d6f';
+    const vsText = s.vsMarket10 >= 0 ? `vs大盤 ${fmtPct(s.vsMarket10)}` : `vs大盤 ${fmtPct(s.vsMarket10)}`;
+
     cell.innerHTML = `
       <div class="sector-name">
-        <span>${sector}</span>
-        <span title="${s.trendText}" style="font-size:14px;">${s.trendIcon}</span>
+        <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${sector}">${sector.split(' ')[0].length > 3 ? sector.substring(0,8) : sector}</span>
+        <span title="${s.trendText}" style="font-size:14px; margin-left:2px;">${s.trendIcon}</span>
       </div>
       <div class="sector-pct">${fmtPct(s.pct10)}</div>
+      <div class="sector-vs" style="color: ${vsColor}">${vsText}</div>
       <div class="sector-meta">${s.count}/${s.total} 檔 | ${s.amount.toFixed(0)}億</div>
     `;
     cell.onclick = () => { currentSector = sector; switchTab("stocks"); renderStocks(); };
@@ -549,7 +443,6 @@ function renderRanking() {
   
   const container = document.getElementById("rankingBars");
   container.innerHTML = "";
-
   if (sorted.length === 0) return;
 
   const isPct = sortKey.startsWith("pct");
@@ -634,7 +527,6 @@ function switchTab(tab) {
   if(tab === "stocks") renderStocks();
 }
 
-// ==================== 事件綁定 ====================
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => switchTab(t.dataset.tab));
 document.getElementById("rankingSort").onchange = renderRanking;
 document.getElementById("stockSort").onchange = (e) => { stockSortKey = e.target.value; stockSortDir = -1; renderStocks(); };
@@ -655,80 +547,55 @@ document.getElementById("clearDataBtn").onclick = () => {
 };
 
 document.getElementById("loadDemoBtn").onclick = () => {
-  // 增加幾筆新族群的 Demo 數據
   stockData = {
+    "0050":{price:185,pct1:1.5,pct5:2.5,pct10:4.0,amount:0,market:"TWSE"}, // 模擬大盤
     "2330":{price:1450,pct1:1.10,pct5:3.2,pct10:5.8,amount:464,market:"TWSE"},
     "2317":{price:239.5,pct1:5.27,pct5:8.3,pct10:11.8,amount:373,market:"TWSE"},
     "3017":{price:1380,pct1:2.3,pct5:5.8,pct10:14.5,amount:207,market:"TWSE"},
     "2327":{price:348.5,pct1:1.75,pct5:5.2,pct10:12.3,amount:135,market:"TWSE"},
     "1519":{price:1085,pct1:5.5,pct5:11.8,pct10:22.5,amount:38,market:"TWSE"},
-    "6442":{price:185,pct1:9.9,pct5:18.5,pct10:25.5,amount:15,market:"TWSE"},
+    "6442":{price:185,pct1:-1.5,pct5:-2.5,pct10:-4.0,amount:15,market:"TWSE"}, // 模擬落後大盤
     "2049":{price:310,pct1:4.5,pct5:9.2,pct10:15.8,amount:22,market:"TWSE"}
   };
   lastUpdateTime = new Date().toISOString();
   saveData(); updateUI(); switchTab("overview");
 };
 
-// ==================== 下拉刷新 (Pull-to-Refresh) 邏輯 ====================
-let startY = 0;
-let currentY = 0;
+// ==================== 下拉刷新 ====================
+let startY = 0; let currentY = 0;
 const ptrIndicator = document.getElementById("pullToRefresh");
-const pullThreshold = 70; 
-let isRefreshing = false;
+const pullThreshold = 70; let isRefreshing = false;
 
 document.addEventListener('touchstart', (e) => {
-  if (window.scrollY === 0 && !isRefreshing) {
-    startY = e.touches[0].clientY;
-  } else {
-    startY = 0;
-  }
+  if (window.scrollY === 0 && !isRefreshing) startY = e.touches[0].clientY;
+  else startY = 0;
 }, { passive: true });
 
 document.addEventListener('touchmove', (e) => {
   if (startY === 0 || isRefreshing) return;
   currentY = e.touches[0].clientY;
   const deltaY = currentY - startY;
-
   if (deltaY > 0) {
     ptrIndicator.style.transition = 'none'; 
     ptrIndicator.style.top = Math.min(deltaY - 60, 10) + 'px'; 
-    
-    if (deltaY > pullThreshold) {
-      ptrIndicator.textContent = "↻ 鬆開手指即可更新...";
-    } else {
-      ptrIndicator.textContent = "↓ 下拉以更新最新股價...";
-    }
+    ptrIndicator.textContent = deltaY > pullThreshold ? "↻ 鬆開手指即可更新..." : "↓ 下拉以更新最新股價...";
   }
 }, { passive: false });
 
 document.addEventListener('touchend', (e) => {
   if (startY === 0 || isRefreshing) return;
   const deltaY = currentY - startY;
-
   ptrIndicator.style.transition = 'top 0.3s'; 
-  
   if (deltaY > pullThreshold) {
     isRefreshing = true;
     ptrIndicator.style.top = '0px';
     ptrIndicator.textContent = "🚀 正在抓取 FinMind 最新資料...";
-    
-    fetchFinMindData().then(() => {
-      setTimeout(() => {
-        ptrIndicator.style.top = '-60px';
-        isRefreshing = false;
-      }, 1000); 
-    });
-  } else {
-    ptrIndicator.style.top = '-60px';
-  }
-  
-  startY = 0;
-  currentY = 0;
+    fetchFinMindData().then(() => { setTimeout(() => { ptrIndicator.style.top = '-60px'; isRefreshing = false; }, 1000); });
+  } else { ptrIndicator.style.top = '-60px'; }
+  startY = 0; currentY = 0;
 });
 
-// 啟動載入資料
-loadData();
-updateUI();
+loadData(); updateUI();
 </script>
 </body>
 </html>
