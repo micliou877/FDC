@@ -158,60 +158,36 @@
 <div class="panel" id="global">
   <div class="section-header">
     <div class="section-title">🌍 跨市場先行指標 (美 / 日 / 韓)</div>
+    <div class="controls">
+      <select id="globalMarketSelect">
+        <option value="all">全部市場</option>
+        <option value="US">🇺🇸 美股</option>
+        <option value="JP">🇯🇵 日股</option>
+        <option value="KR">🇰🇷 韓股</option>
+      </select>
+    </div>
   </div>
   <p style="font-size:12px; color:#aaa; margin-bottom:12px; line-height:1.4;">
-    💡 提示：此面板由 TradingView 官方提供即時報價，不消耗 FinMind API 額度。點擊標的依然可開啟完整線圖。
+    💡 提示：美股將自動抓取 FinMind 歷史報價；日/韓股受限於免費 API，僅提供超連結，點擊代號即可開啟 TradingView 查看即時線圖。
   </p>
-  
-  <div class="tradingview-widget-container" style="border-radius: 8px; overflow: hidden;">
-    <div class="tradingview-widget-container__widget"></div>
-    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
-    {
-      "colorTheme": "dark",
-      "dateRange": "1M",
-      "showChart": true,
-      "locale": "zh_TW",
-      "width": "100%",
-      "height": "550",
-      "largeChartUrl": "",
-      "isTransparent": true,
-      "showSymbolLogo": true,
-      "showFloatingTooltip": true,
-      "tabs": [
-        {
-          "title": "🇺🇸 美股 AI 指標",
-          "symbols": [
-            { "s": "NASDAQ:NVDA", "d": "NVIDIA 輝達 (AI晶片)" },
-            { "s": "NASDAQ:AMD", "d": "AMD 超微 (GPU/CPU)" },
-            { "s": "NASDAQ:AVGO", "d": "Broadcom 博通 (ASIC)" },
-            { "s": "NASDAQ:TSLA", "d": "Tesla 特斯拉 (機器人/車用)" },
-            { "s": "NASDAQ:SMCI", "d": "Super Micro (AI伺服器)" },
-            { "s": "NYSE:DELL", "d": "Dell 戴爾 (AI伺服器)" },
-            { "s": "NYSE:VRT", "d": "Vertiv (散熱/電源)" },
-            { "s": "NASDAQ:ASML", "d": "ASML (EUV設備)" }
-          ]
-        },
-        {
-          "title": "🇯🇵 日股先行指標",
-          "symbols": [
-            { "s": "TSE:6857", "d": "Advantest (AI測試機)" },
-            { "s": "TSE:8035", "d": "Tokyo Electron (半導體設備)" },
-            { "s": "TSE:6981", "d": "Murata 村田 (被動元件)" },
-            { "s": "TSE:6146", "d": "Disco (晶圓切割)" }
-          ]
-        },
-        {
-          "title": "🇰🇷 韓股先行指標",
-          "symbols": [
-            { "s": "KRX:005930", "d": "Samsung 三星 (記憶體/代工)" },
-            { "s": "KRX:000660", "d": "SK Hynix (HBM龍頭)" }
-          ]
-        }
-      ]
-    }
-    </script>
+  <div style="overflow-x: auto;">
+    <table class="stocks-table">
+      <thead>
+        <tr>
+          <th>市場</th>
+          <th>代號</th>
+          <th>公司</th>
+          <th>對應族群</th>
+          <th style="text-align:right">收盤(當地貨幣)</th>
+          <th style="text-align:right">當日%</th>
+          <th style="text-align:right">5日%</th>
+          <th style="text-align:right">10日%</th>
+        </tr>
+      </thead>
+      <tbody id="globalTbody"></tbody>
+    </table>
   </div>
-  </div>
+</div>
 
 <div class="panel" id="data">
   <div class="data-panel">
