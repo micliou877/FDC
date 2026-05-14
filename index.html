@@ -4,12 +4,12 @@
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="台股26族群追蹤">
+  <meta name="apple-mobile-web-app-title" content="台股與全球輪動">
   <link rel="apple-touch-icon" href="icon-192.png">
   
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>台股 26 族群資金輪動追蹤</title>
+  <title>台股 26 族群 & 全球先行指標追蹤</title>
   
   <style>
     #pullToRefresh { position: fixed; top: -60px; left: 0; width: 100%; height: 60px; display: flex; justify-content: center; align-items: center; color: #4a9eff; font-size: 13px; font-weight: bold; z-index: 1000; background-color: rgba(26, 32, 38, 0.9); transition: top 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
@@ -54,6 +54,7 @@
     .pos-text { color: #ff6b6b; font-weight: 600; }
     .neg-text { color: #4a9d6f; font-weight: 600; }
     .flat-text { color: #888; }
+    .tag { background: #2a3138; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #ccc; }
     
     .data-panel { background: #1a2026; border-radius: 6px; padding: 14px; margin-bottom: 16px; }
     .data-panel h3 { font-size: 14px; color: #fff; margin-bottom: 8px; }
@@ -79,14 +80,15 @@
 
 <div id="pullToRefresh">↓ 下拉以更新最新股價...</div>
 
-<h1>📊 台股 26 族群資金輪動追蹤</h1>
+<h1>📊 台股 26 族群 & 全球先行指標追蹤</h1>
 <div class="subtitle"><span id="lastUpdate">尚未匯入資料</span></div>
 
 <div class="tabs">
   <button class="tab active" data-tab="overview">族群總覽</button>
   <button class="tab" data-tab="ranking">族群排行</button>
   <button class="tab" data-tab="stocks">個股下鑽</button>
-  <button class="tab" data-tab="data">資料匯入 & FinMind</button>
+  <button class="tab" data-tab="global">🌍 跨市場先行指標</button>
+  <button class="tab" data-tab="data">資料匯入 & 設定</button>
 </div>
 
 <div class="panel active" id="overview">
@@ -125,7 +127,7 @@
 
 <div class="panel" id="stocks">
   <div class="section-header">
-    <div class="section-title" id="stocksTitle">選擇族群查看個股</div>
+    <div class="section-title" id="stocksTitle">選擇族群查看台股</div>
     <div class="controls">
       <select id="sectorSelect"></select>
       <select id="stockSort">
@@ -153,15 +155,49 @@
   </div>
 </div>
 
+<div class="panel" id="global">
+  <div class="section-header">
+    <div class="section-title">🌍 跨市場先行指標 (美 / 日 / 韓)</div>
+    <div class="controls">
+      <select id="globalMarketSelect">
+        <option value="all">全部市場</option>
+        <option value="US">🇺🇸 美股</option>
+        <option value="JP">🇯🇵 日股</option>
+        <option value="KR">🇰🇷 韓股</option>
+      </select>
+    </div>
+  </div>
+  <p style="font-size:12px; color:#aaa; margin-bottom:12px; line-height:1.4;">
+    💡 提示：美股將自動抓取 FinMind 歷史報價；日/韓股受限於免費 API，僅提供超連結，點擊代號即可開啟 TradingView 查看即時線圖。
+  </p>
+  <div style="overflow-x: auto;">
+    <table class="stocks-table">
+      <thead>
+        <tr>
+          <th>市場</th>
+          <th>代號</th>
+          <th>公司</th>
+          <th>對應族群</th>
+          <th style="text-align:right">收盤(當地貨幣)</th>
+          <th style="text-align:right">當日%</th>
+          <th style="text-align:right">5日%</th>
+          <th style="text-align:right">10日%</th>
+        </tr>
+      </thead>
+      <tbody id="globalTbody"></tbody>
+    </table>
+  </div>
+</div>
+
 <div class="panel" id="data">
   <div class="data-panel">
     <h3>🔄 FinMind API 即時資料抓取</h3>
-    <p>透過 FinMind API 自動抓取大盤(0050)與各族群最新股價。採延遲抓取防封鎖，請耐心等候。</p>
+    <p>自動抓取大盤(0050)、26大台股族群、以及美股先行指標的最新股價。採延遲抓取防封鎖，請耐心等候。</p>
     <div style="margin-bottom: 8px;">
       <input type="text" id="apiToken" placeholder="FinMind Token (選填，免費用戶留白)" style="width: 250px;">
     </div>
     <div class="button-row">
-      <button class="btn primary" id="fetchFinMindBtn">🚀 開始抓取最新股價</button>
+      <button class="btn primary" id="fetchFinMindBtn">🚀 開始抓取所有股價</button>
       <button class="btn" id="loadDemoBtn">🎯 載入範例資料（立即試用）</button>
       <button class="btn" id="clearDataBtn">🗑 清空資料</button>
     </div>
@@ -169,9 +205,8 @@
     <div id="fetchStatus"></div>
   </div>
   <div class="data-panel">
-    <h3>個股資料庫預覽</h3>
-    <p>共 <strong id="dbCount">0</strong> 檔個股有資料 | 涵蓋族群 <strong id="dbSectors">0</strong> 個</p>
-    <textarea id="dataView" readonly placeholder="匯入資料後將顯示在此"></textarea>
+    <h3>資料庫狀態</h3>
+    <p>共 <strong id="dbCount">0</strong> 檔標的有資料</p>
   </div>
 </div>
 
@@ -206,11 +241,40 @@ const SECTORS = {
   "26. ETF權值股核心": [{code:"2330",name:"台積電"},{code:"2317",name:"鴻海"},{code:"2454",name:"聯發科"},{code:"6669",name:"緯穎"},{code:"2382",name:"廣達"},{code:"2308",name:"台達電"},{code:"2891",name:"中信金"},{code:"2881",name:"富邦金"},{code:"2412",name:"中華電"},{code:"2303",name:"聯電"},{code:"3231",name:"緯創"},{code:"3711",name:"日月光投控"},{code:"1303",name:"南亞"},{code:"1301",name:"台塑"},{code:"2882",name:"國泰金"},{code:"2002",name:"中鋼"},{code:"5871",name:"中租-KY"},{code:"3008",name:"大立光"},{code:"1216",name:"統一"},{code:"2207",name:"和泰車"},{code:"2603",name:"長榮"},{code:"2884",name:"玉山金"},{code:"2886",name:"兆豐金"}]
 };
 
+// ==================== 全球先行指標 (美日韓) ====================
+const GLOBAL_INDICATORS = [
+  // 美股 (可透過 API 抓取)
+  { code: "NVDA", name: "NVIDIA 輝達", sector: "AI晶片龍頭", market: "US" },
+  { code: "AMD", name: "AMD 超微", sector: "GPU/CPU", market: "US" },
+  { code: "AVGO", name: "Broadcom 博通", sector: "ASIC/網通", market: "US" },
+  { code: "TSLA", name: "Tesla 特斯拉", sector: "電動車/機器人", market: "US" },
+  { code: "SMCI", name: "Super Micro 美超微", sector: "AI伺服器", market: "US" },
+  { code: "DELL", name: "Dell 戴爾", sector: "AI伺服器/PC", market: "US" },
+  { code: "VRT", name: "Vertiv", sector: "散熱/電源", market: "US" },
+  { code: "MU", name: "Micron 美光", sector: "記憶體", market: "US" },
+  { code: "AMKR", name: "Amkor", sector: "先進封測", market: "US" },
+  { code: "COHR", name: "Coherent", sector: "CPO/光通訊", market: "US" },
+  { code: "AMAT", name: "Applied Materials", sector: "半導體設備", market: "US" },
+  { code: "ASML", name: "ASML (ADR)", sector: "EUV設備", market: "US" },
+  { code: "PANW", name: "Palo Alto", sector: "資安", market: "US" },
+  { code: "MSFT", name: "Microsoft 微軟", sector: "AI雲端/PC", market: "US" },
+  { code: "AAPL", name: "Apple 蘋果", sector: "智慧手機", market: "US" },
+  { code: "AMZN", name: "Amazon 亞馬遜", sector: "雲端/電商/衛星", market: "US" },
+  { code: "LMT", name: "Lockheed Martin", sector: "軍工", market: "US" },
+  { code: "ETN", name: "Eaton", sector: "重電/電力", market: "US" },
+  // 日韓股 (API 無法抓取，僅供 TradingView 連結)
+  { code: "6857", name: "Advantest 愛德萬", sector: "AI測試機", market: "JP" },
+  { code: "6981", name: "Murata 村田", sector: "MLCC被動元件", market: "JP" },
+  { code: "8035", name: "Tokyo Electron", sector: "半導體設備", market: "JP" },
+  { code: "6146", name: "Disco", sector: "晶圓切割設備", market: "JP" },
+  { code: "6594", name: "Nidec 日本電產", sector: "馬達/機器人", market: "JP" },
+  { code: "005930", name: "Samsung 三星", sector: "記憶體/代工", market: "KR" },
+  { code: "000660", name: "SK Hynix", sector: "HBM記憶體", market: "KR" }
+];
+
 const STOCK_NAMES = {};
 Object.values(SECTORS).flat().forEach(s => STOCK_NAMES[s.code] = s.name);
-
-// ==================== 關鍵：將大盤 (0050) 強制加入名單 ====================
-STOCK_NAMES["0050"] = "大盤(0050)";
+STOCK_NAMES["0050"] = "大盤(0050)"; // 加入台股大盤
 
 let stockData = {};
 let lastUpdateTime = null;
@@ -242,9 +306,11 @@ async function fetchFinMindData() {
   const progContainer = document.getElementById("progressContainer");
   const progBar = document.getElementById("progressBar");
   
-  // 加入大盤代碼
-  const uniqueCodes = Object.keys(STOCK_NAMES);
-  if (!uniqueCodes.includes("0050")) uniqueCodes.unshift("0050");
+  // 準備要抓取的代號 (台股 + 美股)
+  const twCodes = Object.keys(STOCK_NAMES);
+  if (!twCodes.includes("0050")) twCodes.unshift("0050");
+  const usCodes = GLOBAL_INDICATORS.filter(g => g.market === 'US').map(g => g.code);
+  const fetchList = [...new Set([...twCodes, ...usCodes])]; // 去重複合併
   
   const today = new Date();
   const pastDate = new Date(today);
@@ -256,13 +322,18 @@ async function fetchFinMindData() {
   stockData = {}; 
   
   let successCount = 0;
-  for (let i = 0; i < uniqueCodes.length; i++) {
-    const code = uniqueCodes[i];
-    statusEl.textContent = `抓取中: ${code} ${STOCK_NAMES[code]} (${i+1}/${uniqueCodes.length})...`;
-    progBar.style.width = `${((i+1) / uniqueCodes.length) * 100}%`;
+  for (let i = 0; i < fetchList.length; i++) {
+    const code = fetchList[i];
     
-    let market = "TWSE";
-    let dataset = "TaiwanStockPrice";
+    // 判斷是否為美股 (純英文字母)
+    const isUS = /^[A-Z]+$/.test(code);
+    const displayName = isUS ? (GLOBAL_INDICATORS.find(g => g.code === code)?.name || code) : STOCK_NAMES[code];
+    
+    statusEl.textContent = `抓取中: ${code} ${displayName} (${i+1}/${fetchList.length})...`;
+    progBar.style.width = `${((i+1) / fetchList.length) * 100}%`;
+    
+    let market = isUS ? "US" : "TWSE";
+    let dataset = isUS ? "USStockPrice" : "TaiwanStockPrice";
     let url = `https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${start_date}`;
     if (token) url += `&token=${token}`;
 
@@ -270,7 +341,8 @@ async function fetchFinMindData() {
       let res = await fetch(url);
       let json = await res.json();
       
-      if (json.msg === "success" && (!json.data || json.data.length === 0)) {
+      // 若台股上市找不到，自動切換上櫃
+      if (!isUS && json.msg === "success" && (!json.data || json.data.length === 0)) {
          market = "TPEX";
          dataset = "TaiwanOTCStockPrice";
          let otcUrl = `https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${start_date}`;
@@ -296,8 +368,9 @@ async function fetchFinMindData() {
         const pct1 = prev1 ? ((price - prev1) / prev1) * 100 : 0;
         const pct5 = prev5 ? ((price - prev5) / prev5) * 100 : 0;
         const pct10 = prev10 ? ((price - prev10) / prev10) * 100 : 0;
+        // 美股成交量很大且單位不同，因此金額僅為示意
         const vol = latest.Trading_Volume / 1000; 
-        const amount = (price * vol) / 10000; 
+        const amount = (price * vol) / (isUS ? 1000 : 10000); 
 
         stockData[code] = {
           price: price,
@@ -309,25 +382,32 @@ async function fetchFinMindData() {
         };
         successCount++;
       }
-    } catch (e) {
-      console.error(`Fetch error for ${code}`, e);
-    }
-    if (!token) await new Promise(r => setTimeout(r, 300));
+    } catch (e) { console.error(`Fetch error for ${code}`, e); }
+    
+    // 延遲防阻擋
+    if (!token) await new Promise(r => setTimeout(r, 250));
   }
 
   lastUpdateTime = new Date().toISOString();
   saveData();
   updateUI();
   
-  statusEl.textContent = `✅ 抓取完成！成功更新 ${successCount} 檔個股。`;
+  statusEl.textContent = `✅ 抓取完成！成功更新 ${successCount} 檔標的。`;
   btn.disabled = false;
   setTimeout(() => { progContainer.style.display = "none"; statusEl.textContent = ""; }, 5000);
+}
+
+// 取得 TradingView 連結 (自動判斷國家與交易所)
+function getTVLink(code, market) {
+  if (market === 'US') return `https://tw.tradingview.com/chart/?symbol=${code}`;
+  if (market === 'JP') return `https://tw.tradingview.com/chart/?symbol=TSE:${code}`;
+  if (market === 'KR') return `https://tw.tradingview.com/chart/?symbol=KRX:${code}`;
+  return `https://tw.tradingview.com/chart/?symbol=${market || 'TWSE'}:${code}`;
 }
 
 // ==================== 計算與大盤比較邏輯 ====================
 function calcSectorStats() {
   const stats = {};
-  // 取得大盤數據(0050)，若無則預設為0
   const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
   
   Object.entries(SECTORS).forEach(([sector, stocks]) => {
@@ -340,11 +420,8 @@ function calcSectorStats() {
     let pct1 = avg("pct1");
     let pct5 = avg("pct5");
     let pct10 = avg("pct10");
-    
-    // 計算相對大盤績效
     let vsMarket10 = pct10 - market.pct10;
     
-    // 動能偵測邏輯
     let past5 = pct10 - pct5; 
     let recent5 = pct5;       
     let trendIcon = "➡️"; let trendText = "盤整";
@@ -356,7 +433,7 @@ function calcSectorStats() {
 
     stats[sector] = {
       pct1: pct1, pct5: pct5, pct10: pct10,
-      vsMarket10: vsMarket10, // 新增大盤比較
+      vsMarket10: vsMarket10,
       amount: sum("amount"),
       count: valid.length, total: stocks.length,
       trendIcon: trendIcon, trendText: trendText
@@ -387,7 +464,7 @@ function fmtPct(pct) {
   return (pct > 0 ? "+" : "") + pct.toFixed(2) + "%";
 }
 
-// ==================== 渲染功能 ====================
+// ==================== 各面板渲染 ====================
 function renderOverview() {
   const stats = calcSectorStats();
   const grid = document.getElementById("heatmap");
@@ -397,8 +474,6 @@ function renderOverview() {
   const totalAmount = validStats.reduce((a, s) => a + (s.amount || 0), 0);
   const market = stockData["0050"];
   const mktPct = market ? market.pct10 : 0;
-  
-  // 計算有多少族群贏過大盤
   const beatMarketCount = validStats.filter(s => s.vsMarket10 > 0).length;
   
   document.getElementById("summaryCards").innerHTML = `
@@ -418,7 +493,6 @@ function renderOverview() {
     cell.className = "sector-cell";
     cell.style.background = pctColor(s.pct10);
     
-    // 大盤比較文字顏色
     const vsColor = s.vsMarket10 >= 0 ? '#ff6b6b' : '#4a9d6f';
     const vsText = s.vsMarket10 >= 0 ? `vs大盤 ${fmtPct(s.vsMarket10)}` : `vs大盤 ${fmtPct(s.vsMarket10)}`;
 
@@ -483,16 +557,8 @@ function renderStocks() {
   const tbody = document.getElementById("stocksTbody");
   tbody.innerHTML = rows.map(s => `
     <tr>
-      <td>
-        <a href="https://tw.tradingview.com/chart/?symbol=${s.market || 'TWSE'}:${s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
-          ${s.code}
-        </a>
-      </td>
-      <td>
-        <a href="https://tw.tradingview.com/chart/?symbol=${s.market || 'TWSE'}:${s.code}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">
-          ${s.name}
-        </a>
-      </td>
+      <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
+      <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a></td>
       <td style="text-align:right">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
@@ -502,12 +568,36 @@ function renderStocks() {
   `).join("");
 }
 
+// 渲染跨市場指標專區
+function renderGlobal() {
+  const tbody = document.getElementById("globalTbody");
+  const filter = document.getElementById("globalMarketSelect").value;
+  
+  let rows = GLOBAL_INDICATORS.filter(g => filter === "all" || g.market === filter);
+  
+  tbody.innerHTML = rows.map(g => {
+    const d = stockData[g.code] || {}; // 抓取到的報價資料
+    const tvLink = getTVLink(g.code, g.market); // 自動判斷交易所
+    let flag = g.market === 'US' ? '🇺🇸' : (g.market === 'JP' ? '🇯🇵' : '🇰🇷');
+    
+    return `
+      <tr>
+        <td><span class="tag">${flag} ${g.market}</span></td>
+        <td><a href="${tvLink}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${g.code}</a></td>
+        <td><a href="${tvLink}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${g.name}</a></td>
+        <td><span style="color:#aaa; font-size:11px;">${g.sector}</span></td>
+        <td style="text-align:right">${d.price?.toFixed(2) ?? "-"}</td>
+        <td style="text-align:right" class="${pctClass(d.pct1)}">${fmtPct(d.pct1)}</td>
+        <td style="text-align:right" class="${pctClass(d.pct5)}">${fmtPct(d.pct5)}</td>
+        <td style="text-align:right" class="${pctClass(d.pct10)}">${fmtPct(d.pct10)}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
 function renderDataPanel() {
-  const lines = Object.entries(stockData).map(([code, d]) => {
-    return `${code} ${STOCK_NAMES[code] || ""}\t收盤:${d.price}\t當日:${d.pct1}%\t10日:${d.pct10}%\t金額:${d.amount}億`;
-  });
-  document.getElementById("dataView").value = lines.join("\n") || "（尚無資料）";
-  document.getElementById("dbCount").textContent = Object.keys(stockData).length;
+  const objSize = Object.keys(stockData).length;
+  document.getElementById("dbCount").textContent = objSize;
 }
 
 function updateUI() {
@@ -516,7 +606,7 @@ function updateUI() {
   } else {
     document.getElementById("lastUpdate").textContent = "尚未匯入資料";
   }
-  renderOverview(); renderRanking(); renderStocks(); renderDataPanel();
+  renderOverview(); renderRanking(); renderStocks(); renderGlobal(); renderDataPanel();
 }
 
 function switchTab(tab) {
@@ -525,13 +615,17 @@ function switchTab(tab) {
   if(tab === "overview") renderOverview();
   if(tab === "ranking") renderRanking();
   if(tab === "stocks") renderStocks();
+  if(tab === "global") renderGlobal();
 }
 
+// ==================== 事件綁定 ====================
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => switchTab(t.dataset.tab));
 document.getElementById("rankingSort").onchange = renderRanking;
+document.getElementById("globalMarketSelect").onchange = renderGlobal;
 document.getElementById("stockSort").onchange = (e) => { stockSortKey = e.target.value; stockSortDir = -1; renderStocks(); };
 document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.target.value === "__all__" ? null : e.target.value; renderStocks(); };
 document.querySelectorAll(".stocks-table th").forEach(th => {
+  if(!th.dataset.sort) return;
   th.onclick = () => {
     const key = th.dataset.sort;
     if (stockSortKey === key) stockSortDir *= -1;
@@ -548,17 +642,16 @@ document.getElementById("clearDataBtn").onclick = () => {
 
 document.getElementById("loadDemoBtn").onclick = () => {
   stockData = {
-    "0050":{price:185,pct1:1.5,pct5:2.5,pct10:4.0,amount:0,market:"TWSE"}, // 模擬大盤
+    "0050":{price:185,pct1:1.5,pct5:2.5,pct10:4.0,amount:0,market:"TWSE"}, 
     "2330":{price:1450,pct1:1.10,pct5:3.2,pct10:5.8,amount:464,market:"TWSE"},
-    "2317":{price:239.5,pct1:5.27,pct5:8.3,pct10:11.8,amount:373,market:"TWSE"},
+    "NVDA":{price:950,pct1:3.2,pct5:7.5,pct10:15.2,amount:0,market:"US"}, // 模擬美股資料
+    "TSLA":{price:180,pct1:-1.2,pct5:2.5,pct10:-4.0,amount:0,market:"US"},
     "3017":{price:1380,pct1:2.3,pct5:5.8,pct10:14.5,amount:207,market:"TWSE"},
-    "2327":{price:348.5,pct1:1.75,pct5:5.2,pct10:12.3,amount:135,market:"TWSE"},
-    "1519":{price:1085,pct1:5.5,pct5:11.8,pct10:22.5,amount:38,market:"TWSE"},
-    "6442":{price:185,pct1:-1.5,pct5:-2.5,pct10:-4.0,amount:15,market:"TWSE"}, // 模擬落後大盤
-    "2049":{price:310,pct1:4.5,pct5:9.2,pct10:15.8,amount:22,market:"TWSE"}
+    "VRT":{price:95,pct1:4.5,pct5:12.8,pct10:20.5,amount:0,market:"US"},
+    "6442":{price:185,pct1:-1.5,pct5:-2.5,pct10:-4.0,amount:15,market:"TWSE"}
   };
   lastUpdateTime = new Date().toISOString();
-  saveData(); updateUI(); switchTab("overview");
+  saveData(); updateUI(); switchTab("global"); // 直接切換過去讓你看看效果
 };
 
 // ==================== 下拉刷新 ====================
