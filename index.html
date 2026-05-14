@@ -49,11 +49,15 @@
     
     .stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
     .stocks-table th { background: #1a2026; padding: 8px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; }
-    .stocks-table td { padding: 8px 6px; border-bottom: 1px solid #1a2026; white-space: nowrap; }
+    .stocks-table td { padding: 10px 6px; border-bottom: 1px solid #1a2026; white-space: nowrap; vertical-align: top; }
+    .stocks-table td.wrap-cell { white-space: normal; min-width: 110px; }
     .stocks-table tbody tr:hover { background: #1a2026; }
     .pos-text { color: #ff6b6b; font-weight: 600; }
     .neg-text { color: #4a9d6f; font-weight: 600; }
     .flat-text { color: #888; }
+    
+    /* 族群專屬小標籤 */
+    .tag { display: inline-block; background: #212b36; padding: 3px 6px; border-radius: 4px; font-size: 10px; color: #9ab4c9; margin-top: 4px; margin-right: 4px; white-space: nowrap; border: 1px solid #2c3a47; }
     
     .data-panel { background: #1a2026; border-radius: 6px; padding: 14px; margin-bottom: 16px; }
     .data-panel h3 { font-size: 14px; color: #fff; margin-bottom: 8px; }
@@ -141,7 +145,7 @@
       <thead>
         <tr>
           <th data-sort="code">代號</th>
-          <th data-sort="name">公司</th>
+          <th data-sort="name">公司 / 族群標籤</th>
           <th data-sort="price" style="text-align:right">收盤</th>
           <th data-sort="pct1" style="text-align:right">當日%</th>
           <th data-sort="pct5" style="text-align:right">5日%</th>
@@ -481,56 +485,75 @@ function renderStocks() {
   select.value = currentSector || "__all__";
   document.getElementById("stocksTitle").textContent = currentSector ? currentSector + " 個股" : "全部個股";
 
+  // 產生個股的所屬族群標籤映射表
+  const stockSectorsMap = {};
+  Object.entries(SECTORS).forEach(([sec, list]) => {
+    const shortName = sec.split('. ')[1] || sec; // 去掉前面的數字標號
+    list.forEach(s => {
+      if(!stockSectorsMap[s.code]) stockSectorsMap[s.code] = [];
+      stockSectorsMap[s.code].push(shortName);
+    });
+  });
+
   let stocks = currentSector && currentSector !== "__all__" ? SECTORS[currentSector] : Object.values(SECTORS).flat().filter((v,i,a)=>a.findIndex(t=>(t.code === v.code))===i);
   let rows = stocks.map(s => ({...s, ...stockData[s.code]})).filter(s => s.price != null);
 
   rows.sort((a,b) => stockSortDir * ((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999)));
 
   const tbody = document.getElementById("stocksTbody");
-  tbody.innerHTML = rows.map(s => `
+  tbody.innerHTML = rows.map(s => {
+    const tags = (stockSectorsMap[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("");
+    return `
     <tr>
-      <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a></td>
-      <td style="text-align:right">${s.price?.toFixed(2) ?? "-"}</td>
-      <td style="text-align:right" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
-      <td style="text-align:right" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
-      <td style="text-align:right" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
-      <td style="text-align:right">${s.amount?.toFixed(1) ?? "-"}</td>
+      <td style="vertical-align: top; padding-top: 10px;">
+        <a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a>
+      </td>
+      <td class="wrap-cell" style="vertical-align: top; padding-top: 10px;">
+        <a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold; display: block; margin-bottom: 2px;">${s.name}</a>
+        <div style="display: flex; flex-wrap: wrap;">${tags}</div>
+      </td>
+      <td style="text-align:right; vertical-align: top; padding-top: 10px;">${s.price?.toFixed(2) ?? "-"}</td>
+      <td style="text-align:right; vertical-align: top; padding-top: 10px;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+      <td style="text-align:right; vertical-align: top; padding-top: 10px;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+      <td style="text-align:right; vertical-align: top; padding-top: 10px;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+      <td style="text-align:right; vertical-align: top; padding-top: 10px;">${s.amount?.toFixed(1) ?? "-"}</td>
     </tr>
-  `).join("");
+    `;
+  }).join("");
 }
 
 // ==================== 跨市場先行指標 (專屬動態載入邏輯) ====================
+// 在這裡加上各股票所屬的「產業族群名稱」
 const GLOBAL_LIST = {
   "US": [
-    { s: "NASDAQ:NVDA", n: "NVIDIA 輝達" },
-    { s: "NASDAQ:AMD", n: "AMD 超微" },
-    { s: "NASDAQ:AVGO", n: "Broadcom 博通" },
-    { s: "NASDAQ:TSLA", n: "Tesla 特斯拉" },
-    { s: "NASDAQ:SMCI", n: "Super Micro" },
-    { s: "NYSE:DELL", n: "Dell 戴爾" },
-    { s: "NYSE:VRT", n: "Vertiv" },
-    { s: "NASDAQ:MU", n: "Micron 美光" },
-    { s: "NASDAQ:AMKR", n: "Amkor" },
-    { s: "NYSE:COHR", n: "Coherent" },
-    { s: "NASDAQ:AMAT", n: "Applied Materials" },
-    { s: "NASDAQ:ASML", n: "ASML" },
-    { s: "NASDAQ:PANW", n: "Palo Alto" },
-    { s: "NASDAQ:MSFT", n: "Microsoft 微軟" },
-    { s: "NASDAQ:AAPL", n: "Apple 蘋果" },
-    { s: "NASDAQ:AMZN", n: "Amazon 亞馬遜" },
-    { s: "NYSE:LMT", n: "Lockheed Martin" }
+    { s: "NASDAQ:NVDA", n: "NVIDIA 輝達 (AI晶片)" },
+    { s: "NASDAQ:AMD", n: "AMD 超微 (GPU/CPU)" },
+    { s: "NASDAQ:AVGO", n: "Broadcom 博通 (ASIC/網通)" },
+    { s: "NASDAQ:TSLA", n: "Tesla 特斯拉 (車用/機器人)" },
+    { s: "NASDAQ:SMCI", n: "Super Micro (AI伺服器)" },
+    { s: "NYSE:DELL", n: "Dell 戴爾 (AI伺服器/PC)" },
+    { s: "NYSE:VRT", n: "Vertiv (散熱/電源)" },
+    { s: "NASDAQ:MU", n: "Micron 美光 (記憶體)" },
+    { s: "NASDAQ:AMKR", n: "Amkor (先進封測)" },
+    { s: "NYSE:COHR", n: "Coherent (CPO/光通訊)" },
+    { s: "NASDAQ:AMAT", n: "Applied Materials (半導體設備)" },
+    { s: "NASDAQ:ASML", n: "ASML (EUV設備)" },
+    { s: "NASDAQ:PANW", n: "Palo Alto (資安)" },
+    { s: "NASDAQ:MSFT", n: "Microsoft 微軟 (雲端/AI軟體)" },
+    { s: "NASDAQ:AAPL", n: "Apple 蘋果 (手機/邊緣AI)" },
+    { s: "NASDAQ:AMZN", n: "Amazon 亞馬遜 (雲端/電商)" },
+    { s: "NYSE:LMT", n: "Lockheed Martin (軍工)" }
   ],
   "JP": [
-    { s: "TSE:6857", n: "Advantest (測試機)" },
-    { s: "TSE:8035", n: "Tokyo Electron (設備)" },
+    { s: "TSE:6857", n: "Advantest (AI測試機)" },
+    { s: "TSE:8035", n: "Tokyo Electron (半導體設備)" },
     { s: "TSE:6981", n: "Murata 村田 (被動元件)" },
-    { s: "TSE:6146", n: "Disco (切割)" },
-    { s: "TSE:6594", n: "Nidec (馬達)" }
+    { s: "TSE:6146", n: "Disco (晶圓切割)" },
+    { s: "TSE:6594", n: "Nidec (馬達/機器人)" }
   ],
   "KR": [
-    { s: "KRX:005930", n: "Samsung 三星 (代工)" },
-    { s: "KRX:000660", n: "SK Hynix (HBM)" }
+    { s: "KRX:005930", n: "Samsung 三星 (記憶體/代工)" },
+    { s: "KRX:000660", n: "SK Hynix (HBM龍頭)" }
   ]
 };
 
@@ -606,7 +629,6 @@ function switchTab(tab) {
   if(tab === "ranking") renderRanking();
   if(tab === "stocks") renderStocks();
   if(tab === "global") {
-    // 確保只初始化一次，或是手動重繪
     if(document.getElementById("globalStockSelect").options.length === 0) {
       initGlobalPanel();
     }
