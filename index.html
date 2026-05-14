@@ -43,9 +43,9 @@
 
     .section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; flex-wrap: wrap; gap: 8px; }
     .section-title { font-size: 16px; font-weight: 600; color: #fff; }
-    .controls { display: flex; gap: 6px; flex-wrap: wrap; }
-    select, button.btn, input { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-    button.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
+    .controls { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; }
+    select, button.btn, input { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+    button.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; font-weight: bold; }
     
     .stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
     .stocks-table th { background: #1a2026; padding: 8px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; }
@@ -79,15 +79,15 @@
 
 <div id="pullToRefresh">↓ 下拉以更新最新股價...</div>
 
-<h1>📊 台股 26 族群 & 全球先行指標追蹤</h1>
+<h1>📊 台股 26 族群 & 全球先行指標</h1>
 <div class="subtitle"><span id="lastUpdate">尚未匯入資料</span></div>
 
 <div class="tabs">
   <button class="tab active" data-tab="overview">族群總覽</button>
   <button class="tab" data-tab="ranking">族群排行</button>
-  <button class="tab" data-tab="stocks">個股下鑽</button>
-  <button class="tab" data-tab="global">🌍 跨市場先行指標</button>
-  <button class="tab" data-tab="data">資料匯入 & 設定</button>
+  <button class="tab" data-tab="stocks">台股下鑽</button>
+  <button class="tab" data-tab="global">🌍 國際指標</button>
+  <button class="tab" data-tab="data">設定</button>
 </div>
 
 <div class="panel active" id="overview">
@@ -155,64 +155,27 @@
 </div>
 
 <div class="panel" id="global">
-  <div class="section-header">
-    <div class="section-title">🌍 跨市場先行指標 (高級看盤室)</div>
+  <div class="controls" style="margin-bottom: 12px; gap: 8px;">
+    <select id="globalMarketSelect" style="flex: 1; font-weight: bold; padding: 10px;">
+      <option value="US">🇺🇸 美股</option>
+      <option value="JP">🇯🇵 日股</option>
+      <option value="KR">🇰🇷 韓股</option>
+    </select>
+    <select id="globalStockSelect" style="flex: 2; font-weight: bold; padding: 10px;"></select>
+    <button class="btn primary" id="openTvAppBtn" style="padding: 10px 14px;">↗️ App</button>
   </div>
-  <p style="font-size:12px; color:#aaa; margin-bottom:12px; line-height:1.4;">
-    💡 提示：此面板採用 TradingView 原生高級圖表，包含美、日、韓龍頭指標清單（位於右側或下方），點擊即可無縫切換 K 線圖，且完全不消耗 FinMind 額度。
+  
+  <p style="font-size:12px; color:#aaa; margin-bottom:12px;">
+    💡 提示：使用上方選單切換標的。若想全螢幕分析，點擊右上方「↗️ App」即可跳轉至 TradingView App。
   </p>
   
-  <div class="tradingview-widget-container" style="height: 600px; width: 100%; border-radius: 8px; overflow: hidden; background: #0f1419;">
-    <div class="tradingview-widget-container__widget" style="height: calc(100% - 32px); width: 100%;"></div>
-    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-    {
-      "autosize": true,
-      "symbol": "NASDAQ:NVDA",
-      "interval": "D",
-      "timezone": "Asia/Taipei",
-      "theme": "dark",
-      "style": "1",
-      "locale": "zh_TW",
-      "enable_publishing": false,
-      "backgroundColor": "#0f1419",
-      "gridColor": "#1a2026",
-      "hide_top_toolbar": false,
-      "hide_legend": false,
-      "save_image": false,
-      "container_id": "tradingview_global",
-      "watchlist": [
-        "NASDAQ:NVDA",
-        "NASDAQ:AMD",
-        "NASDAQ:AVGO",
-        "NASDAQ:TSLA",
-        "NASDAQ:SMCI",
-        "NYSE:DELL",
-        "NYSE:VRT",
-        "NASDAQ:MU",
-        "NASDAQ:ASML",
-        "NYSE:TSM",
-        "TSE:6857",
-        "TSE:8035",
-        "TSE:6981",
-        "TSE:6146",
-        "KRX:005930",
-        "KRX:000660"
-      ],
-      "details": true,
-      "hotlist": false,
-      "calendar": false,
-      "show_popup_button": true,
-      "popup_width": "1000",
-      "popup_height": "650"
-    }
-    </script>
-  </div>
-  </div>
-
+  <div id="tvChartContainer" style="height: 75vh; width: 100%; border-radius: 8px; overflow: hidden; background: #0f1419;">
+    </div>
+</div>
 <div class="panel" id="data">
   <div class="data-panel">
     <h3>🔄 FinMind API 即時資料抓取</h3>
-    <p>自動抓取大盤(0050)與 26大台股族群的最新股價（國外指標已交由 TradingView 處理）。採延遲抓取防封鎖，請耐心等候。</p>
+    <p>自動抓取大盤(0050)與 26大台股族群的最新股價。採延遲抓取防封鎖，請耐心等候。</p>
     <div style="margin-bottom: 8px;">
       <input type="text" id="apiToken" placeholder="FinMind Token (選填，免費用戶留白)" style="width: 250px;">
     </div>
@@ -245,7 +208,7 @@ const SECTORS = {
   "10. AI電源與BBU": [{code:"2308",name:"台達電"},{code:"2301",name:"光寶科"},{code:"1504",name:"東元"},{code:"1519",name:"華城"},{code:"6282",name:"康舒"},{code:"6125",name:"廣運"}],
   "11. 機構件與滑軌": [{code:"2059",name:"川湖"},{code:"3376",name:"新日興"},{code:"2474",name:"可成"}],
   "12. 廠務工程": [{code:"2404",name:"漢唐"},{code:"6139",name:"亞翔"},{code:"6196",name:"帆宣"},{code:"6691",name:"洋基工程"},{code:"5536",name:"聖暉*"},{code:"6667",name:"信紘科"},{code:"7703",name:"銳澤"},{code:"3402",name:"漢科"}],
-  "13. 半導體設備": [{code:"3131",name:"弘塑"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2467",name:"志聖"},{code:"5443",name:"均豪"},{code:"6640",name:"均華"},{code:"3413",name:"京鼎"},{code:"7769",name:"鸿勁"},{code:"6223",name:"旺矽"},{code:"2360",name:"致茂"},{code:"3680",name:"家登"},{code:"1560",name:"中砂"},{code:"3551",name:"世禾"},{code:"3167",name:"大量"}],
+  "13. 半導體設備": [{code:"3131",name:"弘塑"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2467",name:"志聖"},{code:"5443",name:"均豪"},{code:"6640",name:"均華"},{code:"3413",name:"京鼎"},{code:"7769",name:"鴻勁"},{code:"6223",name:"旺矽"},{code:"2360",name:"致茂"},{code:"3680",name:"家登"},{code:"1560",name:"中砂"},{code:"3551",name:"世禾"},{code:"3167",name:"大量"}],
   "14. 面板與螢幕": [{code:"2409",name:"友達"},{code:"3481",name:"群創"},{code:"6147",name:"頎邦"},{code:"2489",name:"瑞軒"},{code:"3673",name:"TPK-KY"},{code:"6278",name:"台表科"},{code:"8069",name:"元太"},{code:"6116",name:"彩晶"}],
   "15. 資安概念股": [{code:"6690",name:"安碁資訊"},{code:"2471",name:"資通"},{code:"4953",name:"緯軟"},{code:"3558",name:"神準"},{code:"6561",name:"是方"},{code:"6245",name:"立端"}],
   "16. AI軟體與雲端": [{code:"6214",name:"精誠"},{code:"6811",name:"宏碁資訊"},{code:"6689",name:"伊雲谷"},{code:"3029",name:"零壹"},{code:"6112",name:"邁達特"},{code:"2480",name:"敦陽科"},{code:"5285",name:"凌群"},{code:"8099",name:"大世科"}],
@@ -537,6 +500,91 @@ function renderStocks() {
   `).join("");
 }
 
+// ==================== 跨市場先行指標 (專屬動態載入邏輯) ====================
+const GLOBAL_LIST = {
+  "US": [
+    { s: "NASDAQ:NVDA", n: "NVIDIA 輝達" },
+    { s: "NASDAQ:AMD", n: "AMD 超微" },
+    { s: "NASDAQ:AVGO", n: "Broadcom 博通" },
+    { s: "NASDAQ:TSLA", n: "Tesla 特斯拉" },
+    { s: "NASDAQ:SMCI", n: "Super Micro" },
+    { s: "NYSE:DELL", n: "Dell 戴爾" },
+    { s: "NYSE:VRT", n: "Vertiv" },
+    { s: "NASDAQ:MU", n: "Micron 美光" },
+    { s: "NASDAQ:AMKR", n: "Amkor" },
+    { s: "NYSE:COHR", n: "Coherent" },
+    { s: "NASDAQ:AMAT", n: "Applied Materials" },
+    { s: "NASDAQ:ASML", n: "ASML" },
+    { s: "NASDAQ:PANW", n: "Palo Alto" },
+    { s: "NASDAQ:MSFT", n: "Microsoft 微軟" },
+    { s: "NASDAQ:AAPL", n: "Apple 蘋果" },
+    { s: "NASDAQ:AMZN", n: "Amazon 亞馬遜" },
+    { s: "NYSE:LMT", n: "Lockheed Martin" }
+  ],
+  "JP": [
+    { s: "TSE:6857", n: "Advantest (測試機)" },
+    { s: "TSE:8035", n: "Tokyo Electron (設備)" },
+    { s: "TSE:6981", n: "Murata 村田 (被動元件)" },
+    { s: "TSE:6146", n: "Disco (切割)" },
+    { s: "TSE:6594", n: "Nidec (馬達)" }
+  ],
+  "KR": [
+    { s: "KRX:005930", n: "Samsung 三星 (代工)" },
+    { s: "KRX:000660", n: "SK Hynix (HBM)" }
+  ]
+};
+
+function initGlobalPanel() {
+  const marketSel = document.getElementById("globalMarketSelect");
+  const stockSel = document.getElementById("globalStockSelect");
+
+  marketSel.onchange = () => {
+    const list = GLOBAL_LIST[marketSel.value];
+    stockSel.innerHTML = list.map(item => `<option value="${item.s}">${item.n}</option>`).join("");
+    updateGlobalChart();
+  };
+
+  stockSel.onchange = updateGlobalChart;
+  marketSel.dispatchEvent(new Event('change')); // 初始化觸發
+}
+
+function updateGlobalChart() {
+  const symbol = document.getElementById("globalStockSelect").value;
+  const container = document.getElementById("tvChartContainer");
+  
+  // 清空舊圖表
+  container.innerHTML = "";
+  
+  // 注入新圖表
+  const script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+  script.async = true;
+  script.innerHTML = JSON.stringify({
+    "autosize": true,
+    "symbol": symbol,
+    "interval": "D",
+    "timezone": "Asia/Taipei",
+    "theme": "dark",
+    "style": "1",
+    "locale": "zh_TW",
+    "enable_publishing": false,
+    "backgroundColor": "#0f1419",
+    "gridColor": "#1a2026",
+    "hide_top_toolbar": false,
+    "hide_legend": false,
+    "save_image": false,
+    "details": true
+  });
+  container.appendChild(script);
+
+  // 設定 App 按鈕跳轉連結
+  document.getElementById("openTvAppBtn").onclick = () => {
+    window.open(`https://tw.tradingview.com/chart/?symbol=${symbol}`, '_blank');
+  };
+}
+// =========================================================================
+
 function renderDataPanel() {
   const objSize = Object.keys(stockData).length;
   document.getElementById("dbCount").textContent = objSize;
@@ -557,6 +605,12 @@ function switchTab(tab) {
   if(tab === "overview") renderOverview();
   if(tab === "ranking") renderRanking();
   if(tab === "stocks") renderStocks();
+  if(tab === "global") {
+    // 確保只初始化一次，或是手動重繪
+    if(document.getElementById("globalStockSelect").options.length === 0) {
+      initGlobalPanel();
+    }
+  }
 }
 
 // ==================== 事件綁定 ====================
@@ -626,6 +680,7 @@ document.addEventListener('touchend', (e) => {
 });
 
 loadData(); updateUI();
+initGlobalPanel(); // 網頁載入時預先準備好美股選單
 </script>
 </body>
 </html>
