@@ -3,112 +3,106 @@
 <head>
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="台股與全球輪動">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="業績追蹤">
   <link rel="apple-touch-icon" href="icon-192.png">
   
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>台股 26 族群 & 全球先行指標追蹤</title>
+  <title>業績追蹤</title>
   
   <style>
-    /* 下拉刷新橫幅 */
-    #pullToRefresh { position: fixed; top: -60px; left: 0; width: 100%; height: 60px; display: flex; justify-content: center; align-items: center; color: #4a9eff; font-size: 13px; font-weight: bold; z-index: 2000; background-color: rgba(26, 32, 38, 0.95); transition: top 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
-    
-    body { overscroll-behavior-y: none; margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; background: #0f1419; color: #e6e6e6; padding: 16px; min-height: 100vh; }
-    h1 { font-size: 20px; margin-bottom: 4px; color: #fff; }
-    .subtitle { font-size: 12px; color: #888; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;}
-    
-    /* 置頂的分類頁籤 */
-    .tabs { 
-      display: flex; gap: 4px; border-bottom: 1px solid #2a3138; overflow-x: auto; 
-      position: sticky; top: 0; z-index: 999; 
-      background: rgba(15, 20, 25, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      padding: 12px 16px; margin: -16px -16px 16px -16px;
-    }
+    #pullToRefresh { position: fixed; top: -60px; left: 0; width: 100%; height: 60px; display: flex; justify-content: center; align-items: center; color: #2563eb; font-size: 13px; font-weight: bold; z-index: 2000; background: rgba(255,255,255,0.97); transition: top 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); backdrop-filter: blur(5px); border-bottom: 1px solid #e2e8f0; }
+
+    body { overscroll-behavior-y: none; margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f1f5f9; color: #334155; padding: 16px; min-height: 100vh; }
+    h1 { font-size: 18px; margin-bottom: 4px; color: #1e293b; font-weight: 600; }
+    .subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+
+    .tabs { display: flex; gap: 2px; border-bottom: 1px solid #e2e8f0; overflow-x: auto; position: sticky; top: 0; z-index: 999; background: rgba(241,245,249,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 10px 16px; margin: -16px -16px 16px -16px; }
     .tabs::-webkit-scrollbar { display: none; }
     .tabs { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    .tab { padding: 8px 14px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 14px; border-bottom: 2px solid transparent; white-space: nowrap; font-weight: 500; }
-    .tab.active { color: #fff; border-bottom-color: #4a9eff; font-weight: bold;}
-    .tab:hover:not(.active) { color: #ccc; }
-    
+
+    .tab { padding: 7px 14px; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 13px; border-bottom: 2px solid transparent; white-space: nowrap; font-weight: 500; border-radius: 6px 6px 0 0; }
+    .tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; background: #fff; }
+    .tab:hover:not(.active) { color: #475569; background: #e2e8f0; }
+
     .panel { display: none; } .panel.active { display: block; }
-    
+
     .heatmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 8px; margin-bottom: 16px; }
-    .sector-cell { padding: 12px 10px; border-radius: 6px; cursor: pointer; transition: transform 0.15s; position: relative; min-height: 85px; display: flex; flex-direction: column; justify-content: space-between; }
-    .sector-cell:hover { transform: scale(1.03); z-index: 2; }
-    .sector-name { font-size: 13px; font-weight: 600; color: #fff; display: flex; justify-content: space-between; margin-bottom: 4px;}
+    .sector-cell { padding: 12px 10px; border-radius: 8px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; position: relative; min-height: 85px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .sector-cell:hover { transform: scale(1.03); z-index: 2; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .sector-name { font-size: 13px; font-weight: 600; color: #fff; display: flex; justify-content: space-between; margin-bottom: 4px; }
     .sector-pct { font-size: 20px; font-weight: 700; color: #fff; }
-    .sector-meta { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 4px;}
+    .sector-meta { font-size: 11px; color: rgba(255,255,255,0.85); margin-top: 4px; }
     .sector-vs { font-size: 11px; font-weight: bold; margin-top: 2px; }
 
-    .trend-legend { margin-top: 8px; font-size: 11px; color: #aaa; display: flex; flex-wrap: wrap; gap: 10px; background: #1a2026; padding: 8px 12px; border-radius: 6px; }
-    .ranking-bars { display: flex; flex-direction: column; gap: 6px; }
-    .bar-row { display: grid; grid-template-columns: 140px 1fr 60px; gap: 8px; align-items: center; padding: 6px 0; cursor: pointer; border-bottom: 1px solid #1a2026; }
-    .bar-row:hover { background: #1a2026; }
-    .bar-name { font-size: 13px; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-    .bar-track { position: relative; height: 22px; background: #1a2026; border-radius: 3px; overflow: hidden; }
+    .trend-legend { margin-top: 8px; font-size: 11px; color: #64748b; display: flex; flex-wrap: wrap; gap: 10px; background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .ranking-bars { display: flex; flex-direction: column; gap: 4px; }
+    .bar-row { display: grid; grid-template-columns: 140px 1fr 60px; gap: 8px; align-items: center; padding: 6px 8px; cursor: pointer; border-radius: 6px; }
+    .bar-row:hover { background: #e2e8f0; }
+    .bar-name { font-size: 13px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { position: relative; height: 22px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
     .bar-fill { height: 100%; display: flex; align-items: center; padding: 0 8px; font-size: 11px; color: #fff; font-weight: 600; white-space: nowrap; }
-    .bar-fill.pos { background: linear-gradient(90deg, #d63031, #ff6b6b); justify-content: flex-start; }
-    .bar-fill.neg { background: linear-gradient(90deg, #2d8659, #4a9d6f); justify-content: flex-end; }
-    .bar-pct { font-size: 13px; font-weight: 600; text-align: right; }
+    .bar-fill.pos { background: linear-gradient(90deg, #dc2626, #f87171); justify-content: flex-start; }
+    .bar-fill.neg { background: linear-gradient(90deg, #16a34a, #4ade80); justify-content: flex-end; }
+    .bar-pct { font-size: 13px; font-weight: 600; text-align: right; color: #475569; }
 
     .section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; flex-wrap: wrap; gap: 8px; }
-    .section-title { font-size: 16px; font-weight: 600; color: #fff; }
+    .section-title { font-size: 15px; font-weight: 600; color: #1e293b; }
     .controls { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; }
-    select, button.btn, input { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 10px; border-radius: 4px; font-size: 13px; cursor: pointer; outline: none; }
-    input:focus { border-color: #4a9eff; }
-    button.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; font-weight: bold; }
-    
-    .stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
-    .stocks-table th { background: #1a2026; padding: 8px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; z-index: 10; user-select: none;}
-    .stocks-table th:hover { color: #fff; }
-    .stocks-table td { padding: 10px 6px; border-bottom: 1px solid #1a2026; white-space: nowrap; vertical-align: top; }
-    .stocks-table td.wrap-cell { white-space: normal; min-width: 110px; }
-    .stocks-table tbody tr:hover { background: #1a2026; }
-    .pos-text { color: #ff6b6b; font-weight: 600; }
-    .neg-text { color: #4a9d6f; font-weight: 600; }
-    .flat-text { color: #888; }
-    
-    .tag { display: inline-block; background: #212b36; padding: 3px 6px; border-radius: 4px; font-size: 10px; color: #9ab4c9; margin-top: 4px; margin-right: 4px; white-space: nowrap; border: 1px solid #2c3a47; }
-    
-    .note-input { width: 90%; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
-    .note-input:focus { border-color: #4a9eff; background: #1a2026; }
-    .note-display { font-size: 11px; color: #b3b3b3; cursor: pointer; min-height: 18px; min-width: 80px; display: inline-block; border-bottom: 1px dashed #3a444d; padding-bottom: 1px;}
-    .note-display:empty::before { content: "點擊新增備註..."; color: #444; font-style: italic; }
+    select, button.btn, input { background: #fff; color: #374151; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; }
+    input:focus { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+    button.btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 600; }
+    button.btn.primary:hover { background: #1d4ed8; }
 
-    .data-panel { background: #1a2026; border-radius: 6px; padding: 14px; margin-bottom: 16px; }
-    .data-panel h3 { font-size: 14px; color: #fff; margin-bottom: 8px; }
-    .data-panel p { font-size: 12px; color: #aaa; margin-bottom: 10px; line-height: 1.5; }
-    
+    .stocks-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    .stocks-table th { background: #f8fafc; padding: 8px 6px; text-align: left; font-weight: 600; color: #64748b; font-size: 11px; cursor: pointer; white-space: nowrap; position: sticky; top: 0; z-index: 10; user-select: none; border-bottom: 2px solid #e2e8f0; }
+    .stocks-table th:hover { color: #1e293b; }
+    .stocks-table td { padding: 9px 6px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; vertical-align: top; }
+    .stocks-table td.wrap-cell { white-space: normal; min-width: 110px; }
+    .stocks-table tbody tr:hover { background: #f8fafc; }
+    .pos-text { color: #dc2626; font-weight: 600; }
+    .neg-text { color: #16a34a; font-weight: 600; }
+    .flat-text { color: #94a3b8; }
+
+    .tag { display: inline-block; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #3b82f6; margin-top: 3px; margin-right: 3px; white-space: nowrap; border: 1px solid #bfdbfe; }
+
+    .note-input { width: 90%; background: #fff; color: #374151; border: 1px solid #cbd5e1; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
+    .note-input:focus { border-color: #2563eb; }
+    .note-display { font-size: 11px; color: #64748b; cursor: pointer; min-height: 18px; min-width: 80px; display: inline-block; border-bottom: 1px dashed #cbd5e1; padding-bottom: 1px; }
+    .note-display:empty::before { content: "點擊新增備註..."; color: #cbd5e1; font-style: italic; }
+
+    .data-panel { background: #fff; border-radius: 8px; padding: 14px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+    .data-panel h3 { font-size: 14px; color: #1e293b; margin-bottom: 8px; }
+    .data-panel p { font-size: 12px; color: #64748b; margin-bottom: 10px; line-height: 1.5; }
+
     .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 14px; }
-    .summary-card { background: #1a2026; padding: 10px 12px; border-radius: 6px; border-left: 3px solid #4a9eff; }
-    .summary-card .label { font-size: 11px; color: #888; }
-    .summary-card .value { font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px; }
-    .summary-card .sub { font-size: 10px; color: #aaa; margin-top: 2px; }
-    .empty-state { text-align: center; padding: 40px 20px; color: #666; font-size: 13px; }
-    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; font-size: 11px; color: #aaa; }
+    .summary-card { background: #fff; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 3px solid #2563eb; }
+    .summary-card .label { font-size: 11px; color: #64748b; }
+    .summary-card .value { font-size: 18px; font-weight: 700; color: #1e293b; margin-top: 2px; }
+    .summary-card .sub { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+    .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 13px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; font-size: 11px; color: #64748b; }
     .legend-box { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
-    .progress-bar-container { height: 6px; background: #1a2026; border-radius: 3px; margin: 10px 0; display: none; overflow: hidden; }
-    .progress-bar { height: 100%; background: #4a9eff; border-radius: 3px; width: 0%; transition: width 0.3s; }
+    .progress-bar-container { height: 6px; background: #e2e8f0; border-radius: 3px; margin: 10px 0; display: none; overflow: hidden; }
+    .progress-bar { height: 100%; background: #2563eb; border-radius: 3px; width: 0%; transition: width 0.3s; }
     .button-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
   </style>
 </head>
 <body>
 
-<div id="pullToRefresh">↓ 下拉以更新最新股價...</div>
+<div id="pullToRefresh">↓ 下拉以更新資料...</div>
 
-<h1>📊 台股 26 族群 & 全球先行指標</h1>
-<div class="subtitle"><span id="lastUpdate">尚未匯入資料</span></div>
+<h1>📋 業績追蹤</h1>
+<div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="overview">族群總覽</button>
-  <button class="tab" data-tab="ranking">族群排行</button>
-  <button class="tab" data-tab="stocks">台股下鑽</button>
-  <button class="tab" data-tab="watchlist">⭐ 自選</button>
-  <button class="tab" data-tab="global">🌍 國際</button>
-  <button class="tab" data-tab="data">設定</button>
+  <button class="tab active" data-tab="overview">概覽</button>
+  <button class="tab" data-tab="ranking">排行</button>
+  <button class="tab" data-tab="stocks">明細</button>
+  <button class="tab" data-tab="watchlist">⭐ 關注</button>
+  <button class="tab" data-tab="global">🌍 外部</button>
+  <button class="tab" data-tab="data">⚙ 設定</button>
 </div>
 
 <div class="panel active" id="overview">
