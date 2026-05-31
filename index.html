@@ -103,6 +103,7 @@
   <button class="tab" data-tab="watchlist">⭐ 關注</button>
   <button class="tab" data-tab="global">🌍 外部</button>
   <button class="tab" data-tab="data">⚙ 設定</button>
+  <button class="tab" data-tab="strategy">💡 策略</button>
 </div>
 
 <div class="panel active" id="overview">
@@ -247,6 +248,8 @@
     <p>共 <strong id="dbCount">0</strong> 檔標的有資料</p>
   </div>
 </div>
+
+<div class="panel" id="strategy"></div>
 
 <script>
 // ==================== 台股 26 大族群分類 (已修正錯字) ====================
@@ -708,6 +711,7 @@ function updateUI() {
   renderStocks();
   renderWatchlist();
   renderDataPanel();
+  renderStrategy();
 }
 
 function switchTab(tab) {
@@ -720,6 +724,7 @@ function switchTab(tab) {
   if(tab === "global") {
     if(document.getElementById("globalStockSelect").options.length === 0) initGlobalPanel();
   }
+  if(tab === "strategy") renderStrategy();
 }
 
 // ==================== 面板渲染邏輯 ====================
@@ -805,6 +810,123 @@ function renderWatchlist() {
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
       <td onclick="editNote(this, '${s.code}')"><span class="note-display">${stockNotes[s.code] || ""}</span></td>
     </tr>`).join("");
+}
+
+function renderStrategy() {
+  const panel = document.getElementById('strategy');
+  if (!panel) return;
+  const stats = getSectorStats();
+  const validStats = Object.entries(stats).filter(([_, s]) => s);
+  if (validStats.length === 0) {
+    panel.innerHTML = `<div class="empty-state" style="padding:60px 20px;">請先在「⚙ 設定」頁載入資料，策略分析才能運作</div>`;
+    return;
+  }
+
+  const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
+  const beatCount = validStats.filter(([_, s]) => s.vsMarket10 > 0).length;
+
+  // 市場環境燈號
+  let ec, el, ed;
+  if (beatCount >= 13) {
+    ec = '#16a34a'; el = '🟢 強勢市場'; ed = `${beatCount}/26 族群跑贏大盤，可積極尋找做多機會`;
+  } else if (beatCount >= 8) {
+    ec = '#d97706'; el = '🟡 震盪格局'; ed = `${beatCount}/26 族群跑贏大盤，精選強勢族群、控制倉位`;
+  } else {
+    ec = '#dc2626'; el = '🔴 弱勢市場'; ed = `${beatCount}/26 族群跑贏大盤，建議輕倉或觀望`;
+  }
+
+  // 成交量前 1/3 門檻
+  const amtSorted = validStats.map(([_, s]) => s.amount).sort((a, b) => b - a);
+  const amtThreshold = amtSorted[Math.floor(amtSorted.length / 3)] || 0;
+
+  // 做多候選：三合一
+  const longs = validStats
+    .filter(([_, s]) => s.vsMarket10 > 2 && s.pct5 > 0 && s.amount >= amtThreshold)
+    .sort((a, b) => b[1].vsMarket10 - a[1].vsMarket10);
+
+  // 翻轉觀察：跌深止跌
+  const reversals = validStats
+    .filter(([_, s]) => s.pct10 < -5 && s.pct1 > 0)
+    .sort((a, b) => b[1].pct1 - a[1].pct1);
+
+  // 精選個股：做多前 3 族群各取前 3 強股
+  let topStocks = [];
+  longs.slice(0, 3).forEach(([sector]) => {
+    (SECTORS[sector] || [])
+      .filter(s => stockData[s.code])
+      .map(s => ({ ...s, ...stockData[s.code], sectorLabel: sector.split('. ')[1] || sector }))
+      .sort((a, b) => (b.pct10 || 0) - (a.pct10 || 0))
+      .slice(0, 3)
+      .forEach(s => topStocks.push(s));
+  });
+  topStocks.sort((a, b) => (b.pct10 || 0) - (a.pct10 || 0));
+
+  const sectorRow = (sector, s, extra = '') => `
+    <tr>
+      <td style="font-weight:600;color:#1e293b;">${sector.split('. ')[1] || sector}</td>
+      ${extra}
+      <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+      <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+      <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+      <td style="text-align:right;">${s.amount.toFixed(0)}</td>
+      <td><button class="btn" style="padding:3px 10px;font-size:11px;" onclick="currentSector='${sector}';switchTab('stocks')">明細</button></td>
+    </tr>`;
+
+  panel.innerHTML = `
+    <div style="background:${ec}18;border:1px solid ${ec}50;border-left:4px solid ${ec};border-radius:8px;padding:14px 16px;margin-bottom:18px;">
+      <div style="font-size:16px;font-weight:700;color:${ec};">${el}</div>
+      <div style="font-size:13px;color:#475569;margin-top:4px;">${ed}</div>
+      <div style="font-size:12px;color:#64748b;margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;">
+        <span>大盤10日 <strong class="${pctClass(market.pct10)}">${fmtPct(market.pct10)}</strong></span>
+        <span>大盤5日 <strong class="${pctClass(market.pct5)}">${fmtPct(market.pct5)}</strong></span>
+        <span>大盤今日 <strong class="${pctClass(market.pct1)}">${fmtPct(market.pct1)}</strong></span>
+      </div>
+    </div>
+
+    <div class="section-header"><div class="section-title">✅ 做多候選族群（${longs.length} 個）</div></div>
+    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">vs大盤>+2%　5日上漲　成交量前1/3</div>
+    ${longs.length === 0
+      ? '<div class="empty-state" style="padding:20px;">目前無符合三條件的族群</div>'
+      : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
+          <th>族群</th><th style="text-align:right">vs大盤</th>
+          <th style="text-align:right">10日%</th><th style="text-align:right">5日%</th>
+          <th style="text-align:right">今日%</th><th style="text-align:right">成交(億)</th><th></th>
+        </tr></thead><tbody>
+          ${longs.map(([sec, s]) => sectorRow(sec, s, `<td style="text-align:right;" class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</td>`)).join('')}
+        </tbody></table></div>`}
+
+    <div class="section-header" style="margin-top:22px;"><div class="section-title">👀 翻轉觀察名單（${reversals.length} 個）</div></div>
+    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">10日跌幅>5%（已跌深）且今日轉正（止跌訊號）</div>
+    ${reversals.length === 0
+      ? '<div class="empty-state" style="padding:20px;">目前無符合條件的族群</div>'
+      : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
+          <th>族群</th>
+          <th style="text-align:right">10日%</th><th style="text-align:right">5日%</th>
+          <th style="text-align:right">今日%</th><th style="text-align:right">成交(億)</th><th></th>
+        </tr></thead><tbody>
+          ${reversals.map(([sec, s]) => sectorRow(sec, s, '')).join('')}
+        </tbody></table></div>`}
+
+    ${topStocks.length > 0 ? `
+    <div class="section-header" style="margin-top:22px;"><div class="section-title">🎯 精選個股（做多前 3 族群各取強勢股）</div></div>
+    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">每族群取 10 日漲幅前 3 名，共最多 9 檔</div>
+    <div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
+      <th>代號</th><th>名稱</th><th>所屬族群</th>
+      <th style="text-align:right">10日%</th><th style="text-align:right">5日%</th>
+      <th style="text-align:right">今日%</th><th style="text-align:right">成交(億)</th>
+    </tr></thead><tbody>
+      ${topStocks.slice(0, 9).map(s => `
+        <tr>
+          <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color:#2563eb;font-weight:bold;text-decoration:none;">${s.code}</a></td>
+          <td>${s.name}</td>
+          <td><span class="tag">${s.sectorLabel}</span></td>
+          <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+          <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+          <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+          <td style="text-align:right;">${s.amount?.toFixed(1) ?? '-'}</td>
+        </tr>`).join('')}
+    </tbody></table></div>` : ''}
+  `;
 }
 
 function initGlobalPanel() {
