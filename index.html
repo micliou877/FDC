@@ -43,8 +43,8 @@
     .bar-name { font-size: 13px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .bar-track { position: relative; height: 22px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
     .bar-fill { height: 100%; display: flex; align-items: center; padding: 0 8px; font-size: 11px; color: #fff; font-weight: 600; white-space: nowrap; }
-    .bar-fill.pos { background: linear-gradient(90deg, #dc2626, #f87171); justify-content: flex-start; }
-    .bar-fill.neg { background: linear-gradient(90deg, #16a34a, #4ade80); justify-content: flex-end; }
+    .bar-fill.pos { background: #9b5252; justify-content: flex-start; }
+    .bar-fill.neg { background: #4a7a60; justify-content: flex-end; }
     .bar-pct { font-size: 13px; font-weight: 600; text-align: right; color: #475569; }
 
     .section-header { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 10px; flex-wrap: wrap; gap: 8px; }
@@ -61,8 +61,8 @@
     .stocks-table td { padding: 9px 6px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; vertical-align: top; }
     .stocks-table td.wrap-cell { white-space: normal; min-width: 110px; }
     .stocks-table tbody tr:hover { background: #f8fafc; }
-    .pos-text { color: #dc2626; font-weight: 600; }
-    .neg-text { color: #16a34a; font-weight: 600; }
+    .pos-text { color: #a84848; font-weight: 600; }
+    .neg-text { color: #3a7a58; font-weight: 600; }
     .flat-text { color: #94a3b8; }
 
     .tag { display: inline-block; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #3b82f6; margin-top: 3px; margin-right: 3px; white-space: nowrap; border: 1px solid #bfdbfe; }
@@ -109,13 +109,13 @@
 <div class="panel active" id="overview">
   <div class="summary-cards" id="summaryCards"></div>
   <div class="legend">
-    <span><span class="legend-box" style="background:#d63031"></span>>5%</span>
-    <span><span class="legend-box" style="background:#ff6b6b"></span>2-5%</span>
-    <span><span class="legend-box" style="background:#ff9999"></span>0-2%</span>
-    <span><span class="legend-box" style="background:#888"></span>0%</span>
-    <span><span class="legend-box" style="background:#7fb89a"></span>0至-2%</span>
-    <span><span class="legend-box" style="background:#4a9d6f"></span>-2至-5%</span>
-    <span><span class="legend-box" style="background:#2d8659"></span>&lt;-5%</span>
+    <span><span class="legend-box" style="background:#7a3030"></span>>5%</span>
+    <span><span class="legend-box" style="background:#9b5252"></span>2-5%</span>
+    <span><span class="legend-box" style="background:#c49494"></span>0-2%</span>
+    <span><span class="legend-box" style="background:#9ca3af"></span>0%</span>
+    <span><span class="legend-box" style="background:#7a9e8a"></span>0至-2%</span>
+    <span><span class="legend-box" style="background:#4a7a60"></span>-2至-5%</span>
+    <span><span class="legend-box" style="background:#2d5c45"></span>&lt;-5%</span>
   </div>
   <div class="heatmap-grid" id="heatmap"></div>
 </div>
@@ -686,8 +686,10 @@ function calcSectorStats() {
 }
 
 function pctColor(pct) {
-  if (pct == null || isNaN(pct)) return "#444";
-  if (pct >= 5) return "#d63031"; if (pct >= 2) return "#ff6b6b"; if (pct > 0) return "#ff9999"; if (pct === 0) return "#888"; if (pct > -2) return "#7fb89a"; if (pct > -5) return "#4a9d6f"; return "#2d8659";
+  if (pct == null || isNaN(pct)) return "#c4c9d0";
+  if (pct >= 5) return "#7a3030"; if (pct >= 2) return "#9b5252"; if (pct > 0) return "#c49494";
+  if (pct === 0) return "#9ca3af";
+  if (pct > -2) return "#7a9e8a"; if (pct > -5) return "#4a7a60"; return "#2d5c45";
 }
 function pctClass(pct) { if (pct == null || isNaN(pct)) return "flat-text"; return pct > 0 ? "pos-text" : (pct < 0 ? "neg-text" : "flat-text"); }
 function fmtPct(pct) { return (pct == null || isNaN(pct)) ? "-" : (pct > 0 ? "+" : "") + pct.toFixed(2) + "%"; }
