@@ -91,19 +91,19 @@
 </head>
 <body>
 
-<div id="pullToRefresh">↓ 下拉以更新資料...</div>
+<div id="pullToRefresh">下拉更新</div>
 
-<h1>📋 業績追蹤</h1>
+<h1>業績追蹤</h1>
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
 
 <div class="tabs">
   <button class="tab active" data-tab="overview">概覽</button>
   <button class="tab" data-tab="ranking">排行</button>
   <button class="tab" data-tab="stocks">明細</button>
-  <button class="tab" data-tab="watchlist">⭐ 關注</button>
-  <button class="tab" data-tab="global">🌍 外部</button>
-  <button class="tab" data-tab="data">⚙ 設定</button>
-  <button class="tab" data-tab="strategy">💡 策略</button>
+  <button class="tab" data-tab="watchlist">關注</button>
+  <button class="tab" data-tab="global">國際</button>
+  <button class="tab" data-tab="data">設定</button>
+  <button class="tab" data-tab="strategy">策略</button>
 </div>
 
 <div class="panel active" id="overview">
@@ -168,7 +168,7 @@
 
 <div class="panel" id="watchlist">
   <div class="section-header">
-    <div class="section-title">🔍 搜尋與新增標的</div>
+    <div class="section-title">搜尋標的</div>
   </div>
   <div class="controls" style="display:flex; gap:8px; margin-bottom:12px;">
     <input type="text" id="searchInput" placeholder="輸入股票代號或名稱" style="flex:1;" onkeyup="handleSearch()">
@@ -176,13 +176,13 @@
   <div id="searchResults" style="margin-bottom: 20px;"></div>
 
   <div class="section-header">
-    <div class="section-title">⭐ 觀察名單分類</div>
+    <div class="section-title">自選分類</div>
   </div>
   <div class="controls" style="margin-bottom: 12px; gap: 8px;">
     <select id="watchGroupSelect" style="flex: 1; font-weight: bold; padding: 10px;" onchange="changeWatchGroup()"></select>
-    <button class="btn primary" onclick="addWatchGroup()">➕ 新增</button>
-    <button class="btn" onclick="renameWatchGroup()">✏️ 改名</button>
-    <button class="btn" onclick="deleteWatchGroup()" style="color:#ff6b6b; border-color:#5c2b2b; background:#2a1a1a;">🗑 刪除</button>
+    <button class="btn primary" onclick="addWatchGroup()">新增</button>
+    <button class="btn" onclick="renameWatchGroup()">改名</button>
+    <button class="btn" onclick="deleteWatchGroup()" style="color:#dc2626; border-color:#fecaca;">刪除</button>
   </div>
   
   <div style="overflow-x: auto;">
@@ -197,7 +197,7 @@
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
-          <th style="min-width:120px;">📌 操盤備註</th>
+          <th style="min-width:120px;">備註</th>
         </tr>
       </thead>
       <tbody id="watchlistTbody"></tbody>
@@ -213,31 +213,31 @@
       <option value="KR">🇰🇷 韓股</option>
     </select>
     <select id="globalStockSelect" style="flex: 2; font-weight: bold; padding: 10px;"></select>
-    <button class="btn primary" id="openTvAppBtn" style="padding: 10px 14px;">↗️ App</button>
+    <button class="btn primary" id="openTvAppBtn" style="padding: 10px 14px;">開啟圖表</button>
   </div>
   <div id="tvChartContainer" style="height: 75vh; width: 100%; border-radius: 8px; overflow: hidden; background: #0f1419;"></div>
 </div>
 
 <div class="panel" id="data">
-  <div class="data-panel" style="border-left: 4px solid #e1b12c; background: #222017;">
-    <h3>☁️ 跨裝置雲端即時同步 (Firebase)</h3>
-    <p>輸入相同的【專屬操盤代碼 (Room ID)】，多台手機與電腦即可瞬間同步自選股、分類與操盤備註！</p>
+  <div class="data-panel" style="border-left: 4px solid #d97706;">
+    <h3>雲端同步</h3>
+    <p>多台裝置輸入同一組代碼，即可同步自選股、分類與備註。</p>
     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-      <input type="text" id="cloudRoomInput" placeholder="自訂專屬代碼 (如 myrich2026)" style="flex:1; padding:10px;">
-      <button class="btn primary" onclick="connectCloud()">📡 連線同步</button>
+      <input type="text" id="cloudRoomInput" placeholder="自訂代碼，例如 mycode2026" style="flex:1; padding:10px;">
+      <button class="btn primary" onclick="connectCloud()">連線</button>
     </div>
-    <div id="cloudStatus" style="font-size: 12px; color: #e1b12c; font-weight: bold;">狀態：目前處於本機離線模式</div>
+    <div id="cloudStatus" style="font-size: 12px; color: #92400e; font-weight: 600;">目前為本機模式</div>
   </div>
 
   <div class="data-panel">
-    <h3>🔄 FinMind API 即時資料抓取</h3>
+    <h3>資料來源</h3>
     <div style="margin-bottom: 8px;">
-      <input type="text" id="apiToken" placeholder="FinMind Token (選填，免費用戶留白)" style="width: 250px;">
+      <input type="text" id="apiToken" placeholder="FinMind Token（免費用戶留空）" style="width: 250px;">
     </div>
     <div class="button-row">
-      <button class="btn primary" id="fetchFinMindBtn">🚀 開始抓取股價</button>
-      <button class="btn" id="loadDemoBtn">🎯 載入範例資料</button>
-      <button class="btn" id="clearDataBtn">🗑 清空資料</button>
+      <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
+      <button class="btn" id="loadDemoBtn">載入範例</button>
+      <button class="btn" id="clearDataBtn">清空</button>
     </div>
     <div class="progress-bar-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
     <div id="fetchStatus"></div>
@@ -419,7 +419,7 @@ async function connectCloud() {
   if (FIREBASE_URL.includes("請把")) { alert("錯誤：你還沒有在網頁原始碼最下方修改填入你的 FIREBASE_URL 網址！"); return; }
 
   cloudRoomId = inputId;
-  statusEl.textContent = `📡 正在連線至雲端房間: ${cloudRoomId}...`;
+  statusEl.textContent = `連線中：${cloudRoomId}...`;
 
   try {
     const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
@@ -428,17 +428,17 @@ async function connectCloud() {
     if (cloudData) {
       if (cloudData.watchlists) watchlists = cloudData.watchlists;
       if (cloudData.stockNotes) stockNotes = cloudData.stockNotes;
-      statusEl.textContent = `✅ 成功連線！已與雲端同步。`;
+      statusEl.textContent = `已同步`;
     } else {
       await pushToCloud();
-      statusEl.textContent = `✅ 成功連線！已在雲端建立新代碼。`;
+      statusEl.textContent = `已建立新代碼`;
     }
     localStorage.setItem("cloud_room_id", cloudRoomId);
     if (syncInterval) clearInterval(syncInterval);
     syncInterval = setInterval(syncPull, 5000);
     updateUI();
   } catch (e) {
-    statusEl.textContent = `❌ 連線失敗，請檢查 Firebase 網址與網路設定。`;
+    statusEl.textContent = `連線失敗，請確認 Firebase 設定與網路。`;
   }
 }
 
@@ -524,7 +524,7 @@ window.handleSearch = function() {
     <div style="display:flex; justify-content:space-between; align-items:center; background:#212b36; padding:10px 14px; margin-bottom:6px; border-radius:6px; border:1px solid #2a3138;">
       <span style="font-size:14px; font-weight:bold; color:#e6e6e6;">${m.code} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span></span>
       <button class="btn ${currentList.includes(m.code) ? '' : 'primary'}" style="padding:6px 14px; font-size:12px;" onclick="toggleWatchlist('${m.code}')">
-        ${currentList.includes(m.code) ? '❌ 移除' : '⭐ 加入目前分類'}
+        ${currentList.includes(m.code) ? '移除' : '加入'}
       </button>
     </div>
   `).join("");
@@ -663,7 +663,7 @@ async function fetchFinMindData() {
     if (!token) await new Promise(r => setTimeout(r, 250));
   }
   lastUpdateTime = new Date().toISOString(); saveData(); updateUI();
-  statusEl.textContent = `✅ 抓取完成！成功更新 ${successCount} 檔標的。`; btn.disabled = false;
+  statusEl.textContent = `更新完成，共 ${successCount} 檔`; btn.disabled = false;
   setTimeout(() => { progContainer.style.display = "none"; statusEl.textContent = ""; }, 5000);
 }
 
@@ -800,7 +800,7 @@ function renderWatchlist() {
 
   tbody.innerHTML = rows.map(s => `
     <tr>
-      <td style="text-align:center;"><span style="cursor:pointer;" onclick="toggleWatchlist('${s.code}')">❌</span></td>
+      <td style="text-align:center;"><span style="cursor:pointer; color:#94a3b8; font-size:14px;" onclick="toggleWatchlist('${s.code}')">✕</span></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
       <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
@@ -883,7 +883,7 @@ function renderStrategy() {
       </div>
     </div>
 
-    <div class="section-header"><div class="section-title">✅ 做多候選族群（${longs.length} 個）</div></div>
+    <div class="section-header"><div class="section-title">做多候選（${longs.length} 個）</div></div>
     <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">vs大盤>+2%　5日上漲　成交量前1/3</div>
     ${longs.length === 0
       ? '<div class="empty-state" style="padding:20px;">目前無符合三條件的族群</div>'
@@ -895,7 +895,7 @@ function renderStrategy() {
           ${longs.map(([sec, s]) => sectorRow(sec, s, `<td style="text-align:right;" class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</td>`)).join('')}
         </tbody></table></div>`}
 
-    <div class="section-header" style="margin-top:22px;"><div class="section-title">👀 翻轉觀察名單（${reversals.length} 個）</div></div>
+    <div class="section-header" style="margin-top:22px;"><div class="section-title">翻轉觀察（${reversals.length} 個）</div></div>
     <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">10日跌幅>5%（已跌深）且今日轉正（止跌訊號）</div>
     ${reversals.length === 0
       ? '<div class="empty-state" style="padding:20px;">目前無符合條件的族群</div>'
@@ -908,7 +908,7 @@ function renderStrategy() {
         </tbody></table></div>`}
 
     ${topStocks.length > 0 ? `
-    <div class="section-header" style="margin-top:22px;"><div class="section-title">🎯 精選個股（做多前 3 族群各取強勢股）</div></div>
+    <div class="section-header" style="margin-top:22px;"><div class="section-title">精選個股（做多前 3 族群強勢股）</div></div>
     <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">每族群取 10 日漲幅前 3 名，共最多 9 檔</div>
     <div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
       <th>代號</th><th>名稱</th><th>所屬族群</th>
@@ -992,7 +992,7 @@ document.addEventListener('touchmove', (e) => {
 }, { passive: false });
 document.addEventListener('touchend', () => {
   if (startY === 0 || isRefreshing) return; const dist = (currentY - startY) * 0.4; ptrIndicator.style.transition = 'top 0.3s';
-  if (dist > 80) { isRefreshing = true; ptrIndicator.style.top = '0px'; ptrIndicator.textContent = "🚀 正在抓取最新資料..."; fetchFinMindData().then(() => { setTimeout(() => { ptrIndicator.style.top = '-60px'; isRefreshing = false; }, 1000); }); }
+  if (dist > 80) { isRefreshing = true; ptrIndicator.style.top = '0px'; ptrIndicator.textContent = "更新中..."; fetchFinMindData().then(() => { setTimeout(() => { ptrIndicator.style.top = '-60px'; isRefreshing = false; }, 1000); }); }
   else { ptrIndicator.style.top = '-60px'; } startY = 0; currentY = 0;
 });
 
