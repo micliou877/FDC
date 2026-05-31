@@ -818,121 +818,155 @@ function renderWatchlist() {
     </tr>`).join("");
 }
 
+// 策略頁排序狀態
+window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1 };
+window.sortStrat = function(t, k) {
+  if (window._ss[t+'k'] === k) window._ss[t+'d'] *= -1;
+  else { window._ss[t+'k'] = k; window._ss[t+'d'] = -1; }
+  renderStrategy();
+};
+
 function renderStrategy() {
   const panel = document.getElementById('strategy');
   if (!panel) return;
   const stats = getSectorStats();
   const validStats = Object.entries(stats).filter(([_, s]) => s);
   if (validStats.length === 0) {
-    panel.innerHTML = `<div class="empty-state" style="padding:60px 20px;">請先在「⚙ 設定」頁載入資料，策略分析才能運作</div>`;
+    panel.innerHTML = `<div class="empty-state" style="padding:60px 20px;">請先在「設定」頁載入資料</div>`;
     return;
   }
 
   const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
   const beatCount = validStats.filter(([_, s]) => s.vsMarket10 > 0).length;
 
-  // 市場環境燈號
-  let ec, el, ed;
-  if (beatCount >= 13) {
-    ec = '#16a34a'; el = '🟢 強勢市場'; ed = `${beatCount}/26 族群跑贏大盤，可積極尋找做多機會`;
-  } else if (beatCount >= 8) {
-    ec = '#d97706'; el = '🟡 震盪格局'; ed = `${beatCount}/26 族群跑贏大盤，精選強勢族群、控制倉位`;
-  } else {
-    ec = '#dc2626'; el = '🔴 弱勢市場'; ed = `${beatCount}/26 族群跑贏大盤，建議輕倉或觀望`;
-  }
+  // 市場狀態（低明度色點）
+  const dotColor = beatCount >= 13 ? '#4b7c59' : beatCount >= 8 ? '#8a7240' : '#7c4b4b';
+  const statusLabel = beatCount >= 13 ? '強勢' : beatCount >= 8 ? '震盪' : '弱勢';
 
-  // 做多候選：三合一（第3條改為量能趨勢）
-  const longs = validStats
-    .filter(([_, s]) => s.vsMarket10 > 2 && s.pct5 > 0 && s.volTrend >= 1.1)
-    .sort((a, b) => b[1].vsMarket10 - a[1].vsMarket10);
-
-  // 翻轉觀察：跌深止跌
-  const reversals = validStats
-    .filter(([_, s]) => s.pct10 < -5 && s.pct1 > 0)
-    .sort((a, b) => b[1].pct1 - a[1].pct1);
-
-  // 精選個股：做多前 3 族群各取前 3 強股
-  let topStocks = [];
-  longs.slice(0, 3).forEach(([sector]) => {
-    (SECTORS[sector] || [])
-      .filter(s => stockData[s.code])
-      .map(s => ({ ...s, ...stockData[s.code], sectorLabel: sector.split('. ')[1] || sector }))
-      .sort((a, b) => (b.pct10 || 0) - (a.pct10 || 0))
-      .slice(0, 3)
-      .forEach(s => topStocks.push(s));
+  // 排序 helper（族群表）
+  const sortSec = (arr, t) => [...arr].sort((a, b) => {
+    const k = window._ss[t+'k'], d = window._ss[t+'d'];
+    if (k === 'name') return d * (a[0].split('. ')[1]||a[0]).localeCompare(b[0].split('. ')[1]||b[0]);
+    return d * ((b[1][k]||0) - (a[1][k]||0));
   });
-  topStocks.sort((a, b) => (b.pct10 || 0) - (a.pct10 || 0));
+  // 排序 helper（個股表）
+  const sortStk = (arr) => [...arr].sort((a, b) => {
+    const k = window._ss.tk, d = window._ss.td;
+    if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
+    return d * ((b[k]||0) - (a[k]||0));
+  });
 
-  const sectorRow = (sector, s, extra = '', extraMid = '') => `
-    <tr>
-      <td style="font-weight:600;color:#1e293b;">${sector.split('. ')[1] || sector}</td>
-      ${extra}
-      <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
-      <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
-      <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
-      ${extraMid}
-      <td style="text-align:right;">${s.amount.toFixed(0)}</td>
-      <td><button class="btn" style="padding:3px 10px;font-size:11px;" onclick="currentSector='${sector}';switchTab('stocks')">明細</button></td>
-    </tr>`;
+  // 可排序表頭 helper
+  const th = (t, k, label, align='right') => {
+    const on = window._ss[t+'k'] === k;
+    const arr = on ? (window._ss[t+'d'] > 0 ? ' ↑' : ' ↓') : '';
+    return `<th onclick="sortStrat('${t}','${k}')" style="text-align:${align};cursor:pointer;user-select:none;${on?'color:#1e293b;':''}">${label}${arr}</th>`;
+  };
+
+  // 極簡分區標題
+  const sec = (label, count, hint) =>
+    `<div style="font-size:12px;font-weight:600;color:#374151;padding:18px 0 6px;border-bottom:1px solid #f1f5f9;">
+      ${label}<span style="font-weight:400;color:#9ca3af;margin-left:6px;">${count}</span>
+    </div>${hint ? `<div style="font-size:11px;color:#9ca3af;padding:5px 0 10px;">${hint}</div>` : ''}`;
+
+  // 篩選 + 排序
+  const longs     = sortSec(validStats.filter(([_,s]) => s.vsMarket10 > 2 && s.pct5 > 0 && s.volTrend >= 1.1), 'l');
+  const reversals = sortSec(validStats.filter(([_,s]) => s.pct10 < -5 && s.pct1 > 0), 'r');
+
+  let rawTop = [];
+  longs.slice(0, 3).forEach(([sector]) => {
+    (SECTORS[sector]||[])
+      .filter(s => stockData[s.code])
+      .map(s => ({...s, ...stockData[s.code], sectorLabel: sector.split('. ')[1]||sector}))
+      .sort((a, b) => (b.pct10||0) - (a.pct10||0))
+      .slice(0, 3).forEach(s => rawTop.push(s));
+  });
+  const topStocks = sortStk(rawTop);
 
   panel.innerHTML = `
-    <div style="background:${ec}18;border:1px solid ${ec}50;border-left:4px solid ${ec};border-radius:8px;padding:14px 16px;margin-bottom:18px;">
-      <div style="font-size:16px;font-weight:700;color:${ec};">${el}</div>
-      <div style="font-size:13px;color:#475569;margin-top:4px;">${ed}</div>
-      <div style="font-size:12px;color:#64748b;margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;">
-        <span>大盤10日 <strong class="${pctClass(market.pct10)}">${fmtPct(market.pct10)}</strong></span>
-        <span>大盤5日 <strong class="${pctClass(market.pct5)}">${fmtPct(market.pct5)}</strong></span>
-        <span>大盤今日 <strong class="${pctClass(market.pct1)}">${fmtPct(market.pct1)}</strong></span>
+    <!-- 市場狀態列 -->
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:22px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:${dotColor};flex-shrink:0;"></div>
+        <span style="font-size:13px;font-weight:600;color:#1e293b;">${statusLabel}</span>
+        <span style="font-size:11px;color:#9ca3af;">${beatCount}/26 族群跑贏大盤</span>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:14px;font-size:12px;color:#6b7280;flex-wrap:wrap;">
+        <span>10日 <span class="${pctClass(market.pct10)}">${fmtPct(market.pct10)}</span></span>
+        <span>5日 <span class="${pctClass(market.pct5)}">${fmtPct(market.pct5)}</span></span>
+        <span>今日 <span class="${pctClass(market.pct1)}">${fmtPct(market.pct1)}</span></span>
       </div>
     </div>
 
-    <div class="section-header"><div class="section-title">做多候選（${longs.length} 個）</div></div>
-    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">vs大盤>+2%　5日上漲　量能趨勢≥1.1x（近5日均量 ÷ 前5日均量）</div>
+    <!-- 做多候選 -->
+    ${sec('做多候選', longs.length, 'vs大盤>+2%　5日上漲　量能≥1.1x')}
     ${longs.length === 0
-      ? '<div class="empty-state" style="padding:20px;">目前無符合三條件的族群</div>'
+      ? '<div style="padding:14px 0;font-size:12px;color:#9ca3af;">目前無符合條件的族群</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-          <th>族群</th><th style="text-align:right">vs大盤</th>
-          <th style="text-align:right">10日%</th><th style="text-align:right">5日%</th>
-          <th style="text-align:right">今日%</th>
-          <th style="text-align:right" title="近5日均量 ÷ 前5日均量，>1代表資金流入">量能趨勢</th>
-          <th style="text-align:right">成交(億)</th><th></th>
+          ${th('l','name','族群','left')}
+          ${th('l','vsMarket10','vs大盤')}
+          ${th('l','pct10','10日%')}
+          ${th('l','pct5','5日%')}
+          ${th('l','pct1','今日%')}
+          ${th('l','volTrend','量能')}
+          ${th('l','amount','成交')}
+          <th></th>
         </tr></thead><tbody>
-          ${longs.map(([sec, s]) => sectorRow(sec, s,
-            `<td style="text-align:right;" class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</td>`,
-            `<td style="text-align:right; font-weight:600; color:${s.volTrend >= 1.3 ? '#dc2626' : s.volTrend >= 1.1 ? '#d97706' : '#94a3b8'};">${s.volTrend != null ? s.volTrend.toFixed(2) + 'x' : '-'}</td>`
-          )).join('')}
+          ${longs.map(([sec2, s]) => `<tr>
+            <td style="font-weight:500;color:#374151;">${sec2.split('. ')[1]||sec2}</td>
+            <td style="text-align:right;" class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+            <td style="text-align:right;color:${s.volTrend>=1.3?'#374151':'#6b7280'};font-weight:${s.volTrend>=1.3?'600':'400'};">${s.volTrend!=null?s.volTrend.toFixed(2)+'x':'-'}</td>
+            <td style="text-align:right;color:#9ca3af;">${s.amount.toFixed(0)}</td>
+            <td><button class="btn" style="padding:2px 8px;font-size:11px;color:#9ca3af;border-color:#e5e7eb;" onclick="currentSector='${sec2}';switchTab('stocks')">明細</button></td>
+          </tr>`).join('')}
         </tbody></table></div>`}
 
-    <div class="section-header" style="margin-top:22px;"><div class="section-title">翻轉觀察（${reversals.length} 個）</div></div>
-    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">10日跌幅>5%（已跌深）且今日轉正（止跌訊號）</div>
+    <!-- 翻轉觀察 -->
+    ${sec('翻轉觀察', reversals.length, '10日跌>5%　今日轉正')}
     ${reversals.length === 0
-      ? '<div class="empty-state" style="padding:20px;">目前無符合條件的族群</div>'
+      ? '<div style="padding:14px 0;font-size:12px;color:#9ca3af;">目前無符合條件的族群</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-          <th>族群</th>
-          <th style="text-align:right">10日%</th><th style="text-align:right">5日%</th>
-          <th style="text-align:right">今日%</th><th style="text-align:right">成交(億)</th><th></th>
+          ${th('r','name','族群','left')}
+          ${th('r','pct10','10日%')}
+          ${th('r','pct5','5日%')}
+          ${th('r','pct1','今日%')}
+          ${th('r','amount','成交')}
+          <th></th>
         </tr></thead><tbody>
-          ${reversals.map(([sec, s]) => sectorRow(sec, s, '')).join('')}
+          ${reversals.map(([sec2, s]) => `<tr>
+            <td style="font-weight:500;color:#374151;">${sec2.split('. ')[1]||sec2}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+            <td style="text-align:right;color:#9ca3af;">${s.amount.toFixed(0)}</td>
+            <td><button class="btn" style="padding:2px 8px;font-size:11px;color:#9ca3af;border-color:#e5e7eb;" onclick="currentSector='${sec2}';switchTab('stocks')">明細</button></td>
+          </tr>`).join('')}
         </tbody></table></div>`}
 
+    <!-- 精選個股 -->
     ${topStocks.length > 0 ? `
-    <div class="section-header" style="margin-top:22px;"><div class="section-title">精選個股（做多前 3 族群強勢股）</div></div>
-    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">每族群取 10 日漲幅前 3 名，共最多 9 檔</div>
+    ${sec('精選個股', Math.min(topStocks.length,9), '做多前3族群各取10日漲幅前3名')}
     <div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-      <th>代號</th><th>名稱</th><th>所屬族群</th>
-      <th style="text-align:right">10日%</th><th style="text-align:right">5日%</th>
-      <th style="text-align:right">今日%</th><th style="text-align:right">成交(億)</th>
+      ${th('t','code','代號','left')}
+      ${th('t','name','名稱','left')}
+      <th>族群</th>
+      ${th('t','pct10','10日%')}
+      ${th('t','pct5','5日%')}
+      ${th('t','pct1','今日%')}
+      ${th('t','amount','成交')}
     </tr></thead><tbody>
-      ${topStocks.slice(0, 9).map(s => `
-        <tr>
-          <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color:#2563eb;font-weight:bold;text-decoration:none;">${s.code}</a></td>
-          <td>${s.name}</td>
-          <td><span class="tag">${s.sectorLabel}</span></td>
-          <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
-          <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
-          <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
-          <td style="text-align:right;">${s.amount?.toFixed(1) ?? '-'}</td>
-        </tr>`).join('')}
+      ${topStocks.slice(0,9).map(s => `<tr>
+        <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;font-weight:600;text-decoration:none;">${s.code}</a></td>
+        <td style="color:#374151;">${s.name}</td>
+        <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
+        <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+        <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+        <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+        <td style="text-align:right;color:#9ca3af;">${s.amount?.toFixed(1)??'-'}</td>
+      </tr>`).join('')}
     </tbody></table></div>` : ''}
   `;
 }
