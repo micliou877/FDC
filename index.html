@@ -656,7 +656,12 @@ async function fetchFinMindData() {
         const pct1 = getClose(1) ? ((price - getClose(1)) / getClose(1)) * 100 : 0;
         const pct5 = getClose(5) ? ((price - getClose(5)) / getClose(5)) * 100 : 0;
         const pct10 = getClose(10) ? ((price - getClose(10)) / getClose(10)) * 100 : 0;
-        stockData[code] = { price: price, pct1: parseFloat(pct1.toFixed(2)), pct5: parseFloat(pct5.toFixed(2)), pct10: parseFloat(pct10.toFixed(2)), amount: parseFloat(((price * latest.Trading_Volume / 1000) / 10000).toFixed(2)), market: market };
+        // 量能趨勢：近5日均量 / 前5日均量，>1 代表資金流入
+        const getVol = (offset) => { const idx = data.length - 1 - offset; return idx >= 0 ? (data[idx].Trading_Volume || 0) : 0; };
+        const vol5  = (getVol(0)+getVol(1)+getVol(2)+getVol(3)+getVol(4)) / 5;
+        const vol5p = (getVol(5)+getVol(6)+getVol(7)+getVol(8)+getVol(9)) / 5;
+        const volTrend = vol5p > 0 ? parseFloat((vol5 / vol5p).toFixed(3)) : 1;
+        stockData[code] = { price: price, pct1: parseFloat(pct1.toFixed(2)), pct5: parseFloat(pct5.toFixed(2)), pct10: parseFloat(pct10.toFixed(2)), amount: parseFloat(((price * latest.Trading_Volume / 1000) / 10000).toFixed(2)), volTrend: volTrend, market: market };
         successCount++;
       }
     } catch (e) {}
@@ -674,7 +679,8 @@ function calcSectorStats() {
     const sum = (key) => valid.reduce((a, s) => a + (stockData[s.code][key] || 0), 0);
     const avg = (key) => sum(key) / valid.length;
     let pct1 = avg("pct1"); let pct5 = avg("pct5"); let pct10 = avg("pct10");
-    stats[sector] = { pct1: pct1, pct5: pct5, pct10: pct10, vsMarket10: pct10 - market.pct10, amount: sum("amount"), count: valid.length, total: stocks.length };
+    const volTrendAvg = parseFloat(avg("volTrend").toFixed(3));
+    stats[sector] = { pct1: pct1, pct5: pct5, pct10: pct10, vsMarket10: pct10 - market.pct10, amount: sum("amount"), volTrend: volTrendAvg, count: valid.length, total: stocks.length };
   });
   return stats;
 }
@@ -835,13 +841,9 @@ function renderStrategy() {
     ec = '#dc2626'; el = '🔴 弱勢市場'; ed = `${beatCount}/26 族群跑贏大盤，建議輕倉或觀望`;
   }
 
-  // 成交量前 1/3 門檻
-  const amtSorted = validStats.map(([_, s]) => s.amount).sort((a, b) => b - a);
-  const amtThreshold = amtSorted[Math.floor(amtSorted.length / 3)] || 0;
-
-  // 做多候選：三合一
+  // 做多候選：三合一（第3條改為量能趨勢）
   const longs = validStats
-    .filter(([_, s]) => s.vsMarket10 > 2 && s.pct5 > 0 && s.amount >= amtThreshold)
+    .filter(([_, s]) => s.vsMarket10 > 2 && s.pct5 > 0 && s.volTrend >= 1.1)
     .sort((a, b) => b[1].vsMarket10 - a[1].vsMarket10);
 
   // 翻轉觀察：跌深止跌
@@ -861,13 +863,14 @@ function renderStrategy() {
   });
   topStocks.sort((a, b) => (b.pct10 || 0) - (a.pct10 || 0));
 
-  const sectorRow = (sector, s, extra = '') => `
+  const sectorRow = (sector, s, extra = '', extraMid = '') => `
     <tr>
       <td style="font-weight:600;color:#1e293b;">${sector.split('. ')[1] || sector}</td>
       ${extra}
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+      ${extraMid}
       <td style="text-align:right;">${s.amount.toFixed(0)}</td>
       <td><button class="btn" style="padding:3px 10px;font-size:11px;" onclick="currentSector='${sector}';switchTab('stocks')">明細</button></td>
     </tr>`;
@@ -884,15 +887,20 @@ function renderStrategy() {
     </div>
 
     <div class="section-header"><div class="section-title">做多候選（${longs.length} 個）</div></div>
-    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">vs大盤>+2%　5日上漲　成交量前1/3</div>
+    <div style="font-size:11px;color:#94a3b8;margin:-6px 0 10px;">vs大盤>+2%　5日上漲　量能趨勢≥1.1x（近5日均量 ÷ 前5日均量）</div>
     ${longs.length === 0
       ? '<div class="empty-state" style="padding:20px;">目前無符合三條件的族群</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
           <th>族群</th><th style="text-align:right">vs大盤</th>
           <th style="text-align:right">10日%</th><th style="text-align:right">5日%</th>
-          <th style="text-align:right">今日%</th><th style="text-align:right">成交(億)</th><th></th>
+          <th style="text-align:right">今日%</th>
+          <th style="text-align:right" title="近5日均量 ÷ 前5日均量，>1代表資金流入">量能趨勢</th>
+          <th style="text-align:right">成交(億)</th><th></th>
         </tr></thead><tbody>
-          ${longs.map(([sec, s]) => sectorRow(sec, s, `<td style="text-align:right;" class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</td>`)).join('')}
+          ${longs.map(([sec, s]) => sectorRow(sec, s,
+            `<td style="text-align:right;" class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</td>`,
+            `<td style="text-align:right; font-weight:600; color:${s.volTrend >= 1.3 ? '#dc2626' : s.volTrend >= 1.1 ? '#d97706' : '#94a3b8'};">${s.volTrend != null ? s.volTrend.toFixed(2) + 'x' : '-'}</td>`
+          )).join('')}
         </tbody></table></div>`}
 
     <div class="section-header" style="margin-top:22px;"><div class="section-title">翻轉觀察（${reversals.length} 個）</div></div>
@@ -971,7 +979,8 @@ document.getElementById("loadDemoBtn").onclick = () => {
     const pct5  = +(pct10 * 0.55 + ((seed % 7) - 3) * 0.4).toFixed(2);
     const pct1  = +(((seed % 13) - 6) * 0.35).toFixed(2);
     const amount = +((seed % 60) + 1).toFixed(1);
-    stockData[code] = { price, pct1, pct5, pct10, amount, market: TPEX_CODES.has(code) ? 'TPEX' : 'TWSE' };
+    const volTrend = parseFloat((0.85 + (seed % 60) / 100).toFixed(3)); // 0.85~1.44，模擬各種資金狀態
+    stockData[code] = { price, pct1, pct5, pct10, amount, volTrend, market: TPEX_CODES.has(code) ? 'TPEX' : 'TWSE' };
   });
   lastUpdateTime = new Date().toISOString();
   saveData(); updateUI();
