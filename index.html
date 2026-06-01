@@ -145,6 +145,7 @@
         <option value="pct1">當日漲跌幅</option>
         <option value="amount">成交金額</option>
       </select>
+      <input type="text" id="stockSearchInput" placeholder="搜尋代號或名稱" style="flex:1; min-width:120px;" oninput="stockSearchQ=this.value.trim().toUpperCase();renderStocks()">
     </div>
   </div>
   <div style="overflow-x: auto;">
@@ -394,6 +395,7 @@ let isRefreshing = false;
 let syncInterval = null;
 let stockSortKey = "pct10";
 let stockSortDir = -1;
+let stockSearchQ = "";
 let wlSortKey = "pct10";
 let wlSortDir = -1;
 
@@ -779,6 +781,7 @@ function renderStocks() {
 
   let stocks = currentSector && currentSector !== "__all__" ? SECTORS[currentSector] : Object.values(SECTORS).flat().filter((v,i,a)=>a.findIndex(t=>(t.code === v.code))===i);
   let rows = stocks.map(s => ({...s, ...stockData[s.code]})).filter(s => s.price != null);
+  if (stockSearchQ) rows = rows.filter(s => s.code.includes(stockSearchQ) || (s.name||'').toUpperCase().includes(stockSearchQ));
   rows.sort((a,b) => stockSortDir * (((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999))));
 
   const tbody = document.getElementById("stocksTbody"); const currentList = watchlists[currentWatchGroup] || [];
@@ -840,6 +843,7 @@ function renderStrategy() {
 
   const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
   const beatCount = validStats.filter(([_, s]) => s.vsMarket10 > 0).length;
+  const currentList = watchlists[currentWatchGroup] || [];
 
   // 市場狀態（低明度色點）
   const dotColor = beatCount >= 13 ? '#4b7c59' : beatCount >= 8 ? '#8a7240' : '#7c4b4b';
@@ -972,6 +976,7 @@ function renderStrategy() {
     ${topStocks.length > 0 ? `
     ${sec('精選個股', Math.min(topStocks.length,9), '做多前3族群各取10日漲幅前3名')}
     <div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
+      <th style="width:40px;text-align:center;">自選</th>
       ${th('t','code','代號','left')}
       ${th('t','name','名稱','left')}
       <th>族群</th>
@@ -981,6 +986,7 @@ function renderStrategy() {
       ${th('t','amount','成交')}
     </tr></thead><tbody>
       ${topStocks.slice(0,9).map(s => `<tr>
+        <td style="text-align:center;"><span style="cursor:pointer;font-size:18px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
         <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;font-weight:600;text-decoration:none;">${s.code}</a></td>
         <td style="color:#374151;">${s.name}</td>
         <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
@@ -996,6 +1002,7 @@ function renderStrategy() {
     ${tvStocks.length === 0
       ? '<div style="padding:14px 0;font-size:12px;color:#9ca3af;">目前無符合條件的個股</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
+          <th style="width:40px;text-align:center;">自選</th>
           ${th('v','code','代號','left')}
           ${th('v','name','名稱','left')}
           <th style="text-align:left;">族群</th>
@@ -1013,6 +1020,7 @@ function renderStrategy() {
               ? '<span style="color:#2d7a45;font-weight:700;">🟢 強多</span>'
               : '<span style="color:#2563eb;font-weight:600;">🔵 趨勢</span>';
             return `<tr>
+              <td style="text-align:center;"><span style="cursor:pointer;font-size:18px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
               <td style="font-weight:600;color:#374151;">${s.code}</td>
               <td style="color:#374151;">${s.name}</td>
               <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
