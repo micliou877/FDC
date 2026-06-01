@@ -821,7 +821,7 @@ function renderWatchlist() {
 }
 
 // 策略頁排序狀態
-window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1 };
+window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1, vk:'pct10', vd:-1 };
 window.sortStrat = function(t, k) {
   if (window._ss[t+'k'] === k) window._ss[t+'d'] *= -1;
   else { window._ss[t+'k'] = k; window._ss[t+'d'] = -1; }
@@ -898,7 +898,11 @@ function renderStrategy() {
   });
   const tvStocks = tvRaw
     .filter((v,i,a) => a.findIndex(t => t.code === v.code) === i)
-    .sort((a,b) => (b.pct10||0) - (a.pct10||0))
+    .sort((a,b) => {
+      const k = window._ss.vk, d = window._ss.vd;
+      if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
+      return d * ((b[k]||0) - (a[k]||0));
+    })
     .slice(0, 30);
 
   panel.innerHTML = `
@@ -992,15 +996,16 @@ function renderStrategy() {
     ${tvStocks.length === 0
       ? '<div style="padding:14px 0;font-size:12px;color:#9ca3af;">目前無符合條件的個股</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-          <th style="text-align:left;cursor:default;">代號</th>
-          <th style="text-align:left;cursor:default;">名稱</th>
-          <th style="text-align:left;cursor:default;">族群</th>
-          <th style="text-align:right;cursor:default;">訊號</th>
-          <th style="text-align:right;cursor:default;">10日%</th>
-          <th style="text-align:right;cursor:default;">5日%</th>
-          <th style="text-align:right;cursor:default;">今日%</th>
-          <th style="text-align:right;cursor:default;">量能</th>
-          <th style="text-align:right;cursor:default;">成交</th>
+          ${th('v','code','代號','left')}
+          ${th('v','name','名稱','left')}
+          <th style="text-align:left;">族群</th>
+          <th style="text-align:right;">訊號</th>
+          ${th('v','price','收盤')}
+          ${th('v','pct10','10日%')}
+          ${th('v','pct5','5日%')}
+          ${th('v','pct1','今日%')}
+          ${th('v','volTrend','量能')}
+          ${th('v','amount','成交')}
           <th></th>
         </tr></thead><tbody>
           ${tvStocks.map(s => {
@@ -1012,6 +1017,7 @@ function renderStrategy() {
               <td style="color:#374151;">${s.name}</td>
               <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
               <td style="text-align:right;">${sig}</td>
+              <td style="text-align:right;">${s.price!=null?s.price.toFixed(2):'-'}</td>
               <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
