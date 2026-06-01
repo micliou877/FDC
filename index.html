@@ -190,6 +190,7 @@
     <table class="stocks-table" id="watchlistTable">
       <thead>
         <tr>
+          <th style="width:36px; text-align:center; cursor:default;">順序</th>
           <th style="width:40px; text-align:center;">移除</th>
           <th data-sort="code">代號 ↕</th>
           <th data-sort="name">公司 / 族群標籤 ↕</th>
@@ -800,17 +801,23 @@ function renderStocks() {
 
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
     let name = STOCK_NAMES[code] || (Object.values(GLOBAL_LIST).flat().find(g=>g.code===code)?.name) || "自訂標的";
     return { code, name, market: d.market || "TWSE", ...d };
   });
-  rows.sort((a,b) => wlSortDir * (((b[wlSortKey] ?? -999) - (a[wlSortKey] ?? -999))));
 
-  tbody.innerHTML = rows.map(s => `
-    <tr>
+  tbody.innerHTML = rows.map((s, idx) => `
+    <tr id="wlr_${idx}" ondragover="wlDragOver(event,${idx})" ondrop="wlDrop(event,${idx})" ondragend="wlDragEnd(event)" ondragstart="wlDragStart(event,${idx})" style="transition:opacity 0.15s;">
+      <td style="text-align:center;padding:2px 4px;color:#94a3b8;user-select:none;">
+        <div style="cursor:grab;font-size:16px;line-height:1;" onmousedown="document.getElementById('wlr_${idx}').draggable=true" onmouseup="document.getElementById('wlr_${idx}').draggable=false">≡</div>
+        <div style="display:flex;justify-content:center;gap:2px;margin-top:2px;">
+          <span style="cursor:pointer;font-size:10px;padding:1px 3px;background:#f1f5f9;border-radius:2px;" onmousedown="event.stopPropagation()" onclick="wlMove(${idx},-1)">▲</span>
+          <span style="cursor:pointer;font-size:10px;padding:1px 3px;background:#f1f5f9;border-radius:2px;" onmousedown="event.stopPropagation()" onclick="wlMove(${idx},1)">▼</span>
+        </div>
+      </td>
       <td style="text-align:center;"><span style="cursor:pointer; color:#94a3b8; font-size:14px;" onclick="toggleWatchlist('${s.code}')">✕</span></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
       <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}</td>
@@ -822,6 +829,41 @@ function renderWatchlist() {
       <td onclick="editNote(this, '${s.code}')"><span class="note-display">${stockNotes[s.code] || ""}</span></td>
     </tr>`).join("");
 }
+
+// ==================== 關注清單拖曳排序 ====================
+let _wlDragIdx = null;
+window.wlDragStart = function(e, idx) {
+  _wlDragIdx = idx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.style.opacity = '0.4';
+};
+window.wlDragEnd = function(e) {
+  e.currentTarget.style.opacity = '';
+  e.currentTarget.draggable = false;
+  _wlDragIdx = null;
+};
+window.wlDragOver = function(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+};
+window.wlDrop = function(e, idx) {
+  e.preventDefault();
+  if (_wlDragIdx === null || _wlDragIdx === idx) return;
+  const list = [...(watchlists[currentWatchGroup] || [])];
+  const [moved] = list.splice(_wlDragIdx, 1);
+  list.splice(idx, 0, moved);
+  watchlists[currentWatchGroup] = list;
+  _wlDragIdx = null;
+  saveData(); renderWatchlist();
+};
+window.wlMove = function(idx, dir) {
+  const list = [...(watchlists[currentWatchGroup] || [])];
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= list.length) return;
+  [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
+  watchlists[currentWatchGroup] = list;
+  saveData(); renderWatchlist();
+};
 
 // 策略頁排序狀態
 window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1, vk:'pct10', vd:-1 };
@@ -1068,7 +1110,7 @@ document.getElementById("stockSort").onchange = (e) => { stockSortKey = e.target
 document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.target.value === "__all__" ? null : e.target.value; renderStocks(); };
 
 document.querySelectorAll("#stocksTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (stockSortKey === th.dataset.sort) stockSortDir *= -1; else { stockSortKey = th.dataset.sort; stockSortDir = -1; } renderStocks(); }; });
-document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } renderWatchlist(); }; });
+document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>d*((b[k]??-999)-(a[k]??-999))); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
 document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
 document.getElementById("loadDemoBtn").onclick = () => {
   const allCodes = [...new Set(Object.values(SECTORS).flat().map(s => s.code)), "0050"];
