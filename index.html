@@ -236,6 +236,7 @@
     </div>
     <div class="button-row">
       <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
+      <button class="btn" id="pullCloudBtn">從雲端下載</button>
       <button class="btn" id="loadDemoBtn">載入範例</button>
       <button class="btn" id="clearDataBtn">清空</button>
     </div>
@@ -1170,6 +1171,34 @@ document.getElementById("loadDemoBtn").onclick = () => {
   saveData(); updateUI();
 };
 document.getElementById("clearDataBtn").onclick = () => { if (confirm("確定清空資料？")) { stockData = {}; lastUpdateTime = null; saveData(); updateUI(); } };
+document.getElementById("pullCloudBtn").onclick = async () => {
+  const btn = document.getElementById("pullCloudBtn");
+  const statusEl = document.getElementById("fetchStatus");
+  if (!cloudRoomId) { alert("請先連上雲端同步代碼！"); return; }
+  btn.disabled = true;
+  statusEl.textContent = "從雲端下載中...";
+  try {
+    const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
+    const cloudData = await res.json();
+    if (cloudData && cloudData.stockData && cloudData.lastUpdateTime) {
+      stockData = cloudData.stockData;
+      lastUpdateTime = cloudData.lastUpdateTime;
+      if (cloudData.finmindToken && !localStorage.getItem("finmind_token")) {
+        localStorage.setItem("finmind_token", cloudData.finmindToken);
+        document.getElementById("apiToken").value = cloudData.finmindToken;
+      }
+      saveLocalOnly();
+      updateUI();
+      statusEl.textContent = `下載完成，共 ${Object.keys(stockData).length} 檔（${new Date(lastUpdateTime).toLocaleString("zh-TW")}）`;
+    } else {
+      statusEl.textContent = "雲端沒有股價資料，請先在 A 地更新。";
+    }
+  } catch (e) {
+    statusEl.textContent = "下載失敗，請確認網路與同步代碼。";
+  }
+  btn.disabled = false;
+  setTimeout(() => { statusEl.textContent = ""; }, 5000);
+};
 document.getElementById("apiToken").addEventListener("input", () => {
   const t = document.getElementById("apiToken").value.trim();
   if (t) localStorage.setItem("finmind_token", t);
