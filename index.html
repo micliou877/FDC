@@ -12,7 +12,6 @@
   <title>業績追蹤</title>
   
   <style>
-    #pullToRefresh { position: fixed; top: -60px; left: 0; width: 100%; height: 60px; display: flex; justify-content: center; align-items: center; color: #2563eb; font-size: 13px; font-weight: bold; z-index: 2000; background: rgba(255,255,255,0.97); transition: top 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); backdrop-filter: blur(5px); border-bottom: 1px solid #e2e8f0; }
 
     body { overscroll-behavior-y: none; margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f1f5f9; color: #334155; padding: 16px; min-height: 100vh; }
     h1 { font-size: 18px; margin-bottom: 4px; color: #1e293b; font-weight: 600; }
@@ -91,7 +90,6 @@
 </head>
 <body>
 
-<div id="pullToRefresh">下拉更新</div>
 
 <h1>業績追蹤</h1>
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
@@ -409,7 +407,6 @@ let cloudRoomId = "";
 
 let lastUpdateTime = null;
 let currentSector = null;
-let isRefreshing = false;
 let syncInterval = null;
 let stockSortKey = "pct10";
 let stockSortDir = -1;
@@ -1179,23 +1176,6 @@ document.getElementById("apiToken").addEventListener("input", () => {
   else localStorage.removeItem("finmind_token");
 });
 
-// 下拉刷新阻力控制
-let startY = 0; let currentY = 0; const ptrIndicator = document.getElementById("pullToRefresh");
-document.addEventListener('touchstart', (e) => { if (window.scrollY <= 5 && !isRefreshing) startY = e.touches[0].clientY; else startY = 0; }, { passive: true });
-document.addEventListener('touchmove', (e) => {
-  if (startY === 0 || isRefreshing || window.scrollY > 5) return;
-  currentY = e.touches[0].clientY; const deltaY = currentY - startY;
-  if (deltaY > 0) {
-    const dist = deltaY * 0.4; ptrIndicator.style.transition = 'none'; ptrIndicator.style.top = Math.min(dist - 60, 20) + 'px';
-    ptrIndicator.textContent = dist > 80 ? "↻ 鬆開手指即可更新..." : "↓ 繼續下拉以更新...";
-    if(e.cancelable) e.preventDefault();
-  }
-}, { passive: false });
-document.addEventListener('touchend', () => {
-  if (startY === 0 || isRefreshing) return; const dist = (currentY - startY) * 0.4; ptrIndicator.style.transition = 'top 0.3s';
-  if (dist > 80) { isRefreshing = true; ptrIndicator.style.top = '0px'; ptrIndicator.textContent = "更新中..."; fetchFinMindData().then(() => { setTimeout(() => { ptrIndicator.style.top = '-60px'; isRefreshing = false; }, 1000); }); }
-  else { ptrIndicator.style.top = '-60px'; } startY = 0; currentY = 0;
-});
 
 loadData();
 </script>
