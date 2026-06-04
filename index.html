@@ -427,7 +427,7 @@ async function pushToCloud() {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchlists, stockNotes })
+      body: JSON.stringify({ watchlists, stockNotes, stockData, lastUpdateTime })
     });
   } catch (e) { console.error("雲端同步失敗", e); }
 }
@@ -444,10 +444,15 @@ async function connectCloud() {
   try {
     const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
     const cloudData = await res.json();
-    
+
     if (cloudData) {
       if (cloudData.watchlists) watchlists = cloudData.watchlists;
       if (cloudData.stockNotes) stockNotes = cloudData.stockNotes;
+      if (cloudData.stockData && cloudData.lastUpdateTime &&
+          (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
+        stockData = cloudData.stockData;
+        lastUpdateTime = cloudData.lastUpdateTime;
+      }
       statusEl.textContent = `已同步`;
     } else {
       await pushToCloud();
@@ -468,29 +473,41 @@ async function syncPull() {
     const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
     const cloudData = await res.json();
     if (cloudData) {
+      let changed = false;
       if (JSON.stringify(watchlists) !== JSON.stringify(cloudData.watchlists)) {
         watchlists = cloudData.watchlists;
-        renderWatchlist();
+        changed = true;
       }
       if (JSON.stringify(stockNotes) !== JSON.stringify(cloudData.stockNotes)) {
         stockNotes = cloudData.stockNotes || {};
-        renderWatchlist();
+        changed = true;
       }
+      if (cloudData.stockData && cloudData.lastUpdateTime &&
+          (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
+        stockData = cloudData.stockData;
+        lastUpdateTime = cloudData.lastUpdateTime;
+        changed = true;
+      }
+      if (changed) { saveLocalOnly(); renderWatchlist(); updateUI(); }
     }
   } catch (e) {}
 }
 
 // ==================== 本地資料儲存 ====================
-function saveData() {
-  try { 
-    localStorage.setItem("ai_stocks_data", JSON.stringify({ 
-      data: stockData, 
+function saveLocalOnly() {
+  try {
+    localStorage.setItem("ai_stocks_data", JSON.stringify({
+      data: stockData,
       time: lastUpdateTime,
       watchlists: watchlists,
       stockNotes: stockNotes
-    })); 
-    pushToCloud(); 
+    }));
   } catch(e) {}
+}
+
+function saveData() {
+  saveLocalOnly();
+  pushToCloud();
 }
 
 function loadData() {
@@ -503,6 +520,8 @@ function loadData() {
       stockNotes = obj.stockNotes || {};
       if (obj.watchlists && Object.keys(obj.watchlists).length > 0) watchlists = obj.watchlists;
     }
+    const savedToken = localStorage.getItem("finmind_token");
+    if (savedToken) document.getElementById("apiToken").value = savedToken;
     const savedRoom = localStorage.getItem("cloud_room_id");
     if (savedRoom) {
       document.getElementById("cloudRoomInput").value = savedRoom;
@@ -627,6 +646,8 @@ function getTVLink(code, market) {
 // ==================== FinMind 抓取邏輯 ====================
 async function fetchFinMindData() {
   const token = document.getElementById("apiToken").value.trim();
+  if (token) localStorage.setItem("finmind_token", token);
+  else localStorage.removeItem("finmind_token");
   const btn = document.getElementById("fetchFinMindBtn");
   const statusEl = document.getElementById("fetchStatus");
   const progContainer = document.getElementById("progressContainer");
