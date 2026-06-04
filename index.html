@@ -646,8 +646,6 @@ function getTVLink(code, market) {
 // ==================== FinMind 抓取邏輯 ====================
 async function fetchFinMindData() {
   const token = document.getElementById("apiToken").value.trim();
-  if (token) localStorage.setItem("finmind_token", token);
-  else localStorage.removeItem("finmind_token");
   const btn = document.getElementById("fetchFinMindBtn");
   const statusEl = document.getElementById("fetchStatus");
   const progContainer = document.getElementById("progressContainer");
@@ -1167,6 +1165,11 @@ document.getElementById("loadDemoBtn").onclick = () => {
   saveData(); updateUI();
 };
 document.getElementById("clearDataBtn").onclick = () => { if (confirm("確定清空資料？")) { stockData = {}; lastUpdateTime = null; saveData(); updateUI(); } };
+document.getElementById("apiToken").addEventListener("input", () => {
+  const t = document.getElementById("apiToken").value.trim();
+  if (t) localStorage.setItem("finmind_token", t);
+  else localStorage.removeItem("finmind_token");
+});
 
 // 下拉刷新阻力控制
 let startY = 0; let currentY = 0; const ptrIndicator = document.getElementById("pullToRefresh");
