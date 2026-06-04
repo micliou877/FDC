@@ -236,6 +236,7 @@
     </div>
     <div class="button-row">
       <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
+      <button class="btn" id="pushCloudBtn">上傳到雲端</button>
       <button class="btn" id="pullCloudBtn">從雲端下載</button>
       <button class="btn" id="loadDemoBtn">載入範例</button>
       <button class="btn" id="clearDataBtn">清空</button>
@@ -1171,6 +1172,22 @@ document.getElementById("loadDemoBtn").onclick = () => {
   saveData(); updateUI();
 };
 document.getElementById("clearDataBtn").onclick = () => { if (confirm("確定清空資料？")) { stockData = {}; lastUpdateTime = null; saveData(); updateUI(); } };
+document.getElementById("pushCloudBtn").onclick = async () => {
+  const btn = document.getElementById("pushCloudBtn");
+  const statusEl = document.getElementById("fetchStatus");
+  if (!cloudRoomId) { alert("請先連上雲端同步代碼！"); return; }
+  if (Object.keys(stockData).length === 0) { alert("本地沒有股價資料，請先更新或載入資料。"); return; }
+  btn.disabled = true;
+  statusEl.textContent = "上傳中...";
+  try {
+    await pushToCloud();
+    statusEl.textContent = `上傳完成，共 ${Object.keys(stockData).length} 檔（${new Date(lastUpdateTime).toLocaleString("zh-TW")}）`;
+  } catch (e) {
+    statusEl.textContent = "上傳失敗，請確認網路與同步代碼。";
+  }
+  btn.disabled = false;
+  setTimeout(() => { statusEl.textContent = ""; }, 5000);
+};
 document.getElementById("pullCloudBtn").onclick = async () => {
   const btn = document.getElementById("pullCloudBtn");
   const statusEl = document.getElementById("fetchStatus");
