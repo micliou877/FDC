@@ -457,11 +457,11 @@ async function connectCloud() {
         localStorage.setItem("finmind_token", cloudData.finmindToken);
         document.getElementById("apiToken").value = cloudData.finmindToken;
       }
-      statusEl.textContent = `已同步`;
-    } else {
-      await pushToCloud();
-      statusEl.textContent = `已建立新代碼`;
     }
+    // 連線後一律推送目前狀態，確保雲端一定有最新資料
+    await pushToCloud();
+    saveLocalOnly();
+    statusEl.textContent = cloudData ? `已同步` : `已建立新代碼`;
     localStorage.setItem("cloud_room_id", cloudRoomId);
     if (syncInterval) clearInterval(syncInterval);
     syncInterval = setInterval(syncPull, 5000);
