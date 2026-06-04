@@ -427,7 +427,7 @@ async function pushToCloud() {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchlists, stockNotes, stockData, lastUpdateTime })
+      body: JSON.stringify({ watchlists, stockNotes, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "" })
     });
   } catch (e) { console.error("雲端同步失敗", e); }
 }
@@ -452,6 +452,10 @@ async function connectCloud() {
           (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
         stockData = cloudData.stockData;
         lastUpdateTime = cloudData.lastUpdateTime;
+      }
+      if (cloudData.finmindToken && !localStorage.getItem("finmind_token")) {
+        localStorage.setItem("finmind_token", cloudData.finmindToken);
+        document.getElementById("apiToken").value = cloudData.finmindToken;
       }
       statusEl.textContent = `已同步`;
     } else {
@@ -487,6 +491,10 @@ async function syncPull() {
         stockData = cloudData.stockData;
         lastUpdateTime = cloudData.lastUpdateTime;
         changed = true;
+      }
+      if (cloudData.finmindToken && !localStorage.getItem("finmind_token")) {
+        localStorage.setItem("finmind_token", cloudData.finmindToken);
+        document.getElementById("apiToken").value = cloudData.finmindToken;
       }
       if (changed) { saveLocalOnly(); renderWatchlist(); updateUI(); }
     }
