@@ -397,8 +397,9 @@ Object.entries(SECTORS).forEach(([sec, list]) => {
 });
 STOCK_NAMES["0050"] = "大盤(0050)"; 
 
+let expandedSectors = new Set();
 let stockData = {};
-let watchlists = { 
+let watchlists = {
   "⭐ 第一級：純度最高": ["6870", "3081", "6739", "5439", "8033", "3491", "6690", "6667", "4749", "5340"], 
   "📈 第二級：基本面驗證": ["2478", "8043", "5289", "6753", "5222", "6285", "7717", "6271", "2455", "4585"],
   "🔥 第三級：高彈性低流性": ["2429", "7719", "4541", "5471", "6116", "2949", "5258", "1514", "3479", "2419"]
@@ -809,12 +810,65 @@ function renderRanking() {
   const sorted = Object.entries(stats).filter(([_,s]) => s).sort((a,b) => (b[1][sortKey] || 0) - (a[1][sortKey] || 0));
   const container = document.getElementById("rankingBars"); container.innerHTML = ""; if (sorted.length === 0) return;
   const isPct = sortKey.startsWith("pct"); const maxAbs = Math.max(...sorted.map(([_,s]) => Math.abs(s[sortKey] || 0)), 1);
+  const currentList = watchlists[currentWatchGroup] || [];
 
   sorted.forEach(([sector, s]) => {
-    const val = s[sortKey] || 0; const row = document.createElement("div"); row.className = "bar-row";
-    row.innerHTML = `<div class="bar-name">${sector}</div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${isPct ? fmtPct(val) : val.toFixed(0) + "億"}</div></div><div class="bar-pct">${s.count}/${s.total}</div>`;
-    row.onclick = () => { currentSector = sector; switchTab("stocks"); renderStocks(); };
+    const val = s[sortKey] || 0;
+    const isExpanded = expandedSectors.has(sector);
+    const row = document.createElement("div"); row.className = "bar-row";
+    row.style.background = isExpanded ? "#e8f0fe" : "";
+    row.innerHTML = `<div class="bar-name" style="display:flex;align-items:center;gap:4px;">${sector}<span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${isExpanded ? "▲" : "▼"}</span></div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${isPct ? fmtPct(val) : val.toFixed(0) + "億"}</div></div><div class="bar-pct">${s.count}/${s.total}</div>`;
+    row.onclick = () => {
+      if (expandedSectors.has(sector)) expandedSectors.delete(sector);
+      else expandedSectors.add(sector);
+      renderRanking();
+    };
     container.appendChild(row);
+
+    if (isExpanded) {
+      const sectorStocks = (SECTORS[sector] || [])
+        .filter(st => stockData[st.code])
+        .map(st => ({...st, ...stockData[st.code]}))
+        .sort((a,b) => (b.pct10||0) - (a.pct10||0));
+      const noData = (SECTORS[sector] || []).length > 0 && sectorStocks.length === 0;
+
+      const panel = document.createElement("div");
+      panel.style.cssText = "background:#f8fafc;border:1px solid #c7d2fe;border-radius:0 0 6px 6px;margin:-2px 0 4px;padding:6px 10px 10px;";
+
+      if (noData) {
+        panel.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:8px 0;">尚未載入資料，請先至「設定」更新股價</div>`;
+      } else {
+        const tableRows = sectorStocks.map(st => {
+          const inWl = currentList.includes(st.code);
+          return `<tr>
+            <td style="padding:4px 2px;text-align:center;"><span style="cursor:pointer;font-size:15px;" onclick="event.stopPropagation();toggleWatchlist('${st.code}')">${inWl ? "⭐" : "☆"}</span></td>
+            <td style="padding:4px 6px;"><a href="${getTVLink(st.code, st.market)}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;" onclick="event.stopPropagation()">${st.code}</a></td>
+            <td style="padding:4px 6px;color:#374151;">${st.name}</td>
+            <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct10)}">${fmtPct(st.pct10)}</td>
+            <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct5)}">${fmtPct(st.pct5)}</td>
+            <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct1)}">${fmtPct(st.pct1)}</td>
+            <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${st.amount?.toFixed(1) ?? "-"}</td>
+          </tr>`;
+        }).join("");
+        panel.innerHTML = `
+          <table style="width:100%;font-size:12px;border-collapse:collapse;">
+            <thead><tr style="color:#64748b;font-size:11px;border-bottom:1px solid #e2e8f0;">
+              <th style="width:28px;padding:2px;"></th>
+              <th style="text-align:left;padding:3px 6px;">代號</th>
+              <th style="text-align:left;padding:3px 6px;">名稱</th>
+              <th style="text-align:right;padding:3px 6px;">10日%</th>
+              <th style="text-align:right;padding:3px 6px;">5日%</th>
+              <th style="text-align:right;padding:3px 6px;">今日%</th>
+              <th style="text-align:right;padding:3px 6px;">成交(億)</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+          <div style="text-align:right;margin-top:6px;">
+            <button class="btn" style="font-size:11px;padding:3px 10px;" onclick="event.stopPropagation();currentSector='${sector}';switchTab('stocks')">全部明細 →</button>
+          </div>`;
+      }
+      container.appendChild(panel);
+    }
   });
 }
 
