@@ -198,6 +198,7 @@
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
+          <th style="min-width:80px;">複製到</th>
           <th style="min-width:120px;">備註</th>
         </tr>
       </thead>
@@ -937,9 +938,20 @@ function renderStocks() {
     </tr>`).join("");
 }
 
+window.copyToGroup = function(code, targetGroup) {
+  if (!targetGroup || !watchlists[targetGroup]) return;
+  if (watchlists[targetGroup].includes(code)) {
+    alert(`${code} 已在「${targetGroup}」中`); return;
+  }
+  watchlists[targetGroup].push(code);
+  saveData();
+  const sel = document.getElementById(`cpy_${code}`);
+  if (sel) { sel.style.color = '#166534'; setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800); }
+};
+
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
@@ -964,6 +976,12 @@ function renderWatchlist() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
+      <td>
+        <select id="cpy_${s.code}" onchange="copyToGroup('${s.code}',this.value)" style="font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;color:#64748b;background:#fff;cursor:pointer;max-width:110px;">
+          <option value="">複製到…</option>
+          ${Object.keys(watchlists).filter(k => k !== currentWatchGroup).map(k => `<option value="${k}">${k}</option>`).join('')}
+        </select>
+      </td>
       <td onclick="editNote(this, '${s.code}')"><span class="note-display">${stockNotes[s.code] || ""}</span></td>
     </tr>`).join("");
 }
