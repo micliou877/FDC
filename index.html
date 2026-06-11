@@ -96,12 +96,12 @@
 
 <div class="tabs">
   <button class="tab active" data-tab="overview">概覽</button>
+  <button class="tab" data-tab="strategy">今日精選</button>
   <button class="tab" data-tab="ranking">排行</button>
   <button class="tab" data-tab="stocks">明細</button>
   <button class="tab" data-tab="watchlist">關注</button>
   <button class="tab" data-tab="global">國際</button>
   <button class="tab" data-tab="data">設定</button>
-  <button class="tab" data-tab="strategy">策略</button>
 </div>
 
 <div class="panel active" id="overview">
@@ -989,7 +989,7 @@ function renderStrategy() {
   const stats = getSectorStats();
   const validStats = Object.entries(stats).filter(([_, s]) => s);
   if (validStats.length === 0) {
-    panel.innerHTML = `<div class="empty-state" style="padding:60px 20px;">請先在「設定」頁載入資料</div>`;
+    panel.innerHTML = `<div class="empty-state" style="padding:60px 20px;">請先在「設定」頁載入資料，再點此分頁</div>`;
     return;
   }
 
@@ -997,37 +997,25 @@ function renderStrategy() {
   const beatCount = validStats.filter(([_, s]) => s.vsMarket10 > 0).length;
   const currentList = watchlists[currentWatchGroup] || [];
 
-  // 市場狀態（低明度色點）
   const dotColor = beatCount >= 13 ? '#4b7c59' : beatCount >= 8 ? '#8a7240' : '#7c4b4b';
   const statusLabel = beatCount >= 13 ? '強勢' : beatCount >= 8 ? '震盪' : '弱勢';
 
-  // 排序 helper（族群表）
   const sortSec = (arr, t) => [...arr].sort((a, b) => {
     const k = window._ss[t+'k'], d = window._ss[t+'d'];
     if (k === 'name') return d * (a[0].split('. ')[1]||a[0]).localeCompare(b[0].split('. ')[1]||b[0]);
     return d * ((b[1][k]||0) - (a[1][k]||0));
   });
-  // 排序 helper（個股表）
   const sortStk = (arr) => [...arr].sort((a, b) => {
     const k = window._ss.tk, d = window._ss.td;
     if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
     return d * ((b[k]||0) - (a[k]||0));
   });
-
-  // 可排序表頭 helper
   const th = (t, k, label, align='right') => {
     const on = window._ss[t+'k'] === k;
     const arr = on ? (window._ss[t+'d'] > 0 ? ' ↑' : ' ↓') : '';
     return `<th onclick="sortStrat('${t}','${k}')" style="text-align:${align};cursor:pointer;user-select:none;${on?'color:#1e293b;':''}">${label}${arr}</th>`;
   };
 
-  // 極簡分區標題
-  const sec = (label, count, hint) =>
-    `<div style="font-size:12px;font-weight:600;color:#374151;padding:18px 0 6px;border-bottom:1px solid #f1f5f9;">
-      ${label}<span style="font-weight:400;color:#9ca3af;margin-left:6px;">${count}</span>
-    </div>${hint ? `<div style="font-size:11px;color:#9ca3af;padding:5px 0 10px;">${hint}</div>` : ''}`;
-
-  // 篩選 + 排序
   const longs     = sortSec(validStats.filter(([_,s]) => s.vsMarket10 > 2 && s.pct5 > 0 && s.volTrend >= 1.1), 'l');
   const reversals = sortSec(validStats.filter(([_,s]) => s.pct10 < -5 && s.pct1 > 0), 'r');
 
@@ -1041,7 +1029,6 @@ function renderStrategy() {
   });
   const topStocks = sortStk(rawTop);
 
-  // TV 觀察清單：逐股掃描，找出趨勢條件符合、值得去 TradingView 確認均線的個股
   let tvRaw = [];
   Object.entries(SECTORS).forEach(([sector, list]) => {
     list.forEach(s => {
@@ -1059,131 +1046,113 @@ function renderStrategy() {
       if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
       return d * ((b[k]||0) - (a[k]||0));
     })
-    .slice(0, 30);
+    .slice(0, 20);
+
+  const sectionLabel = (title, hint) =>
+    `<div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.5px;padding:12px 0 8px;border-top:1px solid #f1f5f9;margin-top:4px;">
+      ${title}<span style="font-weight:400;color:#9ca3af;letter-spacing:0;margin-left:6px;">${hint}</span>
+    </div>`;
 
   panel.innerHTML = `
-    <!-- 市場狀態列 -->
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:22px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:7px;height:7px;border-radius:50%;background:${dotColor};flex-shrink:0;"></div>
-        <span style="font-size:13px;font-weight:600;color:#1e293b;">${statusLabel}</span>
-        <span style="font-size:11px;color:#9ca3af;">${beatCount}/${validStats.length} 族群跑贏大盤</span>
+    <!-- 市場體溫 -->
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:14px;flex-wrap:wrap;font-size:12px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;"></div>
+        <span style="font-weight:700;color:#1e293b;font-size:13px;">${statusLabel}</span>
+        <span style="color:#9ca3af;">${beatCount}/${validStats.length} 跑贏大盤</span>
       </div>
-      <div style="margin-left:auto;display:flex;gap:14px;font-size:12px;color:#6b7280;flex-wrap:wrap;">
+      <div style="margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;">
         <span>10日 <span class="${pctClass(market.pct10)}">${fmtPct(market.pct10)}</span></span>
         <span>5日 <span class="${pctClass(market.pct5)}">${fmtPct(market.pct5)}</span></span>
         <span>今日 <span class="${pctClass(market.pct1)}">${fmtPct(market.pct1)}</span></span>
       </div>
     </div>
 
-    <!-- 做多候選 -->
-    ${sec('做多候選', longs.length, 'vs大盤>+2%　5日上漲　量能≥1.1x')}
+    <!-- 推薦族群卡片 -->
+    <div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.5px;margin-bottom:8px;">推薦族群 <span style="font-weight:400;color:#9ca3af;letter-spacing:0;">vs大盤>+2%・5日↑・量能≥1.1x</span></div>
     ${longs.length === 0
-      ? '<div style="padding:14px 0;font-size:12px;color:#9ca3af;">目前無符合條件的族群</div>'
-      : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-          ${th('l','name','族群','left')}
-          ${th('l','vsMarket10','vs大盤')}
-          ${th('l','pct10','10日%')}
-          ${th('l','pct5','5日%')}
-          ${th('l','pct1','今日%')}
-          ${th('l','volTrend','量能')}
-          ${th('l','amount','成交')}
-          <th></th>
-        </tr></thead><tbody>
-          ${longs.map(([sec2, s]) => `<tr>
-            <td style="font-weight:500;color:#374151;">${sec2.split('. ')[1]||sec2}</td>
-            <td style="text-align:right;" class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</td>
-            <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
-            <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
-            <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
-            <td style="text-align:right;color:${s.volTrend>=1.3?'#374151':'#6b7280'};font-weight:${s.volTrend>=1.3?'600':'400'};">${s.volTrend!=null?s.volTrend.toFixed(2)+'x':'-'}</td>
-            <td style="text-align:right;color:#9ca3af;">${s.amount.toFixed(0)}</td>
-            <td><button class="btn" style="padding:2px 8px;font-size:11px;color:#9ca3af;border-color:#e5e7eb;" onclick="currentSector='${sec2}';switchTab('stocks')">明細</button></td>
-          </tr>`).join('')}
-        </tbody></table></div>`}
-
-    <!-- 翻轉觀察 -->
-    ${sec('翻轉觀察', reversals.length, '10日跌>5%　今日轉正')}
-    ${reversals.length === 0
-      ? '<div style="padding:14px 0;font-size:12px;color:#9ca3af;">目前無符合條件的族群</div>'
-      : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-          ${th('r','name','族群','left')}
-          ${th('r','pct10','10日%')}
-          ${th('r','pct5','5日%')}
-          ${th('r','pct1','今日%')}
-          ${th('r','amount','成交')}
-          <th></th>
-        </tr></thead><tbody>
-          ${reversals.map(([sec2, s]) => `<tr>
-            <td style="font-weight:500;color:#374151;">${sec2.split('. ')[1]||sec2}</td>
-            <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
-            <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
-            <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
-            <td style="text-align:right;color:#9ca3af;">${s.amount.toFixed(0)}</td>
-            <td><button class="btn" style="padding:2px 8px;font-size:11px;color:#9ca3af;border-color:#e5e7eb;" onclick="currentSector='${sec2}';switchTab('stocks')">明細</button></td>
-          </tr>`).join('')}
-        </tbody></table></div>`}
+      ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0 16px;">目前無強勢族群</div>'
+      : `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin-bottom:4px;">
+          ${longs.slice(0,4).map(([sec2,s]) => `
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;cursor:pointer;" onmouseover="this.style.borderColor='#2563eb'" onmouseout="this.style.borderColor='#e5e7eb'" onclick="currentSector='${sec2}';switchTab('stocks')">
+              <div style="font-size:11px;font-weight:600;color:#1e293b;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sec2.split('. ')[1]||sec2}</div>
+              <div style="font-size:22px;font-weight:700;line-height:1;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</div>
+              <div style="font-size:11px;margin-top:5px;">vs大盤 <span class="${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</span></div>
+              <div style="font-size:11px;color:#9ca3af;margin-top:3px;">${volTrendBadge(s.volTrend)}&nbsp;${s.amount.toFixed(0)}億&nbsp;·&nbsp;${s.count}/${s.total}檔</div>
+            </div>`).join('')}
+        </div>`}
 
     <!-- 精選個股 -->
     ${topStocks.length > 0 ? `
-    ${sec('精選個股', Math.min(topStocks.length,9), '做多前3族群各取10日漲幅前3名')}
-    <div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-      <th style="width:40px;text-align:center;">自選</th>
+    ${sectionLabel('精選個股', '前3族群各取10日漲幅前3名')}
+    <div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
+      <th style="width:32px;text-align:center;">自選</th>
       ${th('t','code','代號','left')}
       ${th('t','name','名稱','left')}
-      <th>族群</th>
+      <th style="text-align:left;">族群</th>
       ${th('t','pct10','10日%')}
       ${th('t','pct5','5日%')}
       ${th('t','pct1','今日%')}
       ${th('t','amount','成交')}
+      <th></th>
     </tr></thead><tbody>
       ${topStocks.slice(0,9).map(s => `<tr>
-        <td style="text-align:center;"><span style="cursor:pointer;font-size:18px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
-        <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;font-weight:600;text-decoration:none;">${s.code}</a></td>
-        <td style="color:#374151;">${s.name}</td>
+        <td style="text-align:center;"><span style="cursor:pointer;font-size:16px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
+        <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
+        <td>${s.name}</td>
         <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
         <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
         <td style="text-align:right;color:#9ca3af;">${s.amount?.toFixed(1)??'-'}</td>
+        <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a></td>
       </tr>`).join('')}
     </tbody></table></div>` : ''}
 
-    <!-- TradingView 觀察清單 -->
-    ${sec('TradingView 觀察清單', tvStocks.length, '篩選條件：10日≥+3%、5日≥0%、今日≥-2%、量能≥1.0x、成交≥1億 → 點「開圖」後在 TradingView 確認 EMA20/EMA60 位置再決定是否買進')}
+    <!-- 翻轉觀察：chip 式 -->
+    ${reversals.length > 0 ? `
+    ${sectionLabel('翻轉觀察', '10日跌>5%・今日轉正')}
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;padding-bottom:4px;">
+      ${reversals.map(([sec2,s]) => `
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;" onclick="currentSector='${sec2}';switchTab('stocks')">
+          <span style="font-weight:600;color:#374151;">${sec2.split('. ')[1]||sec2}</span>
+          <span class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</span>
+          <span style="color:#ccc;">→</span>
+          <span class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</span>
+        </div>`).join('')}
+    </div>` : ''}
+
+    <!-- TV 觀察清單 -->
+    ${sectionLabel('TV觀察清單', '確認 EMA20/60 再進場')}
     ${tvStocks.length === 0
-      ? '<div style="padding:14px 0;font-size:12px;color:#9ca3af;">目前無符合條件的個股</div>'
+      ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無符合條件的個股</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
-          <th style="width:40px;text-align:center;">自選</th>
+          <th style="width:32px;text-align:center;">自選</th>
           ${th('v','code','代號','left')}
           ${th('v','name','名稱','left')}
           <th style="text-align:left;">族群</th>
           <th style="text-align:right;">訊號</th>
-          ${th('v','price','收盤')}
           ${th('v','pct10','10日%')}
           ${th('v','pct5','5日%')}
           ${th('v','pct1','今日%')}
           ${th('v','volTrend','量能')}
-          ${th('v','amount','成交')}
           <th></th>
         </tr></thead><tbody>
           ${tvStocks.map(s => {
             const sig = (s.pct10>=7 && s.pct5>=2 && s.pct1>=0)
-              ? '<span style="color:#2d7a45;font-weight:700;">🟢 強多</span>'
-              : '<span style="color:#2563eb;font-weight:600;">🔵 趨勢</span>';
+              ? '<span style="font-size:11px;color:#2d7a45;font-weight:700;">🟢強多</span>'
+              : '<span style="font-size:11px;color:#2563eb;">🔵趨勢</span>';
             return `<tr>
-              <td style="text-align:center;"><span style="cursor:pointer;font-size:18px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
+              <td style="text-align:center;"><span style="cursor:pointer;font-size:16px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
               <td style="font-weight:600;color:#374151;">${s.code}</td>
-              <td style="color:#374151;">${s.name}</td>
+              <td>${s.name}</td>
               <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
               <td style="text-align:right;">${sig}</td>
-              <td style="text-align:right;">${s.price!=null?s.price.toFixed(2):'-'}</td>
               <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
-              <td style="text-align:right;color:${(s.volTrend||0)>=1.3?'#374151':'#6b7280'};font-weight:${(s.volTrend||0)>=1.3?'600':'400'};">${s.volTrend!=null?s.volTrend.toFixed(2)+'x':'-'}</td>
-              <td style="text-align:right;color:#9ca3af;">${s.amount!=null?s.amount.toFixed(1):'-'}</td>
-              <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:3px 10px;font-size:11px;background:#2563eb;color:#fff;border-radius:5px;text-decoration:none;font-weight:600;white-space:nowrap;">開圖 ↗</a></td>
+              <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
+              <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;white-space:nowrap;">圖↗</a></td>
             </tr>`;
           }).join('')}
         </tbody></table></div>`}
