@@ -417,6 +417,7 @@ let stockSortDir = -1;
 let stockSearchQ = "";
 let wlSortKey = "pct10";
 let wlSortDir = -1;
+let dailyPlan = [];
 
 // ==================== 📡 雲端即時同步核心邏輯 ====================
 // ⚠️ 關鍵：請將下方的網址替換為你在 Firebase 複製的資料庫 Realtime 網址（結尾需保留 /）
@@ -537,8 +538,35 @@ function loadData() {
       setTimeout(connectCloud, 800);
     }
     updateUI();
+    loadDailyPlan();
   } catch(e) {}
 }
+
+function saveDailyPlan() {
+  try { localStorage.setItem("fdc_daily_plan", JSON.stringify(dailyPlan)); } catch(e) {}
+}
+function loadDailyPlan() {
+  try { const r = localStorage.getItem("fdc_daily_plan"); if (r) dailyPlan = JSON.parse(r); } catch(e) {}
+}
+window.addToDailyPlan = function(code, name) {
+  if (dailyPlan.find(p => p.code === code)) { alert(`${code} 已在作業清單中`); return; }
+  dailyPlan.push({ code, name, entryPrice: "", stopLoss: "", status: "待進場" });
+  saveDailyPlan(); renderStrategy();
+};
+window.removePlan = function(i) {
+  dailyPlan.splice(i, 1); saveDailyPlan(); renderStrategy();
+};
+window.cyclePlanStatus = function(i) {
+  const s = ["待進場","已進場","略過"];
+  dailyPlan[i].status = s[(s.indexOf(dailyPlan[i].status) + 1) % s.length];
+  saveDailyPlan(); renderStrategy();
+};
+window.updatePlanPrice = function(i, field, val) {
+  dailyPlan[i][field] = val; saveDailyPlan();
+};
+window.clearDonePlan = function() {
+  dailyPlan = dailyPlan.filter(p => p.status === "待進場"); saveDailyPlan(); renderStrategy();
+};
 
 // ==================== 搜尋與自選邏輯 ====================
 window.toggleWatchlist = function(code) {
@@ -1053,7 +1081,36 @@ function renderStrategy() {
       ${title}<span style="font-weight:400;color:#9ca3af;letter-spacing:0;margin-left:6px;">${hint}</span>
     </div>`;
 
+  const planStatusStyle = s => s==="已進場"?"background:#dcfce7;color:#166534;" : s==="略過"?"background:#f1f5f9;color:#94a3b8;" : "background:#fef9c3;color:#854d0e;";
+  const planHtml = `
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${dailyPlan.length?'10':'4'}px;">
+        <span style="font-size:13px;font-weight:700;color:#1e293b;">今日作業清單</span>
+        ${dailyPlan.length ? `<button onclick="clearDonePlan()" style="font-size:11px;padding:2px 8px;background:transparent;border:1px solid #e2e8f0;border-radius:4px;color:#9ca3af;cursor:pointer;">清除完成/略過</button>` : ''}
+      </div>
+      ${dailyPlan.length === 0
+        ? `<div style="font-size:12px;color:#9ca3af;">從下方精選個股或 TV 觀察清單點「＋」新增</div>`
+        : `<table style="width:100%;font-size:12px;border-collapse:collapse;">
+            <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
+              <th style="text-align:left;padding:3px 6px;">標的</th>
+              <th style="text-align:right;padding:3px 6px;">進場價</th>
+              <th style="text-align:right;padding:3px 6px;">停損價</th>
+              <th style="text-align:center;padding:3px 6px;">狀態</th>
+              <th style="width:20px;"></th>
+            </tr></thead><tbody>
+              ${dailyPlan.map((p,i) => `<tr style="${p.status!=='待進場'?'opacity:0.5;':''}">
+                <td style="padding:5px 6px;font-weight:600;">${p.code} <span style="font-weight:400;color:#64748b;">${p.name}</span></td>
+                <td style="padding:5px 6px;text-align:right;"><input type="number" value="${p.entryPrice}" placeholder="進場" style="width:68px;text-align:right;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-size:12px;" oninput="updatePlanPrice(${i},'entryPrice',this.value)"></td>
+                <td style="padding:5px 6px;text-align:right;"><input type="number" value="${p.stopLoss}" placeholder="停損" style="width:68px;text-align:right;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-size:12px;" oninput="updatePlanPrice(${i},'stopLoss',this.value)"></td>
+                <td style="padding:5px 6px;text-align:center;"><span style="cursor:pointer;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;${planStatusStyle(p.status)}" onclick="cyclePlanStatus(${i})">${p.status}</span></td>
+                <td style="padding:5px 2px;text-align:center;"><span style="cursor:pointer;color:#9ca3af;font-size:14px;" onclick="removePlan(${i})">✕</span></td>
+              </tr>`).join('')}
+            </tbody></table>`}
+    </div>`;
+
   panel.innerHTML = `
+    <!-- 今日作業清單 -->
+    ${planHtml}
     <!-- 市場體溫 -->
     <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:14px;flex-wrap:wrap;font-size:12px;">
       <div style="display:flex;align-items:center;gap:6px;">
@@ -1105,7 +1162,7 @@ function renderStrategy() {
         <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
         <td style="text-align:right;color:#9ca3af;">${s.amount?.toFixed(1)??'-'}</td>
-        <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a></td>
+        <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
       </tr>`).join('')}
     </tbody></table></div>` : ''}
 
@@ -1152,7 +1209,7 @@ function renderStrategy() {
               <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
               <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
-              <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;white-space:nowrap;">圖↗</a></td>
+              <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
             </tr>`;
           }).join('')}
         </tbody></table></div>`}
