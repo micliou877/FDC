@@ -382,11 +382,16 @@ const TPEX_CODES = new Set([
   "3707","3016","6182","8255","8048","8261","6202",
 ]);
 
-// 手動指定交易所：若發現某支股票連結錯誤，在此新增即可（優先權最高）
-// 格式：股票代號 → "TWSE" 或 "TPEX"
+// ==================== 股票交易所明細表（TWSE=上市 / TPEX=上櫃）====================
+// 優先權最高，蓋過 FinMind 回傳值與 TPEX_CODES 猜測邏輯
+// 逐步擴充中，確認有效後再補全部股票
+const STOCK_EXCHANGE = {
+  "6173": "TWSE",  // 信昌電 ← 測試用第一筆
+};
+
+// 舊有手動修正（保留作為後備，待 STOCK_EXCHANGE 補完後移除）
 const MANUAL_MARKETS = {
-  "3491": "TWSE",  // 昇達科 → 上市
-  "6173": "TWSE",  // 信昌電 → 上市
+  "3491": "TWSE",  // 昇達科
 };
 
 const STOCK_NAMES = {};
@@ -678,8 +683,8 @@ function getTVLink(code, market) {
   }
   if (market === 'JP') return `https://tw.tradingview.com/chart/?symbol=TSE:${code}`;
   if (market === 'KR') return `https://tw.tradingview.com/chart/?symbol=KRX:${code}`;
-  // 台股：MANUAL_MARKETS > FinMind market > TPEX_CODES > 預設 TWSE
-  const twEx = MANUAL_MARKETS[code] || market || (TPEX_CODES.has(code) ? 'TPEX' : 'TWSE');
+  // 台股：STOCK_EXCHANGE > MANUAL_MARKETS > FinMind market > TPEX_CODES > 預設 TWSE
+  const twEx = STOCK_EXCHANGE[code] || MANUAL_MARKETS[code] || market || (TPEX_CODES.has(code) ? 'TPEX' : 'TWSE');
   return `https://tw.tradingview.com/chart/?symbol=${twEx}:${code}`;
 }
 
