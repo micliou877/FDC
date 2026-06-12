@@ -159,6 +159,7 @@
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
+          <th style="width:36px;text-align:center;cursor:default;">作業</th>
         </tr>
       </thead>
       <tbody id="stocksTbody"></tbody>
@@ -198,6 +199,7 @@
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
+          <th style="width:36px;text-align:center;cursor:default;">作業</th>
           <th style="min-width:80px;">複製到</th>
           <th style="min-width:120px;">備註</th>
         </tr>
@@ -890,6 +892,7 @@ function renderRanking() {
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct5)}">${fmtPct(st.pct5)}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct1)}">${fmtPct(st.pct1)}</td>
             <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${st.amount?.toFixed(1) ?? "-"}</td>
+            <td style="padding:4px 6px;text-align:center;"><span style="cursor:pointer;padding:2px 6px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="event.stopPropagation();addToDailyPlan('${st.code}','${st.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`;
         }).join("");
         panel.innerHTML = `
@@ -902,6 +905,7 @@ function renderRanking() {
               <th style="text-align:right;padding:3px 6px;">5日%</th>
               <th style="text-align:right;padding:3px 6px;">今日%</th>
               <th style="text-align:right;padding:3px 6px;">成交(億)</th>
+              <th style="width:36px;text-align:center;">作業</th>
             </tr></thead>
             <tbody>${tableRows}</tbody>
           </table>
@@ -935,6 +939,7 @@ function renderStocks() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
+      <td style="text-align:center;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
     </tr>`).join("");
 }
 
@@ -951,7 +956,7 @@ window.copyToGroup = function(code, targetGroup) {
 
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
@@ -976,6 +981,7 @@ function renderWatchlist() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
+      <td style="text-align:center;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
       <td>
         <select id="cpy_${s.code}" onchange="copyToGroup('${s.code}',this.value)" style="font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;color:#64748b;background:#fff;cursor:pointer;max-width:110px;">
           <option value="">複製到…</option>
