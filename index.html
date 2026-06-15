@@ -59,7 +59,9 @@
     .stocks-table th:hover { color: #1e293b; }
     .stocks-table td { padding: 9px 6px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; vertical-align: top; }
     .stocks-table td.wrap-cell { white-space: normal; min-width: 110px; }
-    .stocks-table tbody tr:hover { background: #dbeafe; }
+    .stocks-table tbody tr:hover { background: #eff6ff; }
+    .stocks-table tbody tr.row-selected { background: #dbeafe; }
+    .stocks-table tbody tr.row-selected:hover { background: #bfdbfe; }
     .pos-text { color: #a84848; font-weight: 600; }
     .neg-text { color: #3a7a58; font-weight: 600; }
     .flat-text { color: #94a3b8; }
@@ -1452,6 +1454,15 @@ document.getElementById("apiToken").addEventListener("input", () => {
 
 
 loadData();
+
+document.addEventListener('click', function(e) {
+  const tr = e.target.closest('.stocks-table tbody tr');
+  if (!tr) return;
+  if (e.target.closest('button, select, input')) return;
+  const wasSelected = tr.classList.contains('row-selected');
+  tr.closest('tbody').querySelectorAll('tr.row-selected').forEach(r => r.classList.remove('row-selected'));
+  if (!wasSelected) tr.classList.add('row-selected');
+});
 </script>
 </body>
 </html>
