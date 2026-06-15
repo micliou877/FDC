@@ -1193,13 +1193,15 @@ function renderStrategy() {
               <th style="text-align:right;padding:3px 6px;">進場價</th>
               <th style="text-align:right;padding:3px 6px;">停損價</th>
               <th style="text-align:center;padding:3px 6px;">狀態</th>
+              <th style="text-align:center;padding:3px 6px;">關注</th>
               <th style="width:20px;"></th>
             </tr></thead><tbody>
               ${dailyPlan.map((p,i) => `<tr style="${p.status!=='待進場'?'opacity:0.5;':''}">
-                <td style="padding:5px 6px;font-weight:600;">${p.code} <span style="font-weight:400;color:#64748b;">${p.name}</span></td>
+                <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,stockData[p.code]?.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,stockData[p.code]?.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a></td>
                 <td style="padding:5px 6px;text-align:right;"><input type="number" value="${p.entryPrice}" placeholder="進場" style="width:68px;text-align:right;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-size:12px;" oninput="updatePlanPrice(${i},'entryPrice',this.value)"></td>
                 <td style="padding:5px 6px;text-align:right;"><input type="number" value="${p.stopLoss}" placeholder="停損" style="width:68px;text-align:right;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-size:12px;" oninput="updatePlanPrice(${i},'stopLoss',this.value)"></td>
                 <td style="padding:5px 6px;text-align:center;"><span style="cursor:pointer;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;${planStatusStyle(p.status)}" onclick="cyclePlanStatus(${i})">${p.status}</span></td>
+                <td style="padding:3px 4px;text-align:center;"><select id="cpy_${p.code}" onchange="copyToGroup('${p.code}',this.value)" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:76px;"><option value="">＋關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
                 <td style="padding:5px 2px;text-align:center;"><span style="cursor:pointer;color:#9ca3af;font-size:14px;" onclick="removePlan(${i})">✕</span></td>
               </tr>`).join('')}
             </tbody></table>`}
@@ -1253,7 +1255,7 @@ function renderStrategy() {
       ${topStocks.slice(0,9).map(s => `<tr>
         <td style="text-align:center;"><span style="cursor:pointer;font-size:16px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
         <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
-        <td>${s.name}</td>
+        <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
         <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
         <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
@@ -1298,8 +1300,8 @@ function renderStrategy() {
               : '<span style="font-size:11px;color:#2563eb;">🔵趨勢</span>';
             return `<tr>
               <td style="text-align:center;"><span style="cursor:pointer;font-size:16px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
-              <td style="font-weight:600;color:#374151;">${s.code}</td>
-              <td>${s.name}</td>
+              <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
+              <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
               <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
               <td style="text-align:right;">${sig}</td>
               <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
