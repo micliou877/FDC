@@ -683,6 +683,17 @@ window.toggleWatchlist = function(code) {
   if (document.getElementById("searchInput").value) handleSearch();
 };
 
+window.goToStock = function(code) {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("searchResults").innerHTML = "";
+  currentSector = null;
+  stockSearchQ = code;
+  const si = document.getElementById("stockSearchInput");
+  if (si) si.value = code;
+  switchTab("stocks");
+  renderStocks();
+};
+
 window.handleSearch = function() {
   const q = document.getElementById("searchInput").value.trim().toUpperCase();
   const resDiv = document.getElementById("searchResults");
@@ -690,23 +701,28 @@ window.handleSearch = function() {
 
   let matches = [];
   Object.entries(STOCK_NAMES).forEach(([code, name]) => {
-     if(code.includes(q) || name.includes(q)) matches.push({code, name});
+    if(code.includes(q) || name.includes(q)) matches.push({code, name, market: STOCK_EXCHANGE[code] || 'TWSE'});
   });
-  Object.values(GLOBAL_LIST).flat().forEach(g => {
-     if(g.code.includes(q) || g.name.toUpperCase().includes(q)) matches.push({code: g.code, name: g.name});
-  });
+  const marketKeys = ['US','JP','KR'];
+  marketKeys.forEach(mkt => (GLOBAL_LIST[mkt]||[]).forEach(g => {
+    if(g.code.includes(q) || g.name.toUpperCase().includes(q)) matches.push({code: g.code, name: g.name, market: mkt});
+  }));
   matches = matches.filter((v,i,a)=>a.findIndex(t=>(t.code === v.code))===i);
   const currentList = watchlists[currentWatchGroup] || [];
 
-  resDiv.innerHTML = matches.slice(0, 15).map(m => `
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#212b36; padding:10px 14px; margin-bottom:6px; border-radius:6px; border:1px solid #2a3138;">
-      <span style="font-size:14px; font-weight:bold; color:#e6e6e6;">${m.code} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span></span>
-      ${currentList.includes(m.code)
-        ? `<button class="btn" style="padding:6px 14px;font-size:12px;" onclick="toggleWatchlist('${m.code}')">移除</button>`
-        : `<select onchange="addToWatchGroup(this,'${m.code}')" style="font-size:12px;padding:5px 6px;border:1px solid #4a9eff;border-radius:6px;color:#4a9eff;background:#1a2535;cursor:pointer;"><option value="">＋ 加入關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select>`
-      }
-    </div>
-  `).join("");
+  resDiv.innerHTML = matches.slice(0, 15).map(m => {
+    const isTW = m.market === 'TWSE' || m.market === 'TPEX';
+    return `
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#212b36; padding:10px 14px; margin-bottom:6px; border-radius:6px; border:1px solid #2a3138; gap:10px;">
+      <span style="font-size:14px; font-weight:bold; color:#e6e6e6; cursor:pointer; flex:1;" onclick="${isTW ? `goToStock('${m.code}')` : ''}" title="${isTW ? '點擊查看標的資料' : ''}">${m.code} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span></span>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <a href="${getTVLink(m.code, m.market)}" target="_blank" style="display:inline-block;padding:4px 10px;font-size:12px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a>
+        ${isTW ? (currentList.includes(m.code)
+          ? `<button class="btn" style="padding:4px 10px;font-size:12px;" onclick="toggleWatchlist('${m.code}')">移除</button>`
+          : `<select onchange="addToWatchGroup(this,'${m.code}')" style="font-size:12px;padding:4px 6px;border:1px solid #4a9eff;border-radius:6px;color:#4a9eff;background:#1a2535;cursor:pointer;"><option value="">＋ 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select>`) : ''}
+      </div>
+    </div>`;
+  }).join("");
 };
 
 window.updateWatchGroupOptions = function() {
