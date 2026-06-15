@@ -675,9 +675,10 @@ window.handleSearch = function() {
   resDiv.innerHTML = matches.slice(0, 15).map(m => `
     <div style="display:flex; justify-content:space-between; align-items:center; background:#212b36; padding:10px 14px; margin-bottom:6px; border-radius:6px; border:1px solid #2a3138;">
       <span style="font-size:14px; font-weight:bold; color:#e6e6e6;">${m.code} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span></span>
-      <button class="btn ${currentList.includes(m.code) ? '' : 'primary'}" style="padding:6px 14px; font-size:12px;" onclick="toggleWatchlist('${m.code}')">
-        ${currentList.includes(m.code) ? '移除' : '加入'}
-      </button>
+      ${currentList.includes(m.code)
+        ? `<button class="btn" style="padding:6px 14px;font-size:12px;" onclick="toggleWatchlist('${m.code}')">移除</button>`
+        : `<select onchange="addToWatchGroup(this,'${m.code}')" style="font-size:12px;padding:5px 6px;border:1px solid #4a9eff;border-radius:6px;color:#4a9eff;background:#1a2535;cursor:pointer;"><option value="">＋ 加入關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select>`
+      }
     </div>
   `).join("");
 };
@@ -958,7 +959,7 @@ function renderRanking() {
         const tableRows = sectorStocks.map(st => {
           const inWl = currentList.includes(st.code);
           return `<tr>
-            <td style="padding:4px 2px;text-align:center;"><span style="cursor:pointer;font-size:15px;" onclick="event.stopPropagation();toggleWatchlist('${st.code}')">${inWl ? "⭐" : "☆"}</span></td>
+            <td style="padding:3px 2px;text-align:center;"><select onchange="addToWatchGroup(this,'${st.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;" onclick="event.stopPropagation()"><option value="">${inWl?"⭐":"☆"} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
             <td style="padding:4px 6px;"><a href="${getTVLink(st.code, st.market)}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;" onclick="event.stopPropagation()">${st.code}</a></td>
             <td style="padding:4px 6px;color:#374151;">${st.name}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct10)}">${fmtPct(st.pct10)}</td>
@@ -1004,7 +1005,7 @@ function renderStocks() {
   const tbody = document.getElementById("stocksTbody"); const currentList = watchlists[currentWatchGroup] || [];
   tbody.innerHTML = rows.map(s => `
     <tr>
-      <td style="text-align:center;"><span style="cursor:pointer; font-size:18px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code) ? '⭐' : '☆'}</span></td>
+      <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
       <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
@@ -1025,6 +1026,18 @@ window.copyToGroup = function(code, targetGroup) {
   saveData();
   const sel = document.getElementById(`cpy_${code}`);
   if (sel) { sel.style.color = '#166534'; setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800); }
+};
+
+window.addToWatchGroup = function(sel, code) {
+  const targetGroup = sel.value;
+  if (!targetGroup || !watchlists[targetGroup]) { sel.value = ''; return; }
+  if (watchlists[targetGroup].includes(code)) {
+    alert(`${code} 已在「${targetGroup}」中`); sel.value = ''; return;
+  }
+  watchlists[targetGroup].push(code);
+  saveData();
+  sel.style.color = '#166534';
+  setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800);
 };
 
 function renderWatchlist() {
@@ -1253,7 +1266,7 @@ function renderStrategy() {
       <th></th>
     </tr></thead><tbody>
       ${topStocks.slice(0,9).map(s => `<tr>
-        <td style="text-align:center;"><span style="cursor:pointer;font-size:16px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
+        <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
         <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
         <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
         <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
@@ -1299,7 +1312,7 @@ function renderStrategy() {
               ? '<span style="font-size:11px;color:#2d7a45;font-weight:700;">🟢強多</span>'
               : '<span style="font-size:11px;color:#2563eb;">🔵趨勢</span>';
             return `<tr>
-              <td style="text-align:center;"><span style="cursor:pointer;font-size:16px;" onclick="toggleWatchlist('${s.code}')">${currentList.includes(s.code)?'⭐':'☆'}</span></td>
+              <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
               <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
               <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
               <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
