@@ -705,8 +705,8 @@ window.addToDailyPlan = function(code, name) {
   dailyPlan.push({ code, name });
   saveDailyPlan(); renderStrategy();
 };
-window.removePlan = function(i) {
-  dailyPlan.splice(i, 1); saveDailyPlan(); renderStrategy();
+window.removePlan = function(code) {
+  dailyPlan = dailyPlan.filter(p => p.code !== code); saveDailyPlan(); renderStrategy();
 };
 
 // ==================== 搜尋與自選邏輯 ====================
@@ -1254,7 +1254,7 @@ window.wlMove = function(idx, dir) {
 };
 
 // 策略頁排序狀態
-window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1, vk:'pct10', vd:-1 };
+window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1, vk:'pct10', vd:-1, pk:'pct10', pd:-1 };
 window.sortStrat = function(t, k) {
   if (window._ss[t+'k'] === k) window._ss[t+'d'] *= -1;
   else { window._ss[t+'k'] = k; window._ss[t+'d'] = -1; }
@@ -1331,6 +1331,11 @@ function renderStrategy() {
       ${title}<span style="font-weight:400;color:#9ca3af;letter-spacing:0;margin-left:6px;">${hint}</span>
     </div>`;
 
+  const sortedPlan = [...dailyPlan].map(p => ({...p, ...stockData[p.code]})).sort((a,b) => {
+    const k = window._ss.pk, d = window._ss.pd;
+    if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
+    return d * ((b[k]||0) - (a[k]||0));
+  });
   const planHtml = `
     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${dailyPlan.length?'10':'4'}px;">
@@ -1340,20 +1345,20 @@ function renderStrategy() {
         ? `<div style="font-size:12px;color:#9ca3af;">從下方精選個股或 TV 觀察清單點「＋」新增</div>`
         : `<table style="width:100%;font-size:12px;border-collapse:collapse;">
             <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
-              <th style="text-align:left;padding:3px 6px;">標的</th>
-              <th style="text-align:right;padding:3px 6px;">10日%</th>
-              <th style="text-align:right;padding:3px 6px;">5日%</th>
-              <th style="text-align:right;padding:3px 6px;">今日%</th>
+              ${th('p','code','標的','left')}
+              ${th('p','pct10','10日%')}
+              ${th('p','pct5','5日%')}
+              ${th('p','pct1','今日%')}
               <th style="text-align:center;padding:3px 6px;">關注</th>
               <th style="width:20px;"></th>
             </tr></thead><tbody>
-              ${dailyPlan.map((p,i) => `<tr>
-                <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,stockData[p.code]?.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,stockData[p.code]?.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a>${(STOCK_SECTORS_MAP[p.code]||[]).length?`<br>${(STOCK_SECTORS_MAP[p.code]||[]).map(t=>`<span class="tag" style="font-size:10px;padding:1px 4px;">${t}</span>`).join('')}`:''}</td>
-                <td style="padding:5px 6px;text-align:right;" class="${pctClass(stockData[p.code]?.pct10)}">${fmtPct(stockData[p.code]?.pct10)}</td>
-                <td style="padding:5px 6px;text-align:right;" class="${pctClass(stockData[p.code]?.pct5)}">${fmtPct(stockData[p.code]?.pct5)}</td>
-                <td style="padding:5px 6px;text-align:right;" class="${pctClass(stockData[p.code]?.pct1)}">${fmtPct(stockData[p.code]?.pct1)}</td>
+              ${sortedPlan.map(p => `<tr>
+                <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,p.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,p.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a>${(STOCK_SECTORS_MAP[p.code]||[]).length?`<br>${(STOCK_SECTORS_MAP[p.code]||[]).map(t=>`<span class="tag" style="font-size:10px;padding:1px 4px;">${t}</span>`).join('')}`:''}</td>
+                <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct10)}">${fmtPct(p.pct10)}</td>
+                <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct5)}">${fmtPct(p.pct5)}</td>
+                <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct1)}">${fmtPct(p.pct1)}</td>
                 <td style="padding:3px 4px;text-align:center;"><select id="cpy_${p.code}" onchange="copyToGroup('${p.code}',this.value)" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:76px;"><option value="">＋關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
-                <td style="padding:5px 2px;text-align:center;"><span style="cursor:pointer;color:#9ca3af;font-size:14px;" onclick="removePlan(${i})">✕</span></td>
+                <td style="padding:5px 2px;text-align:center;"><span style="cursor:pointer;color:#9ca3af;font-size:14px;" onclick="removePlan('${p.code}')">✕</span></td>
               </tr>`).join('')}
             </tbody></table>`}
     </div>`;
