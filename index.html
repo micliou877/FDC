@@ -1607,10 +1607,31 @@ async function triggerQuoteUpdate() {
       body: JSON.stringify({ ref: "main" })
     });
     if (res.status === 204) {
+      const beforeTime = liveQuoteTime;
       statusEl.style.color = "#15803d";
-      statusEl.textContent = "已觸發！約 15-30 秒後資料會更新，正在自動重新抓取...";
-      setTimeout(fetchLiveQuotes, 20000);
-      setTimeout(fetchLiveQuotes, 35000);
+      statusEl.textContent = "已觸發！要查 300+ 支股票，約需 1.5～2 分鐘，請耐心等候...";
+      let attempts = 0;
+      const maxAttempts = 10;
+      const poll = async () => {
+        attempts++;
+        await fetchLiveQuotes();
+        if (liveQuoteTime && liveQuoteTime !== beforeTime) {
+          statusEl.style.color = "#15803d";
+          statusEl.textContent = `更新完成！台股報價：${liveQuoteTime}`;
+          btn.disabled = false;
+          return;
+        }
+        if (attempts < maxAttempts) {
+          statusEl.textContent = `仍在等候 GitHub Actions 執行完成...（第 ${attempts} 次檢查）`;
+          setTimeout(poll, 15000);
+        } else {
+          statusEl.style.color = "#b91c1c";
+          statusEl.textContent = "等待逾時，請稍後手動重新整理頁面，或到 GitHub Actions 頁面查看執行狀態。";
+          btn.disabled = false;
+        }
+      };
+      setTimeout(poll, 80000);
+      return;
     } else {
       const body = await res.text();
       statusEl.style.color = "#b91c1c";
