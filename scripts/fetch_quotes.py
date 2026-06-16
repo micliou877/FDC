@@ -23,7 +23,9 @@ CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval
 
 def extract_codes():
     html = INDEX_HTML.read_text(encoding="utf-8")
-    return sorted(set(re.findall(r'\{code:"(\d{4,6})"', html)))
+    codes = set(re.findall(r'\{code:"(\d{4,6})"', html))
+    codes.add("0050")  # 大盤基準，前端用來算族群 vs 大盤強弱，沒有寫在 SECTORS 清單裡
+    return sorted(codes)
 
 
 def fetch_chart(opener, symbol):

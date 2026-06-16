@@ -889,7 +889,7 @@ async function fetchFinMindData() {
          res = await fetch(otcUrl); json = await res.json();
       }
       if (json.msg === "success" && json.data && json.data.length > 0) {
-        const data = json.data; const latest = data[data.length - 1]; 
+        const data = json.data; const latest = data[data.length - 1];
         const getClose = (offset) => { const idx = data.length - 1 - offset; return idx >= 0 ? data[idx].close : latest.close; }
         const price = latest.close;
         const pct1 = getClose(1) ? ((price - getClose(1)) / getClose(1)) * 100 : 0;
@@ -900,7 +900,13 @@ async function fetchFinMindData() {
         const vol5  = (getVol(0)+getVol(1)+getVol(2)+getVol(3)+getVol(4)) / 5;
         const vol5p = (getVol(5)+getVol(6)+getVol(7)+getVol(8)+getVol(9)) / 5;
         const volTrend = vol5p > 0 ? parseFloat((vol5 / vol5p).toFixed(3)) : 1;
-        stockData[code] = { price: price, pct1: parseFloat(pct1.toFixed(2)), pct5: parseFloat(pct5.toFixed(2)), pct10: parseFloat(pct10.toFixed(2)), amount: parseFloat(((price * latest.Trading_Volume / 1000) / 10000).toFixed(2)), volTrend: volTrend, market: market };
+        // FinMind 是盤後資料：若 latest 還不是「今天」，今天的即時報價要比對
+        // 往前推 4/9 天（而非 5/10 天）的收盤才是真正的「5日/10日前」基準。
+        const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
+        const latestIsToday = latest.date === todayStr;
+        const close5Ref = latestIsToday ? getClose(5) : getClose(4);
+        const close10Ref = latestIsToday ? getClose(10) : getClose(9);
+        stockData[code] = { price: price, pct1: parseFloat(pct1.toFixed(2)), pct5: parseFloat(pct5.toFixed(2)), pct10: parseFloat(pct10.toFixed(2)), amount: parseFloat(((price * latest.Trading_Volume / 1000) / 10000).toFixed(2)), volTrend: volTrend, market: market, close5Ref: close5Ref || null, close10Ref: close10Ref || null };
         successCount++;
       }
     } catch (e) {}
@@ -920,7 +926,13 @@ async function fetchLiveQuotes() {
     if (!json.quotes) return;
     Object.entries(json.quotes).forEach(([code, q]) => {
       const prev = stockData[code] || {};
-      stockData[code] = { ...prev, price: q.price, pct1: q.pct1, amount: q.amount, market: q.market };
+      const pct5 = prev.close5Ref ? ((q.price - prev.close5Ref) / prev.close5Ref) * 100 : prev.pct5;
+      const pct10 = prev.close10Ref ? ((q.price - prev.close10Ref) / prev.close10Ref) * 100 : prev.pct10;
+      stockData[code] = {
+        ...prev, price: q.price, pct1: q.pct1, amount: q.amount, market: q.market,
+        pct5: pct5 != null ? parseFloat(pct5.toFixed(2)) : pct5,
+        pct10: pct10 != null ? parseFloat(pct10.toFixed(2)) : pct10
+      };
     });
     liveQuoteTime = json.updated;
     updateUI();
