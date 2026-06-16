@@ -176,7 +176,8 @@
   <div class="controls" style="display:flex; gap:8px; margin-bottom:12px;">
     <input type="text" id="searchInput" placeholder="輸入股票代號或名稱" style="flex:1;" onkeyup="handleSearch()">
   </div>
-  <div id="searchResults" style="margin-bottom: 20px;"></div>
+  <div id="searchResults" style="margin-bottom: 8px;"></div>
+  <div style="margin-bottom: 20px;"><a href="javascript:void(0)" onclick="manualAddGlobalStock()" style="font-size:12px;color:#64748b;text-decoration:underline;cursor:pointer;">找不到？知道代號的話可直接手動輸入加入（例如中概股、其他海外標的）</a></div>
 
   <div class="section-header">
     <div class="section-title">自選分類</div>
@@ -347,6 +348,31 @@ const GLOBAL_LIST = {
     {code:"POWI",  ex:"NASDAQ", name:"Power Integrations (高壓GaN IC)"},
     {code:"NVTS",  ex:"NASDAQ", name:"Navitas Semiconductor (純GaN/SiC設計)"},
     {code:"WOLF",  ex:"NYSE",   name:"Wolfspeed (SiC龍頭/重整中)"},
+    {code:"GOOGL", ex:"NASDAQ", name:"Alphabet 谷歌 (搜尋/雲端/AI)"},
+    {code:"META",  ex:"NASDAQ", name:"Meta (社群/AI)"},
+    {code:"NFLX",  ex:"NASDAQ", name:"Netflix 網飛 (串流)"},
+    {code:"QCOM",  ex:"NASDAQ", name:"Qualcomm 高通 (手機晶片)"},
+    {code:"TXN",   ex:"NASDAQ", name:"Texas Instruments 德州儀器 (類比IC)"},
+    {code:"INTC",  ex:"NASDAQ", name:"Intel 英特爾 (CPU/晶圓代工)"},
+    {code:"ARM",   ex:"NASDAQ", name:"ARM Holdings (IP授權)"},
+    {code:"CRM",   ex:"NYSE",   name:"Salesforce (企業軟體/AI)"},
+    {code:"ORCL",  ex:"NYSE",   name:"Oracle 甲骨文 (雲端/資料庫)"},
+    {code:"JPM",   ex:"NYSE",   name:"JPMorgan 摩根大通 (金融)"},
+    {code:"V",     ex:"NYSE",   name:"Visa (支付)"},
+    {code:"SE",    ex:"NYSE",   name:"Sea Limited 冬海集團 (Shopee/遊戲)"},
+    {code:"BABA",  ex:"NYSE",   name:"Alibaba 阿里巴巴 (電商/雲端)"},
+    {code:"PDD",   ex:"NASDAQ", name:"PDD Holdings 拼多多 (電商)"},
+    {code:"JD",    ex:"NASDAQ", name:"JD.com 京東 (電商)"},
+    {code:"NIO",   ex:"NYSE",   name:"NIO 蔚來汽車 (電動車)"},
+    {code:"XPEV",  ex:"NYSE",   name:"XPeng 小鵬汽車 (電動車)"},
+    {code:"LI",    ex:"NASDAQ", name:"Li Auto 理想汽車 (電動車)"},
+    {code:"BIDU",  ex:"NASDAQ", name:"Baidu 百度 (搜尋/AI)"},
+    {code:"NTES",  ex:"NASDAQ", name:"NetEase 網易 (遊戲)"},
+    {code:"BILI",  ex:"NASDAQ", name:"Bilibili 嗶哩嗶哩 (影音)"},
+    {code:"FUTU",  ex:"NASDAQ", name:"Futu Holdings 富途證券"},
+    {code:"TIGR",  ex:"NASDAQ", name:"UP Fintech 老虎證券"},
+    {code:"GRAB",  ex:"NASDAQ", name:"Grab Holdings 東南亞版Uber"},
+    {code:"TSM",   ex:"NYSE",   name:"TSMC 台積電 ADR"},
   ],
   "JP": [{code:"6857",name:"Advantest (AI測試機)"},{code:"8035",name:"Tokyo Electron (半導體設備)"},{code:"6981",name:"Murata 村田 (被動元件)"},{code:"6146",name:"Disco (晶圓切割)"},{code:"6594",name:"Nidec (馬達/機器人)"}],
   "KR": [{code:"005930",name:"Samsung 三星 (記憶體/代工)"},{code:"000660",name:"SK Hynix (HBM龍頭)"}]
@@ -508,7 +534,8 @@ let watchlists = {
 };
 let currentWatchGroup = "⭐ 第一級：純度最高";
 let stockNotes = {};
-let cloudRoomId = ""; 
+let stockMeta = {}; // 儲存美股/日股等非台股的市場資訊 { code: { market, name } }
+let cloudRoomId = "";
 
 let lastUpdateTime = null;
 let currentSector = null;
@@ -531,7 +558,7 @@ async function pushToCloud() {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchlists, stockNotes, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "" })
+      body: JSON.stringify({ watchlists, stockNotes, stockMeta, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "" })
     });
   } catch (e) { console.error("雲端同步失敗", e); }
 }
@@ -552,6 +579,7 @@ async function connectCloud() {
     if (cloudData) {
       if (cloudData.watchlists) watchlists = cloudData.watchlists;
       if (cloudData.stockNotes) stockNotes = cloudData.stockNotes;
+      if (cloudData.stockMeta) stockMeta = cloudData.stockMeta;
       if (cloudData.stockData && cloudData.lastUpdateTime &&
           (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
         stockData = cloudData.stockData;
@@ -590,6 +618,10 @@ async function syncPull() {
         stockNotes = cloudData.stockNotes || {};
         changed = true;
       }
+      if (cloudData.stockMeta && JSON.stringify(stockMeta) !== JSON.stringify(cloudData.stockMeta)) {
+        stockMeta = cloudData.stockMeta || {};
+        changed = true;
+      }
       if (cloudData.stockData && cloudData.lastUpdateTime &&
           (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
         stockData = cloudData.stockData;
@@ -612,7 +644,8 @@ function saveLocalOnly() {
       data: stockData,
       time: lastUpdateTime,
       watchlists: watchlists,
-      stockNotes: stockNotes
+      stockNotes: stockNotes,
+      stockMeta: stockMeta
     }));
   } catch(e) {}
 }
@@ -630,6 +663,7 @@ function loadData() {
       stockData = obj.data || {};
       lastUpdateTime = obj.time;
       stockNotes = obj.stockNotes || {};
+      stockMeta = obj.stockMeta || {};
       if (obj.watchlists && Object.keys(obj.watchlists).length > 0) watchlists = obj.watchlists;
     }
     const savedToken = localStorage.getItem("finmind_token");
@@ -708,18 +742,26 @@ window.handleSearch = function() {
     if(g.code.includes(q) || g.name.toUpperCase().includes(q)) matches.push({code: g.code, name: g.name, market: mkt});
   }));
   matches = matches.filter((v,i,a)=>a.findIndex(t=>(t.code === v.code))===i);
+
+  // 找不到完全相符的美股代號時，允許直接手動加入（不需要內建清單收錄），支援 BRK.B 這類含點代號
+  if (/^[A-Z]{1,5}(\.[A-Z]{1,2})?$/.test(q) && !matches.some(m => m.code === q)) {
+    matches.push({code: q, name: `自訂美股（${q}）`, market: 'US', isCustom: true});
+  }
+
   const currentList = watchlists[currentWatchGroup] || [];
 
   resDiv.innerHTML = matches.slice(0, 15).map(m => {
     const isTW = m.market === 'TWSE' || m.market === 'TPEX';
+    const inWL = currentList.includes(m.code);
+    const marketTag = isTW ? '' : `<span style="font-size:10px;background:#1e3a5f;color:#60a5fa;padding:1px 5px;border-radius:3px;margin-left:6px;">${m.market}</span>`;
     return `
     <div style="display:flex; justify-content:space-between; align-items:center; background:#212b36; padding:10px 14px; margin-bottom:6px; border-radius:6px; border:1px solid #2a3138; gap:10px;">
-      <span style="font-size:14px; font-weight:bold; color:#e6e6e6; cursor:pointer; flex:1;" onclick="${isTW ? `goToStock('${m.code}')` : ''}" title="${isTW ? '點擊查看標的資料' : ''}">${m.code} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span></span>
+      <span style="font-size:14px; font-weight:bold; color:#e6e6e6; cursor:pointer; flex:1;" onclick="${isTW ? `goToStock('${m.code}')` : ''}" title="${isTW ? '點擊查看標的資料' : ''}">${m.code}${marketTag} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span></span>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
         <a href="${getTVLink(m.code, m.market)}" target="_blank" style="display:inline-block;padding:4px 10px;font-size:12px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a>
-        ${isTW ? (currentList.includes(m.code)
+        ${inWL
           ? `<button class="btn" style="padding:4px 10px;font-size:12px;" onclick="toggleWatchlist('${m.code}')">移除</button>`
-          : `<select onchange="addToWatchGroup(this,'${m.code}')" style="font-size:12px;padding:4px 6px;border:1px solid #4a9eff;border-radius:6px;color:#4a9eff;background:#1a2535;cursor:pointer;"><option value="">＋ 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select>`) : ''}
+          : `<select onchange="addToWatchGroup(this,'${m.code}','${m.market}')" style="font-size:12px;padding:4px 6px;border:1px solid #4a9eff;border-radius:6px;color:#4a9eff;background:#1a2535;cursor:pointer;"><option value="">＋ 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select>`}
       </div>
     </div>`;
   }).join("");
@@ -1072,16 +1114,33 @@ window.copyToGroup = function(code, targetGroup) {
   if (sel) { sel.style.color = '#166534'; setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800); }
 };
 
-window.addToWatchGroup = function(sel, code) {
+window.addToWatchGroup = function(sel, code, market) {
   const targetGroup = sel.value;
   if (!targetGroup || !watchlists[targetGroup]) { sel.value = ''; return; }
   if (watchlists[targetGroup].includes(code)) {
     alert(`${code} 已在「${targetGroup}」中`); sel.value = ''; return;
   }
   watchlists[targetGroup].push(code);
+  if (market && market !== 'TWSE' && market !== 'TPEX') {
+    const globalEntry = (GLOBAL_LIST[market]||[]).find(g => g.code === code);
+    stockMeta[code] = { market, name: globalEntry?.name || `自訂標的（${code}）` };
+  }
   saveData();
   sel.style.color = '#166534';
   setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800);
+};
+
+window.manualAddGlobalStock = function() {
+  const raw = prompt("請輸入代號（例如 SE、BRK.B）：");
+  if (!raw || !raw.trim()) return;
+  const code = raw.trim().toUpperCase();
+  if (watchlists[currentWatchGroup].includes(code)) { alert(`${code} 已在「${currentWatchGroup}」中`); return; }
+  const name = prompt("標的名稱（選填，方便辨識）：", code) || code;
+  watchlists[currentWatchGroup].push(code);
+  stockMeta[code] = { market: 'US', name };
+  saveData();
+  renderWatchlist();
+  alert(`已加入 ${code} 到「${currentWatchGroup}」`);
 };
 
 function renderWatchlist() {
@@ -1090,8 +1149,14 @@ function renderWatchlist() {
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
-    let name = STOCK_NAMES[code] || (Object.values(GLOBAL_LIST).flat().find(g=>g.code===code)?.name) || "自訂標的";
-    return { code, name, market: d.market || "TWSE", ...d };
+    let globalEntry = null;
+    for (const [mkt, list] of Object.entries(GLOBAL_LIST)) {
+      const found = list.find(g => g.code === code);
+      if (found) { globalEntry = { ...found, market: mkt }; break; }
+    }
+    let name = STOCK_NAMES[code] || stockMeta[code]?.name || globalEntry?.name || "自訂標的";
+    let market = d.market || stockMeta[code]?.market || globalEntry?.market || "TWSE";
+    return { code, name, market, ...d };
   });
 
   tbody.innerHTML = rows.map((s, idx) => `
