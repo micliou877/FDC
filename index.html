@@ -702,22 +702,11 @@ function loadDailyPlan() {
 }
 window.addToDailyPlan = function(code, name) {
   if (dailyPlan.find(p => p.code === code)) { alert(`${code} 已在作業清單中`); return; }
-  dailyPlan.push({ code, name, entryPrice: "", stopLoss: "", status: "待進場" });
+  dailyPlan.push({ code, name });
   saveDailyPlan(); renderStrategy();
 };
 window.removePlan = function(i) {
   dailyPlan.splice(i, 1); saveDailyPlan(); renderStrategy();
-};
-window.cyclePlanStatus = function(i) {
-  const s = ["待進場","已進場","略過"];
-  dailyPlan[i].status = s[(s.indexOf(dailyPlan[i].status) + 1) % s.length];
-  saveDailyPlan(); renderStrategy();
-};
-window.updatePlanPrice = function(i, field, val) {
-  dailyPlan[i][field] = val; saveDailyPlan();
-};
-window.clearDonePlan = function() {
-  dailyPlan = dailyPlan.filter(p => p.status === "待進場"); saveDailyPlan(); renderStrategy();
 };
 
 // ==================== 搜尋與自選邏輯 ====================
@@ -1342,29 +1331,27 @@ function renderStrategy() {
       ${title}<span style="font-weight:400;color:#9ca3af;letter-spacing:0;margin-left:6px;">${hint}</span>
     </div>`;
 
-  const planStatusStyle = s => s==="已進場"?"background:#dcfce7;color:#166534;" : s==="略過"?"background:#f1f5f9;color:#94a3b8;" : "background:#fef9c3;color:#854d0e;";
   const planHtml = `
     <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${dailyPlan.length?'10':'4'}px;">
         <span style="font-size:13px;font-weight:700;color:#1e293b;">今日作業清單</span>
-        ${dailyPlan.length ? `<button onclick="clearDonePlan()" style="font-size:11px;padding:2px 8px;background:transparent;border:1px solid #e2e8f0;border-radius:4px;color:#9ca3af;cursor:pointer;">清除完成/略過</button>` : ''}
       </div>
       ${dailyPlan.length === 0
         ? `<div style="font-size:12px;color:#9ca3af;">從下方精選個股或 TV 觀察清單點「＋」新增</div>`
         : `<table style="width:100%;font-size:12px;border-collapse:collapse;">
             <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
               <th style="text-align:left;padding:3px 6px;">標的</th>
-              <th style="text-align:right;padding:3px 6px;">進場價</th>
-              <th style="text-align:right;padding:3px 6px;">停損價</th>
-              <th style="text-align:center;padding:3px 6px;">狀態</th>
+              <th style="text-align:right;padding:3px 6px;">10日%</th>
+              <th style="text-align:right;padding:3px 6px;">5日%</th>
+              <th style="text-align:right;padding:3px 6px;">今日%</th>
               <th style="text-align:center;padding:3px 6px;">關注</th>
               <th style="width:20px;"></th>
             </tr></thead><tbody>
-              ${dailyPlan.map((p,i) => `<tr style="${p.status!=='待進場'?'opacity:0.5;':''}">
+              ${dailyPlan.map((p,i) => `<tr>
                 <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,stockData[p.code]?.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,stockData[p.code]?.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a>${(STOCK_SECTORS_MAP[p.code]||[]).length?`<br>${(STOCK_SECTORS_MAP[p.code]||[]).map(t=>`<span class="tag" style="font-size:10px;padding:1px 4px;">${t}</span>`).join('')}`:''}</td>
-                <td style="padding:5px 6px;text-align:right;"><input type="number" value="${p.entryPrice}" placeholder="進場" style="width:68px;text-align:right;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-size:12px;" oninput="updatePlanPrice(${i},'entryPrice',this.value)"></td>
-                <td style="padding:5px 6px;text-align:right;"><input type="number" value="${p.stopLoss}" placeholder="停損" style="width:68px;text-align:right;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:2px 4px;font-size:12px;" oninput="updatePlanPrice(${i},'stopLoss',this.value)"></td>
-                <td style="padding:5px 6px;text-align:center;"><span style="cursor:pointer;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;${planStatusStyle(p.status)}" onclick="cyclePlanStatus(${i})">${p.status}</span></td>
+                <td style="padding:5px 6px;text-align:right;" class="${pctClass(stockData[p.code]?.pct10)}">${fmtPct(stockData[p.code]?.pct10)}</td>
+                <td style="padding:5px 6px;text-align:right;" class="${pctClass(stockData[p.code]?.pct5)}">${fmtPct(stockData[p.code]?.pct5)}</td>
+                <td style="padding:5px 6px;text-align:right;" class="${pctClass(stockData[p.code]?.pct1)}">${fmtPct(stockData[p.code]?.pct1)}</td>
                 <td style="padding:3px 4px;text-align:center;"><select id="cpy_${p.code}" onchange="copyToGroup('${p.code}',this.value)" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:76px;"><option value="">＋關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
                 <td style="padding:5px 2px;text-align:center;"><span style="cursor:pointer;color:#9ca3af;font-size:14px;" onclick="removePlan(${i})">✕</span></td>
               </tr>`).join('')}
