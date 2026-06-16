@@ -538,6 +538,8 @@ let stockMeta = {}; // 儲存美股/日股等非台股的市場資訊 { code: { 
 let cloudRoomId = "";
 
 let lastUpdateTime = null;
+let liveQuoteTime = null;
+const QUOTES_URL = "https://raw.githubusercontent.com/micliou877/FDC/main/quotes.json";
 let currentSector = null;
 let syncInterval = null;
 let stockSortKey = "pct10";
@@ -909,6 +911,22 @@ async function fetchFinMindData() {
   setTimeout(() => { progContainer.style.display = "none"; statusEl.textContent = ""; }, 5000);
 }
 
+// ==================== 台股近即時報價（GitHub Actions 每15分鐘更新 quotes.json） ====================
+async function fetchLiveQuotes() {
+  try {
+    const res = await fetch(`${QUOTES_URL}?t=${Date.now()}`);
+    if (!res.ok) return;
+    const json = await res.json();
+    if (!json.quotes) return;
+    Object.entries(json.quotes).forEach(([code, q]) => {
+      const prev = stockData[code] || {};
+      stockData[code] = { ...prev, price: q.price, pct1: q.pct1, amount: q.amount, market: q.market };
+    });
+    liveQuoteTime = json.updated;
+    updateUI();
+  } catch (e) { console.error("即時報價更新失敗", e); }
+}
+
 function calcSectorStats() {
   const stats = {}; const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
   Object.entries(SECTORS).forEach(([sector, stocks]) => {
@@ -946,11 +964,9 @@ function invalidateSectorCache() { _cachedSectorStats = null; }
 
 function updateUI() {
   invalidateSectorCache();
-  if (lastUpdateTime) {
-    document.getElementById("lastUpdate").textContent = "最後更新：" + new Date(lastUpdateTime).toLocaleString("zh-TW");
-  } else {
-    document.getElementById("lastUpdate").textContent = "尚未匯入資料";
-  }
+  let updateTxt = lastUpdateTime ? ("最後更新：" + new Date(lastUpdateTime).toLocaleString("zh-TW")) : "尚未匯入資料";
+  if (liveQuoteTime) updateTxt += `｜台股報價：${liveQuoteTime}`;
+  document.getElementById("lastUpdate").textContent = updateTxt;
   renderOverview();
   renderRanking();
   renderStocks();
@@ -1538,6 +1554,8 @@ document.getElementById("apiToken").addEventListener("input", () => {
 
 
 loadData();
+fetchLiveQuotes();
+setInterval(fetchLiveQuotes, 5 * 60 * 1000);
 
 document.addEventListener('click', function(e) {
   const tr = e.target.closest('.stocks-table tbody tr');

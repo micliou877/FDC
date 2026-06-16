@@ -1,0 +1,35 @@
+name: Update TW stock quotes
+
+on:
+  schedule:
+    # 每 15 分鐘跑一次，限定在台股盤中時段（UTC 01:00-05:59 = 台北 09:00-13:59），週一到週五
+    - cron: "*/15 1-5 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch quotes
+        run: python scripts/fetch_quotes.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- quotes.json; then
+            git add quotes.json
+            git commit -m "更新台股報價快照 $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          else
+            echo "no change"
+          fi
