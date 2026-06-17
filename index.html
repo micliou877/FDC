@@ -88,6 +88,57 @@
     .progress-bar-container { height: 6px; background: #e2e8f0; border-radius: 3px; margin: 10px 0; display: none; overflow: hidden; }
     .progress-bar { height: 100%; background: #2563eb; border-radius: 3px; width: 0%; transition: width 0.3s; }
     .button-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+
+    @media (max-width: 600px) {
+      /* 縮小整體邊距 */
+      body { padding: 8px; }
+
+      /* Tab 列：更大的點擊區 */
+      .tabs { padding: 8px 8px; margin: -8px -8px 12px -8px; }
+      .tab { padding: 8px 10px; font-size: 12px; }
+
+      /* 概覽：摘要卡片緊湊 */
+      .summary-card { padding: 8px 10px; }
+      .summary-card .label { font-size: 10px; }
+      .summary-card .value { font-size: 15px; }
+
+      /* 熱力圖：強制 2 欄 */
+      .heatmap-grid { grid-template-columns: repeat(2, 1fr); }
+      .sector-cell { min-height: 70px; padding: 10px 8px; }
+      .sector-pct { font-size: 17px; }
+
+      /* 排行面板：族群名欄縮窄，展開子表可橫向捲動 */
+      .bar-row { grid-template-columns: 100px 1fr 38px 22px; gap: 4px; padding: 5px 4px; }
+      .bar-name { font-size: 11px; }
+      .ranking-bars > div:not(.bar-row) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+      /* 所有表格：緊縮 cell */
+      .stocks-table th, .stocks-table td { padding: 5px 3px; font-size: 11px; }
+
+      /* 名稱欄內的族群標籤在手機上隱藏（省空間） */
+      .wrap-cell .tag { display: none; }
+      .wrap-cell { min-width: 0; }
+
+      /* 明細表（#stocksTable）：隱藏「金額(億)」欄 */
+      #stocksTable th:nth-child(8),
+      #stocksTable td:nth-child(8) { display: none; }
+
+      /* 關注表（#watchlistTable）：隱藏「順序」「金額」「複製到」「備註」欄 */
+      #watchlistTable th:nth-child(1), #watchlistTable td:nth-child(1) { display: none; }
+      #watchlistTable th:nth-child(9),  #watchlistTable td:nth-child(9)  { display: none; }
+      #watchlistTable th:nth-child(11), #watchlistTable td:nth-child(11) { display: none; }
+      #watchlistTable th:nth-child(12), #watchlistTable td:nth-child(12) { display: none; }
+
+      /* 設定頁：input 全寬（覆蓋 inline style 的固定寬度） */
+      #apiToken, #ghTriggerToken { width: 100% !important; box-sizing: border-box; }
+      .data-panel { padding: 10px 12px; }
+
+      /* 防止 iOS 點擊 input 時自動縮放（需 font-size ≥ 16px） */
+      input[type="text"], input[type="password"], input[type="number"] { font-size: 16px !important; }
+
+      /* 按鈕觸控目標放大 */
+      button.btn { min-height: 40px; }
+    }
   </style>
 </head>
 <body>
@@ -561,6 +612,7 @@ let stockSearchQ = "";
 let wlSortKey = "pct10";
 let wlSortDir = -1;
 let dailyPlan = [];
+let selectedPlanCode = null;
 
 // ==================== 📡 雲端即時同步核心邏輯 ====================
 // ⚠️ 關鍵：請將下方的網址替換為你在 Firebase 複製的資料庫 Realtime 網址（結尾需保留 /）
@@ -706,7 +758,13 @@ window.addToDailyPlan = function(code, name) {
   saveDailyPlan(); renderStrategy();
 };
 window.removePlan = function(code) {
+  if (selectedPlanCode === code) selectedPlanCode = null;
   dailyPlan = dailyPlan.filter(p => p.code !== code); saveDailyPlan(); renderStrategy();
+};
+window.togglePlanSelect = function(code, event) {
+  if (event.target.closest('span[onclick], select, a')) return;
+  selectedPlanCode = selectedPlanCode === code ? null : code;
+  renderStrategy();
 };
 
 // ==================== 搜尋與自選邏輯 ====================
@@ -1343,7 +1401,7 @@ function renderStrategy() {
       </div>
       ${dailyPlan.length === 0
         ? `<div style="font-size:12px;color:#9ca3af;">從下方精選個股或 TV 觀察清單點「＋」新增</div>`
-        : `<table style="width:100%;font-size:12px;border-collapse:collapse;">
+        : `<table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
             <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
               ${th('p','code','標的','left')}
               ${th('p','pct10','10日%')}
@@ -1352,7 +1410,7 @@ function renderStrategy() {
               <th style="text-align:center;padding:3px 6px;">關注</th>
               <th style="width:20px;"></th>
             </tr></thead><tbody>
-              ${sortedPlan.map(p => `<tr>
+              ${sortedPlan.map(p => `<tr class="${selectedPlanCode === p.code ? 'row-selected' : ''}" onclick="togglePlanSelect('${p.code}', event)" style="cursor:pointer;">
                 <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,p.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,p.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a>${(STOCK_SECTORS_MAP[p.code]||[]).length?`<br>${(STOCK_SECTORS_MAP[p.code]||[]).map(t=>`<span class="tag" style="font-size:10px;padding:1px 4px;">${t}</span>`).join('')}`:''}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct10)}">${fmtPct(p.pct10)}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct5)}">${fmtPct(p.pct5)}</td>
