@@ -200,6 +200,7 @@
       <input type="text" id="stockSearchInput" placeholder="搜尋代號或名稱" style="flex:1; min-width:120px;" oninput="stockSearchQ=this.value.trim().toUpperCase();renderStocks()">
     </div>
   </div>
+  <div id="sectorUSBanner" style="margin-bottom:8px;"></div>
   <div style="overflow-x: auto;">
     <table class="stocks-table" id="stocksTable">
       <thead>
@@ -595,6 +596,126 @@ const STOCK_EXCHANGE = {
 
 // 後備（STOCK_EXCHANGE 未涵蓋的股票才會用到）
 const MANUAL_MARKETS = {};
+
+// ==================== 29族群核心美股對應（2026/06整理）====================
+// ★ = NVIDIA點名  ★★ = NVIDIA直接入股/點名超強連動
+const SECTOR_US = {
+  "1. AI晶片設計與IP":           "NVDA / AMD / AVGO★ / ARM / MRVL",
+  "2. 先進封裝與封測":            "AMKR★ / TER / KEYS★",
+  "3. AI伺服器ODM":              "DELL★ / HPE / SMCI / JBL★",
+  "4. 散熱與液冷":               "VRT★",
+  "5. 記憶體循環":               "MU★ / SNDK★ / WDC★",
+  "6. 伺服器機殼":               "VRT / SMCI",
+  "7. 被動元件":                 "VSH / 村田6981.T / TDK6762.T",
+  "8. PCB與CCL載板":             "GLW★ / Ibiden4062.T",
+  "9. CPO與光通訊":              "COHR★★(入股) / LITE★★(入股) / GLW★ / ANET",
+  "10. AI電源與BBU":             "VRT★ / ETN / MPWR",
+  "11. 機構件與滑軌":             "JCI / VRT",
+  "12. 廠務工程":                "AECOM / JCI",
+  "13. 半導體設備":              "KLAC★ / LRCX★ / KEYS★ / AMAT / ASML",
+  "14. 面板與螢幕":              "日韓為主：LGD / Samsung / Sony",
+  "15. 資安概念股":              "PANW / CRWD / FTNT / ZS / OKTA",
+  "16. AI軟體與雲端":            "MSFT / GOOGL / AMZN / META / CRM / ORCL",
+  "17. 工業電腦與邊緣AI":         "NVDA(Jetson) / AMBA / QCOM",
+  "18. 軍工與低空經濟":           "LMT / RTX / AVAV / KTOS / PLTR",
+  "19. 機器人與人形機器人":        "TSLA(Optimus) / NVDA(Isaac) / ISRG / ABB",
+  "20. AI_PC與智慧手機":         "AAPL / DELL / MSFT / QCOM(Snapdragon)",
+  "21. 低軌衛星與6G":            "SpaceX(未上市) / AMZN(Kuiper) / ASTS",
+  "22. 車用自駕與EV":            "TSLA / NVDA(Drive) / MBLY / ON★ / STM★",
+  "23. 矽光子與CPO":             "COHR★★(入股) / LITE★★(入股) / GLW★ / ANET / IONQ",
+  "24. 重電電網與儲能":           "ETN / GEV / VRT★ / PWR / CEG / VST",
+  "25. 消費復甦與電商":           "AMZN / WMT / COST / NKE / SBUX",
+  "26. ETF權值股核心":            "SPY / QQQ / SMH(半導體ETF) / SOXX",
+  "27. 功率半導體/第三代半導體":   "STM★ / ON★ / MPWR / NVTS / WOLF / IFX(德)",
+  "28. 邊緣運算/Edge AI":        "NVDA / AMBA / AVGO / QCOM / INTC / AMD",
+  "29. IDM整合元件製造商":        "MU★ / INTC / STM★ / ON★ / TXN / ADI / WOLF"
+};
+
+// ==================== 個股美股對應（從29族群備註整理）====================
+const STOCK_US = {
+  // 族群1 AI晶片設計
+  "2330":"TSM","2454":"QCOM/AVGO","3661":"AVGO/MRVL","3443":"AVGO/MRVL",
+  "3035":"AVGO","6643":"ARM","5274":"NVDA/AVGO","2379":"QCOM","6531":"MU","5471":"NXPI",
+  // 族群2 先進封裝
+  "3711":"AMKR★","6239":"AMKR","2449":"AMKR","6147":"COHR/LITE",
+  "3105":"NVTS/WOLF","6510":"TER/KEYS","6451":"COHR",
+  // 族群3 AI伺服器ODM
+  "2317":"DELL/JBL★","2382":"DELL/HPE","3231":"DELL★(獨家)",
+  "6669":"DELL/HPE/SMCI","2356":"HPE","2376":"SMCI/DELL",
+  "4938":"AAPL/DELL","2377":"DELL","2353":"DELL","2357":"DELL/HPQ",
+  // 族群4 散熱液冷
+  "3017":"VRT★","3324":"VRT","3653":"VRT","6805":"VRT(QDC)","8996":"VRT(CDU)",
+  "3013":"VRT","2421":"VRT","6125":"VRT","2059":"VRT/JCI",
+  // 族群5 記憶體
+  "2408":"MU★","2344":"MU/SNDK","6770":"MU","2337":"SNDK/WDC",
+  "3006":"MU","8299":"SNDK/WDC","3260":"MU/WDC","4967":"MU","2451":"MU",
+  // 族群9 CPO光通訊
+  "3081":"COHR/LITE","2455":"COHR/LITE","4971":"COHR/LITE",
+  "3163":"COHR/GLW","3363":"COHR/LITE","6442":"COHR/GLW",
+  "4979":"COHR/LITE","3450":"COHR","4906":"CIEN","2345":"ANET",
+  // 族群10 AI電源
+  "2301":"VRT/ETN","1504":"ETN/GEV","6282":"VRT","3027":"VRT",
+  // 族群11 機構件
+  "3376":"JCI","2474":"AAPL/DELL",
+  // 族群12 廠務工程
+  "2404":"AECOM/JCI","6139":"AECOM","6196":"AMAT","6691":"JCI","5536":"JCI",
+  // 族群13 半導體設備
+  "3131":"LRCX/AMAT","3583":"AMAT","6187":"AMAT/ASML","2467":"AMAT",
+  "5443":"AMAT","6640":"AMAT","3413":"AMAT","7769":"KEYS★/TER",
+  "6223":"KLAC★","2360":"KEYS/TER","3680":"ASML/AMAT","1560":"AMAT",
+  // 族群15 資安
+  "6690":"PANW/CRWD","2471":"OKTA","4953":"PANW","3558":"PANW/FTNT",
+  "6561":"EQIX","6245":"PANW",
+  // 族群16 AI軟體雲端
+  "6214":"CRM/MSFT","6811":"MSFT","6689":"AMZN/GOOGL/MSFT",
+  "3029":"MSFT/ORCL","6112":"MSFT","2480":"ORCL/MSFT","5285":"ORCL","8099":"MSFT",
+  // 族群17 工業電腦
+  "2395":"NVDA(Jetson)/AMBA","6414":"NVDA/MSFT","6166":"NVDA(Isaac)",
+  "8234":"NVDA(Jetson)","3088":"NVDA","3005":"GOOGL(Edge TPU)",
+  // 族群18 軍工
+  "2634":"LMT/BA","8033":"AVAV","5371":"AVAV/KTOS","2645":"BA",
+  "6753":"GD","5222":"RTX","6829":"LMT/RTX","2429":"AVAV/KTOS",
+  "7719":"AVAV","2208":"GD","2644":"GD","2419":"PLTR/AMZN","1466":"AVAV",
+  // 族群19 機器人
+  "2049":"TSLA/ISRG","4576":"TSLA","4585":"ABB/TSLA","6188":"TSLA/ABB",
+  "1536":"TSLA","2359":"NVDA★(Isaac)","7750":"TSLA/ABB","8374":"ABB","2464":"ABB",
+  // 族群20 AI PC
+  "4966":"AAPL","5269":"AMD","6121":"AAPL/DELL",
+  // 族群21 低軌衛星
+  "3491":"SpaceX/ASTS","6285":"SpaceX/AMZN","2313":"SpaceX","6271":"SpaceX",
+  "7717":"SpaceX(雷射)","4916":"SpaceX",
+  // 族群22 車用EV
+  "2231":"TSLA/MBLY","3008":"MBLY","3034":"MBLY/ON","1815":"TSLA","6515":"TSLA",
+  "1503":"TSLA/ETN","2236":"TSLA",
+  // 族群24 重電電網
+  "1519":"ETN/GEV","1513":"ETN/GEV","1514":"NVDA/ETN","2371":"GEV","6443":"FSLR",
+  // 族群27 功率半導體
+  "5347":"STM★/ON★","3707":"WOLF/STM","3016":"WOLF/STM","6488":"WOLF",
+  "6182":"WOLF","8255":"ON★","6573":"ON/VSH","8261":"ON/MPWR",
+  "8048":"ON","6415":"MPWR★","6138":"MPWR/ON","8081":"MPWR",
+  // 族群28 邊緣運算
+  "3530":"AMBA","6870":"NVDA(Metropolis)/PLTR",
+  // 族群29 IDM
+  "2337":"SNDK/WDC","6770":"INTC","8086":"GaAs代工"
+};
+
+// ==================== 功率元件供應鏈層級（三層架構）====================
+// 上層=功率半導體晶片  中層=PMIC設計  下層=電源模組/重電
+const STOCK_POWER_LAYER = {
+  // 上層 功率半導體晶片
+  "5347":"功率·上層","3707":"功率·上層","3016":"功率·上層",
+  "6488":"功率·上層","6182":"功率·上層","3105":"功率·上層",
+  "8086":"功率·上層","8048":"功率·上層","8261":"功率·上層",
+  "2436":"功率·上層","2329":"功率·上層","8255":"功率·上層","6573":"功率·上層",
+  // 中層 PMIC設計
+  "6415":"功率·中層","6138":"功率·中層","8081":"功率·中層",
+  "6531":"功率·中層","6643":"功率·中層","6202":"功率·中層","3035":"功率·中層",
+  // 下層 電源模組/重電
+  "2308":"功率·下層","2301":"功率·下層","6282":"功率·下層",
+  "6121":"功率·下層","3027":"功率·下層","1519":"功率·下層",
+  "1503":"功率·下層","1513":"功率·下層","1514":"功率·下層",
+  "1504":"功率·下層","2371":"功率·下層"
+};
 
 const STOCK_NAMES = {};
 const STOCK_SECTORS_MAP = {};
@@ -1164,7 +1285,8 @@ function renderRanking() {
         }).join("");
         const rk = rankingExpandSort;
         const sortTh = (key, label, align='right') => `<th style="text-align:${align};padding:3px 6px;cursor:pointer;user-select:none;white-space:nowrap;" onclick="event.stopPropagation();rankingExpandSort={key:'${key}',dir:rankingExpandSort.key==='${key}'?-rankingExpandSort.dir:-1};renderRanking()">${label}${rk.key===key?(rk.dir===-1?' ▼':' ▲'):''}</th>`;
-        panel.innerHTML = `
+        const usLine = SECTOR_US[sector] ? `<div style="font-size:11px;color:#1d6fa4;background:#eff8ff;border-radius:4px;padding:5px 8px;margin-bottom:8px;"><strong>核心美股：</strong>${SECTOR_US[sector]}<span style="color:#9ca3af;margin-left:6px;font-size:10px;">★=NVIDIA點名</span></div>` : '';
+        panel.innerHTML = usLine + `
           <table class="stocks-table" style="font-size:12px;">
             <thead><tr style="color:#64748b;font-size:11px;">
               <th style="width:28px;padding:2px;"></th>
@@ -1197,19 +1319,33 @@ function renderStocks() {
   if (stockSearchQ) rows = rows.filter(s => s.code.includes(stockSearchQ) || (s.name||'').toUpperCase().includes(stockSearchQ));
   rows.sort((a,b) => stockSortDir * (((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999))));
 
+  const banner = document.getElementById('sectorUSBanner');
+  if (banner) {
+    const usInfo = currentSector && currentSector !== "__all__" ? SECTOR_US[currentSector] : null;
+    banner.innerHTML = usInfo
+      ? `<div style="background:#eff8ff;border:1px solid #bae8ff;border-radius:6px;padding:7px 12px;font-size:12px;color:#1d6fa4;line-height:1.6;">
+           <strong>核心美股參考：</strong>${usInfo}
+           <span style="color:#9ca3af;margin-left:8px;font-size:10px;">★=NVIDIA點名</span>
+         </div>`
+      : '';
+  }
+
   const tbody = document.getElementById("stocksTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  tbody.innerHTML = rows.map(s => `
+  tbody.innerHTML = rows.map(s => {
+    const usTags = STOCK_US[s.code] ? `<span class="tag" style="background:#eff8ff;color:#1d6fa4;border-color:#bae8ff;">🇺🇸 ${STOCK_US[s.code]}</span>` : '';
+    const pwrTag = STOCK_POWER_LAYER[s.code] ? `<span class="tag" style="background:#fdf4ff;color:#7c3aed;border-color:#e9d5ff;">${STOCK_POWER_LAYER[s.code]}</span>` : '';
+    return `
     <tr>
       <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}</td>
+      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}${usTags}${pwrTag}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
       <td style="text-align:center;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
-    </tr>`).join("");
+    </tr>`; }).join("");
 }
 
 window.copyToGroup = function(code, targetGroup) {
@@ -1268,7 +1404,10 @@ function renderWatchlist() {
     return { code, name, market, ...d };
   });
 
-  tbody.innerHTML = rows.map((s, idx) => `
+  tbody.innerHTML = rows.map((s, idx) => {
+    const wlUsTag = STOCK_US[s.code] ? `<span class="tag" style="background:#eff8ff;color:#1d6fa4;border-color:#bae8ff;">🇺🇸 ${STOCK_US[s.code]}</span>` : '';
+    const wlPwrTag = STOCK_POWER_LAYER[s.code] ? `<span class="tag" style="background:#fdf4ff;color:#7c3aed;border-color:#e9d5ff;">${STOCK_POWER_LAYER[s.code]}</span>` : '';
+    return `
     <tr id="wlr_${idx}" ondragover="wlDragOver(event,${idx})" ondrop="wlDrop(event,${idx})" ondragend="wlDragEnd(event)" ondragstart="wlDragStart(event,${idx})" style="transition:opacity 0.15s;">
       <td style="text-align:center;padding:2px 4px;color:#94a3b8;user-select:none;">
         <div style="cursor:grab;font-size:16px;line-height:1;" onmousedown="document.getElementById('wlr_${idx}').draggable=true" onmouseup="document.getElementById('wlr_${idx}').draggable=false">≡</div>
@@ -1279,7 +1418,7 @@ function renderWatchlist() {
       </td>
       <td style="text-align:center;"><span style="cursor:pointer; color:#94a3b8; font-size:14px;" onclick="toggleWatchlist('${s.code}')">✕</span></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}</td>
+      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}${wlUsTag}${wlPwrTag}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
@@ -1293,7 +1432,7 @@ function renderWatchlist() {
         </select>
       </td>
       <td onclick="editNote(this, '${s.code}')"><span class="note-display">${stockNotes[s.code] || ""}</span></td>
-    </tr>`).join("");
+    </tr>`; }).join("");
 }
 
 // ==================== 關注清單拖曳排序 ====================
