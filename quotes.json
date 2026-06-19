@@ -1,5 +1,5 @@
 {
- "updated": "2026-06-18 13:56:55",
+ "updated": "2026-06-19 14:21:52",
  "quotes": {
   "0050": {
    "market": "TWSE",
@@ -585,9 +585,9 @@
   },
   "2644": {
    "market": "TPEX",
-   "price": 80.5,
-   "pct1": 0.12,
-   "amount": 0.61
+   "price": 80.3,
+   "pct1": -0.12,
+   "amount": 0.62
   },
   "2645": {
    "market": "TWSE",
@@ -1665,9 +1665,9 @@
   },
   "7719": {
    "market": "TPEX",
-   "price": 39.5,
-   "pct1": -0.88,
-   "amount": 0.11
+   "price": 40.15,
+   "pct1": 0.75,
+   "amount": 0.15
   },
   "7750": {
    "market": "TWSE",
