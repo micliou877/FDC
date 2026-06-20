@@ -753,6 +753,7 @@ let rankingExpandSort = { key: "pct10", dir: -1 };
 let stockSearchQ = "";
 let wlSortKey = "pct10";
 let wlSortDir = -1;
+let _suppressSyncUntil = 0;
 let dailyPlan = [];
 let selectedPlanCode = null;
 
@@ -813,6 +814,7 @@ async function connectCloud() {
 
 async function syncPull() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
+  if (Date.now() < _suppressSyncUntil) return;
   try {
     const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
     const cloudData = await res.json();
@@ -1446,8 +1448,16 @@ function renderWatchlist() {
 window.wlSortByCode = function() {
   if (wlSortKey === 'code') { wlSortDir *= -1; } else { wlSortKey = 'code'; wlSortDir = 1; }
   const d = wlSortDir;
-  const sorted = [...(watchlists[currentWatchGroup] || [])].sort((a, b) => d * a.localeCompare(b));
+  const list = watchlists[currentWatchGroup];
+  if (!list || list.length === 0) { renderWatchlist(); return; }
+  const sorted = list.slice().sort((a, b) => {
+    const sa = String(a), sb = String(b);
+    if (sa < sb) return -d;
+    if (sa > sb) return d;
+    return 0;
+  });
   watchlists[currentWatchGroup] = sorted;
+  _suppressSyncUntil = Date.now() + 6000;
   saveData(); renderWatchlist();
 };
 
