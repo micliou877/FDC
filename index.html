@@ -1433,6 +1433,11 @@ function renderWatchlist() {
       </td>
       <td onclick="editNote(this, '${s.code}')"><span class="note-display">${stockNotes[s.code] || ""}</span></td>
     </tr>`; }).join("");
+
+  document.querySelectorAll("#watchlistTable th[data-sort]").forEach(th => {
+    const base = th.textContent.replace(/\s*[↕↑↓]$/, '');
+    th.textContent = base + ' ' + (th.dataset.sort === wlSortKey ? (wlSortDir === -1 ? '↓' : '↑') : '↕');
+  });
 }
 
 // ==================== 關注清單拖曳排序 ====================
