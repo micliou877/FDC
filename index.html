@@ -239,6 +239,7 @@
     <button class="btn primary" onclick="addWatchGroup()">新增</button>
     <button class="btn" onclick="renameWatchGroup()">改名</button>
     <button class="btn" onclick="deleteWatchGroup()" style="color:#dc2626; border-color:#fecaca;">刪除</button>
+    <button class="btn" id="wlCodeSortBtn" onclick="wlSortByCode()" style="white-space:nowrap;">代號 ↕</button>
   </div>
   
   <div style="overflow-x: auto;">
@@ -1438,7 +1439,17 @@ function renderWatchlist() {
     const base = th.textContent.replace(/\s*[↕↑↓]$/, '');
     th.textContent = base + ' ' + (th.dataset.sort === wlSortKey ? (wlSortDir === -1 ? '↓' : '↑') : '↕');
   });
+  const sortBtn = document.getElementById('wlCodeSortBtn');
+  if (sortBtn) sortBtn.textContent = wlSortKey === 'code' ? (wlSortDir === 1 ? '代號 ↑' : '代號 ↓') : '代號 ↕';
 }
+
+window.wlSortByCode = function() {
+  if (wlSortKey === 'code') { wlSortDir *= -1; } else { wlSortKey = 'code'; wlSortDir = 1; }
+  const d = wlSortDir;
+  const sorted = [...(watchlists[currentWatchGroup] || [])].sort((a, b) => d * a.localeCompare(b));
+  watchlists[currentWatchGroup] = sorted;
+  saveData(); renderWatchlist();
+};
 
 // ==================== 關注清單拖曳排序 ====================
 let _wlDragIdx = null;
