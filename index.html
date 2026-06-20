@@ -1407,6 +1407,11 @@ function renderWatchlist() {
     return { code, name, market, ...d };
   });
 
+  if (wlSortKey === 'code') {
+    const dir = wlSortDir;
+    rows.sort((a, b) => a.code < b.code ? -dir : a.code > b.code ? dir : 0);
+  }
+
   tbody.innerHTML = rows.map((s, idx) => {
     const wlUsTag = STOCK_US[s.code] ? `<span class="tag" style="background:#eff8ff;color:#1d6fa4;border-color:#bae8ff;">🇺🇸 ${STOCK_US[s.code]}</span>` : '';
     const wlPwrTag = STOCK_POWER_LAYER[s.code] ? `<span class="tag" style="background:#fdf4ff;color:#7c3aed;border-color:#e9d5ff;">${STOCK_POWER_LAYER[s.code]}</span>` : '';
@@ -1447,18 +1452,7 @@ function renderWatchlist() {
 
 window.wlSortByCode = function() {
   if (wlSortKey === 'code') { wlSortDir *= -1; } else { wlSortKey = 'code'; wlSortDir = 1; }
-  const d = wlSortDir;
-  const list = watchlists[currentWatchGroup];
-  if (!list || list.length === 0) { renderWatchlist(); return; }
-  const sorted = list.slice().sort((a, b) => {
-    const sa = String(a), sb = String(b);
-    if (sa < sb) return -d;
-    if (sa > sb) return d;
-    return 0;
-  });
-  watchlists[currentWatchGroup] = sorted;
-  _suppressSyncUntil = Date.now() + 6000;
-  saveData(); renderWatchlist();
+  renderWatchlist();
 };
 
 // ==================== 關注清單拖曳排序 ====================
