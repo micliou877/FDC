@@ -1529,7 +1529,7 @@ function renderRanking() {
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct5)}">${fmtPct(st.pct5)}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct1)}">${fmtPct(st.pct1)}</td>
             <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${st.amount?.toFixed(1) ?? "-"}</td>
-            <td style="padding:4px 6px;text-align:center;"><span style="cursor:pointer;padding:2px 6px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="event.stopPropagation();addToDailyPlan('${st.code}','${st.name}')" title="加入今日作業清單">＋</span></td>
+            <td style="padding:4px 6px;text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 6px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="event.stopPropagation();addToDailyPlan('${st.code}','${st.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="event.stopPropagation();addToHolding('${st.code}','${st.name}',${st.price ?? null})" title="加入持有追蹤">⏰</span></td>
           </tr>`;
         }).join("");
         const rk = rankingExpandSort;
@@ -1598,7 +1598,7 @@ function renderStocks() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
-      <td style="text-align:center;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+      <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price ?? null})" title="加入持有追蹤">⏰</span></td>
     </tr>`; }).join("");
 }
 
@@ -1627,6 +1627,20 @@ window.addToWatchGroup = function(sel, code, market) {
   saveData();
   sel.style.color = '#166534';
   setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800);
+};
+
+window.addToHolding = function(code, name, price) {
+  const today = new Date().toISOString().slice(0,10);
+  const raw = prompt(`加入持有追蹤\n${code} ${name}\n\n進場價格：`, price != null ? price : '');
+  if (raw === null || raw.trim() === '') return;
+  const entry = parseFloat(raw);
+  if (isNaN(entry) || entry <= 0) { alert('請輸入有效價格'); return; }
+  if (!window._t4_data) window._t4_data = [];
+  if (window._t4_data.some(p => p.code === code)) {
+    if (!confirm(`${code} ${name} 已在持有追蹤中，仍要重複加入嗎？`)) return;
+  }
+  window._t4_data.push({ code, name, date: today, entry, cur: entry });
+  if (window._t4_render) window._t4_render();
 };
 
 window.manualAddGlobalStock = function() {
@@ -1905,7 +1919,7 @@ function renderStrategy() {
         <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
         <td style="text-align:right;color:#9ca3af;">${s.amount?.toFixed(1)??'-'}</td>
-        <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+        <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price??null})" title="加入持有追蹤">⏰</span></td>
       </tr>`).join('')}
     </tbody></table></div>` : ''}
 
@@ -1952,7 +1966,7 @@ function renderStrategy() {
               <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
               <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
-              <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+              <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price??null})" title="加入持有追蹤">⏰</span></td>
             </tr>`;
           }).join('')}
         </tbody></table></div>`}
@@ -2339,7 +2353,8 @@ function t4_init() {
     {code:'6435',name:'大中',date:'2026-06-02',entry:42,cur:45},
     {code:'2330',name:'台積電',date:'2026-05-28',entry:980,cur:1020},
   ];
-  let t4_positions=[];
+  window._t4_data = window._t4_data || [];
+  const _t4 = () => window._t4_data;
   const t4_dateEl=document.getElementById('t4_date');
   if(t4_dateEl) t4_dateEl.value=new Date().toISOString().slice(0,10);
 
@@ -2366,8 +2381,8 @@ function t4_init() {
   function t4_render() {
     const list=document.getElementById('t4_list');
     if(!list) return;
-    if(!t4_positions.length){list.innerHTML='<div class="t-empty">尚未追蹤任何持股</div>';return;}
-    list.innerHTML=t4_positions.map((d,idx)=>{
+    if(!_t4().length){list.innerHTML='<div class="t-empty">尚未追蹤任何持股</div>';return;}
+    list.innerHTML=_t4().map((d,idx)=>{
       const ph=t4_phase(d),ret=t4_retPct(d),act=t4_action(ph,ret),days=t4_days(d.date);
       return `<div class="t-pos-card ${ph.cls}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -2394,10 +2409,11 @@ function t4_init() {
       </div>`;
     }).join('');
     const tj=document.getElementById('t4_json');
-    if(tj) tj.value=JSON.stringify(t4_positions.map(d=>({...d,days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
+    if(tj) tj.value=JSON.stringify(_t4().map(d=>({...d,days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
   }
-  window.t4_del=function(idx){t4_positions.splice(idx,1);t4_render();};
-  window.t4_update=function(idx){const el=document.getElementById('t4_upd'+idx);if(el){t4_positions[idx].cur=parseFloat(el.value)||t4_positions[idx].cur;t4_render();}};
+  window._t4_render = t4_render;
+  window.t4_del=function(idx){_t4().splice(idx,1);t4_render();};
+  window.t4_update=function(idx){const el=document.getElementById('t4_upd'+idx);if(el){_t4()[idx].cur=parseFloat(el.value)||_t4()[idx].cur;t4_render();}};
   document.getElementById('t4_add').onclick=()=>{
     const code=document.getElementById('t4_code')?.value.trim();
     const name=document.getElementById('t4_name')?.value.trim()||code;
@@ -2405,10 +2421,10 @@ function t4_init() {
     const entry=parseFloat(document.getElementById('t4_entry')?.value);
     const cur=parseFloat(document.getElementById('t4_cur')?.value)||entry;
     if(!code||!date||!entry){alert('請填代號、進場日、進場價');return;}
-    t4_positions.push({code,name,date,entry,cur});
+    _t4().push({code,name,date,entry,cur});
     t4_render();
   };
-  document.getElementById('t4_loadDemo').onclick=()=>{t4_positions=[...T4_DEMO];t4_render();};
+  document.getElementById('t4_loadDemo').onclick=()=>{window._t4_data=[...T4_DEMO];t4_render();};
   document.getElementById('t4_export').onclick=()=>{const j=document.getElementById('t4_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
 }
 </script>
