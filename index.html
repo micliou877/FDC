@@ -1697,7 +1697,7 @@ function renderWatchlist() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
-      <td style="text-align:center;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+      <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price??null})" title="加入持有追蹤">⏰</span></td>
       <td>
         <select id="cpy_${s.code}" onchange="copyToGroup('${s.code}',this.value)" style="font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;color:#64748b;background:#fff;cursor:pointer;max-width:110px;">
           <option value="">複製到…</option>
@@ -2426,6 +2426,7 @@ function t4_init() {
   };
   document.getElementById('t4_loadDemo').onclick=()=>{window._t4_data=[...T4_DEMO];t4_render();};
   document.getElementById('t4_export').onclick=()=>{const j=document.getElementById('t4_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
+  t4_render();
 }
 </script>
 </body>
