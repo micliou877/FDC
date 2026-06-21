@@ -2538,27 +2538,56 @@ function t4_init() {
     if(ret>=15) return {cls:'success',text:'獲利 15%+ → 考慮部分獲利'};
     return {cls:'',text:ph.tip};
   }
-  window._t4_editIdx = window._t4_editIdx ?? -1;
+  window._t4_editIdx  = window._t4_editIdx  ?? -1;
+  window._t4_sortKey  = window._t4_sortKey  ?? null;
+  window._t4_sortDir  = window._t4_sortDir  ?? -1;
+
   function t4_render() {
     const list=document.getElementById('t4_list');
     if(!list) return;
     if(!_t4().length){list.innerHTML='<div class="t-empty">尚未追蹤任何持股</div>';return;}
+
+    // 建立帶原始 index 的顯示陣列，然後排序
+    const sKey=window._t4_sortKey, sDir=window._t4_sortDir;
+    let disp=_t4().map((d,i)=>({...d,_i:i}));
+    if(sKey){
+      disp.sort((a,b)=>{
+        if(sKey==='code') return sDir*(a.code<b.code?-1:a.code>b.code?1:0);
+        const av=sKey==='days'?t4_days(a.date):sKey==='date'?new Date(a.date).getTime():sKey==='entry'?a.entry:sKey==='cur'?t4_cur(a):t4_retPct(a);
+        const bv=sKey==='days'?t4_days(b.date):sKey==='date'?new Date(b.date).getTime():sKey==='entry'?b.entry:sKey==='cur'?t4_cur(b):t4_retPct(b);
+        return sDir*(bv-av);
+      });
+    }
+    const canMove=!sKey;
+    const thS=(key,label,align='right')=>{
+      const act=sKey===key;
+      return `<th style="padding:6px 4px;font-size:11px;color:${act?'#ffc94a':'#888'};text-align:${align};cursor:pointer;user-select:none;white-space:nowrap" onclick="t4_sortBy('${key}')">${label} ${act?(sDir===-1?'↓':'↑'):'↕'}</th>`;
+    };
+
     let rows='';
-    _t4().forEach((d,idx)=>{
+    disp.forEach(d=>{
+      const i=d._i;
       const cur=t4_cur(d),ph=t4_phase(d),ret=t4_retPct(d),act=t4_action(ph,ret),days=t4_days(d.date);
       const hasLive=t4_livePrice(d.code)!=null;
-      const editing=window._t4_editIdx===idx;
+      const editing=window._t4_editIdx===i;
       const retStr=(ret>=0?'+':'')+ret.toFixed(2)+'%';
       const retCls=ret>=0?'t-pos':'t-neg';
       const shortTip=act.cls==='danger'?'⚠️ '+act.text.slice(0,8):act.cls==='success'?'✅ '+act.text.slice(0,8):ph.tip.slice(0,10);
+      const moveBtn=canMove?`<div style="display:flex;flex-direction:column;gap:1px;margin-top:3px">
+        <span style="cursor:pointer;font-size:10px;padding:1px 5px;background:#1a2026;border-radius:2px;text-align:center;line-height:1.4" onclick="t4_move(${i},-1)">▲</span>
+        <span style="cursor:pointer;font-size:10px;padding:1px 5px;background:#1a2026;border-radius:2px;text-align:center;line-height:1.4" onclick="t4_move(${i},1)">▼</span>
+      </div>`:'';
       rows+=`<tr style="border-bottom:1px solid #1a2026">
-        <td style="padding:6px 4px"><button class="t-del" style="font-size:12px;padding:2px 6px" onclick="t4_del(${idx})">✕</button></td>
+        <td style="padding:6px 4px;vertical-align:top">
+          <button class="t-del" style="font-size:12px;padding:2px 6px" onclick="t4_del(${i})">✕</button>
+          ${moveBtn}
+        </td>
         <td style="padding:6px 4px;white-space:nowrap"><strong style="font-size:13px">${d.code}</strong><br><span style="font-size:11px;color:#aaa">${d.name}</span></td>
         <td style="padding:6px 4px;text-align:center"><span class="t-ph-badge ${ph.badge}">${ph.label}</span><br><span style="font-size:10px;color:#666">${days}天</span></td>
         <td style="padding:6px 4px;text-align:right;font-size:11px;color:#aaa">${d.date}<br>進場 ${d.entry}</td>
         <td style="padding:6px 4px;text-align:right"><span style="${ret>=0?'color:#ff6b6b':'color:#4a9d6f'};font-size:13px;font-weight:600">${cur.toFixed(2)}</span>${hasLive?'<span style="font-size:9px;color:#2d8659;display:block">●即時</span>':'<span style="font-size:9px;color:#666;display:block">○</span>'}</td>
         <td style="padding:6px 4px;text-align:right"><span class="${retCls}" style="font-weight:700">${retStr}</span><br><span style="font-size:10px;color:#888">${shortTip}</span></td>
-        <td style="padding:6px 4px;text-align:center"><button class="t-btn" style="padding:2px 8px;font-size:11px" onclick="t4_editToggle(${idx})">${editing?'✕':'✏'}</button></td>
+        <td style="padding:6px 4px;text-align:center"><button class="t-btn" style="padding:2px 8px;font-size:11px" onclick="t4_editToggle(${i})">${editing?'✕':'✏'}</button></td>
       </tr>`;
       if(editing){
         rows+=`<tr style="background:#1a2026">
@@ -2568,7 +2597,7 @@ function t4_init() {
               <input type="date" id="t4_ed_date" value="${d.date}" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px">
               <label style="font-size:11px;color:#aaa">進場價</label>
               <input type="number" id="t4_ed_entry" value="${d.entry}" step="0.01" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px;width:90px">
-              <button class="t-btn primary" style="padding:4px 12px;font-size:11px" onclick="t4_save(${idx})">✓ 儲存</button>
+              <button class="t-btn primary" style="padding:4px 12px;font-size:11px" onclick="t4_save(${i})">✓ 儲存</button>
               <button class="t-btn" style="padding:4px 12px;font-size:11px" onclick="t4_editToggle(-1)">取消</button>
             </div>
           </td>
@@ -2578,24 +2607,35 @@ function t4_init() {
     list.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
       <thead><tr style="border-bottom:2px solid #2a3138">
         <th style="padding:6px 4px;font-size:11px;color:#888;text-align:left"></th>
-        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:left">代號/公司</th>
-        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:center">週期</th>
-        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:right">進場</th>
-        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:right">現價</th>
-        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:right">損益</th>
+        ${thS('code','代號/公司','left')}
+        ${thS('days','週期','center')}
+        ${thS('date','進場','right')}
+        ${thS('cur','現價','right')}
+        ${thS('ret','損益','right')}
         <th style="padding:6px 4px;font-size:11px;color:#888"></th>
       </tr></thead><tbody>${rows}</tbody></table></div>`;
     const tj=document.getElementById('t4_json');
     if(tj) tj.value=JSON.stringify(_t4().map(d=>({...d,cur:t4_cur(d),days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
   }
   window._t4_render = t4_render;
-  window.t4_del=function(idx){_t4().splice(idx,1);window._t4_editIdx=-1;t4_render();};
-  window.t4_editToggle=function(idx){window._t4_editIdx=(window._t4_editIdx===idx)?-1:idx;t4_render();};
-  window.t4_save=function(idx){
+  window.t4_sortBy=function(key){
+    if(window._t4_sortKey===key) window._t4_sortDir*=-1;
+    else{window._t4_sortKey=key;window._t4_sortDir=-1;}
+    window._t4_editIdx=-1;t4_render();
+  };
+  window.t4_move=function(i,dir){
+    const arr=_t4(),j=i+dir;
+    if(j<0||j>=arr.length) return;
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+    t4_render();
+  };
+  window.t4_del=function(i){_t4().splice(i,1);window._t4_editIdx=-1;t4_render();};
+  window.t4_editToggle=function(i){window._t4_editIdx=(window._t4_editIdx===i)?-1:i;t4_render();};
+  window.t4_save=function(i){
     const date=document.getElementById('t4_ed_date')?.value;
     const entry=parseFloat(document.getElementById('t4_ed_entry')?.value);
     if(!date||!entry){alert('請填進場日與進場價');return;}
-    _t4()[idx].date=date;_t4()[idx].entry=entry;
+    _t4()[i].date=date;_t4()[i].entry=entry;
     window._t4_editIdx=-1;t4_render();
   };
   document.getElementById('t4_add').onclick=()=>{
