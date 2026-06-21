@@ -326,7 +326,7 @@
 <div class="panel" id="strategy"></div>
 
 <script>
-// ==================== 台股 29 大族群分類 ====================
+// ==================== 台股 30 大族群分類 ====================
 const SECTORS = {
   "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"5471",name:"松翰"},{code:"5388",name:"中磊"},{code:"8081",name:"致新"}],
   "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"8038",name:"長園科"},{code:"3530",name:"晶相光"},{code:"3014",name:"聯陽"}],
@@ -337,7 +337,7 @@ const SECTORS = {
   "7. 被動元件": [{code:"2327",name:"國巨*"},{code:"2492",name:"華新科"},{code:"3026",name:"禾伸堂"},{code:"3357",name:"臺慶科"},{code:"2375",name:"凱美"},{code:"2428",name:"興勤"},{code:"2472",name:"立隆電"},{code:"2478",name:"大毅"},{code:"5328",name:"華容"},{code:"6155",name:"鈞寶"},{code:"6173",name:"信昌電"},{code:"9802",name:"鈺邦"},{code:"3686",name:"達能"},{code:"8043",name:"蜜望實"}],
   "8. PCB與CCL載板": [{code:"8046",name:"南電"},{code:"3037",name:"欣興"},{code:"2368",name:"金像電"},{code:"4958",name:"臻鼎-KY"},{code:"3044",name:"健鼎"},{code:"6213",name:"聯茂"},{code:"2383",name:"台光電"},{code:"6274",name:"台燿"},{code:"2313",name:"華通"},{code:"2367",name:"燿華"},{code:"2355",name:"敬鵬"},{code:"5439",name:"高技"},{code:"8101",name:"華冠"},{code:"2436",name:"偉詮電"},{code:"6263",name:"精成科"},{code:"8021",name:"尖點"},{code:"8358",name:"金居"}],
   "9. CPO與光通訊": [{code:"3081",name:"聯亞"},{code:"2455",name:"全新"},{code:"4971",name:"IET-KY"},{code:"3163",name:"波若威"},{code:"3363",name:"上詮"},{code:"6442",name:"光聖"},{code:"4979",name:"華星光"},{code:"3450",name:"聯鈞"},{code:"4977",name:"眾達-KY"},{code:"6271",name:"同欣電"},{code:"3105",name:"穩懋"},{code:"6451",name:"訊芯-KY"},{code:"4906",name:"正文"}],
-  "10. AI電源與BBU": [{code:"2308",name:"台達電"},{code:"2301",name:"光寶科"},{code:"1504",name:"東元"},{code:"1519",name:"華城"},{code:"6282",name:"康舒"},{code:"6125",name:"廣運"},{code:"3027",name:"順達"},{code:"6121",name:"新普"}],
+  "10. AI電源與BBU": [{code:"2308",name:"台達電"},{code:"2301",name:"光寶科"},{code:"1504",name:"東元"},{code:"1519",name:"華城"},{code:"6282",name:"康舒"},{code:"6125",name:"廣運"},{code:"3027",name:"順達"},{code:"6121",name:"新普"},{code:"6415",name:"矽力-KY"},{code:"6138",name:"茂達"},{code:"6286",name:"立錡⭐"},{code:"8081",name:"致新"}],
   "11. 機構件與滑軌": [{code:"2059",name:"川湖"},{code:"3376",name:"新日興"},{code:"2474",name:"可成"}],
   "12. 廠務工程": [{code:"2404",name:"漢唐"},{code:"6139",name:"亞翔"},{code:"6196",name:"帆宣"},{code:"6691",name:"洋基工程"},{code:"5536",name:"聖暉*"},{code:"6667",name:"信紘科"},{code:"7703",name:"銳澤"},{code:"3402",name:"漢科"},{code:"5340",name:"華景電"}],
   "13. 半導體設備": [{code:"3131",name:"弘塑"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2467",name:"志聖"},{code:"5443",name:"均豪"},{code:"6640",name:"均華"},{code:"3413",name:"京鼎"},{code:"7769",name:"鴻勁"},{code:"6223",name:"旺矽"},{code:"2360",name:"致茂"},{code:"3680",name:"家登"},{code:"1560",name:"中砂"},{code:"3551",name:"世禾"},{code:"3167",name:"大量"},{code:"6739",name:"竹陞科"},{code:"4749",name:"新應材"},{code:"4772",name:"台特化"},{code:"8028",name:"昇陽半"}],
@@ -360,7 +360,8 @@ const SECTORS = {
     {code:"6415",name:"矽力-KY"},{code:"6138",name:"茂達"},{code:"3105",name:"穩懋"},
     {code:"8255",name:"朋程"},{code:"8048",name:"德勝"},{code:"8261",name:"富鼎"},
     {code:"2329",name:"華泰"},{code:"2436",name:"偉詮電"},{code:"6573",name:"虹揚-KY"},
-    {code:"6202",name:"盛群"},{code:"8086",name:"宏捷科"},{code:"2308",name:"台達電"}
+    {code:"6202",name:"盛群"},{code:"8086",name:"宏捷科"},{code:"2308",name:"台達電"},
+    {code:"6435",name:"大中⭐"},{code:"2481",name:"強茂⭐"}
   ],
   "28. 邊緣運算/Edge AI": [
     // A. 邊緣 AI 晶片設計
@@ -404,6 +405,14 @@ const SECTORS = {
     {code:"2455",name:"全新"},{code:"3081",name:"聯亞"},
     // F. 矽晶圓/上游材料
     {code:"6488",name:"環球晶"}
+  ],
+  "30. 半導體通路": [
+    // 核心通路商
+    {code:"3036",name:"文曄"},   // 全球第二大、ST/onsemi 代理
+    {code:"3702",name:"大聯大"}, // 全球第一大、Infineon/MPWR 代理
+    // 二線通路
+    {code:"3060",name:"銘異"},
+    {code:"8121",name:"越峰"}
   ]
 };
 
@@ -433,6 +442,8 @@ const GLOBAL_LIST = {
     {code:"POWI",  ex:"NASDAQ", name:"Power Integrations (高壓GaN IC)"},
     {code:"NVTS",  ex:"NASDAQ", name:"Navitas Semiconductor (純GaN/SiC設計)"},
     {code:"WOLF",  ex:"NYSE",   name:"Wolfspeed (SiC龍頭/重整中)"},
+    {code:"ARW",   ex:"NYSE",   name:"Arrow Electronics (美系半導體通路龍頭)"},
+    {code:"AVT",   ex:"NASDAQ", name:"Avnet (美系半導體通路第二大)"},
     {code:"GOOGL", ex:"NASDAQ", name:"Alphabet 谷歌 (搜尋/雲端/AI)"},
     {code:"META",  ex:"NASDAQ", name:"Meta (社群/AI)"},
     {code:"NFLX",  ex:"NASDAQ", name:"Netflix 網飛 (串流)"},
@@ -516,6 +527,9 @@ const TPEX_CODES = new Set([
   "3024","6244","3704","8086",
   // 族群27 功率半導體/第三代半導體（新增）
   "3707","3016","6182","8255","8048","8261","6202",
+  "6435", // 大中（MOSFET 補強）
+  // 族群30 半導體通路
+  "3060","8121", // 銘異、越峰（二線通路）
 ]);
 
 // ==================== 股票交易所明細表（TWSE=上市 / TPEX=上櫃）====================
@@ -541,14 +555,14 @@ const STOCK_EXCHANGE = {
   "2404":"TWSE","2408":"TWSE","2409":"TWSE","2412":"TWSE","2413":"TWSE",
   "2419":"TWSE","2421":"TWSE","2428":"TWSE","2436":"TWSE","2449":"TWSE",
   "2451":"TWSE","2454":"TWSE","2455":"TWSE","2467":"TWSE","2471":"TWSE",
-  "2472":"TWSE","2474":"TWSE","2478":"TWSE","2480":"TWSE","2489":"TWSE",
+  "2472":"TWSE","2474":"TWSE","2478":"TWSE","2480":"TWSE","2481":"TWSE","2489":"TWSE",
   "2492":"TWSE","2603":"TWSE","2609":"TWSE","2610":"TWSE","2615":"TWSE",
   "2618":"TWSE","2630":"TWSE","2634":"TWSE","2637":"TWSE","2644":"TWSE",
   "2645":"TWSE","2706":"TWSE","2723":"TWSE","2727":"TWSE","2731":"TWSE",
   "2881":"TWSE","2882":"TWSE","2884":"TWSE","2886":"TWSE","2891":"TWSE",
   "2912":"TWSE","2929":"TWSE","2949":"TWSE","3008":"TWSE","3034":"TWSE",
-  "3037":"TWSE","3044":"TWSE","3231":"TWSE","3260":"TWSE","3443":"TWSE",
-  "3481":"TWSE","3491":"TPEX","3515":"TWSE","3673":"TWSE","3706":"TWSE",
+  "3036":"TWSE","3037":"TWSE","3044":"TWSE","3231":"TWSE","3260":"TWSE","3443":"TWSE",
+  "3481":"TWSE","3491":"TPEX","3515":"TWSE","3673":"TWSE","3702":"TWSE","3706":"TWSE",
   "3711":"TWSE","4763":"TWSE","4938":"TWSE","4958":"TWSE","4967":"TWSE",
   "5285":"TWSE","5328":"TWSE","5347":"TPEX","5371":"TWSE","5536":"TPEX",
   "5706":"TWSE","5871":"TWSE","5903":"TWSE","6168":"TWSE","6214":"TWSE",
@@ -560,7 +574,7 @@ const STOCK_EXCHANGE = {
   "2231":"TPEX","2236":"TPEX","2359":"TPEX","2429":"TPEX","2464":"TPEX","2494":"TPEX",
   "3005":"TPEX","3006":"TPEX","3013":"TPEX","3014":"TPEX","3016":"TWSE",
   "3017":"TPEX","3022":"TWSE","3024":"TPEX","3026":"TWSE","3027":"TPEX",
-  "3029":"TPEX","3030":"TPEX","3032":"TPEX","3035":"TPEX","3081":"TPEX",
+  "3029":"TPEX","3030":"TPEX","3032":"TPEX","3035":"TPEX","3060":"TPEX","3081":"TPEX",
   "3088":"TPEX","3105":"TPEX","3131":"TPEX","3163":"TPEX","3167":"TPEX",
   "3189":"TPEX","3324":"TPEX","3357":"TPEX","3363":"TPEX","3376":"TPEX",
   "3402":"TPEX","3413":"TPEX","3416":"TPEX","3450":"TPEX","3454":"TPEX",
@@ -579,8 +593,8 @@ const STOCK_EXCHANGE = {
   "6163":"TPEX","6166":"TPEX","6173":"TPEX","6182":"TPEX","6187":"TPEX",
   "6188":"TPEX","6196":"TWSE","6202":"TWSE","6206":"TPEX","6213":"TPEX",
   "6223":"TPEX","6244":"TPEX","6245":"TPEX","6263":"TPEX","6271":"TPEX",
-  "6274":"TPEX","6278":"TPEX","6282":"TPEX","6285":"TPEX",
-  "6415":"TWSE","6416":"TPEX","6442":"TPEX","6443":"TPEX","6451":"TPEX",
+  "6274":"TPEX","6278":"TPEX","6282":"TPEX","6285":"TPEX","6286":"TWSE",
+  "6415":"TWSE","6416":"TPEX","6435":"TPEX","6442":"TPEX","6443":"TPEX","6451":"TPEX",
   "6485":"TPEX","6510":"TPEX","6515":"TPEX","6531":"TPEX","6561":"TPEX",
   "6569":"TPEX","6570":"TPEX","6573":"TWSE","6640":"TPEX","6643":"TPEX",
   "6667":"TPEX","6680":"TPEX","6689":"TPEX","6690":"TPEX","6691":"TWSE",
@@ -589,7 +603,7 @@ const STOCK_EXCHANGE = {
   "7703":"TPEX","7717":"TPEX","7719":"TPEX","7769":"TPEX",
   "8021":"TWSE","8028":"TPEX","8033":"TPEX","8038":"TPEX","8043":"TPEX",
   "8044":"TPEX","8048":"TPEX","8050":"TPEX","8069":"TPEX","8081":"TPEX",
-  "8086":"TPEX","8099":"TPEX","8101":"TPEX","8114":"TPEX","8131":"TPEX",
+  "8086":"TPEX","8099":"TPEX","8101":"TPEX","8114":"TPEX","8121":"TPEX","8131":"TPEX",
   "8210":"TPEX","8222":"TPEX","8234":"TPEX","8255":"TPEX","8261":"TWSE",
   "8299":"TPEX","8358":"TPEX","8374":"TPEX",
   "9802":"TPEX",
@@ -629,7 +643,8 @@ const SECTOR_US = {
   "26. ETF權值股核心":            "SPY / QQQ / SMH(半導體ETF) / SOXX",
   "27. 功率半導體/第三代半導體":   "STM★ / ON★ / MPWR / NVTS / WOLF / IFX(德)",
   "28. 邊緣運算/Edge AI":        "NVDA / AMBA / AVGO / QCOM / INTC / AMD",
-  "29. IDM整合元件製造商":        "MU★ / INTC / STM★ / ON★ / TXN / ADI / WOLF"
+  "29. IDM整合元件製造商":        "MU★ / INTC / STM★ / ON★ / TXN / ADI / WOLF",
+  "30. 半導體通路":               "ARW / AVT (美系通路龍頭) / STM★ / ON★ / MPWR (被代理品牌)"
 };
 
 // ==================== 個股美股對應（從29族群備註整理）====================
@@ -690,14 +705,19 @@ const STOCK_US = {
   "1503":"TSLA/ETN","2236":"TSLA",
   // 族群24 重電電網
   "1519":"ETN/GEV","1513":"ETN/GEV","1514":"NVDA/ETN","2371":"GEV","6443":"FSLR",
+  // 族群10 AI電源補強
+  "6286":"MPWR/ADI",
   // 族群27 功率半導體
   "5347":"STM★/ON★","3707":"WOLF/STM","3016":"WOLF/STM","6488":"WOLF",
   "6182":"WOLF","8255":"ON★","6573":"ON/VSH","8261":"ON/MPWR",
   "8048":"ON","6415":"MPWR★","6138":"MPWR/ON","8081":"MPWR",
+  "6435":"ON/VSH","2481":"ON/VSH/STM",
   // 族群28 邊緣運算
   "3530":"AMBA","6870":"NVDA(Metropolis)/PLTR",
   // 族群29 IDM
-  "2337":"SNDK/WDC","6770":"INTC","8086":"GaAs代工"
+  "2337":"SNDK/WDC","6770":"INTC","8086":"GaAs代工",
+  // 族群30 半導體通路
+  "3036":"ARW/AVT","3702":"ARW/AVT","3060":"ARW/AVT","8121":"ARW/AVT"
 };
 
 // ==================== 功率元件供應鏈層級（三層架構）====================
@@ -708,9 +728,11 @@ const STOCK_POWER_LAYER = {
   "6488":"功率·上層","6182":"功率·上層","3105":"功率·上層",
   "8086":"功率·上層","8048":"功率·上層","8261":"功率·上層",
   "2436":"功率·上層","2329":"功率·上層","8255":"功率·上層","6573":"功率·上層",
+  "6435":"功率·上層","2481":"功率·上層",
   // 中層 PMIC設計
   "6415":"功率·中層","6138":"功率·中層","8081":"功率·中層",
   "6531":"功率·中層","6643":"功率·中層","6202":"功率·中層","3035":"功率·中層",
+  "6286":"功率·中層",
   // 下層 電源模組/重電
   "2308":"功率·下層","2301":"功率·下層","6282":"功率·下層",
   "6121":"功率·下層","3027":"功率·下層","1519":"功率·下層",
