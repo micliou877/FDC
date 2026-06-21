@@ -139,6 +139,85 @@
       /* 按鈕觸控目標放大 */
       button.btn { min-height: 40px; }
     }
+
+    /* ====== 工具 panel 暗色主題 ====== */
+    .tool-panel { background:#0f1419; color:#e6e6e6; padding:14px; border-radius:8px; }
+    .tool-panel h1 { font-size:18px; margin-bottom:4px; color:#fff; }
+    .tool-panel .t-subtitle { font-size:11px; color:#888; margin-bottom:14px; }
+    .tool-panel .t-formula-card { background:#1a2026; border-radius:8px; padding:14px; margin-bottom:14px; border-left:4px solid #4a9eff; }
+    .tool-panel .t-formula-card h3 { font-size:13px; color:#4a9eff; margin-bottom:8px; }
+    .tool-panel .t-formula { font-family:'SF Mono',Consolas,monospace; font-size:13px; color:#ffc94a; background:#0f1419; padding:10px; border-radius:4px; margin:8px 0; }
+    .tool-panel .t-formula-card p { font-size:11px; color:#aaa; line-height:1.6; }
+    .tool-panel .t-formula-card ul { margin-left:18px; margin-top:4px; }
+    .tool-panel .t-formula-card li { font-size:11px; color:#ccc; margin:2px 0; }
+    .tool-panel .t-warning-card { background:#1a2026; border-radius:8px; padding:14px; margin-bottom:14px; border-left:4px solid #ffc94a; }
+    .tool-panel .t-warning-card h3 { font-size:13px; color:#ffc94a; margin-bottom:10px; }
+    .tool-panel .t-controls { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+    .tool-panel .t-btn { background:#1a2026; color:#e6e6e6; border:1px solid #2a3138; padding:7px 12px; border-radius:4px; font-size:12px; cursor:pointer; }
+    .tool-panel .t-btn.primary { background:#4a9eff; color:#fff; border-color:#4a9eff; }
+    .tool-panel .t-btn.danger { background:#d63031; color:#fff; border-color:#d63031; }
+    .tool-panel .t-btn.success { background:#2d8659; color:#fff; border-color:#2d8659; }
+    .tool-panel .t-btn:hover { opacity:.9; }
+    .tool-panel .t-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:6px; }
+    .tool-panel .t-table th { background:#1a2026; padding:10px 6px; text-align:left; font-weight:600; color:#aaa; font-size:11px; white-space:nowrap; }
+    .tool-panel .t-table td { padding:9px 6px; border-bottom:1px solid #1a2026; }
+    .tool-panel .t-table tbody tr:hover { background:#1a2026; }
+    .tool-panel .t-table tbody tr.t-top1 { background:linear-gradient(90deg,rgba(255,107,107,0.15),transparent); }
+    .tool-panel .t-table tbody tr.t-top2 { background:linear-gradient(90deg,rgba(255,153,153,0.10),transparent); }
+    .tool-panel .t-table tbody tr.t-top3 { background:linear-gradient(90deg,rgba(255,200,200,0.05),transparent); }
+    .tool-panel .t-pos { color:#ff6b6b; font-weight:600; }
+    .tool-panel .t-neg { color:#4a9d6f; font-weight:600; }
+    .tool-panel .t-score-bar { position:relative; height:18px; background:#1a2026; border-radius:3px; overflow:hidden; min-width:80px; }
+    .tool-panel .t-score-fill { height:100%; background:linear-gradient(90deg,#d63031,#ff6b6b); display:flex; align-items:center; padding:0 6px; font-size:10px; color:#fff; font-weight:600; }
+    .tool-panel select { background:#1a2026; color:#e6e6e6; border:1px solid #2a3138; padding:7px 12px; border-radius:4px; font-size:12px; cursor:pointer; }
+    .tool-panel textarea { width:100%; min-height:100px; background:#0f1419; color:#e6e6e6; border:1px solid #2a3138; border-radius:4px; padding:8px; font-family:'SF Mono',monospace; font-size:11px; margin-top:8px; }
+    .tool-panel .t-form { background:#1a2026; border-radius:8px; padding:14px; margin-bottom:14px; }
+    .tool-panel .t-form h3 { font-size:13px; color:#4a9eff; margin-bottom:12px; }
+    .tool-panel .t-form-row { display:grid; grid-template-columns:90px 1fr; gap:8px; align-items:center; margin-bottom:8px; }
+    .tool-panel .t-form-row label { font-size:11px; color:#aaa; }
+    .tool-panel .t-form-row input { background:#0f1419; color:#e6e6e6; border:1px solid #2a3138; padding:6px 8px; border-radius:4px; font-size:12px; }
+    .tool-panel .t-score-row { display:grid; grid-template-columns:100px 48px 1fr; gap:8px; align-items:center; margin-bottom:6px; font-size:11px; }
+    .tool-panel .t-score-row input[type="range"] { width:100%; }
+    .tool-panel .t-score-val { color:#ffc94a; font-weight:700; text-align:center; }
+    /* 信念等級 */
+    .tool-panel .t-tier { padding:2px 6px; border-radius:3px; font-size:10px; font-weight:700; }
+    .tool-panel .t-tier.t1 { background:#d63031; color:#fff; }
+    .tool-panel .t-tier.t2 { background:#ff6b6b; color:#fff; }
+    .tool-panel .t-tier.t3 { background:#ff9999; color:#fff; }
+    .tool-panel .t-tier.t4 { background:#888; color:#fff; }
+    .tool-panel .t-del { background:transparent; border:none; color:#d63031; cursor:pointer; font-size:14px; padding:4px 8px; }
+    /* 持有卡 */
+    .tool-panel .t-pos-card { background:#1a2026; border-radius:8px; padding:12px; margin-bottom:10px; border-left:4px solid #888; }
+    .tool-panel .t-pos-card.phase-1 { border-left-color:#ffc94a; }
+    .tool-panel .t-pos-card.phase-2 { border-left-color:#4a9eff; }
+    .tool-panel .t-pos-card.phase-3 { border-left-color:#2d8659; }
+    .tool-panel .t-pos-card.phase-r { border-left-color:#d63031; animation:tpulse 2s infinite; }
+    @keyframes tpulse { 0%,100%{box-shadow:0 0 0 0 rgba(214,48,49,0.4)}50%{box-shadow:0 0 0 8px rgba(214,48,49,0)} }
+    .tool-panel .t-ph-badge { padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700; }
+    .tool-panel .t-ph-badge.p1 { background:#ffc94a; color:#000; }
+    .tool-panel .t-ph-badge.p2 { background:#4a9eff; color:#fff; }
+    .tool-panel .t-ph-badge.p3 { background:#2d8659; color:#fff; }
+    .tool-panel .t-ph-badge.pr { background:#d63031; color:#fff; }
+    .tool-panel .t-prog { background:#0f1419; height:8px; border-radius:4px; overflow:hidden; margin:8px 0; position:relative; }
+    .tool-panel .t-prog-bar { background:linear-gradient(90deg,#ffc94a,#4a9eff,#2d8659); height:100%; }
+    .tool-panel .t-stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:8px; margin:8px 0; }
+    .tool-panel .t-stat { background:#0f1419; padding:6px 8px; border-radius:4px; }
+    .tool-panel .t-stat .label { font-size:10px; color:#888; }
+    .tool-panel .t-stat .value { font-size:13px; font-weight:600; color:#fff; margin-top:2px; }
+    .tool-panel .t-alert { font-size:11px; color:#ffc94a; padding:6px 0; }
+    .tool-panel .t-alert.danger { color:#ff6b6b; }
+    .tool-panel .t-alert.success { color:#2d8659; }
+    .tool-panel .t-empty { text-align:center; padding:40px 20px; color:#666; font-size:13px; }
+    /* 工具2 量比badge */
+    .tool-panel .vol-hot { background:#ff6b6b; color:#fff; padding:1px 5px; border-radius:3px; font-size:10px; font-weight:600; }
+    .tool-panel .vol-low { background:#555; color:#ccc; padding:1px 5px; border-radius:3px; font-size:10px; }
+    /* 工具2 勾選清單 */
+    .tool-panel .t-check-card { background:#1a2026; border-radius:8px; padding:14px; margin-bottom:14px; border-left:4px solid #ffc94a; }
+    .tool-panel .t-check-card h3 { font-size:13px; color:#ffc94a; margin-bottom:10px; }
+    .tool-panel .t-check-item { display:flex; align-items:center; gap:8px; padding:6px 0; font-size:12px; color:#ddd; }
+    .tool-panel .t-check-item input[type="checkbox"] { width:16px; height:16px; }
+    .tool-panel .t-pass { color:#ff6b6b; font-weight:700; }
+    .tool-panel .t-fail { color:#4a9d6f; font-weight:700; }
   </style>
 </head>
 <body>
@@ -154,6 +233,10 @@
   <button class="tab" data-tab="stocks">明細</button>
   <button class="tab" data-tab="watchlist">關注</button>
   <button class="tab" data-tab="global">國際</button>
+  <button class="tab" data-tab="tool1">🔥 熱度</button>
+  <button class="tab" data-tab="tool2">💪 強勢</button>
+  <button class="tab" data-tab="tool3">🏆 信念</button>
+  <button class="tab" data-tab="tool4">⏰ 持有</button>
   <button class="tab" data-tab="data">設定</button>
 </div>
 
@@ -276,6 +359,141 @@
     <button class="btn primary" id="openTvAppBtn" style="padding: 10px 14px;">開啟圖表</button>
   </div>
   <div id="tvChartContainer" style="height: 75vh; width: 100%; border-radius: 8px; overflow: hidden; background: #0f1419;"></div>
+</div>
+
+<!-- ====== 工具 1：族群熱度評分 ====== -->
+<div class="panel" id="tool1">
+<div class="tool-panel">
+<h1>🔥 族群熱度評分</h1>
+<div class="t-subtitle">每週日跑一次 → 排出 Top 3 操作族群</div>
+<div class="t-formula-card">
+  <h3>📐 評分公式</h3>
+  <div class="t-formula">熱度分數 = (10日漲幅 × 0.5) + (5日漲幅 × 0.3) + (成交金額標準化 × 0.2)</div>
+  <p>• <strong>10日漲幅（50%）</strong>：主要趨勢方向　• <strong>5日漲幅（30%）</strong>：近期加速度　• <strong>成交金額（20%）</strong>：資金關注度</p>
+</div>
+<div class="t-controls">
+  <button class="t-btn primary" id="t1_loadDemo">🎯 載入範例</button>
+  <button class="t-btn" id="t1_export">📤 匯出 JSON</button>
+  <button class="t-btn" id="t1_clear">🗑 清空</button>
+</div>
+<table class="t-table">
+  <thead><tr><th>排名</th><th>族群</th><th style="text-align:right">10日%</th><th style="text-align:right">5日%</th><th style="text-align:right">金額(億)</th><th>熱度分數</th><th>建議</th></tr></thead>
+  <tbody id="t1_tbody"><tr><td colspan="7" style="text-align:center;padding:40px;color:#666;">請點「載入範例」</td></tr></tbody>
+</table>
+<div class="t-warning-card" id="t1_decision" style="display:none;">
+  <h3>💡 部位配置建議</h3>
+  <div id="t1_decisionContent"></div>
+</div>
+<div class="t-formula-card" style="margin-top:14px;">
+  <h3>📊 匯出資料（JSON）</h3>
+  <textarea id="t1_json" readonly></textarea>
+</div>
+</div>
+</div>
+
+<!-- ====== 工具 2：個股強勢度評分 ====== -->
+<div class="panel" id="tool2">
+<div class="tool-panel">
+<h1>💪 個股強勢度評分</h1>
+<div class="t-subtitle">從熱門族群中挑「最強 1-2 檔」</div>
+<div class="t-formula-card">
+  <h3>📐 強勢度公式</h3>
+  <div class="t-formula">強勢度 = (5日漲幅 × 0.4) + (量比 × 0.3 × 10) + (距前高反向 × 0.3)</div>
+  <p>• <strong>5日漲幅（40%）</strong>：當前動能　• <strong>量比（30%）</strong>：籌碼聚焦　• <strong>距前高（30%）</strong>：上漲空間</p>
+</div>
+<div class="t-check-card">
+  <h3>✅ 起漲股 5 個 OK 條件</h3>
+  <div class="t-check-item"><input type="checkbox" id="t2_c1"><label for="t2_c1">站上 60 日均線（季線）</label></div>
+  <div class="t-check-item"><input type="checkbox" id="t2_c2"><label for="t2_c2">月線、季線轉強或多頭排列</label></div>
+  <div class="t-check-item"><input type="checkbox" id="t2_c3"><label for="t2_c3">近 5 日均量 ≥ 60 日均量 × 1.5 倍</label></div>
+  <div class="t-check-item"><input type="checkbox" id="t2_c4"><label for="t2_c4">同族群至少 3 檔同步走強</label></div>
+  <div class="t-check-item"><input type="checkbox" id="t2_c5"><label for="t2_c5">距前波高點還有 30%+ 上漲空間</label></div>
+  <div id="t2_checkResult" style="margin-top:10px;font-size:13px;color:#ddd;">
+    勾選 <span id="t2_checkCount">0</span>/5（4 個以上才進場：<span id="t2_checkPass" class="t-fail">不夠 ❌</span>）
+  </div>
+</div>
+<div class="t-controls">
+  <select id="t2_sectorSel"><option value="">— 選擇族群 —</option></select>
+  <button class="t-btn primary" id="t2_loadDemo">🎯 載入範例</button>
+  <button class="t-btn" id="t2_export">📤 匯出 JSON</button>
+</div>
+<table class="t-table">
+  <thead><tr><th>名次</th><th>代號</th><th>公司</th><th style="text-align:right">收盤</th><th style="text-align:right">5日%</th><th style="text-align:center">量比</th><th style="text-align:right">距前高</th><th>強勢度</th><th>動作</th></tr></thead>
+  <tbody id="t2_tbody"><tr><td colspan="9" style="text-align:center;padding:40px;color:#666;">請選擇族群並載入範例</td></tr></tbody>
+</table>
+<div class="t-formula-card" style="margin-top:14px;"><h3>📊 匯出資料</h3><textarea id="t2_json" readonly></textarea></div>
+</div>
+</div>
+
+<!-- ====== 工具 3：信念排行榜 ====== -->
+<div class="panel" id="tool3">
+<div class="tool-panel">
+<h1>🏆 信念排行榜</h1>
+<div class="t-subtitle">為每檔股票打 4 個維度的分數 → 排出 Top 10</div>
+<div class="t-formula-card">
+  <h3>📐 信念總分公式</h3>
+  <div class="t-formula">信念總分 = (理解度 × 0.3) + (確信度 × 0.3) + (風險可控 × 0.2) + (爆發力 × 0.2)</div>
+  <p>分級：T1 (8.0+) / T2 (7.0-7.9) / T3 (6.0-6.9) / T4 (&lt;6.0)</p>
+</div>
+<div class="t-form">
+  <h3>➕ 新增 / 編輯</h3>
+  <div class="t-form-row"><label>代號</label><input type="text" id="t3_code" placeholder="例如 2330"></div>
+  <div class="t-form-row"><label>公司</label><input type="text" id="t3_name" placeholder="例如 台積電"></div>
+  <div class="t-form-row"><label>族群</label><input type="text" id="t3_sec" placeholder="例如 AI晶片"></div>
+  <div style="margin-top:12px;padding-top:12px;border-top:1px solid #2a3138;">
+    <div class="t-score-row"><label>理解度（30%）</label><span class="t-score-val" id="t3_v1">5</span><input type="range" id="t3_s1" min="1" max="10" value="5"></div>
+    <div class="t-score-row"><label>確信度（30%）</label><span class="t-score-val" id="t3_v2">5</span><input type="range" id="t3_s2" min="1" max="10" value="5"></div>
+    <div class="t-score-row"><label>風險可控（20%）</label><span class="t-score-val" id="t3_v3">5</span><input type="range" id="t3_s3" min="1" max="10" value="5"></div>
+    <div class="t-score-row"><label>爆發力（20%）</label><span class="t-score-val" id="t3_v4">5</span><input type="range" id="t3_s4" min="1" max="10" value="5"></div>
+  </div>
+  <div style="margin-top:12px;display:flex;gap:6px;">
+    <button class="t-btn primary" id="t3_add">新增</button>
+    <button class="t-btn" id="t3_loadDemo">🎯 載入範例</button>
+    <button class="t-btn" id="t3_export">📤 匯出 JSON</button>
+  </div>
+</div>
+<table class="t-table">
+  <thead><tr><th>名次</th><th>代號</th><th>公司</th><th>族群</th><th style="text-align:center">理解</th><th style="text-align:center">確信</th><th style="text-align:center">風控</th><th style="text-align:center">爆發</th><th style="text-align:center">總分</th><th>等級</th><th></th></tr></thead>
+  <tbody id="t3_tbody"><tr><td colspan="11" style="text-align:center;padding:40px;color:#666;">請新增或載入範例</td></tr></tbody>
+</table>
+<div class="t-warning-card" id="t3_allocCard" style="display:none;margin-top:14px;">
+  <h3>💼 部位配置建議</h3>
+  <div id="t3_allocContent"></div>
+</div>
+<div class="t-formula-card" style="margin-top:14px;"><h3>📊 匯出資料</h3><textarea id="t3_json" readonly></textarea></div>
+</div>
+</div>
+
+<!-- ====== 工具 4：3 週持有原則追蹤 ====== -->
+<div class="panel" id="tool4">
+<div class="tool-panel">
+<h1>⏰ 3 週持有原則追蹤</h1>
+<div class="t-subtitle">避免賣在低點、買在高點的頻繁換股</div>
+<div class="t-formula-card">
+  <h3>📐 3 週原則邏輯</h3>
+  <p>第 1 週（觀察）：讓子彈飛　第 2 週（耐心）：不可頻繁換股　第 3 週（評估）：決定續抱、加碼或淘汰</p>
+  <ul style="margin-top:8px;">
+    <li>跌破週線且爆量 → 立即停損</li>
+    <li>族群其他股都在大跌 → 考慮換族群</li>
+    <li>單檔虧損超過 -10% → 強制停損</li>
+  </ul>
+</div>
+<div class="t-form">
+  <h3>➕ 新增持股</h3>
+  <div class="t-form-row"><label>代號</label><input type="text" id="t4_code" placeholder="例如 3081"></div>
+  <div class="t-form-row"><label>公司</label><input type="text" id="t4_name" placeholder="例如 聯亞"></div>
+  <div class="t-form-row"><label>進場日</label><input type="date" id="t4_date"></div>
+  <div class="t-form-row"><label>進場價</label><input type="number" id="t4_entry" placeholder="成本價" step="0.01"></div>
+  <div class="t-form-row"><label>當前價</label><input type="number" id="t4_cur" placeholder="現在股價" step="0.01"></div>
+  <div style="margin-top:12px;display:flex;gap:6px;">
+    <button class="t-btn primary" id="t4_add">➕ 加入追蹤</button>
+    <button class="t-btn" id="t4_loadDemo">🎯 載入範例</button>
+    <button class="t-btn" id="t4_export">📤 匯出 JSON</button>
+  </div>
+</div>
+<div id="t4_list"><div class="t-empty">尚未追蹤任何持股</div></div>
+<div class="t-formula-card" style="margin-top:14px;"><h3>📊 匯出資料</h3><textarea id="t4_json" readonly></textarea></div>
+</div>
 </div>
 
 <div class="panel" id="data">
@@ -1227,6 +1445,10 @@ function switchTab(tab) {
     if(document.getElementById("globalStockSelect").options.length === 0) initGlobalPanel();
   }
   if(tab === "strategy") renderStrategy();
+  if(tab === "tool1" && !window._t1_inited) { window._t1_inited=true; t1_init(); }
+  if(tab === "tool2" && !window._t2_inited) { window._t2_inited=true; t2_init(); }
+  if(tab === "tool3" && !window._t3_inited) { window._t3_inited=true; t3_init(); }
+  if(tab === "tool4" && !window._t4_inited) { window._t4_inited=true; t4_init(); }
 }
 
 // ==================== 面板渲染邏輯 ====================
@@ -1915,6 +2137,280 @@ document.addEventListener('click', function(e) {
   tr.closest('tbody').querySelectorAll('tr.row-selected').forEach(r => r.classList.remove('row-selected'));
   if (!wasSelected) tr.classList.add('row-selected');
 });
+
+// ==================== 工具 1：族群熱度評分 ====================
+function t1_init() {
+  const T1_DEMO = [
+    {name:"AI電源BBU",pct10:8.2,pct5:4.1,amount:320},
+    {name:"功率半導體",pct10:5.6,pct5:3.8,amount:210},
+    {name:"AI晶片",pct10:4.9,pct5:2.2,amount:580},
+    {name:"散熱",pct10:3.1,pct5:1.5,amount:140},
+    {name:"半導體通路",pct10:2.4,pct5:1.2,amount:190},
+  ];
+  let t1_data = [];
+
+  function t1_calcHeat(d) {
+    const maxAmt = Math.max(...t1_data.map(x=>x.amount), 1);
+    const amtN = (d.amount / maxAmt) * 10;
+    return (d.pct10*0.5 + d.pct5*0.3 + amtN*0.2);
+  }
+  function t1_action(rank) {
+    if(rank===1) return '⭐ 主力倉位（35-40%）';
+    if(rank===2) return '📌 次要倉位（20-25%）';
+    if(rank===3) return '🔍 觀察倉（10-15%）';
+    return '— 觀望';
+  }
+  function t1_medal(r){return r===1?'🥇':r===2?'🥈':r===3?'🥉':r;}
+  function t1_render() {
+    const tbody = document.getElementById('t1_tbody');
+    if(!tbody) return;
+    if(!t1_data.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:#666;">請點「載入範例」</td></tr>';return;}
+    const scored = t1_data.map(d=>({...d,score:t1_calcHeat(d)})).sort((a,b)=>b.score-a.score);
+    tbody.innerHTML = scored.map((d,i)=>{
+      const r=i+1, pct=(d.score/Math.max(scored[0].score,1)*100).toFixed(0);
+      return `<tr class="${r<=3?'t-top'+r:''}">
+        <td>${t1_medal(r)}</td><td>${d.name}</td>
+        <td class="t-${d.pct10>=0?'pos':'neg'}" style="text-align:right">${d.pct10>=0?'+':''}${d.pct10}%</td>
+        <td class="t-${d.pct5>=0?'pos':'neg'}" style="text-align:right">${d.pct5>=0?'+':''}${d.pct5}%</td>
+        <td style="text-align:right">${d.amount}</td>
+        <td><div class="t-score-bar"><div class="t-score-fill" style="width:${pct}%">${d.score.toFixed(1)}</div></div></td>
+        <td style="font-size:11px">${t1_action(r)}</td>
+      </tr>`;
+    }).join('');
+    const top=scored[0],sec=scored[1]||null,trd=scored[2]||null;
+    const dc=document.getElementById('t1_decisionContent');
+    const dd=document.getElementById('t1_decision');
+    if(dc&&dd){
+      dc.innerHTML=`<p>📌 <strong>本週主力操作族群</strong>：${top.name}（熱度 ${top.score.toFixed(1)}）</p>`+
+        (sec?`<p>📌 次要佈局：${sec.name}（熱度 ${sec.score.toFixed(1)}）</p>`:'')+
+        (trd?`<p>🔍 觀察族群：${trd.name}（熱度 ${trd.score.toFixed(1)}）</p>`:'')+
+        `<p style="margin-top:10px;font-size:11px;color:#aaa;">✅ 資金集中於前 2 族群，避免分散。</p>`;
+      dd.style.display='block';
+    }
+    const tj=document.getElementById('t1_json');
+    if(tj) tj.value=JSON.stringify(scored.map((d,i)=>({rank:i+1,...d,score:parseFloat(d.score.toFixed(2))})),null,2);
+  }
+  document.getElementById('t1_loadDemo').onclick=()=>{t1_data=[...T1_DEMO];t1_render();};
+  document.getElementById('t1_export').onclick=()=>{const j=document.getElementById('t1_json');if(j){j.select();document.execCommand('copy');alert('已複製到剪貼簿！');}};
+  document.getElementById('t1_clear').onclick=()=>{t1_data=[];t1_render();const d=document.getElementById('t1_decision');if(d)d.style.display='none';};
+}
+
+// ==================== 工具 2：個股強勢度評分 ====================
+function t2_init() {
+  const T2_SECTORS = {
+    "AI電源BBU":["6415矽力","6138茂達","6286立錡","8081致新","6449創耀"],
+    "功率半導體":["6704至善","6196帆宣","6435大中","2481強茂","5299杰力"],
+    "AI晶片":["2330台積電","2454聯發科","3711日月投"],
+    "散熱":["3017奇鋐","6230超眾","8163達方"],
+    "半導體通路":["3036文曄","3702大聯大","3060銘異","8121越峰"],
+  };
+  const T2_DEMO = {
+    "AI電源BBU":[
+      {code:"6415",name:"矽力-KY",close:1200,pct5:6.8,volRatio:2.4,distHigh:12},
+      {code:"6138",name:"茂達",close:98,pct5:4.2,volRatio:1.8,distHigh:25},
+      {code:"6286",name:"立錡",close:215,pct5:3.1,volRatio:1.2,distHigh:32},
+    ],
+    "功率半導體":[
+      {code:"6435",name:"大中",close:45,pct5:5.9,volRatio:2.1,distHigh:18},
+      {code:"5299",name:"杰力",close:63,pct5:4.4,volRatio:1.5,distHigh:28},
+      {code:"2481",name:"強茂",close:82,pct5:3.2,volRatio:1.1,distHigh:35},
+    ],
+  };
+  let t2_stockData=[], t2_curSector='';
+
+  function t2_calcStrength(d) {
+    return d.pct5*0.4 + d.volRatio*0.3*10 + (100-d.distHigh)/10*0.3;
+  }
+  function t2_volBadge(v){ return v>=2?`<span class="vol-hot">量比 ${v}x</span>`:`<span class="vol-low">量比 ${v}x</span>`; }
+  function t2_action(r){ if(r===1)return'⭐ 優先買'; if(r===2)return'📌 備選'; return'— 觀望'; }
+  function t2_render() {
+    const tbody=document.getElementById('t2_tbody');
+    if(!tbody) return;
+    if(!t2_stockData.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:40px;color:#666;">請選擇族群並載入範例</td></tr>';return;}
+    const scored=t2_stockData.map(d=>({...d,score:t2_calcStrength(d)})).sort((a,b)=>b.score-a.score);
+    const maxS=Math.max(scored[0]?.score||1,1);
+    tbody.innerHTML=scored.map((d,i)=>{
+      const r=i+1,pct=(d.score/maxS*100).toFixed(0);
+      return `<tr class="${r<=3?'t-top'+r:''}">
+        <td>${r}</td><td><strong>${d.code}</strong></td><td>${d.name}</td>
+        <td style="text-align:right">${d.close}</td>
+        <td class="t-${d.pct5>=0?'pos':'neg'}" style="text-align:right">${d.pct5>=0?'+':''}${d.pct5}%</td>
+        <td style="text-align:center">${t2_volBadge(d.volRatio)}</td>
+        <td style="text-align:right;color:#aaa">${d.distHigh}%</td>
+        <td><div class="t-score-bar"><div class="t-score-fill" style="width:${pct}%">${d.score.toFixed(1)}</div></div></td>
+        <td style="font-size:11px">${t2_action(r)}</td>
+      </tr>`;
+    }).join('');
+    const tj=document.getElementById('t2_json');
+    if(tj) tj.value=JSON.stringify(scored.map((d,i)=>({rank:i+1,...d,score:parseFloat(d.score.toFixed(2))})),null,2);
+  }
+  function t2_updateCheck() {
+    let cnt=0;
+    ['t2_c1','t2_c2','t2_c3','t2_c4','t2_c5'].forEach(id=>{const el=document.getElementById(id);if(el&&el.checked)cnt++;});
+    const cc=document.getElementById('t2_checkCount');
+    const cp=document.getElementById('t2_checkPass');
+    if(cc) cc.textContent=cnt;
+    if(cp){cp.textContent=cnt>=4?'達標 ✅':'不夠 ❌';cp.className=cnt>=4?'t-pass':'t-fail';}
+  }
+  const sel=document.getElementById('t2_sectorSel');
+  if(sel){
+    Object.keys(T2_SECTORS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;sel.appendChild(o);});
+    sel.onchange=()=>{t2_curSector=sel.value;};
+  }
+  document.getElementById('t2_loadDemo').onclick=()=>{
+    const sector=document.getElementById('t2_sectorSel')?.value||'AI電源BBU';
+    t2_stockData=T2_DEMO[sector]||T2_DEMO['AI電源BBU'];
+    t2_render();
+  };
+  document.getElementById('t2_export').onclick=()=>{const j=document.getElementById('t2_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
+  ['t2_c1','t2_c2','t2_c3','t2_c4','t2_c5'].forEach(id=>{const el=document.getElementById(id);if(el)el.onchange=t2_updateCheck;});
+  t2_updateCheck();
+}
+
+// ==================== 工具 3：信念排行榜 ====================
+function t3_init() {
+  const T3_DEMO = [
+    {code:'2330',name:'台積電',sector:'AI晶片',s1:9,s2:9,s3:8,s4:9},
+    {code:'6415',name:'矽力',sector:'AI電源',s1:8,s2:8,s3:7,s4:9},
+    {code:'6435',name:'大中',sector:'功率',s1:7,s2:8,s3:8,s4:8},
+    {code:'3036',name:'文曄',sector:'通路',s1:7,s2:7,s3:9,s4:7},
+    {code:'2481',name:'強茂',sector:'功率',s1:7,s2:7,s3:8,s4:8},
+  ];
+  let t3_beliefs=[];
+
+  function t3_calcScore(d){ return d.s1*0.3+d.s2*0.3+d.s3*0.2+d.s4*0.2; }
+  function t3_tier(sc){ if(sc>=8)return{l:'T1',c:'t1'}; if(sc>=7)return{l:'T2',c:'t2'}; if(sc>=6)return{l:'T3',c:'t3'}; return{l:'T4',c:'t4'}; }
+  function t3_weight(t){ if(t==='T1')return'30-35%'; if(t==='T2')return'20-25%'; if(t==='T3')return'10-15%'; return'0-5%'; }
+  function t3_render() {
+    const tbody=document.getElementById('t3_tbody');
+    if(!tbody) return;
+    if(!t3_beliefs.length){tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:40px;color:#666;">請新增或載入範例</td></tr>';return;}
+    const scored=[...t3_beliefs].map(d=>({...d,total:t3_calcScore(d)})).sort((a,b)=>b.total-a.total);
+    tbody.innerHTML=scored.map((d,i)=>{
+      const r=i+1,ti=t3_tier(d.total);
+      return `<tr class="${r<=3?'t-top'+r:''}">
+        <td>${r}</td><td><strong>${d.code}</strong></td><td>${d.name}</td><td style="font-size:11px;color:#aaa">${d.sector}</td>
+        <td style="text-align:center">${d.s1}</td><td style="text-align:center">${d.s2}</td>
+        <td style="text-align:center">${d.s3}</td><td style="text-align:center">${d.s4}</td>
+        <td style="text-align:center;font-weight:700;color:#ffc94a">${d.total.toFixed(1)}</td>
+        <td style="text-align:center"><span class="t-tier ${ti.c}">${ti.l}</span></td>
+        <td><button class="t-del" onclick="t3_delete('${d.code}')">✕</button></td>
+      </tr>`;
+    }).join('');
+    const ac=document.getElementById('t3_allocCard');
+    const aContent=document.getElementById('t3_allocContent');
+    if(ac&&aContent){
+      const tierCounts={T1:0,T2:0,T3:0,T4:0};
+      scored.forEach(d=>{tierCounts[t3_tier(d.total).l]++;});
+      aContent.innerHTML=`<p>${scored.slice(0,5).map(d=>{const ti=t3_tier(d.total);return`<strong>${d.code} ${d.name}</strong>（${ti.l} ${d.total.toFixed(1)}分）→ 配置 ${t3_weight(ti.l)}`;}).join('<br>')}</p><p style="margin-top:8px;font-size:11px;color:#aaa">T1：${tierCounts.T1} 檔　T2：${tierCounts.T2} 檔　T3：${tierCounts.T3} 檔</p>`;
+      ac.style.display='block';
+    }
+    const tj=document.getElementById('t3_json');
+    if(tj) tj.value=JSON.stringify(scored.map((d,i)=>({rank:i+1,...d})),null,2);
+  }
+  window.t3_delete=function(code){ t3_beliefs=t3_beliefs.filter(d=>d.code!==code); t3_render(); };
+  window.t3_edit=function(code){ const d=t3_beliefs.find(x=>x.code===code);if(!d)return;
+    document.getElementById('t3_code').value=d.code;document.getElementById('t3_name').value=d.name;document.getElementById('t3_sec').value=d.sector;
+    ['s1','s2','s3','s4'].forEach(k=>{const el=document.getElementById('t3_'+k);if(el){el.value=d[k];document.getElementById('t3_v'+k.slice(1)).textContent=d[k];}});
+  };
+  ['1','2','3','4'].forEach(n=>{
+    const el=document.getElementById('t3_s'+n),val=document.getElementById('t3_v'+n);
+    if(el&&val) el.oninput=()=>{val.textContent=el.value;};
+  });
+  document.getElementById('t3_add').onclick=()=>{
+    const code=document.getElementById('t3_code')?.value.trim();
+    const name=document.getElementById('t3_name')?.value.trim()||code;
+    const sector=document.getElementById('t3_sec')?.value.trim()||'';
+    if(!code){alert('請輸入代號');return;}
+    const s1=+document.getElementById('t3_s1').value,s2=+document.getElementById('t3_s2').value;
+    const s3=+document.getElementById('t3_s3').value,s4=+document.getElementById('t3_s4').value;
+    t3_beliefs=t3_beliefs.filter(d=>d.code!==code);
+    t3_beliefs.push({code,name,sector,s1,s2,s3,s4});
+    t3_render();
+  };
+  document.getElementById('t3_loadDemo').onclick=()=>{t3_beliefs=[...T3_DEMO];t3_render();};
+  document.getElementById('t3_export').onclick=()=>{const j=document.getElementById('t3_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
+}
+
+// ==================== 工具 4：3 週持有原則 ====================
+function t4_init() {
+  const T4_DEMO = [
+    {code:'6415',name:'矽力-KY',date:'2026-06-07',entry:1150,cur:1200},
+    {code:'6435',name:'大中',date:'2026-06-02',entry:42,cur:45},
+    {code:'2330',name:'台積電',date:'2026-05-28',entry:980,cur:1020},
+  ];
+  let t4_positions=[];
+  const t4_dateEl=document.getElementById('t4_date');
+  if(t4_dateEl) t4_dateEl.value=new Date().toISOString().slice(0,10);
+
+  function t4_days(dateStr){return Math.floor((Date.now()-new Date(dateStr))/(86400000));}
+  function t4_phase(d){
+    const days=t4_days(d.date);
+    if(days<7) return {id:'p1',label:'第1週',cls:'phase-1',badge:'p1',tip:'讓子彈飛，觀察為主'};
+    if(days<14) return {id:'p2',label:'第2週',cls:'phase-2',badge:'p2',tip:'耐心持有，不隨意換股'};
+    if(days<21) return {id:'p3',label:'第3週',cls:'phase-3',badge:'p3',tip:'評估是否加碼或保持'};
+    return {id:'pr',label:'需評估',cls:'phase-r',badge:'pr',tip:'⚠️ 已超過3週！檢視是否續抱、加碼或淘汰'};
+  }
+  function t4_retPct(d){ if(!d.entry||d.entry===0)return 0; return ((d.cur-d.entry)/d.entry*100); }
+  function t4_progressW(d){return Math.min(t4_days(d.date)/21*100,100).toFixed(0);}
+  function t4_action(ph,ret){
+    if(ph.id==='pr'){
+      if(ret<=-10) return {cls:'danger',text:'⚠️ -10% 強制停損！'};
+      if(ret<=0) return {cls:'danger',text:'虧損超過3週 → 考慮認輸'};
+      return {cls:'success',text:'續抱 or 加碼？重新評估信念'};
+    }
+    if(ret<=-10) return {cls:'danger',text:'跌破 -10% → 停損出場'};
+    if(ret>=15) return {cls:'success',text:'獲利 15%+ → 考慮部分獲利'};
+    return {cls:'',text:ph.tip};
+  }
+  function t4_render() {
+    const list=document.getElementById('t4_list');
+    if(!list) return;
+    if(!t4_positions.length){list.innerHTML='<div class="t-empty">尚未追蹤任何持股</div>';return;}
+    list.innerHTML=t4_positions.map((d,idx)=>{
+      const ph=t4_phase(d),ret=t4_retPct(d),act=t4_action(ph,ret),days=t4_days(d.date);
+      return `<div class="t-pos-card ${ph.cls}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div><strong style="font-size:14px">${d.code}</strong> <span style="color:#aaa">${d.name}</span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="t-ph-badge ${ph.badge}">${ph.label}</span>
+            <span class="${ret>=0?'t-pos':'t-neg'}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>
+            <button class="t-del" onclick="t4_del(${idx})">✕</button>
+          </div>
+        </div>
+        <div class="t-prog"><div class="t-prog-bar" style="width:${t4_progressW(d)}%"></div></div>
+        <div class="t-stat-grid">
+          <div class="t-stat"><div class="label">持有天數</div><div class="value">${days} 天</div></div>
+          <div class="t-stat"><div class="label">進場價</div><div class="value">${d.entry}</div></div>
+          <div class="t-stat"><div class="label">當前價</div><div class="value" style="${ret>=0?'color:#ff6b6b':'color:#4a9d6f'}">${d.cur}</div></div>
+          <div class="t-stat"><div class="label">損益</div><div class="value ${ret>=0?'t-pos':'t-neg'}">${ret>=0?'+':''}${ret.toFixed(2)}%</div></div>
+        </div>
+        <div class="t-alert ${act.cls}" style="margin-top:4px">💡 ${act.text}</div>
+        <div style="display:flex;gap:6px;margin-top:10px;align-items:center">
+          <span style="font-size:11px;color:#aaa">更新現價：</span>
+          <input type="number" id="t4_upd${idx}" value="${d.cur}" step="0.01" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px;width:90px">
+          <button class="t-btn" style="padding:4px 10px;font-size:11px" onclick="t4_update(${idx})">更新</button>
+        </div>
+      </div>`;
+    }).join('');
+    const tj=document.getElementById('t4_json');
+    if(tj) tj.value=JSON.stringify(t4_positions.map(d=>({...d,days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
+  }
+  window.t4_del=function(idx){t4_positions.splice(idx,1);t4_render();};
+  window.t4_update=function(idx){const el=document.getElementById('t4_upd'+idx);if(el){t4_positions[idx].cur=parseFloat(el.value)||t4_positions[idx].cur;t4_render();}};
+  document.getElementById('t4_add').onclick=()=>{
+    const code=document.getElementById('t4_code')?.value.trim();
+    const name=document.getElementById('t4_name')?.value.trim()||code;
+    const date=document.getElementById('t4_date')?.value;
+    const entry=parseFloat(document.getElementById('t4_entry')?.value);
+    const cur=parseFloat(document.getElementById('t4_cur')?.value)||entry;
+    if(!code||!date||!entry){alert('請填代號、進場日、進場價');return;}
+    t4_positions.push({code,name,date,entry,cur});
+    t4_render();
+  };
+  document.getElementById('t4_loadDemo').onclick=()=>{t4_positions=[...T4_DEMO];t4_render();};
+  document.getElementById('t4_export').onclick=()=>{const j=document.getElementById('t4_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
+}
 </script>
 </body>
 </html>
