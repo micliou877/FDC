@@ -372,8 +372,9 @@
   <p>• <strong>10日漲幅（50%）</strong>：主要趨勢方向　• <strong>5日漲幅（30%）</strong>：近期加速度　• <strong>成交金額（20%）</strong>：資金關注度</p>
 </div>
 <div class="t-controls">
-  <button class="t-btn primary" id="t1_loadDemo">🎯 載入範例</button>
-  <button class="t-btn" id="t1_export">📤 匯出 JSON</button>
+  <button class="t-btn primary" id="t1_loadPool">📊 從股池計算</button>
+  <button class="t-btn" id="t1_loadDemo">🎯 範例</button>
+  <button class="t-btn" id="t1_export">📤 匯出</button>
   <button class="t-btn" id="t1_clear">🗑 清空</button>
 </div>
 <table class="t-table">
@@ -414,8 +415,9 @@
 </div>
 <div class="t-controls">
   <select id="t2_sectorSel"><option value="">— 選擇族群 —</option></select>
-  <button class="t-btn primary" id="t2_loadDemo">🎯 載入範例</button>
-  <button class="t-btn" id="t2_export">📤 匯出 JSON</button>
+  <button class="t-btn primary" id="t2_loadPool">📊 從股池載入</button>
+  <button class="t-btn" id="t2_loadDemo">🎯 範例</button>
+  <button class="t-btn" id="t2_export">📤 匯出</button>
 </div>
 <table class="t-table">
   <thead><tr><th>名次</th><th>代號</th><th>公司</th><th style="text-align:right">收盤</th><th style="text-align:right">5日%</th><th style="text-align:center">量比</th><th style="text-align:right">距前高</th><th>強勢度</th><th>動作</th></tr></thead>
@@ -437,9 +439,13 @@
 </div>
 <div class="t-form">
   <h3>➕ 新增 / 編輯</h3>
-  <div class="t-form-row"><label>代號</label><input type="text" id="t3_code" placeholder="例如 2330"></div>
-  <div class="t-form-row"><label>公司</label><input type="text" id="t3_name" placeholder="例如 台積電"></div>
-  <div class="t-form-row"><label>族群</label><input type="text" id="t3_sec" placeholder="例如 AI晶片"></div>
+  <div class="t-form-row">
+    <label>搜尋標的</label>
+    <input list="t3_stockList" id="t3_stockInput" placeholder="輸入代號或名稱…" autocomplete="off"
+      style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:6px 8px;border-radius:4px;font-size:12px;width:100%;">
+    <datalist id="t3_stockList"></datalist>
+  </div>
+  <div class="t-form-row"><label>族群</label><input type="text" id="t3_sec" placeholder="自動帶入或手動填"></div>
   <div style="margin-top:12px;padding-top:12px;border-top:1px solid #2a3138;">
     <div class="t-score-row"><label>理解度（30%）</label><span class="t-score-val" id="t3_v1">5</span><input type="range" id="t3_s1" min="1" max="10" value="5"></div>
     <div class="t-score-row"><label>確信度（30%）</label><span class="t-score-val" id="t3_v2">5</span><input type="range" id="t3_s2" min="1" max="10" value="5"></div>
@@ -2180,10 +2186,24 @@ function t1_init() {
     return '— 觀望';
   }
   function t1_medal(r){return r===1?'🥇':r===2?'🥈':r===3?'🥉':r;}
+  function t1_loadFromPool() {
+    if(typeof SECTORS==='undefined'||typeof stockData==='undefined'){alert('請先在設定頁更新股價資料');return;}
+    const result=Object.entries(SECTORS).map(([name,stocks])=>{
+      const withData=stocks.map(st=>stockData[st.code]).filter(d=>d&&d.price!=null);
+      if(!withData.length) return null;
+      const avgPct10=withData.reduce((s,d)=>s+(d.pct10||0),0)/withData.length;
+      const avgPct5=withData.reduce((s,d)=>s+(d.pct5||0),0)/withData.length;
+      const totalAmt=withData.reduce((s,d)=>s+(d.amount||0),0);
+      return {name,pct10:+avgPct10.toFixed(1),pct5:+avgPct5.toFixed(1),amount:+totalAmt.toFixed(1)};
+    }).filter(Boolean);
+    if(!result.length){alert('無報價資料，請先在設定頁更新股價');return;}
+    t1_data=result;
+    t1_render();
+  }
   function t1_render() {
     const tbody = document.getElementById('t1_tbody');
     if(!tbody) return;
-    if(!t1_data.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:#666;">請點「載入範例」</td></tr>';return;}
+    if(!t1_data.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:40px;color:#666;">請點「📊 從股池計算」或「🎯 範例」</td></tr>';return;}
     const scored = t1_data.map(d=>({...d,score:t1_calcHeat(d)})).sort((a,b)=>b.score-a.score);
     tbody.innerHTML = scored.map((d,i)=>{
       const r=i+1, pct=(d.score/Math.max(scored[0].score,1)*100).toFixed(0);
@@ -2209,8 +2229,9 @@ function t1_init() {
     const tj=document.getElementById('t1_json');
     if(tj) tj.value=JSON.stringify(scored.map((d,i)=>({rank:i+1,...d,score:parseFloat(d.score.toFixed(2))})),null,2);
   }
+  document.getElementById('t1_loadPool').onclick=t1_loadFromPool;
   document.getElementById('t1_loadDemo').onclick=()=>{t1_data=[...T1_DEMO];t1_render();};
-  document.getElementById('t1_export').onclick=()=>{const j=document.getElementById('t1_json');if(j){j.select();document.execCommand('copy');alert('已複製到剪貼簿！');}};
+  document.getElementById('t1_export').onclick=()=>{const j=document.getElementById('t1_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
   document.getElementById('t1_clear').onclick=()=>{t1_data=[];t1_render();const d=document.getElementById('t1_decision');if(d)d.style.display='none';};
 }
 
@@ -2272,13 +2293,26 @@ function t2_init() {
     if(cp){cp.textContent=cnt>=4?'達標 ✅':'不夠 ❌';cp.className=cnt>=4?'t-pass':'t-fail';}
   }
   const sel=document.getElementById('t2_sectorSel');
-  if(sel){
-    Object.keys(T2_SECTORS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;sel.appendChild(o);});
+  if(sel && typeof SECTORS!=='undefined'){
+    Object.keys(SECTORS).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k;sel.appendChild(o);});
     sel.onchange=()=>{t2_curSector=sel.value;};
   }
+  document.getElementById('t2_loadPool').onclick=()=>{
+    const sector=document.getElementById('t2_sectorSel')?.value;
+    if(!sector){alert('請先選擇族群');return;}
+    if(typeof SECTORS==='undefined'||typeof stockData==='undefined'){alert('請先更新股價資料');return;}
+    const stocks=SECTORS[sector]||[];
+    t2_stockData=stocks.map(st=>{
+      const d=stockData[st.code];
+      if(!d||d.price==null) return null;
+      return {code:st.code,name:st.name,close:d.price,pct5:+(d.pct5||0).toFixed(1),volRatio:1.0,distHigh:20};
+    }).filter(Boolean);
+    if(!t2_stockData.length){alert('此族群目前無報價資料');return;}
+    t2_render();
+  };
   document.getElementById('t2_loadDemo').onclick=()=>{
     const sector=document.getElementById('t2_sectorSel')?.value||'AI電源BBU';
-    t2_stockData=T2_DEMO[sector]||T2_DEMO['AI電源BBU'];
+    t2_stockData=T2_DEMO[sector]||T2_DEMO['AI電源BBU']||[];
     t2_render();
   };
   document.getElementById('t2_export').onclick=()=>{const j=document.getElementById('t2_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
@@ -2327,9 +2361,31 @@ function t3_init() {
     const tj=document.getElementById('t3_json');
     if(tj) tj.value=JSON.stringify(scored.map((d,i)=>({rank:i+1,...d})),null,2);
   }
+  // 建立股池 datalist
+  const t3_stockMap={};
+  const t3_dl=document.getElementById('t3_stockList');
+  if(t3_dl && typeof SECTORS!=='undefined'){
+    Object.entries(SECTORS).forEach(([secName,stocks])=>{
+      stocks.forEach(st=>{
+        const key=`${st.code} ${st.name}`;
+        if(!t3_stockMap[key]){t3_stockMap[key]={...st,sector:secName};const o=document.createElement('option');o.value=key;t3_dl.appendChild(o);}
+      });
+    });
+  }
+  // 選標的後自動帶族群
+  const t3_inp=document.getElementById('t3_stockInput');
+  function t3_autoFill(){
+    if(!t3_inp) return;
+    const found=t3_stockMap[t3_inp.value];
+    if(found){const secEl=document.getElementById('t3_sec');if(secEl&&!secEl.value)secEl.value=found.sector;}
+  }
+  if(t3_inp){t3_inp.addEventListener('change',t3_autoFill);t3_inp.addEventListener('input',t3_autoFill);}
+
   window.t3_delete=function(code){ t3_beliefs=t3_beliefs.filter(d=>d.code!==code); t3_render(); };
   window.t3_edit=function(code){ const d=t3_beliefs.find(x=>x.code===code);if(!d)return;
-    document.getElementById('t3_code').value=d.code;document.getElementById('t3_name').value=d.name;document.getElementById('t3_sec').value=d.sector;
+    const inp=document.getElementById('t3_stockInput');
+    if(inp) inp.value=`${d.code} ${d.name}`;
+    const secEl=document.getElementById('t3_sec');if(secEl)secEl.value=d.sector;
     ['s1','s2','s3','s4'].forEach(k=>{const el=document.getElementById('t3_'+k);if(el){el.value=d[k];document.getElementById('t3_v'+k.slice(1)).textContent=d[k];}});
   };
   ['1','2','3','4'].forEach(n=>{
@@ -2337,14 +2393,18 @@ function t3_init() {
     if(el&&val) el.oninput=()=>{val.textContent=el.value;};
   });
   document.getElementById('t3_add').onclick=()=>{
-    const code=document.getElementById('t3_code')?.value.trim();
-    const name=document.getElementById('t3_name')?.value.trim()||code;
-    const sector=document.getElementById('t3_sec')?.value.trim()||'';
-    if(!code){alert('請輸入代號');return;}
+    const val=document.getElementById('t3_stockInput')?.value.trim();
+    const found=t3_stockMap[val];
+    const parts=val.split(' ');
+    const code=found?.code||parts[0];
+    const name=found?.name||(parts.slice(1).join(' ')||code);
+    const sector=document.getElementById('t3_sec')?.value.trim()||found?.sector||'';
+    if(!code){alert('請選擇或輸入標的代號');return;}
     const s1=+document.getElementById('t3_s1').value,s2=+document.getElementById('t3_s2').value;
     const s3=+document.getElementById('t3_s3').value,s4=+document.getElementById('t3_s4').value;
     t3_beliefs=t3_beliefs.filter(d=>d.code!==code);
     t3_beliefs.push({code,name,sector,s1,s2,s3,s4});
+    if(t3_inp){t3_inp.value='';const secEl=document.getElementById('t3_sec');if(secEl)secEl.value='';}
     t3_render();
   };
   document.getElementById('t3_loadDemo').onclick=()=>{t3_beliefs=[...T3_DEMO];t3_render();};
