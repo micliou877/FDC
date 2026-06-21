@@ -1710,6 +1710,7 @@ window.addToHolding = function(code, name, price) {
     if (!confirm(`${code} ${name} 已在持有追蹤中，仍要重複加入嗎？`)) return;
   }
   window._t4_data.push({ code, name, date: today, entry });
+  try{localStorage.setItem("fdc_holdings",JSON.stringify(window._t4_data));}catch(e){}
   if (window._t4_render) window._t4_render();
 };
 
@@ -2210,6 +2211,7 @@ async function triggerQuoteUpdate() {
 document.getElementById("triggerQuoteBtn").onclick = triggerQuoteUpdate;
 
 loadData();
+window._t4_data = JSON.parse(localStorage.getItem("fdc_holdings") || "null") || [];
 fetchLiveQuotes();
 setInterval(fetchLiveQuotes, 5 * 60 * 1000);
 
@@ -2616,6 +2618,7 @@ function t4_init() {
       </tr></thead><tbody>${rows}</tbody></table></div>`;
     const tj=document.getElementById('t4_json');
     if(tj) tj.value=JSON.stringify(_t4().map(d=>({...d,cur:t4_cur(d),days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
+    try{localStorage.setItem("fdc_holdings",JSON.stringify(_t4()));}catch(e){}
   }
   window._t4_render = t4_render;
   window.t4_sortBy=function(key){
