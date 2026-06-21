@@ -1606,7 +1606,7 @@ function renderRanking() {
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct5)}">${fmtPct(st.pct5)}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct1)}">${fmtPct(st.pct1)}</td>
             <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${st.amount?.toFixed(1) ?? "-"}</td>
-            <td style="padding:4px 6px;text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 6px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="event.stopPropagation();addToDailyPlan('${st.code}','${st.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="event.stopPropagation();addToHolding('${st.code}','${st.name}',${st.price ?? null})" title="加入持有追蹤">⏰</span></td>
+            <td style="padding:4px 6px;text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 6px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="event.stopPropagation();addToDailyPlan('${st.code}','${st.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`;
         }).join("");
         const rk = rankingExpandSort;
@@ -1675,7 +1675,7 @@ function renderStocks() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
-      <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price ?? null})" title="加入持有追蹤">⏰</span></td>
+      <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
     </tr>`; }).join("");
 }
 
@@ -2017,7 +2017,7 @@ function renderStrategy() {
         <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
         <td style="text-align:right;color:#9ca3af;">${s.amount?.toFixed(1)??'-'}</td>
-        <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price??null})" title="加入持有追蹤">⏰</span></td>
+        <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
       </tr>`).join('')}
     </tbody></table></div>` : ''}
 
@@ -2064,7 +2064,7 @@ function renderStrategy() {
               <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
               <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
-              <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price??null})" title="加入持有追蹤">⏰</span></td>
+              <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
             </tr>`;
           }).join('')}
         </tbody></table></div>`}
