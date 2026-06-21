@@ -480,11 +480,15 @@
 </div>
 <div class="t-form">
   <h3>➕ 新增持股</h3>
-  <div class="t-form-row"><label>代號</label><input type="text" id="t4_code" placeholder="例如 3081"></div>
-  <div class="t-form-row"><label>公司</label><input type="text" id="t4_name" placeholder="例如 聯亞"></div>
+  <div class="t-form-row">
+    <label>搜尋標的</label>
+    <input list="t4_stockList" id="t4_stockInput" placeholder="輸入代號或名稱…" autocomplete="off"
+      style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:6px 8px;border-radius:4px;font-size:12px;width:100%;">
+    <datalist id="t4_stockList"></datalist>
+  </div>
+  <div id="t4_selectedInfo" style="font-size:12px;padding:2px 0 8px 0;display:none;"></div>
   <div class="t-form-row"><label>進場日</label><input type="date" id="t4_date"></div>
   <div class="t-form-row"><label>進場價</label><input type="number" id="t4_entry" placeholder="成本價" step="0.01"></div>
-  <div class="t-form-row"><label>當前價</label><input type="number" id="t4_cur" placeholder="現在股價" step="0.01"></div>
   <div style="margin-top:12px;display:flex;gap:6px;">
     <button class="t-btn primary" id="t4_add">➕ 加入追蹤</button>
     <button class="t-btn" id="t4_loadDemo">🎯 載入範例</button>
@@ -1631,7 +1635,8 @@ window.addToWatchGroup = function(sel, code, market) {
 
 window.addToHolding = function(code, name, price) {
   const today = new Date().toISOString().slice(0,10);
-  const raw = prompt(`加入持有追蹤\n${code} ${name}\n\n進場價格：`, price != null ? price : '');
+  const suggested = price != null ? price : '';
+  const raw = prompt(`加入持有追蹤：${code} ${name}\n\n進場價格：`, suggested);
   if (raw === null || raw.trim() === '') return;
   const entry = parseFloat(raw);
   if (isNaN(entry) || entry <= 0) { alert('請輸入有效價格'); return; }
@@ -1639,7 +1644,7 @@ window.addToHolding = function(code, name, price) {
   if (window._t4_data.some(p => p.code === code)) {
     if (!confirm(`${code} ${name} 已在持有追蹤中，仍要重複加入嗎？`)) return;
   }
-  window._t4_data.push({ code, name, date: today, entry, cur: entry });
+  window._t4_data.push({ code, name, date: today, entry });
   if (window._t4_render) window._t4_render();
 };
 
@@ -2349,15 +2354,50 @@ function t3_init() {
 // ==================== 工具 4：3 週持有原則 ====================
 function t4_init() {
   const T4_DEMO = [
-    {code:'6415',name:'矽力-KY',date:'2026-06-07',entry:1150,cur:1200},
-    {code:'6435',name:'大中',date:'2026-06-02',entry:42,cur:45},
-    {code:'2330',name:'台積電',date:'2026-05-28',entry:980,cur:1020},
+    {code:'6415',name:'矽力-KY',date:'2026-06-07',entry:1150},
+    {code:'6435',name:'大中',date:'2026-06-02',entry:42},
+    {code:'2330',name:'台積電',date:'2026-05-28',entry:980},
   ];
   window._t4_data = window._t4_data || [];
   const _t4 = () => window._t4_data;
   const t4_dateEl=document.getElementById('t4_date');
   if(t4_dateEl) t4_dateEl.value=new Date().toISOString().slice(0,10);
 
+  // 建立股池 datalist
+  const t4_stockMap = {};
+  const dl=document.getElementById('t4_stockList');
+  if(dl && typeof SECTORS !== 'undefined') {
+    Object.values(SECTORS).forEach(stocks => {
+      stocks.forEach(st => {
+        const key=`${st.code} ${st.name}`;
+        if(!t4_stockMap[key]) {
+          t4_stockMap[key]=st;
+          const opt=document.createElement('option');
+          opt.value=key;
+          dl.appendChild(opt);
+        }
+      });
+    });
+  }
+
+  // 選標的後顯示現價提示
+  const inp=document.getElementById('t4_stockInput');
+  const info=document.getElementById('t4_selectedInfo');
+  function t4_showInfo() {
+    if(!inp||!info) return;
+    const found=t4_stockMap[inp.value];
+    if(found) {
+      const live=typeof stockData!=='undefined'?stockData[found.code]?.price:null;
+      info.innerHTML=`<span style="color:#4a9eff">✓ ${found.name}（${found.code}）</span>${live!=null?`<span style="color:#ffc94a;margin-left:8px">現價 ${live.toFixed(2)}</span>`:`<span style="color:#888;margin-left:8px">（股池無報價）</span>`}`;
+      info.style.display='block';
+    } else {
+      info.style.display='none';
+    }
+  }
+  if(inp) inp.addEventListener('input', t4_showInfo);
+  if(inp) inp.addEventListener('change', t4_showInfo);
+
+  function t4_livePrice(code){ return (typeof stockData!=='undefined'&&stockData[code]?.price!=null)?stockData[code].price:null; }
   function t4_days(dateStr){return Math.floor((Date.now()-new Date(dateStr))/(86400000));}
   function t4_phase(d){
     const days=t4_days(d.date);
@@ -2366,7 +2406,8 @@ function t4_init() {
     if(days<21) return {id:'p3',label:'第3週',cls:'phase-3',badge:'p3',tip:'評估是否加碼或保持'};
     return {id:'pr',label:'需評估',cls:'phase-r',badge:'pr',tip:'⚠️ 已超過3週！檢視是否續抱、加碼或淘汰'};
   }
-  function t4_retPct(d){ if(!d.entry||d.entry===0)return 0; return ((d.cur-d.entry)/d.entry*100); }
+  function t4_cur(d){ return t4_livePrice(d.code)??d.entry; }
+  function t4_retPct(d){ const cur=t4_cur(d); if(!d.entry||d.entry===0)return 0; return ((cur-d.entry)/d.entry*100); }
   function t4_progressW(d){return Math.min(t4_days(d.date)/21*100,100).toFixed(0);}
   function t4_action(ph,ret){
     if(ph.id==='pr'){
@@ -2383,10 +2424,11 @@ function t4_init() {
     if(!list) return;
     if(!_t4().length){list.innerHTML='<div class="t-empty">尚未追蹤任何持股</div>';return;}
     list.innerHTML=_t4().map((d,idx)=>{
-      const ph=t4_phase(d),ret=t4_retPct(d),act=t4_action(ph,ret),days=t4_days(d.date);
+      const cur=t4_cur(d),ph=t4_phase(d),ret=t4_retPct(d),act=t4_action(ph,ret),days=t4_days(d.date);
+      const hasLive=t4_livePrice(d.code)!=null;
       return `<div class="t-pos-card ${ph.cls}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div><strong style="font-size:14px">${d.code}</strong> <span style="color:#aaa">${d.name}</span></div>
+          <div><strong style="font-size:14px">${d.code}</strong> <span style="color:#aaa">${d.name}</span>${hasLive?'<span style="font-size:10px;color:#2d8659;margin-left:6px">● 即時</span>':'<span style="font-size:10px;color:#888;margin-left:6px">○ 無報價</span>'}</div>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="t-ph-badge ${ph.badge}">${ph.label}</span>
             <span class="${ret>=0?'t-pos':'t-neg'}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>
@@ -2397,34 +2439,29 @@ function t4_init() {
         <div class="t-stat-grid">
           <div class="t-stat"><div class="label">持有天數</div><div class="value">${days} 天</div></div>
           <div class="t-stat"><div class="label">進場價</div><div class="value">${d.entry}</div></div>
-          <div class="t-stat"><div class="label">當前價</div><div class="value" style="${ret>=0?'color:#ff6b6b':'color:#4a9d6f'}">${d.cur}</div></div>
+          <div class="t-stat"><div class="label">現價</div><div class="value" style="${ret>=0?'color:#ff6b6b':'color:#4a9d6f'}">${cur.toFixed(2)}</div></div>
           <div class="t-stat"><div class="label">損益</div><div class="value ${ret>=0?'t-pos':'t-neg'}">${ret>=0?'+':''}${ret.toFixed(2)}%</div></div>
         </div>
         <div class="t-alert ${act.cls}" style="margin-top:4px">💡 ${act.text}</div>
-        <div style="display:flex;gap:6px;margin-top:10px;align-items:center">
-          <span style="font-size:11px;color:#aaa">更新現價：</span>
-          <input type="number" id="t4_upd${idx}" value="${d.cur}" step="0.01" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px;width:90px">
-          <button class="t-btn" style="padding:4px 10px;font-size:11px" onclick="t4_update(${idx})">更新</button>
-        </div>
       </div>`;
     }).join('');
     const tj=document.getElementById('t4_json');
-    if(tj) tj.value=JSON.stringify(_t4().map(d=>({...d,days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
+    if(tj) tj.value=JSON.stringify(_t4().map(d=>({...d,cur:t4_cur(d),days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
   }
   window._t4_render = t4_render;
   window.t4_del=function(idx){_t4().splice(idx,1);t4_render();};
-  window.t4_update=function(idx){const el=document.getElementById('t4_upd'+idx);if(el){_t4()[idx].cur=parseFloat(el.value)||_t4()[idx].cur;t4_render();}};
   document.getElementById('t4_add').onclick=()=>{
-    const code=document.getElementById('t4_code')?.value.trim();
-    const name=document.getElementById('t4_name')?.value.trim()||code;
+    const val=document.getElementById('t4_stockInput')?.value.trim();
+    const found=t4_stockMap[val];
+    if(!found){alert('請從下拉選單選擇股池內的標的');return;}
     const date=document.getElementById('t4_date')?.value;
     const entry=parseFloat(document.getElementById('t4_entry')?.value);
-    const cur=parseFloat(document.getElementById('t4_cur')?.value)||entry;
-    if(!code||!date||!entry){alert('請填代號、進場日、進場價');return;}
-    _t4().push({code,name,date,entry,cur});
+    if(!date||!entry){alert('請填進場日與進場價');return;}
+    _t4().push({code:found.code,name:found.name,date,entry});
+    if(inp){inp.value='';if(info)info.style.display='none';}
     t4_render();
   };
-  document.getElementById('t4_loadDemo').onclick=()=>{window._t4_data=[...T4_DEMO];t4_render();};
+  document.getElementById('t4_loadDemo').onclick=()=>{window._t4_data=T4_DEMO.map(d=>({...d}));t4_render();};
   document.getElementById('t4_export').onclick=()=>{const j=document.getElementById('t4_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
   t4_render();
 }
