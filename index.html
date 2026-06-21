@@ -233,9 +233,9 @@
   <button class="tab" data-tab="stocks">明細</button>
   <button class="tab" data-tab="watchlist">關注</button>
   <button class="tab" data-tab="global">國際</button>
-  <button class="tab" data-tab="tool1">🔥 熱度</button>
-  <button class="tab" data-tab="tool2">💪 強勢</button>
-  <button class="tab" data-tab="tool3">🏆 信念</button>
+  <button class="tab" data-tab="tool1" style="display:none">🔥 熱度</button>
+  <button class="tab" data-tab="tool2" style="display:none">💪 強勢</button>
+  <button class="tab" data-tab="tool3" style="display:none">🏆 信念</button>
   <button class="tab" data-tab="tool4">⏰ 持有</button>
   <button class="tab" data-tab="data">設定</button>
 </div>
@@ -255,6 +255,28 @@
 </div>
 
 <div class="panel" id="ranking">
+  <!-- 熱度分數卡 -->
+  <div style="background:#fff8e1;border:1px solid #fbbf24;border-radius:8px;margin-bottom:10px;overflow:hidden;">
+    <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#92400e;" onclick="var b=document.getElementById('rk_heatBody');b.hidden=!b.hidden;this.querySelector('.rk-arr').textContent=b.hidden?'▶':'▼'">
+      🔥 複合熱度分數 &amp; Top 3 配置建議 <span class="rk-arr">▼</span>
+    </div>
+    <div id="rk_heatBody" style="padding:0 12px 12px;font-size:12px;"><div style="color:#aaa;font-size:11px;padding:4px 0">載入報價後自動計算…</div></div>
+  </div>
+  <!-- 5 OK 條件清單 -->
+  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;margin-bottom:10px;overflow:hidden;">
+    <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#166534;" onclick="var b=document.getElementById('rk_5okBody');b.hidden=!b.hidden;this.querySelector('.ok-arr').textContent=b.hidden?'▶':'▼'">
+      ✅ 起漲股 5 OK 條件確認 <span class="ok-arr">▶</span>
+    </div>
+    <div id="rk_5okBody" hidden style="padding:4px 12px 12px">
+      <div style="font-size:12px;color:#166534;margin-bottom:8px">4 個以上才進場　當前：<span id="rk_5ok_count" style="font-weight:700">0</span>/5　<span id="rk_5ok_pass" style="font-weight:700;color:#dc2626">不夠 ❌</span></div>
+      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok1" onchange="rk5okUpdate()"> 站上 60 日均線（季線）</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok2" onchange="rk5okUpdate()"> 月線、季線轉強或多頭排列</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok3" onchange="rk5okUpdate()"> 近 5 日均量 ≥ 60 日均量 × 1.5 倍</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok4" onchange="rk5okUpdate()"> 同族群至少 3 檔同步走強</label>
+      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer"><input type="checkbox" id="rk_ok5" onchange="rk5okUpdate()"> 距前波高點還有 30%+ 上漲空間</label>
+      <button onclick="['rk_ok1','rk_ok2','rk_ok3','rk_ok4','rk_ok5'].forEach(id=>document.getElementById(id).checked=false);rk5okUpdate()" style="margin-top:8px;font-size:11px;padding:3px 10px;border:1px solid #86efac;border-radius:4px;background:#fff;cursor:pointer;color:#166534">清空</button>
+    </div>
+  </div>
   <div class="section-header">
     <div class="section-title">族群排行榜</div>
     <div class="controls">
@@ -1494,6 +1516,14 @@ function volTrendBadge(vt) {
   return `<span style="font-size:12px;color:#4a7a60;font-weight:700;" title="資金流出 ${vt.toFixed(2)}x">↓</span>`;
 }
 
+function rk5okUpdate() {
+  let cnt = ['rk_ok1','rk_ok2','rk_ok3','rk_ok4','rk_ok5'].filter(id => document.getElementById(id)?.checked).length;
+  const cEl = document.getElementById('rk_5ok_count');
+  const pEl = document.getElementById('rk_5ok_pass');
+  if(cEl) cEl.textContent = cnt;
+  if(pEl) { pEl.textContent = cnt>=4 ? '達標 ✅' : '不夠 ❌'; pEl.style.color = cnt>=4 ? '#16a34a' : '#dc2626'; }
+}
+
 function renderRanking() {
   const stats = getSectorStats(); const sortKey = document.getElementById("rankingSort").value;
   const sorted = Object.entries(stats).filter(([_,s]) => s).sort((a,b) => (b[1][sortKey] || 0) - (a[1][sortKey] || 0));
@@ -1502,13 +1532,42 @@ function renderRanking() {
   const maxAbs = Math.max(...sorted.map(([_,s]) => Math.abs(s[sortKey] || 0)), 1);
   const currentList = watchlists[currentWatchGroup] || [];
 
+  // 計算複合熱度分數
+  const heatList = Object.entries(SECTORS).map(([name, stocks]) => {
+    const wd = stocks.map(st => stockData[st.code]).filter(d => d && d.price != null);
+    if(!wd.length) return null;
+    const p10 = wd.reduce((s,d)=>s+(d.pct10||0),0)/wd.length;
+    const p5  = wd.reduce((s,d)=>s+(d.pct5||0),0)/wd.length;
+    const amt = wd.reduce((s,d)=>s+(d.amount||0),0);
+    return {name, p10, p5, amt, score:0};
+  }).filter(Boolean);
+  const heatMap = {};
+  if(heatList.length) {
+    const maxAmt = Math.max(...heatList.map(h=>h.amt), 1);
+    heatList.forEach(h => { h.score = h.p10*0.5 + h.p5*0.3 + (h.amt/maxAmt*10)*0.2; heatMap[h.name]=h.score; });
+    const top3 = [...heatList].sort((a,b)=>b.score-a.score).slice(0,3);
+    const hb = document.getElementById('rk_heatBody');
+    if(hb) {
+      const medals=['🥇','🥈','🥉'], allocs=['35-40%','20-25%','10-15%'];
+      hb.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:4px">${
+        top3.map((h,i)=>`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px">
+          <div style="font-size:11px;color:#92400e">${medals[i]} ${['主力倉','次要倉','觀察倉'][i]}</div>
+          <div style="font-weight:700;font-size:13px;margin:2px 0;color:#78350f">${h.name}</div>
+          <div style="font-size:11px;color:#d97706">熱度 <strong>${h.score.toFixed(1)}</strong>　建議 <strong>${allocs[i]}</strong></div>
+        </div>`).join('')
+      }</div><div style="margin-top:6px;font-size:10px;color:#b45309">公式：10日漲幅×0.5 + 5日漲幅×0.3 + 成交金額標準化×0.2</div>`;
+    }
+  }
+
   sorted.forEach(([sector, s]) => {
     const val = s[sortKey] || 0;
     const isExpanded = expandedSectors.has(sector);
     const fillLabel = isPct ? fmtPct(val) : isVol ? val.toFixed(2) + "x" : val.toFixed(0) + "億";
     const row = document.createElement("div"); row.className = "bar-row";
     row.style.background = isExpanded ? "#e8f0fe" : "";
-    row.innerHTML = `<div class="bar-name" style="display:flex;align-items:center;gap:4px;">${sector}<span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${isExpanded ? "▲" : "▼"}</span></div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${fillLabel}</div></div><div class="bar-pct">${s.count}/${s.total}</div><div style="text-align:center;">${volTrendBadge(s.volTrend)}</div>`;
+    const hs = heatMap[sector];
+    const hsBadge = hs!=null ? `<span style="font-size:10px;color:#d97706;font-weight:700;white-space:nowrap">🔥${hs.toFixed(1)}</span>` : '';
+    row.innerHTML = `<div class="bar-name" style="display:flex;align-items:center;gap:4px;">${sector}<span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${isExpanded ? "▲" : "▼"}</span></div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${fillLabel}</div></div><div class="bar-pct">${s.count}/${s.total}</div><div style="text-align:center;">${volTrendBadge(s.volTrend)}</div><div style="text-align:right;min-width:36px;">${hsBadge}</div>`;
     row.onclick = () => {
       if (expandedSectors.has(sector)) expandedSectors.delete(sector);
       else expandedSectors.add(sector);
