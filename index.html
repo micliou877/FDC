@@ -1342,8 +1342,13 @@ function renderStocks() {
   select.value = currentSector || "__all__";
 
   let stocks = currentSector && currentSector !== "__all__" ? SECTORS[currentSector] : Object.values(SECTORS).flat().filter((v,i,a)=>a.findIndex(t=>(t.code === v.code))===i);
-  let rows = stocks.map(s => ({...s, ...stockData[s.code]})).filter(s => s.price != null);
-  if (stockSearchQ) rows = rows.filter(s => s.code.includes(stockSearchQ) || (s.name||'').toUpperCase().includes(stockSearchQ));
+  let rows = stocks.map(s => ({...s, ...stockData[s.code]}));
+  if (stockSearchQ) {
+    // 搜尋模式：顯示所有符合的標的（含尚無報價的新股）
+    rows = rows.filter(s => s.code.includes(stockSearchQ) || (s.name||'').toUpperCase().includes(stockSearchQ.toUpperCase()));
+  } else {
+    rows = rows.filter(s => s.price != null);
+  }
   rows.sort((a,b) => stockSortDir * (((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999))));
 
   const banner = document.getElementById('sectorUSBanner');
