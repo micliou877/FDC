@@ -208,6 +208,12 @@
     .tool-panel .t-alert.danger { color:#ff6b6b; }
     .tool-panel .t-alert.success { color:#2d8659; }
     .tool-panel .t-empty { text-align:center; padding:40px 20px; color:#666; font-size:13px; }
+    /* 持有拖曳 */
+    .tool-panel .t4-handle { cursor:grab; color:#555; font-size:16px; display:block; text-align:center; line-height:1.2; padding:2px 0; user-select:none; }
+    .tool-panel .t4-handle:active { cursor:grabbing; }
+    .tool-panel .t4-row-dragging { opacity:0.35; background:#0a0f14 !important; }
+    .tool-panel .t4-drop-above td { border-top:2px solid #4a9eff !important; }
+    .tool-panel .t4-drop-below td { border-bottom:2px solid #4a9eff !important; }
     /* 工具2 量比badge */
     .tool-panel .vol-hot { background:#ff6b6b; color:#fff; padding:1px 5px; border-radius:3px; font-size:10px; font-weight:600; }
     .tool-panel .vol-low { background:#555; color:#ccc; padding:1px 5px; border-radius:3px; font-size:10px; }
@@ -2560,14 +2566,14 @@ function t4_init() {
         return sDir*(bv-av);
       });
     }
-    const canMove=!sKey;
     const thS=(key,label,align='right')=>{
       const act=sKey===key;
       return `<th style="padding:6px 4px;font-size:11px;color:${act?'#ffc94a':'#888'};text-align:${align};cursor:pointer;user-select:none;white-space:nowrap" onclick="t4_sortBy('${key}')">${label} ${act?(sDir===-1?'↓':'↑'):'↕'}</th>`;
     };
 
+    window._t4_dispCache = disp;
     let rows='';
-    disp.forEach(d=>{
+    disp.forEach((d,di)=>{
       const i=d._i;
       const cur=t4_cur(d),ph=t4_phase(d),ret=t4_retPct(d),act=t4_action(ph,ret),days=t4_days(d.date);
       const hasLive=t4_livePrice(d.code)!=null;
@@ -2575,14 +2581,16 @@ function t4_init() {
       const retStr=(ret>=0?'+':'')+ret.toFixed(2)+'%';
       const retCls=ret>=0?'t-pos':'t-neg';
       const shortTip=act.cls==='danger'?'⚠️ '+act.text.slice(0,8):act.cls==='success'?'✅ '+act.text.slice(0,8):ph.tip.slice(0,10);
-      const moveBtn=canMove?`<div style="display:flex;flex-direction:column;gap:1px;margin-top:3px">
-        <span style="cursor:pointer;font-size:10px;padding:1px 5px;background:#1a2026;border-radius:2px;text-align:center;line-height:1.4" onclick="t4_move(${i},-1)">▲</span>
-        <span style="cursor:pointer;font-size:10px;padding:1px 5px;background:#1a2026;border-radius:2px;text-align:center;line-height:1.4" onclick="t4_move(${i},1)">▼</span>
-      </div>`:'';
-      rows+=`<tr style="border-bottom:1px solid #1a2026">
+      rows+=`<tr id="t4r_${di}" style="border-bottom:1px solid #1a2026"
+        ondragover="t4_dragOver(event,${di})"
+        ondragleave="t4_dragLeave(event)"
+        ondrop="t4_drop(event,${di})"
+        ondragend="t4_dragEnd(event)">
         <td style="padding:6px 4px;vertical-align:top">
-          <button class="t-del" style="font-size:12px;padding:2px 6px" onclick="t4_del(${i})">✕</button>
-          ${moveBtn}
+          <span class="t4-handle"
+            onmousedown="document.getElementById('t4r_${di}').draggable=true;t4_dragStart(event,${di})"
+            onmouseup="document.getElementById('t4r_${di}').draggable=false">≡</span>
+          <button class="t-del" style="font-size:12px;padding:2px 6px;display:block;margin-top:3px" onclick="t4_del(${i})">✕</button>
         </td>
         <td style="padding:6px 4px;white-space:nowrap"><strong style="font-size:13px">${d.code}</strong><br><span style="font-size:11px;color:#aaa">${d.name}</span></td>
         <td style="padding:6px 4px;text-align:center"><span class="t-ph-badge ${ph.badge}">${ph.label}</span><br><span style="font-size:10px;color:#666">${days}天</span></td>
@@ -2640,6 +2648,62 @@ function t4_init() {
     if(!date||!entry){alert('請填進場日與進場價');return;}
     _t4()[i].date=date;_t4()[i].entry=entry;
     window._t4_editIdx=-1;t4_render();
+  };
+  // --- 拖曳排序 ---
+  window._t4_dragDi = -1; // 拖曳中的 display index
+  window.t4_dragStart=function(e,di){
+    window._t4_dragDi=di;
+    e.dataTransfer.effectAllowed='move';
+    // 延遲加樣式，避免拖曳截圖也半透明
+    requestAnimationFrame(()=>{
+      const tr=document.getElementById('t4r_'+di);
+      if(tr) tr.classList.add('t4-row-dragging');
+    });
+  };
+  window.t4_dragOver=function(e,di){
+    if(window._t4_dragDi===-1||window._t4_dragDi===di)return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    const tr=document.getElementById('t4r_'+di);
+    if(!tr)return;
+    const mid=tr.getBoundingClientRect().top+tr.getBoundingClientRect().height/2;
+    // 清除所有指示
+    document.querySelectorAll('.t4-drop-above,.t4-drop-below').forEach(el=>{
+      el.classList.remove('t4-drop-above','t4-drop-below');
+    });
+    tr.classList.add(e.clientY<mid?'t4-drop-above':'t4-drop-below');
+  };
+  window.t4_dragLeave=function(e){
+    e.currentTarget.classList.remove('t4-drop-above','t4-drop-below');
+  };
+  window.t4_drop=function(e,targetDi){
+    e.preventDefault();
+    const srcDi=window._t4_dragDi;
+    if(srcDi===-1)return;
+    const tr=document.getElementById('t4r_'+targetDi);
+    const mid=tr?tr.getBoundingClientRect().top+tr.getBoundingClientRect().height/2:0;
+    const insertAfter=tr&&e.clientY>=mid;
+    // 根據目前 disp 順序重建 _t4_data
+    const cache=window._t4_dispCache||[];
+    const origData=[..._t4()];
+    const newDisp=[...cache];
+    const [moved]=newDisp.splice(srcDi,1);
+    let dest=targetDi;
+    if(srcDi<targetDi) dest--;
+    if(insertAfter) dest++;
+    dest=Math.max(0,Math.min(newDisp.length,dest));
+    newDisp.splice(dest,0,moved);
+    window._t4_data=newDisp.map(d=>origData[d._i]);
+    window._t4_sortKey=null; // 拖曳後清除排序
+    window._t4_dragDi=-1;
+    t4_render();
+  };
+  window.t4_dragEnd=function(e){
+    window._t4_dragDi=-1;
+    document.querySelectorAll('.t4-row-dragging,.t4-drop-above,.t4-drop-below').forEach(el=>{
+      el.classList.remove('t4-row-dragging','t4-drop-above','t4-drop-below');
+      el.draggable=false;
+    });
   };
   document.getElementById('t4_add').onclick=()=>{
     const val=document.getElementById('t4_stockInput')?.value.trim();
