@@ -2419,37 +2419,66 @@ function t4_init() {
     if(ret>=15) return {cls:'success',text:'獲利 15%+ → 考慮部分獲利'};
     return {cls:'',text:ph.tip};
   }
+  window._t4_editIdx = window._t4_editIdx ?? -1;
   function t4_render() {
     const list=document.getElementById('t4_list');
     if(!list) return;
     if(!_t4().length){list.innerHTML='<div class="t-empty">尚未追蹤任何持股</div>';return;}
-    list.innerHTML=_t4().map((d,idx)=>{
+    let rows='';
+    _t4().forEach((d,idx)=>{
       const cur=t4_cur(d),ph=t4_phase(d),ret=t4_retPct(d),act=t4_action(ph,ret),days=t4_days(d.date);
       const hasLive=t4_livePrice(d.code)!=null;
-      return `<div class="t-pos-card ${ph.cls}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div><strong style="font-size:14px">${d.code}</strong> <span style="color:#aaa">${d.name}</span>${hasLive?'<span style="font-size:10px;color:#2d8659;margin-left:6px">● 即時</span>':'<span style="font-size:10px;color:#888;margin-left:6px">○ 無報價</span>'}</div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <span class="t-ph-badge ${ph.badge}">${ph.label}</span>
-            <span class="${ret>=0?'t-pos':'t-neg'}">${ret>=0?'+':''}${ret.toFixed(1)}%</span>
-            <button class="t-del" onclick="t4_del(${idx})">✕</button>
-          </div>
-        </div>
-        <div class="t-prog"><div class="t-prog-bar" style="width:${t4_progressW(d)}%"></div></div>
-        <div class="t-stat-grid">
-          <div class="t-stat"><div class="label">持有天數</div><div class="value">${days} 天</div></div>
-          <div class="t-stat"><div class="label">進場價</div><div class="value">${d.entry}</div></div>
-          <div class="t-stat"><div class="label">現價</div><div class="value" style="${ret>=0?'color:#ff6b6b':'color:#4a9d6f'}">${cur.toFixed(2)}</div></div>
-          <div class="t-stat"><div class="label">損益</div><div class="value ${ret>=0?'t-pos':'t-neg'}">${ret>=0?'+':''}${ret.toFixed(2)}%</div></div>
-        </div>
-        <div class="t-alert ${act.cls}" style="margin-top:4px">💡 ${act.text}</div>
-      </div>`;
-    }).join('');
+      const editing=window._t4_editIdx===idx;
+      const retStr=(ret>=0?'+':'')+ret.toFixed(2)+'%';
+      const retCls=ret>=0?'t-pos':'t-neg';
+      const shortTip=act.cls==='danger'?'⚠️ '+act.text.slice(0,8):act.cls==='success'?'✅ '+act.text.slice(0,8):ph.tip.slice(0,10);
+      rows+=`<tr style="border-bottom:1px solid #1a2026">
+        <td style="padding:6px 4px"><button class="t-del" style="font-size:12px;padding:2px 6px" onclick="t4_del(${idx})">✕</button></td>
+        <td style="padding:6px 4px;white-space:nowrap"><strong style="font-size:13px">${d.code}</strong><br><span style="font-size:11px;color:#aaa">${d.name}</span></td>
+        <td style="padding:6px 4px;text-align:center"><span class="t-ph-badge ${ph.badge}">${ph.label}</span><br><span style="font-size:10px;color:#666">${days}天</span></td>
+        <td style="padding:6px 4px;text-align:right;font-size:11px;color:#aaa">${d.date}<br>進場 ${d.entry}</td>
+        <td style="padding:6px 4px;text-align:right"><span style="${ret>=0?'color:#ff6b6b':'color:#4a9d6f'};font-size:13px;font-weight:600">${cur.toFixed(2)}</span>${hasLive?'<span style="font-size:9px;color:#2d8659;display:block">●即時</span>':'<span style="font-size:9px;color:#666;display:block">○</span>'}</td>
+        <td style="padding:6px 4px;text-align:right"><span class="${retCls}" style="font-weight:700">${retStr}</span><br><span style="font-size:10px;color:#888">${shortTip}</span></td>
+        <td style="padding:6px 4px;text-align:center"><button class="t-btn" style="padding:2px 8px;font-size:11px" onclick="t4_editToggle(${idx})">${editing?'✕':'✏'}</button></td>
+      </tr>`;
+      if(editing){
+        rows+=`<tr style="background:#1a2026">
+          <td colspan="7" style="padding:8px 12px">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <label style="font-size:11px;color:#aaa">進場日</label>
+              <input type="date" id="t4_ed_date" value="${d.date}" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px">
+              <label style="font-size:11px;color:#aaa">進場價</label>
+              <input type="number" id="t4_ed_entry" value="${d.entry}" step="0.01" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px;width:90px">
+              <button class="t-btn primary" style="padding:4px 12px;font-size:11px" onclick="t4_save(${idx})">✓ 儲存</button>
+              <button class="t-btn" style="padding:4px 12px;font-size:11px" onclick="t4_editToggle(-1)">取消</button>
+            </div>
+          </td>
+        </tr>`;
+      }
+    });
+    list.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+      <thead><tr style="border-bottom:2px solid #2a3138">
+        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:left"></th>
+        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:left">代號/公司</th>
+        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:center">週期</th>
+        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:right">進場</th>
+        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:right">現價</th>
+        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:right">損益</th>
+        <th style="padding:6px 4px;font-size:11px;color:#888"></th>
+      </tr></thead><tbody>${rows}</tbody></table></div>`;
     const tj=document.getElementById('t4_json');
     if(tj) tj.value=JSON.stringify(_t4().map(d=>({...d,cur:t4_cur(d),days:t4_days(d.date),retPct:parseFloat(t4_retPct(d).toFixed(2))})),null,2);
   }
   window._t4_render = t4_render;
-  window.t4_del=function(idx){_t4().splice(idx,1);t4_render();};
+  window.t4_del=function(idx){_t4().splice(idx,1);window._t4_editIdx=-1;t4_render();};
+  window.t4_editToggle=function(idx){window._t4_editIdx=(window._t4_editIdx===idx)?-1:idx;t4_render();};
+  window.t4_save=function(idx){
+    const date=document.getElementById('t4_ed_date')?.value;
+    const entry=parseFloat(document.getElementById('t4_ed_entry')?.value);
+    if(!date||!entry){alert('請填進場日與進場價');return;}
+    _t4()[idx].date=date;_t4()[idx].entry=entry;
+    window._t4_editIdx=-1;t4_render();
+  };
   document.getElementById('t4_add').onclick=()=>{
     const val=document.getElementById('t4_stockInput')?.value.trim();
     const found=t4_stockMap[val];
