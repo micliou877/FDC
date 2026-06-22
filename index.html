@@ -1049,6 +1049,7 @@ let selectedPlanCode = null;
 const FIREBASE_URL = "https://fdc43-56da5-default-rtdb.firebaseio.com/"; 
 
 let _pushInFlight = false;
+let _pendingPush = false;
 
 async function pushToCloud() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
@@ -1059,7 +1060,8 @@ async function pushToCloud() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ watchlists, stockNotes, stockMeta, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "" })
     });
-  } catch (e) { console.error("雲端同步失敗", e); }
+    _pendingPush = false;
+  } catch (e) { console.error("雲端同步失敗", e); _pendingPush = true; }
   finally { _pushInFlight = false; }
 }
 
@@ -1106,6 +1108,7 @@ async function connectCloud() {
 async function syncPull() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
   if (_pushInFlight) return;
+  if (_pendingPush) { pushToCloud(); return; }
   try {
     const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
     if (_pushInFlight) return;
@@ -1154,6 +1157,7 @@ function saveLocalOnly() {
 
 function saveData() {
   saveLocalOnly();
+  _pendingPush = true;
   pushToCloud();
 }
 
