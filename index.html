@@ -352,7 +352,7 @@
     <button class="btn" onclick="deleteWatchGroup()" style="color:#dc2626; border-color:#fecaca;">刪除</button>
     <button class="btn" id="wlCodeSortBtn" onclick="wlSortByCode()" style="white-space:nowrap;">代號 ↕</button>
   </div>
-  <div id="watchGroupInputRow" style="display:none; margin-bottom:10px; gap:8px; align-items:center; display:none;">
+  <div id="watchGroupInputRow" style="display:none; margin-bottom:10px; gap:8px; align-items:center;">
     <input id="watchGroupNameInput" type="text" placeholder="輸入分類名稱" style="flex:1; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px;">
     <button class="btn primary" id="watchGroupConfirmBtn" onclick="confirmWatchGroupInput()">確定</button>
     <button class="btn" onclick="cancelWatchGroupInput()">取消</button>
@@ -1319,7 +1319,7 @@ window.confirmWatchGroupInput = function() {
   }
   cancelWatchGroupInput();
   saveData(); updateUI();
-  if (document.getElementById("searchInput").value) handleSearch();
+  handleSearch();
 };
 
 window.cancelWatchGroupInput = function() {
@@ -1336,7 +1336,7 @@ window.deleteWatchGroup = function() {
   if (confirm(`確定要刪除「${currentWatchGroup}」群組嗎？`)) {
     delete watchlists[currentWatchGroup];
     currentWatchGroup = Object.keys(watchlists)[0];
-    saveData(); updateWatchGroupOptions(); renderWatchlist();
+    saveData(); updateUI(); handleSearch();
   }
 };
 
@@ -1744,6 +1744,8 @@ window.addToWatchGroup = function(sel, code, market) {
     stockMeta[code] = { market, name: globalEntry?.name || `自訂標的（${code}）` };
   }
   saveData();
+  if (targetGroup === currentWatchGroup) renderWatchlist();
+  handleSearch();
   sel.style.color = '#166534';
   setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800);
 };
@@ -1793,7 +1795,7 @@ window.manualAddGlobalStock = function() {
 
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
