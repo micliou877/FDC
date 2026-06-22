@@ -347,10 +347,15 @@
   </div>
   <div class="controls" style="margin-bottom: 12px; gap: 8px;">
     <select id="watchGroupSelect" style="flex: 1; font-weight: bold; padding: 10px;" onchange="changeWatchGroup()"></select>
-    <button class="btn primary" onclick="addWatchGroup()">新增</button>
-    <button class="btn" onclick="renameWatchGroup()">改名</button>
+    <button class="btn primary" onclick="showAddGroupInput()">新增</button>
+    <button class="btn" onclick="showRenameGroupInput()">改名</button>
     <button class="btn" onclick="deleteWatchGroup()" style="color:#dc2626; border-color:#fecaca;">刪除</button>
     <button class="btn" id="wlCodeSortBtn" onclick="wlSortByCode()" style="white-space:nowrap;">代號 ↕</button>
+  </div>
+  <div id="watchGroupInputRow" style="display:none; margin-bottom:10px; gap:8px; align-items:center; display:none;">
+    <input id="watchGroupNameInput" type="text" placeholder="輸入分類名稱" style="flex:1; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px;">
+    <button class="btn primary" id="watchGroupConfirmBtn" onclick="confirmWatchGroupInput()">確定</button>
+    <button class="btn" onclick="cancelWatchGroupInput()">取消</button>
   </div>
   
   <div style="overflow-x: auto;">
@@ -1043,8 +1048,11 @@ let selectedPlanCode = null;
 // ⚠️ 關鍵：請將下方的網址替換為你在 Firebase 複製的資料庫 Realtime 網址（結尾需保留 /）
 const FIREBASE_URL = "https://fdc43-56da5-default-rtdb.firebaseio.com/"; 
 
+let _pushInFlight = false;
+
 async function pushToCloud() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
+  _pushInFlight = true;
   try {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
@@ -1052,6 +1060,7 @@ async function pushToCloud() {
       body: JSON.stringify({ watchlists, stockNotes, stockMeta, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "" })
     });
   } catch (e) { console.error("雲端同步失敗", e); }
+  finally { _pushInFlight = false; }
 }
 
 async function connectCloud() {
@@ -1096,9 +1105,10 @@ async function connectCloud() {
 
 async function syncPull() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
-  if (Date.now() < _suppressSyncUntil) return;
+  if (_pushInFlight) return;
   try {
     const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
+    if (_pushInFlight) return;
     const cloudData = await res.json();
     if (cloudData) {
       let changed = false;
@@ -1268,26 +1278,58 @@ window.changeWatchGroup = function() {
   if (document.getElementById("searchInput").value) handleSearch();
 };
 
-window.addWatchGroup = function() {
-  const name = prompt("請輸入新建立的分類名稱：");
-  if (name && name.trim()) {
-    if (watchlists[name.trim()]) { alert("該分類名稱已經存在！"); return; }
-    watchlists[name.trim()] = [];
-    currentWatchGroup = name.trim();
-    saveData(); updateWatchGroupOptions(); renderWatchlist();
-  }
+let _watchGroupInputMode = "add";
+
+window.showAddGroupInput = function() {
+  _watchGroupInputMode = "add";
+  const row = document.getElementById("watchGroupInputRow");
+  const inp = document.getElementById("watchGroupNameInput");
+  row.style.display = "flex";
+  inp.value = "";
+  inp.placeholder = "輸入新分類名稱";
+  inp.focus();
+  inp.onkeydown = (e) => { if (e.key === "Enter") confirmWatchGroupInput(); if (e.key === "Escape") cancelWatchGroupInput(); };
 };
 
-window.renameWatchGroup = function() {
-  const newName = prompt("請輸入新的分類名稱：", currentWatchGroup);
-  if (newName && newName.trim() && newName.trim() !== currentWatchGroup) {
-    if (watchlists[newName.trim()]) { alert("該分類名稱已被佔用！"); return; }
-    watchlists[newName.trim()] = watchlists[currentWatchGroup];
-    delete watchlists[currentWatchGroup];
-    currentWatchGroup = newName.trim();
-    saveData(); updateWatchGroupOptions(); renderWatchlist();
-  }
+window.showRenameGroupInput = function() {
+  _watchGroupInputMode = "rename";
+  const row = document.getElementById("watchGroupInputRow");
+  const inp = document.getElementById("watchGroupNameInput");
+  row.style.display = "flex";
+  inp.value = currentWatchGroup;
+  inp.placeholder = "輸入新名稱";
+  inp.focus();
+  inp.select();
+  inp.onkeydown = (e) => { if (e.key === "Enter") confirmWatchGroupInput(); if (e.key === "Escape") cancelWatchGroupInput(); };
 };
+
+window.confirmWatchGroupInput = function() {
+  const name = document.getElementById("watchGroupNameInput").value.trim();
+  if (!name) return;
+  if (_watchGroupInputMode === "add") {
+    if (watchlists[name]) { document.getElementById("watchGroupNameInput").style.outline = "2px solid red"; return; }
+    watchlists[name] = [];
+    currentWatchGroup = name;
+  } else {
+    if (name === currentWatchGroup) { cancelWatchGroupInput(); return; }
+    if (watchlists[name]) { document.getElementById("watchGroupNameInput").style.outline = "2px solid red"; return; }
+    watchlists[name] = watchlists[currentWatchGroup];
+    delete watchlists[currentWatchGroup];
+    currentWatchGroup = name;
+  }
+  cancelWatchGroupInput();
+  saveData(); updateUI();
+  if (document.getElementById("searchInput").value) handleSearch();
+};
+
+window.cancelWatchGroupInput = function() {
+  const row = document.getElementById("watchGroupInputRow");
+  row.style.display = "none";
+  document.getElementById("watchGroupNameInput").style.outline = "";
+};
+
+window.addWatchGroup = window.showAddGroupInput;
+window.renameWatchGroup = window.showRenameGroupInput;
 
 window.deleteWatchGroup = function() {
   if (Object.keys(watchlists).length <= 1) { alert("系統必須保留至少一個自選分類！"); return; }
