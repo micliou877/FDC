@@ -37,7 +37,7 @@
 
     .trend-legend { margin-top: 8px; font-size: 11px; color: #64748b; display: flex; flex-wrap: wrap; gap: 10px; background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
     .ranking-bars { display: flex; flex-direction: column; gap: 4px; }
-    .bar-row { display: grid; grid-template-columns: 140px 1fr 50px 28px; gap: 8px; align-items: center; padding: 6px 8px; cursor: pointer; border-radius: 6px; }
+    .bar-row { display: grid; grid-template-columns: 140px 1fr 50px 28px 36px 62px; gap: 8px; align-items: center; padding: 6px 8px; cursor: pointer; border-radius: 6px; }
     .bar-row:hover { background: #e2e8f0; }
     .bar-name { font-size: 13px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .bar-track { position: relative; height: 22px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
@@ -108,7 +108,8 @@
       .sector-pct { font-size: 17px; }
 
       /* 排行面板：族群名欄縮窄，展開子表可橫向捲動 */
-      .bar-row { grid-template-columns: 100px 1fr 38px 22px; gap: 4px; padding: 5px 4px; }
+      .bar-row { grid-template-columns: 100px 1fr 38px 22px 28px; gap: 4px; padding: 5px 4px; }
+      .bar-sparkline { display: none; }
       .bar-name { font-size: 11px; }
       .ranking-bars > div:not(.bar-row) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
@@ -1018,6 +1019,7 @@ Object.entries(SECTORS).forEach(([sec, list]) => {
 STOCK_NAMES["0050"] = "大盤(0050)"; 
 
 let expandedSectors = new Set();
+let heatHistory = {}; // { "2026-06-22": { "族群名": score, ... }, ... }
 let stockData = {};
 let watchlists = {
   "⭐ 第一級：純度最高": ["6870", "3081", "6739", "5439", "8033", "3491", "6690", "6667", "4749", "5340"], 
@@ -1189,9 +1191,61 @@ function loadData() {
       document.getElementById("cloudRoomInput").value = savedRoom;
       setTimeout(connectCloud, 800);
     }
+    loadHeatHistory();
     updateUI();
     loadDailyPlan();
   } catch(e) {}
+}
+
+// ==================== 族群熱度歷史走勢 ====================
+function loadHeatHistory() {
+  try { const r = localStorage.getItem("fdc_heat_history"); if (r) heatHistory = JSON.parse(r); } catch(e) {}
+}
+
+function recordHeatSnapshot() {
+  if (!Object.keys(stockData).length) return;
+  const today = new Date().toISOString().slice(0, 10);
+  const sectors = Object.entries(SECTORS).map(([name, stocks]) => {
+    const wd = stocks.map(st => stockData[st.code]).filter(d => d && d.price != null);
+    if (!wd.length) return null;
+    const p10 = wd.reduce((s,d) => s+(d.pct10||0),0)/wd.length;
+    const p5  = wd.reduce((s,d) => s+(d.pct5||0),0)/wd.length;
+    const amt = wd.reduce((s,d) => s+(d.amount||0),0);
+    return { name, p10, p5, amt };
+  }).filter(Boolean);
+  if (!sectors.length) return;
+  const maxAmt = Math.max(...sectors.map(s => s.amt), 1);
+  const scores = {};
+  sectors.forEach(s => { scores[s.name] = +(s.p10*0.5 + s.p5*0.3 + (s.amt/maxAmt*10)*0.2).toFixed(2); });
+  heatHistory[today] = scores;
+  const keys = Object.keys(heatHistory).sort();
+  if (keys.length > 15) keys.slice(0, keys.length - 15).forEach(k => delete heatHistory[k]);
+  try { localStorage.setItem("fdc_heat_history", JSON.stringify(heatHistory)); } catch(e) {}
+}
+
+function renderHeatSparkline(sectorName) {
+  const days = Object.keys(heatHistory).sort().slice(-10);
+  if (days.length < 2) return '';
+  const vals = days.map(d => (heatHistory[d]||{})[sectorName] ?? null);
+  const defined = vals.filter(v => v !== null);
+  if (defined.length < 2) return '';
+  const W = 58, H = 20, pad = 2;
+  const min = Math.min(...defined), max = Math.max(...defined);
+  const range = max - min || 0.01;
+  const toXY = (i, v) => [
+    (pad + i/(days.length-1)*(W-2*pad)).toFixed(1),
+    (pad + (1-(v-min)/range)*(H-2*pad)).toFixed(1)
+  ];
+  let d = '';
+  vals.forEach((v,i) => { if (v===null) return; const [x,y]=toXY(i,v); d += d?`L${x},${y}`:`M${x},${y}`; });
+  const pts = vals.map((v,i)=>({v,i})).filter(({v})=>v!==null);
+  const up = pts.length>=2 && pts[pts.length-1].v >= pts[pts.length-2].v;
+  const col = up ? '#ef4444' : '#22c55e';
+  const [lx,ly] = toXY(pts[pts.length-1].i, pts[pts.length-1].v);
+  return `<svg width="${W}" height="${H}" style="overflow:visible;vertical-align:middle" title="${sectorName} 近${days.length}日熱度走勢">
+    <path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${lx}" cy="${ly}" r="2.5" fill="${col}"/>
+  </svg>`;
 }
 
 function saveDailyPlan() {
@@ -1528,6 +1582,7 @@ function updateUI() {
   renderWatchlist();
   renderDataPanel();
   renderStrategy();
+  recordHeatSnapshot();
 }
 
 function switchTab(tab) {
@@ -1631,7 +1686,7 @@ function renderRanking() {
     row.style.background = isExpanded ? "#e8f0fe" : "";
     const hs = heatMap[sector];
     const hsBadge = hs!=null ? `<span style="font-size:10px;color:#d97706;font-weight:700;white-space:nowrap">🔥${hs.toFixed(1)}</span>` : '';
-    row.innerHTML = `<div class="bar-name" style="display:flex;align-items:center;gap:4px;">${sector}<span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${isExpanded ? "▲" : "▼"}</span></div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${fillLabel}</div></div><div class="bar-pct">${s.count}/${s.total}</div><div style="text-align:center;">${volTrendBadge(s.volTrend)}</div><div style="text-align:right;min-width:36px;">${hsBadge}</div>`;
+    row.innerHTML = `<div class="bar-name" style="display:flex;align-items:center;gap:4px;">${sector}<span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${isExpanded ? "▲" : "▼"}</span></div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${fillLabel}</div></div><div class="bar-pct">${s.count}/${s.total}</div><div style="text-align:center;">${volTrendBadge(s.volTrend)}</div><div style="text-align:right;min-width:36px;">${hsBadge}</div><div class="bar-sparkline" style="display:flex;align-items:center;justify-content:center;">${renderHeatSparkline(sector)}</div>`;
     row.onclick = () => {
       if (expandedSectors.has(sector)) expandedSectors.delete(sector);
       else expandedSectors.add(sector);
