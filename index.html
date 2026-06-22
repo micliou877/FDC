@@ -66,7 +66,8 @@
     .neg-text { color: #3a7a58; font-weight: 600; }
     .flat-text { color: #94a3b8; }
 
-    .tag { display: inline-block; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #3b82f6; margin-top: 3px; margin-right: 3px; white-space: nowrap; border: 1px solid #bfdbfe; }
+    .tag { display: inline-block; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #3b82f6; margin-top: 3px; margin-right: 3px; white-space: nowrap; border: 1px solid #bfdbfe; cursor: pointer; }
+    .tag:hover { background: #dbeafe; border-color: #93c5fd; }
 
     .note-input { width: 90%; background: #fff; color: #374151; border: 1px solid #cbd5e1; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
     .note-input:focus { border-color: #2563eb; }
@@ -1746,6 +1747,14 @@ function renderRanking() {
   });
 }
 
+window.goToSector = function(shortName, event) {
+  if (event) event.stopPropagation();
+  const fullName = Object.keys(SECTORS).find(k => (k.split('. ')[1] || k) === shortName);
+  if (!fullName) return;
+  currentSector = fullName;
+  switchTab('stocks');
+};
+
 function renderStocks() {
   const select = document.getElementById("sectorSelect");
   if (select.options.length === 0) select.innerHTML = '<option value="__all__">— 全部族群 —</option>' + Object.keys(SECTORS).map(s => `<option value="${s}">${s}</option>`).join("");
@@ -1780,7 +1789,7 @@ function renderStocks() {
     <tr>
       <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}${usTags}${pwrTag}</td>
+      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag" onclick="goToSector('${t}',event)">${t}</span>`).join("")}${usTags}${pwrTag}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
@@ -1900,7 +1909,7 @@ function renderWatchlist() {
       </td>
       <td style="text-align:center;"><span style="cursor:pointer; color:#94a3b8; font-size:14px;" onclick="toggleWatchlist('${s.code}')">✕</span></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag">${t}</span>`).join("")}${wlUsTag}${wlPwrTag}</td>
+      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag" onclick="goToSector('${t}',event)">${t}</span>`).join("")}${wlUsTag}${wlPwrTag}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
@@ -2066,7 +2075,7 @@ function renderStrategy() {
               <th style="width:20px;"></th>
             </tr></thead><tbody>
               ${sortedPlan.map(p => `<tr class="${selectedPlanCode === p.code ? 'row-selected' : ''}" onclick="togglePlanSelect('${p.code}', event)" style="cursor:pointer;">
-                <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,p.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,p.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a>${(STOCK_SECTORS_MAP[p.code]||[]).length?`<br>${(STOCK_SECTORS_MAP[p.code]||[]).map(t=>`<span class="tag" style="font-size:10px;padding:1px 4px;">${t}</span>`).join('')}`:''}</td>
+                <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,p.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,p.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a>${(STOCK_SECTORS_MAP[p.code]||[]).length?`<br>${(STOCK_SECTORS_MAP[p.code]||[]).map(t=>`<span class="tag" style="font-size:10px;padding:1px 4px;" onclick="goToSector('${t}',event)">${t}</span>`).join('')}`:''}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct10)}">${fmtPct(p.pct10)}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct5)}">${fmtPct(p.pct5)}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct1)}">${fmtPct(p.pct1)}</td>
