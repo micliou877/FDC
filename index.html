@@ -1613,7 +1613,9 @@ async function fetchFundamentals() {
   const startDate = oneYearAgo.toISOString().slice(0, 10);
   const apiBase = "https://api.finmindtrade.com/api/v4/data";
   const tok = token ? `&token=${token}` : "";
-  const delay = () => token ? Promise.resolve() : new Promise(r => setTimeout(r, 300));
+  // 無 token 免費額度約 600 次/小時 → 每 call 間隔 6 秒才不超限
+  const DELAY_MS = token ? 0 : 6000;
+  const delay = () => DELAY_MS ? new Promise(r => setTimeout(r, DELAY_MS)) : Promise.resolve();
   const cacheAge = (code, key) => {
     const d = financialsCache[code]?.[key];
     return d ? (Date.now() - new Date(d)) / 86400000 : 999;
@@ -1658,7 +1660,9 @@ async function fetchFundamentals() {
   for (let i = 0; i < needFetch.length; i++) {
     const code = needFetch[i];
     const group = wlSet.has(code) ? "⭐關注" : "🔥族群";
-    statusEl.textContent = `${group} ${code}（${i + 1}/${needFetch.length}，已跳過 ${skipped} 快取）`;
+    const remainSecs = Math.ceil((needFetch.length - i) * 2 * DELAY_MS / 1000); // 估每股約 2 call
+    const etaTxt = DELAY_MS && remainSecs > 10 ? `，約剩 ${remainSecs >= 60 ? Math.ceil(remainSecs / 60) + " 分鐘" : remainSecs + " 秒"}` : "";
+    statusEl.textContent = `${group} ${code}（${i + 1}/${needFetch.length}${etaTxt}）`;
     progBar.style.width = `${((i + 1) / needFetch.length) * 100}%`;
 
     const fc = financialsCache[code] || {};
