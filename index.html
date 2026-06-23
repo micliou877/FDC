@@ -1667,62 +1667,76 @@ async function fetchFundamentals() {
 
     const fc = financialsCache[code] || {};
 
+    const safeFloat = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+    const isEtf = /^00[0-9]/.test(code); // ETF (0050, 0056, 006208…) 無 EPS/PER
+
     // ── PER（TTL 1 天）──
     let per = fc.per ?? null;
-    if (cacheAge(code, "perDate") > 1) {
+    let perApiOk = false;
+    if (!isEtf && cacheAge(code, "perDate") > 1) {
       per = null;
       try {
         const res = await fetch(`${apiBase}?dataset=TaiwanStockPER&data_id=${code}&start_date=${startDate}${tok}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        if (json.msg === "success" && json.data?.length > 0) {
-          const row = json.data[json.data.length - 1];
-          per = row.PER != null ? parseFloat(row.PER) || null : null;
-        }
-      } catch(e) {}
+        if (json.msg === "success") {
+          perApiOk = true;
+          if (json.data?.length > 0) {
+            per = safeFloat(json.data[json.data.length - 1].PER);
+          }
+        } else { console.warn(`[${code}] PER:`, json.msg); }
+      } catch(e) { console.warn(`[${code}] PER fetch:`, e.message); }
       financialsCache[code] = { ...fc, per, perDate: today };
       await delay();
-    }
+    } else if (isEtf) { perApiOk = true; }
 
     // ── EPS（TTL 90 天）──
     let eps = fc.eps ?? null;
-    if (cacheAge(code, "epsDate") > 90) {
+    let epsApiOk = false;
+    if (!isEtf && cacheAge(code, "epsDate") > 90) {
       try {
         const res = await fetch(`${apiBase}?dataset=TaiwanStockFinancialStatements&data_id=${code}&start_date=${startDate}${tok}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        if (json.msg === "success" && json.data?.length > 0) {
-          const epsRows = json.data.filter(d => d.type === "EPS");
+        if (json.msg === "success") {
+          epsApiOk = true;
+          const epsRows = (json.data || []).filter(d => d.type === "EPS");
           if (epsRows.length > 0) {
-            eps = parseFloat(epsRows[epsRows.length - 1].value) || null;
+            eps = safeFloat(epsRows[epsRows.length - 1].value);
             financialsCache[code] = { ...(financialsCache[code] || fc), eps, epsDate: today };
           }
-        }
-      } catch(e) {}
+        } else { console.warn(`[${code}] EPS:`, json.msg); }
+      } catch(e) { console.warn(`[${code}] EPS fetch:`, e.message); }
       await delay();
-    }
+    } else if (isEtf) { epsApiOk = true; }
 
     // ── 月營收年增率（TTL 32 天）──
     let yoy = fc.yoy ?? null;
     if (cacheAge(code, "yoyDate") > 32) {
       try {
         const res = await fetch(`${apiBase}?dataset=TaiwanStockMonthRevenue&data_id=${code}&start_date=${startDate}${tok}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
         if (json.msg === "success" && json.data?.length > 0) {
           const row = json.data[json.data.length - 1];
           if (row.last_year_revenue > 0) {
-            yoy = parseFloat(((row.revenue - row.last_year_revenue) / row.last_year_revenue * 100).toFixed(1));
+            yoy = safeFloat(((row.revenue - row.last_year_revenue) / row.last_year_revenue * 100).toFixed(1));
             financialsCache[code] = { ...(financialsCache[code] || fc), yoy, yoyDate: today };
           }
-        }
-      } catch(e) {}
+        } else if (json.msg !== "success") { console.warn(`[${code}] YOY:`, json.msg); }
+      } catch(e) { console.warn(`[${code}] YOY fetch:`, e.message); }
       await delay();
     }
 
     // ── 合併到 stockData ──
     if (!stockData[code]) stockData[code] = {};
+    if (isEtf) { stockData[code].qualityTag = stockData[code].quality_status = "❓ETF"; stockData[code].per = stockData[code].eps = null; continue; }
     stockData[code].per = per;
     stockData[code].eps = eps;
     stockData[code].yoy = yoy;
-    const tag = classify_quality(eps, per);
+    let tag = classify_quality(eps, per);
+    // API 有回應但兩個都沒資料 → 缺財報，不是抓取失敗
+    if (tag === "✖️抓取失敗" && perApiOk && epsApiOk) tag = "❓缺財報";
     stockData[code].qualityTag     = tag;
     stockData[code].quality_status = tag;
   }
@@ -1731,7 +1745,7 @@ async function fetchFundamentals() {
   updateUI();
 
   // ── 統計 ──
-  const tagOrder = ["🟢業績股", "🟡普通", "⚫虧損", "🔴題材股", "❓缺財報", "✖️抓取失敗"];
+  const tagOrder = ["🟢業績股", "🟡普通", "⚫虧損", "🔴題材股", "❓缺財報", "❓ETF", "✖️抓取失敗"];
   const counts = Object.fromEntries(tagOrder.map(t => [t, 0]));
   fullQueue.forEach(c => { const t = stockData[c]?.quality_status; if (counts[t] != null) counts[t]++; });
   const failedCodes = fullQueue.filter(c => stockData[c]?.quality_status === "✖️抓取失敗");
