@@ -580,6 +580,7 @@
     </div>
     <div class="progress-bar-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
     <div id="fetchStatus"></div>
+    <div id="fundStats" style="font-size:12px;color:#475569;margin-top:6px;line-height:1.8;"></div>
   </div>
 
   <div class="data-panel">
@@ -1226,8 +1227,9 @@ function loadData() {
         if (stockData[code]) {
           if (f.eps != null) stockData[code].eps = f.eps;
           if (f.yoy != null) stockData[code].yoy = f.yoy;
-          if (stockData[code].per != null || f.eps != null)
-            stockData[code].qualityTag = classify_quality(stockData[code].eps ?? null, stockData[code].per ?? null);
+          const tag = classify_quality(stockData[code].eps ?? null, stockData[code].per ?? null);
+          stockData[code].qualityTag     = tag;
+          stockData[code].quality_status = tag;
         }
       });
     }
@@ -1587,11 +1589,12 @@ async function fetchLiveQuotes() {
 
 // ==================== 基本面品質分類 ====================
 function classify_quality(eps, per) {
-  if (eps == null && per == null) return null;
-  if (eps != null && eps <= 0) return "題材股🔴";
-  if (per != null && per > 100) return "題材股🔴";
-  if (eps != null && eps > 3 && per != null && per >= 10 && per <= 50) return "業績股🟢";
-  return "普通🟡";
+  if (eps == null && per == null) return "✖️抓取失敗";
+  if (eps == null || per == null)  return "❓缺財報";
+  if (eps <= 0)                    return "⚫虧損";
+  if (per > 100 || eps < 1)        return "🔴題材股";
+  if (eps > 3 && per >= 10 && per <= 50) return "🟢業績股";
+  return "🟡普通";
 }
 
 // ==================== 基本面抓取（PER 每次抓、EPS/月營收快取）====================
@@ -1672,15 +1675,35 @@ async function fetchFundamentals() {
     stockData[code].per = per;
     stockData[code].eps = eps;
     stockData[code].yoy = yoy;
-    stockData[code].qualityTag = classify_quality(eps, per);
+    const tag = classify_quality(eps, per);
+    stockData[code].qualityTag   = tag;
+    stockData[code].quality_status = tag;
   }
 
   saveLocalOnly();
   updateUI();
-  statusEl.textContent = `基本面更新完成（${twCodes.length} 檔）`;
+
+  // ── 統計 ──
+  const tagOrder = ["🟢業績股", "🟡普通", "⚫虧損", "🔴題材股", "❓缺財報", "✖️抓取失敗"];
+  const counts = Object.fromEntries(tagOrder.map(t => [t, 0]));
+  twCodes.forEach(c => { const t = stockData[c]?.quality_status; if (counts[t] != null) counts[t]++; });
+  const failedCodes = twCodes.filter(c => stockData[c]?.quality_status === "✖️抓取失敗");
+
+  const statsLine = tagOrder.filter(t => counts[t] > 0).map(t => `${t} ${counts[t]}`).join("　");
+  console.log("=== 基本面抓取統計 ===");
+  tagOrder.forEach(t => console.log(`  ${t}: ${counts[t]} 檔`));
+  if (failedCodes.length) console.warn("✖️抓取失敗代號:", failedCodes.join(", "));
+
+  const statsEl = document.getElementById("fundStats");
+  if (statsEl) {
+    statsEl.innerHTML = `<strong>最近一次基本面更新</strong>（${today}）<br>${statsLine}`
+      + (failedCodes.length ? `<br><span style="color:#dc2626;">✖️失敗代號：${failedCodes.join(", ")}</span>` : "");
+  }
+
+  statusEl.textContent = `基本面更新完成`;
   btn.disabled = false;
   progContainer.style.display = "none";
-  setTimeout(() => { statusEl.textContent = ""; }, 6000);
+  setTimeout(() => { statusEl.textContent = ""; }, 4000);
 }
 
 function calcSectorStats() {
