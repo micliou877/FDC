@@ -1864,6 +1864,9 @@ function renderRanking() {
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct5)}">${fmtPct(st.pct5)}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct1)}">${fmtPct(st.pct1)}</td>
             <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${st.amount?.toFixed(1) ?? "-"}</td>
+            <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${st.per != null ? st.per.toFixed(1) : "-"}</td>
+            <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${st.eps != null ? st.eps.toFixed(2) : "-"}</td>
+            <td style="padding:4px 6px;text-align:center;font-size:12px;" title="${st.yoy != null ? '月營收年增率: ' + (st.yoy > 0 ? '+' : '') + st.yoy + '%' : ''}">${st.qualityTag ?? "-"}</td>
             <td style="padding:4px 6px;text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 6px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="event.stopPropagation();addToDailyPlan('${st.code}','${st.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`;
         }).join("");
@@ -1880,6 +1883,9 @@ function renderRanking() {
               ${sortTh('pct5','5日%')}
               ${sortTh('pct1','今日%')}
               ${sortTh('amount','成交(億)')}
+              ${sortTh('per','PER')}
+              ${sortTh('eps','EPS')}
+              <th style="text-align:center;padding:3px 6px;white-space:nowrap;cursor:default;">品質</th>
               <th style="width:36px;text-align:center;">作業</th>
             </tr></thead>
             <tbody>${tableRows}</tbody>
