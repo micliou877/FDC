@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工具 4：3 週持有原則追蹤</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif; background: #0f1419; color: #e6e6e6; padding: 14px; min-height: 100vh; }
+h1 { font-size: 18px; margin-bottom: 4px; color: #fff; }
+.subtitle { font-size: 11px; color: #888; margin-bottom: 14px; }
+
+.formula-card { background: #1a2026; border-radius: 8px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #4a9eff; }
+.formula-card h3 { font-size: 13px; color: #4a9eff; margin-bottom: 8px; }
+.formula-card p { font-size: 11px; color: #aaa; line-height: 1.7; }
+.formula-card ul { margin-left: 18px; margin-top: 4px; }
+.formula-card li { font-size: 11px; color: #ccc; margin: 2px 0; }
+
+.add-form { background: #1a2026; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+.add-form h3 { font-size: 13px; color: #4a9eff; margin-bottom: 12px; }
+.form-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+.form-row label { font-size: 11px; color: #aaa; }
+.form-row input { background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
+
+.btn { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 7px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 6px; }
+.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
+.btn.success { background: #2d8659; color: #fff; border-color: #2d8659; }
+.btn.danger { background: #d63031; color: #fff; border-color: #d63031; }
+
+.position-card { background: #1a2026; border-radius: 8px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #888; }
+.position-card.phase-1 { border-left-color: #ffc94a; }
+.position-card.phase-2 { border-left-color: #4a9eff; }
+.position-card.phase-3 { border-left-color: #2d8659; }
+.position-card.phase-review { border-left-color: #d63031; animation: pulse 2s infinite; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(214, 48, 49, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(214, 48, 49, 0); }
+}
+
+.position-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.position-name { font-size: 15px; font-weight: 700; color: #fff; }
+.position-name small { font-size: 11px; color: #888; font-weight: normal; }
+.phase-badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.phase-badge.p1 { background: #ffc94a; color: #000; }
+.phase-badge.p2 { background: #4a9eff; color: #fff; }
+.phase-badge.p3 { background: #2d8659; color: #fff; }
+.phase-badge.review { background: #d63031; color: #fff; }
+
+.position-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 8px 0; }
+.position-stat { background: #0f1419; padding: 6px 8px; border-radius: 4px; }
+.position-stat .label { font-size: 10px; color: #888; }
+.position-stat .value { font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px; }
+.position-stat .value.pos { color: #ff6b6b; }
+.position-stat .value.neg { color: #4a9d6f; }
+
+.position-progress { background: #0f1419; height: 8px; border-radius: 4px; overflow: hidden; margin: 8px 0; position: relative; }
+.position-progress .progress-bar { background: linear-gradient(90deg, #ffc94a, #4a9eff, #2d8659); height: 100%; transition: width 0.3s; }
+.position-progress .week-markers { position: absolute; top: 0; left: 0; right: 0; height: 100%; display: flex; }
+.position-progress .week-markers span { flex: 1; border-right: 1px solid rgba(255,255,255,0.2); font-size: 8px; color: rgba(255,255,255,0.7); text-align: center; padding-top: 1px; }
+.position-progress .week-markers span:last-child { border: none; }
+
+.action-row { display: flex; gap: 6px; margin-top: 8px; }
+.alert-text { font-size: 11px; color: #ffc94a; padding: 6px 0; }
+.alert-text.danger { color: #ff6b6b; }
+.alert-text.success { color: #2d8659; }
+
+textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: 'SF Mono', monospace; font-size: 11px; margin-top: 8px; }
+
+.empty-state { text-align: center; padding: 40px 20px; color: #666; font-size: 13px; }
+
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  .position-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<h1>⏰ 工具 4：3 週持有原則追蹤</h1>
+<div class="subtitle">避免賣在低點、買在高點的頻繁換股</div>
+
+<div class="formula-card">
+  <h3>📐 3 週原則邏輯</h3>
+  <p>
+    族群輪動有兩個層次：<br>
+    1️⃣ 強勢族群連續漲 2-3 週（主升段）<br>
+    2️⃣ 休息 1-2 週（整理）<br>
+    3️⃣ 再強勢漲 1-2 週（末升段）<br>
+    4️⃣ 完全休息或下跌（換族群）
+  </p>
+  <p style="margin-top: 8px;">
+    <strong>常見錯誤</strong>：看到第 2 週整理，誤以為輪動結束 → 換股 → 錯過第 3 週末升段。
+  </p>
+  <p style="margin-top: 8px;">
+    <strong>檢視階段</strong>：
+  </p>
+  <ul>
+    <li>第 1 週（觀察）：剛進場，**讓子彈飛**</li>
+    <li>第 2 週（耐心）：整理期，<strong style="color:#ffc94a;">不可頻繁換股</strong></li>
+    <li>第 3 週（評估）：滿 3 週後檢視，決定續抱、加碼或淘汰</li>
+  </ul>
+  <p style="margin-top: 8px;">
+    <strong>例外停損條件</strong>：
+  </p>
+  <ul>
+    <li>跌破週線且爆量 → 立即停損</li>
+    <li>族群其他股都在大跌 → 考慮換族群</li>
+    <li>單檔虧損超過 -10% → 強制停損</li>
+  </ul>
+</div>
+
+<div class="add-form">
+  <h3>➕ 新增持股</h3>
+  <div class="form-row">
+    <label>代號</label>
+    <input type="text" id="inputCode" placeholder="例如 3081">
+  </div>
+  <div class="form-row">
+    <label>公司</label>
+    <input type="text" id="inputName" placeholder="例如 聯亞">
+  </div>
+  <div class="form-row">
+    <label>進場日</label>
+    <input type="date" id="inputDate">
+  </div>
+  <div class="form-row">
+    <label>進場價</label>
+    <input type="number" id="inputEntryPrice" placeholder="進場成本價" step="0.01">
+  </div>
+  <div class="form-row">
+    <label>當前價</label>
+    <input type="number" id="inputCurrentPrice" placeholder="現在股價" step="0.01">
+  </div>
+  
+  <div style="margin-top: 12px;">
+    <button class="btn primary" id="addBtn">➕ 加入追蹤</button>
+    <button class="btn" id="loadDemoBtn">🎯 載入範例</button>
+    <button class="btn" id="exportBtn">📤 匯出 JSON</button>
+  </div>
+</div>
+
+<div id="positionsList">
+  <div class="empty-state">尚未追蹤任何持股</div>
+</div>
+
+<div class="formula-card" style="margin-top: 14px;">
+  <h3>📊 整合用資料（給 Claude Code）</h3>
+  <textarea id="jsonOutput" readonly></textarea>
+</div>
+
+<script>
+let positions = [];
+
+// ==================== 核心演算法 ====================
+function calcDaysSinceEntry(entryDate) {
+  const today = new Date();
+  const entry = new Date(entryDate);
+  const diffTime = today - entry;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+}
+
+function getPhase(days) {
+  if (days < 7) return { phase: 1, label: "第 1 週｜觀察期", desc: "讓子彈飛，不急著做決定" };
+  if (days < 14) return { phase: 2, label: "第 2 週｜耐心期", desc: "整理期，不可頻繁換股" };
+  if (days < 21) return { phase: 3, label: "第 3 週｜評估期", desc: "滿 3 週後進入檢視階段" };
+  return { phase: "review", label: "🔴 須檢視", desc: "已超過 3 週，請決定續抱、加碼或淘汰" };
+}
+
+function calcReturn(entryPrice, currentPrice) {
+  return ((currentPrice - entryPrice) / entryPrice) * 100;
+}
+
+function getActionSuggestion(days, ret) {
+  if (ret <= -10) return { text: "🚨 觸發停損 -10%，建議立即出場", level: "danger" };
+  
+  if (days < 14) {
+    if (ret < -7) return { text: "⚠️ 短期已下跌 7%+，密切觀察", level: "" };
+    return { text: "✅ 還在 3 週原則內，不需動作", level: "success" };
+  }
+  
+  if (days >= 21) {
+    if (ret > 30) return { text: "🎯 滿 3 週且漲 30%+，可考慮分批落袋", level: "success" };
+    if (ret > 15) return { text: "✅ 滿 3 週且獲利 15%+，可續抱或加碼", level: "success" };
+    if (ret > 0) return { text: "📊 滿 3 週小幅獲利，評估族群熱度決定", level: "" };
+    return { text: "⚠️ 滿 3 週仍虧損，考慮淘汰換股", level: "danger" };
+  }
+  
+  return { text: "📌 第 2-3 週整理期，保持耐心", level: "" };
+}
+
+// ==================== 互動 ====================
+document.getElementById("inputDate").valueAsDate = new Date();
+
+document.getElementById("addBtn").onclick = () => {
+  const code = document.getElementById("inputCode").value.trim();
+  const name = document.getElementById("inputName").value.trim();
+  const entryDate = document.getElementById("inputDate").value;
+  const entryPrice = parseFloat(document.getElementById("inputEntryPrice").value);
+  const currentPrice = parseFloat(document.getElementById("inputCurrentPrice").value);
+  
+  if (!code || !name || !entryDate || !entryPrice || !currentPrice) {
+    return alert("請完整填寫所有欄位");
+  }
+  
+  const existingIdx = positions.findIndex(p => p.code === code);
+  const item = { code, name, entryDate, entryPrice, currentPrice };
+  
+  if (existingIdx >= 0) {
+    positions[existingIdx] = item;
+  } else {
+    positions.push(item);
+  }
+  
+  // 清空表單
+  document.getElementById("inputCode").value = "";
+  document.getElementById("inputName").value = "";
+  document.getElementById("inputEntryPrice").value = "";
+  document.getElementById("inputCurrentPrice").value = "";
+  document.getElementById("inputDate").valueAsDate = new Date();
+  
+  render();
+};
+
+function updatePrice(code) {
+  const newPrice = prompt("輸入最新股價：");
+  if (newPrice === null || newPrice === "") return;
+  const p = positions.find(p => p.code === code);
+  if (p) {
+    p.currentPrice = parseFloat(newPrice);
+    render();
+  }
+}
+
+function deletePosition(code) {
+  if (!confirm(`移除 ${code}？`)) return;
+  positions = positions.filter(p => p.code !== code);
+  render();
+}
+
+window.updatePrice = updatePrice;
+window.deletePosition = deletePosition;
+
+// ==================== 渲染 ====================
+function render() {
+  const container = document.getElementById("positionsList");
+  const jsonOutput = document.getElementById("jsonOutput");
+  
+  if (positions.length === 0) {
+    container.innerHTML = `<div class="empty-state">尚未追蹤任何持股</div>`;
+    jsonOutput.value = "";
+    return;
+  }
+  
+  // 依進場日排序（最新在上）
+  const sorted = [...positions].sort((a, b) => new Date(b.entryDate) - new Date(a.entryDate));
+  
+  container.innerHTML = sorted.map(p => {
+    const days = calcDaysSinceEntry(p.entryDate);
+    const phase = getPhase(days);
+    const ret = calcReturn(p.entryPrice, p.currentPrice);
+    const action = getActionSuggestion(days, ret);
+    
+    const progressPct = Math.min((days / 21) * 100, 100);
+    const phaseBadgeClass = phase.phase === "review" ? "review" : `p${phase.phase}`;
+    const cardClass = phase.phase === "review" ? "phase-review" : `phase-${phase.phase}`;
+    
+    return `
+      <div class="position-card ${cardClass}">
+        <div class="position-header">
+          <div class="position-name">
+            ${p.code} ${p.name}
+            <small>進場 ${p.entryDate}</small>
+          </div>
+          <span class="phase-badge ${phaseBadgeClass}">${phase.label}</span>
+        </div>
+        
+        <div class="position-progress">
+          <div class="progress-bar" style="width:${progressPct}%"></div>
+          <div class="week-markers">
+            <span>第 1 週</span>
+            <span>第 2 週</span>
+            <span>第 3 週</span>
+          </div>
+        </div>
+        
+        <div class="position-grid">
+          <div class="position-stat">
+            <div class="label">持有天數</div>
+            <div class="value">${days} 天</div>
+          </div>
+          <div class="position-stat">
+            <div class="label">進場價</div>
+            <div class="value">${p.entryPrice.toFixed(2)}</div>
+          </div>
+          <div class="position-stat">
+            <div class="label">當前價</div>
+            <div class="value">${p.currentPrice.toFixed(2)}</div>
+          </div>
+          <div class="position-stat">
+            <div class="label">報酬率</div>
+            <div class="value ${ret > 0 ? 'pos' : (ret < 0 ? 'neg' : '')}">${ret > 0 ? "+" : ""}${ret.toFixed(2)}%</div>
+          </div>
+        </div>
+        
+        <div class="alert-text ${action.level}">${action.text}</div>
+        <div style="font-size:10px; color:#888; margin-top:4px;">${phase.desc}</div>
+        
+        <div class="action-row">
+          <button class="btn" onclick="updatePrice('${p.code}')">💱 更新股價</button>
+          <button class="btn danger" onclick="deletePosition('${p.code}')">🗑 移除</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+  
+  // JSON 輸出
+  const exportData = {
+    timestamp: new Date().toISOString(),
+    algorithm: "3 週持有原則：1-7 天觀察 / 8-14 天耐心 / 15-21 天評估 / 22+ 天須檢視",
+    positions: sorted.map(p => {
+      const days = calcDaysSinceEntry(p.entryDate);
+      const phase = getPhase(days);
+      const ret = calcReturn(p.entryPrice, p.currentPrice);
+      const action = getActionSuggestion(days, ret);
+      return {
+        code: p.code,
+        name: p.name,
+        entry_date: p.entryDate,
+        entry_price: p.entryPrice,
+        current_price: p.currentPrice,
+        days_held: days,
+        return_pct: parseFloat(ret.toFixed(2)),
+        phase: phase.phase,
+        phase_label: phase.label,
+        action_suggestion: action.text
+      };
+    })
+  };
+  jsonOutput.value = JSON.stringify(exportData, null, 2);
+}
+
+// ==================== 範例 ====================
+document.getElementById("loadDemoBtn").onclick = () => {
+  const today = new Date();
+  const daysAgo = (n) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d.toISOString().split('T')[0];
+  };
+  
+  positions = [
+    {code:"2330", name:"台積電", entryDate: daysAgo(25), entryPrice: 1380, currentPrice: 1450},
+    {code:"3081", name:"聯亞", entryDate: daysAgo(18), entryPrice: 980, currentPrice: 1250},
+    {code:"8033", name:"雷虎", entryDate: daysAgo(10), entryPrice: 225, currentPrice: 285},
+    {code:"3017", name:"奇鋐", entryDate: daysAgo(5), entryPrice: 1300, currentPrice: 1380},
+    {code:"5347", name:"世界先進", entryDate: daysAgo(28), entryPrice: 150, currentPrice: 132}
+  ];
+  render();
+};
+
+document.getElementById("exportBtn").onclick = () => {
+  const text = document.getElementById("jsonOutput").value;
+  if (!text) return alert("尚無資料");
+  navigator.clipboard.writeText(text).then(() => alert("已複製 JSON"));
+};
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工具 2：個股強勢度評分</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif; background: #0f1419; color: #e6e6e6; padding: 14px; min-height: 100vh; }
+h1 { font-size: 18px; margin-bottom: 4px; color: #fff; }
+.subtitle { font-size: 11px; color: #888; margin-bottom: 14px; }
+
+.formula-card { background: #1a2026; border-radius: 8px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #4a9eff; }
+.formula-card h3 { font-size: 13px; color: #4a9eff; margin-bottom: 8px; }
+.formula-card .formula { font-family: 'SF Mono', Consolas, monospace; font-size: 13px; color: #ffc94a; background: #0f1419; padding: 10px; border-radius: 4px; margin: 8px 0; }
+.formula-card p { font-size: 11px; color: #aaa; line-height: 1.6; }
+
+.checklist-card { background: #1a2026; border-radius: 8px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #ffc94a; }
+.checklist-card h3 { font-size: 13px; color: #ffc94a; margin-bottom: 10px; }
+.checklist-card .check-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 12px; color: #ddd; }
+.checklist-card .check-item input[type="checkbox"] { width: 16px; height: 16px; }
+.checklist-card .check-item label { flex: 1; }
+.checklist-card .pass { color: #ff6b6b; font-weight: 700; }
+.checklist-card .fail { color: #4a9d6f; font-weight: 700; }
+
+.sector-selector { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+select, .btn { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 7px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
+.btn:hover, select:hover { border-color: #4a9eff; }
+
+.ranking-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.ranking-table th { background: #1a2026; padding: 10px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.ranking-table td { padding: 9px 6px; border-bottom: 1px solid #1a2026; }
+.ranking-table tbody tr:hover { background: #1a2026; }
+.ranking-table tbody tr.top1 { background: linear-gradient(90deg, rgba(255, 107, 107, 0.15), transparent); }
+.ranking-table tbody tr.top2 { background: linear-gradient(90deg, rgba(255, 153, 153, 0.10), transparent); }
+
+.medal { font-size: 16px; }
+.score-bar { position: relative; height: 16px; background: #1a2026; border-radius: 3px; overflow: hidden; min-width: 80px; }
+.score-fill { height: 100%; background: linear-gradient(90deg, #d63031, #ff6b6b); display: flex; align-items: center; padding: 0 6px; font-size: 10px; color: #fff; font-weight: 600; }
+
+.pos-text { color: #ff6b6b; font-weight: 600; }
+.neg-text { color: #4a9d6f; font-weight: 600; }
+.flat-text { color: #888; }
+
+.volume-spike { background: #ff6b6b; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: 600; }
+.volume-low { background: #555; color: #ccc; padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+
+textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: 'SF Mono', monospace; font-size: 11px; margin-top: 8px; }
+
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  .ranking-table { font-size: 10px; }
+  .ranking-table th, .ranking-table td { padding: 6px 3px; }
+}
+</style>
+</head>
+<body>
+
+<h1>💪 工具 2：個股強勢度評分</h1>
+<div class="subtitle">從熱門族群中挑「最強 1-2 檔」</div>
+
+<div class="formula-card">
+  <h3>📐 強勢度公式</h3>
+  <div class="formula">強勢度 = (5 日漲幅 × 0.4) + (量比 × 0.3 × 10) + (距離前高反向 × 0.3)</div>
+  <p>
+    • <strong>5 日漲幅（40%）</strong>：當前動能<br>
+    • <strong>量比（30%）</strong>：當日量 / 20 日均量，反映籌碼聚焦度<br>
+    • <strong>距離前高（30%）</strong>：未漲足的上漲空間（越多越好）<br>
+    <br>
+    <strong>使用方式</strong>：每族群只挑 Top 1-2 進場，其他列入觀察。
+  </p>
+</div>
+
+<div class="checklist-card">
+  <h3>✅ 起漲股 5 個 OK 條件（手動勾選）</h3>
+  <div class="check-item">
+    <input type="checkbox" id="check1">
+    <label for="check1">站上 60 日均線（季線）</label>
+  </div>
+  <div class="check-item">
+    <input type="checkbox" id="check2">
+    <label for="check2">月線、季線轉強或多頭排列</label>
+  </div>
+  <div class="check-item">
+    <input type="checkbox" id="check3">
+    <label for="check3">近 5 日均量 ≥ 60 日均量 × 1.5 倍</label>
+  </div>
+  <div class="check-item">
+    <input type="checkbox" id="check4">
+    <label for="check4">同族群至少 3 檔同步走強</label>
+  </div>
+  <div class="check-item">
+    <input type="checkbox" id="check5">
+    <label for="check5">距離前波高點還有 30%+ 上漲空間</label>
+  </div>
+  <div id="checkResult" style="margin-top:10px; font-size:13px;">
+    勾選 <span id="checkCount">0</span>/5 條件
+    （4 個以上才進場：<span id="checkPass" class="fail">不夠</span>）
+  </div>
+</div>
+
+<div class="sector-selector">
+  <select id="sectorSelect">
+    <option value="">— 選擇族群 —</option>
+  </select>
+  <button class="btn primary" id="loadDemoBtn">🎯 載入範例</button>
+  <button class="btn" id="exportBtn">📤 匯出 JSON</button>
+</div>
+
+<table class="ranking-table" id="rankingTable">
+  <thead>
+    <tr>
+      <th>名次</th>
+      <th>代號</th>
+      <th>公司</th>
+      <th style="text-align:right">收盤</th>
+      <th style="text-align:right">5日 %</th>
+      <th style="text-align:center">量比</th>
+      <th style="text-align:right">距前高</th>
+      <th>強勢度</th>
+      <th>動作</th>
+    </tr>
+  </thead>
+  <tbody id="rankingTbody">
+    <tr><td colspan="9" style="text-align:center; padding:40px; color:#666;">請選擇族群並載入資料</td></tr>
+  </tbody>
+</table>
+
+<div class="formula-card" style="margin-top: 14px;">
+  <h3>📊 整合用資料（給 Claude Code）</h3>
+  <p>下方 JSON 可直接餵給 Claude Code 整合到主程式：</p>
+  <textarea id="jsonOutput" readonly></textarea>
+</div>
+
+<script>
+// ==================== 族群與個股資料 ====================
+const SECTORS = {
+  "矽光子CPO": [
+    {c:"3081",n:"聯亞"}, {c:"2455",n:"全新"}, {c:"4971",n:"IET-KY"},
+    {c:"3163",n:"波若威"}, {c:"3363",n:"上詮"}, {c:"6442",n:"光聖"},
+    {c:"4979",n:"華星光"}, {c:"3450",n:"聯鈞"}
+  ],
+  "軍工無人機": [
+    {c:"2634",n:"漢翔"}, {c:"8033",n:"雷虎"}, {c:"5371",n:"中光電"},
+    {c:"2645",n:"長榮航太"}, {c:"6753",n:"龍德造船"}, {c:"5222",n:"全訊"},
+    {c:"2429",n:"銘旺科"}, {c:"7719",n:"碳基"}, {c:"2208",n:"台船"}
+  ],
+  "半導體設備": [
+    {c:"3131",n:"弘塑"}, {c:"3583",n:"辛耘"}, {c:"6187",n:"萬潤"},
+    {c:"7769",n:"鴻勁"}, {c:"6223",n:"旺矽"}, {c:"3680",n:"家登"},
+    {c:"2360",n:"致茂"}, {c:"3413",n:"京鼎"}
+  ],
+  "低軌衛星6G": [
+    {c:"3491",n:"昇達科"}, {c:"6285",n:"啟碁"}, {c:"2313",n:"華通"},
+    {c:"6271",n:"同欣電"}, {c:"7717",n:"萊德光電-KY"}, {c:"2419",n:"仲琦"}
+  ],
+  "功率半導體": [
+    {c:"5347",n:"世界先進"}, {c:"3707",n:"漢磊"}, {c:"3105",n:"穩懋"},
+    {c:"8255",n:"朋程"}, {c:"6488",n:"環球晶"}, {c:"3016",n:"嘉晶"},
+    {c:"6573",n:"虹揚-KY"}, {c:"8261",n:"富鼎"}
+  ],
+  "散熱液冷": [
+    {c:"3017",n:"奇鋐"}, {c:"3324",n:"雙鴻"}, {c:"3653",n:"健策"},
+    {c:"2308",n:"台達電"}, {c:"6805",n:"富世達"}, {c:"8996",n:"高力"}
+  ],
+  "被動元件": [
+    {c:"2327",n:"國巨*"}, {c:"2492",n:"華新科"}, {c:"3026",n:"禾伸堂"},
+    {c:"3357",n:"臺慶科"}, {c:"2478",n:"大毅"}, {c:"2375",n:"凱美"}
+  ]
+};
+
+let stockData = {};  // {code: {price, pct5, vol, avgVol, prevHigh}}
+let currentSector = null;
+
+// ==================== 核心演算法 ====================
+function calculateStrengthScore(pct5, volRatio, distFromHigh) {
+  // pct5: 5 日漲幅（%）
+  // volRatio: 量比（當日量/20日均量）
+  // distFromHigh: 距離前高的百分比（負數，例如 -25% 代表還有 25% 空間）
+  // 把 distFromHigh 反向（越遠 = 分數越高）
+  const distScore = -distFromHigh;  // -25% → 25 分
+  
+  const score = (pct5 * 0.4) + (volRatio * 0.3 * 10) + (distScore * 0.3);
+  return score;
+}
+
+function getVolumeBadge(volRatio) {
+  if (!volRatio) return "-";
+  if (volRatio >= 2.5) return `<span class="volume-spike">${volRatio.toFixed(2)}x🔥</span>`;
+  if (volRatio >= 1.5) return `<span class="volume-spike" style="background:#ff9999">${volRatio.toFixed(2)}x</span>`;
+  if (volRatio < 0.7) return `<span class="volume-low">${volRatio.toFixed(2)}x</span>`;
+  return volRatio.toFixed(2) + "x";
+}
+
+function getActionByRank(rank) {
+  if (rank === 1) return "🥇 主力買入";
+  if (rank === 2) return "🥈 次選買入";
+  if (rank === 3) return "👀 觀察";
+  return "⚪ 略過";
+}
+
+function getRowClass(rank) {
+  if (rank === 1) return "top1";
+  if (rank === 2) return "top2";
+  return "";
+}
+
+// ==================== 渲染 ====================
+function render() {
+  const tbody = document.getElementById("rankingTbody");
+  const jsonOutput = document.getElementById("jsonOutput");
+  
+  if (!currentSector || !SECTORS[currentSector]) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#666;">請先選擇族群</td></tr>`;
+    jsonOutput.value = "";
+    return;
+  }
+  
+  const stocks = SECTORS[currentSector];
+  const rows = stocks.map(s => {
+    const d = stockData[s.c];
+    if (!d) return null;
+    const volRatio = d.vol / Math.max(d.avgVol, 1);
+    const distFromHigh = ((d.price - d.prevHigh) / d.prevHigh) * 100;  // 負數
+    const score = calculateStrengthScore(d.pct5, volRatio, distFromHigh);
+    return {
+      code: s.c,
+      name: s.n,
+      price: d.price,
+      pct5: d.pct5,
+      volRatio,
+      distFromHigh,
+      score
+    };
+  }).filter(r => r !== null);
+  
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#666;">此族群尚無資料</td></tr>`;
+    jsonOutput.value = "";
+    return;
+  }
+  
+  rows.sort((a, b) => b.score - a.score);
+  
+  const maxScore = Math.max(...rows.map(r => r.score));
+  const minScore = Math.min(...rows.map(r => r.score));
+  const range = maxScore - minScore;
+  
+  tbody.innerHTML = rows.map((r, i) => {
+    const rank = i + 1;
+    const barWidth = range > 0 ? ((r.score - minScore) / range * 100).toFixed(0) : 50;
+    return `
+      <tr class="${getRowClass(rank)}">
+        <td><span class="medal">${rank <= 3 ? ['🥇','🥈','🥉'][rank-1] : rank}</span></td>
+        <td>${r.code}</td>
+        <td>${r.name}</td>
+        <td style="text-align:right">${r.price.toFixed(2)}</td>
+        <td style="text-align:right" class="${r.pct5 > 0 ? 'pos-text' : 'neg-text'}">${r.pct5.toFixed(2)}%</td>
+        <td style="text-align:center">${getVolumeBadge(r.volRatio)}</td>
+        <td style="text-align:right" class="${r.distFromHigh > -10 ? 'neg-text' : 'pos-text'}">${r.distFromHigh.toFixed(1)}%</td>
+        <td>
+          <div class="score-bar">
+            <div class="score-fill" style="width:${Math.max(barWidth, 5)}%">${r.score.toFixed(1)}</div>
+          </div>
+        </td>
+        <td style="font-size:11px; color:#aaa;">${getActionByRank(rank)}</td>
+      </tr>
+    `;
+  }).join("");
+  
+  // JSON 輸出
+  const exportData = {
+    timestamp: new Date().toISOString(),
+    sector: currentSector,
+    algorithm: "強勢度 = (5日漲幅 × 0.4) + (量比 × 0.3 × 10) + (距前高反向 × 0.3)",
+    ranking: rows.map((r, i) => ({
+      rank: i + 1,
+      code: r.code,
+      name: r.name,
+      score: parseFloat(r.score.toFixed(2)),
+      pct5: r.pct5,
+      volRatio: parseFloat(r.volRatio.toFixed(2)),
+      distFromHigh: parseFloat(r.distFromHigh.toFixed(1)),
+      action: getActionByRank(i + 1)
+    }))
+  };
+  jsonOutput.value = JSON.stringify(exportData, null, 2);
+}
+
+// ==================== 5 OK 條件勾選 ====================
+function updateCheckResult() {
+  const checks = ['check1', 'check2', 'check3', 'check4', 'check5']
+    .map(id => document.getElementById(id).checked);
+  const count = checks.filter(c => c).length;
+  document.getElementById("checkCount").textContent = count;
+  const passEl = document.getElementById("checkPass");
+  if (count >= 4) {
+    passEl.textContent = "可進場 ✅";
+    passEl.className = "pass";
+  } else {
+    passEl.textContent = "不夠 ❌";
+    passEl.className = "fail";
+  }
+}
+['check1', 'check2', 'check3', 'check4', 'check5'].forEach(id => {
+  document.getElementById(id).addEventListener("change", updateCheckResult);
+});
+
+// ==================== 互動 ====================
+const selectEl = document.getElementById("sectorSelect");
+selectEl.innerHTML = '<option value="">— 選擇族群 —</option>' + 
+  Object.keys(SECTORS).map(s => `<option value="${s}">${s}</option>`).join("");
+selectEl.onchange = (e) => {
+  currentSector = e.target.value || null;
+  render();
+};
+
+document.getElementById("loadDemoBtn").onclick = () => {
+  // 範例資料
+  stockData = {
+    // 矽光子
+    "3081":{price:1250, pct5:18.2, vol:8500, avgVol:5000, prevHigh:1380},
+    "2455":{price:285, pct5:11.5, vol:8500, avgVol:5500, prevHigh:320},
+    "4971":{price:780, pct5:9.5, vol:3500, avgVol:2200, prevHigh:850},
+    "3163":{price:520, pct5:13.8, vol:6000, avgVol:3800, prevHigh:600},
+    "3363":{price:580, pct5:12.5, vol:6500, avgVol:4000, prevHigh:650},
+    "6442":{price:1430, pct5:8.5, vol:3500, avgVol:2500, prevHigh:1500},
+    "4979":{price:680, pct5:15.2, vol:5500, avgVol:3500, prevHigh:750},
+    "3450":{price:365, pct5:18.5, vol:29908, avgVol:12000, prevHigh:420},
+    // 軍工
+    "2634":{price:78, pct5:18.5, vol:45000, avgVol:18000, prevHigh:95},
+    "8033":{price:285, pct5:25.5, vol:18000, avgVol:8500, prevHigh:320},
+    "5371":{price:215, pct5:12.5, vol:25000, avgVol:15000, prevHigh:260},
+    "2645":{price:205, pct5:15.5, vol:15000, avgVol:8000, prevHigh:240},
+    "6753":{price:165, pct5:22.5, vol:35000, avgVol:12000, prevHigh:200},
+    "5222":{price:155, pct5:12.5, vol:6500, avgVol:3800, prevHigh:185},
+    "2429":{price:50.4, pct5:18.5, vol:8500, avgVol:3500, prevHigh:60},
+    "7719":{price:285, pct5:14.5, vol:8500, avgVol:4500, prevHigh:320},
+    "2208":{price:38, pct5:14.5, vol:85000, avgVol:45000, prevHigh:45},
+    // 半導體設備
+    "3131":{price:2875, pct5:14.5, vol:1305, avgVol:850, prevHigh:3200},
+    "3583":{price:736, pct5:16.5, vol:2109, avgVol:1200, prevHigh:850},
+    "6187":{price:1080, pct5:14.2, vol:4861, avgVol:2500, prevHigh:1200},
+    "7769":{price:3450, pct5:8.5, vol:850, avgVol:600, prevHigh:4000},
+    "6223":{price:1250, pct5:9.5, vol:1800, avgVol:1200, prevHigh:1400},
+    "3680":{price:880, pct5:12.5, vol:3500, avgVol:2200, prevHigh:980},
+    "2360":{price:485, pct5:5.8, vol:5500, avgVol:4500, prevHigh:550},
+    "3413":{price:520, pct5:8.5, vol:2500, avgVol:1800, prevHigh:600},
+    // 低軌衛星
+    "3491":{price:850, pct5:14.5, vol:4500, avgVol:2800, prevHigh:950},
+    "6285":{price:165, pct5:18.5, vol:25000, avgVol:12000, prevHigh:200},
+    "2313":{price:185, pct5:11.5, vol:55000, avgVol:35000, prevHigh:220},
+    "6271":{price:148, pct5:8.5, vol:8500, avgVol:5500, prevHigh:170},
+    "7717":{price:285, pct5:14.5, vol:3500, avgVol:2200, prevHigh:320},
+    "2419":{price:35, pct5:8.5, vol:12000, avgVol:8000, prevHigh:42},
+    // 功率半導體
+    "5347":{price:135, pct5:8.5, vol:25000, avgVol:18000, prevHigh:150},
+    "3707":{price:95, pct5:15.5, vol:18000, avgVol:9500, prevHigh:120},
+    "3105":{price:265, pct5:11.5, vol:12000, avgVol:7500, prevHigh:300},
+    "8255":{price:185, pct5:8.5, vol:5500, avgVol:3800, prevHigh:210},
+    "6488":{price:580, pct5:9.5, vol:4500, avgVol:3500, prevHigh:650},
+    "3016":{price:165, pct5:14.5, vol:8500, avgVol:5500, prevHigh:185},
+    "6573":{price:52, pct5:11.5, vol:5500, avgVol:3500, prevHigh:60},
+    "8261":{price:65, pct5:18.5, vol:8500, avgVol:4500, prevHigh:75},
+    // 散熱
+    "3017":{price:1380, pct5:5.8, vol:15000, avgVol:11000, prevHigh:1500},
+    "3324":{price:1075, pct5:4.2, vol:8500, avgVol:7000, prevHigh:1200},
+    "3653":{price:1250, pct5:7.5, vol:5000, avgVol:3800, prevHigh:1400},
+    "2308":{price:2165, pct5:4.8, vol:9407, avgVol:8500, prevHigh:2300},
+    "6805":{price:1520, pct5:8.8, vol:3500, avgVol:2200, prevHigh:1700},
+    "8996":{price:780, pct5:6.5, vol:2800, avgVol:2100, prevHigh:880},
+    // 被動元件
+    "2327":{price:348.5, pct5:5.2, vol:38955, avgVol:32000, prevHigh:380},
+    "2492":{price:148.5, pct5:9.8, vol:18094, avgVol:9500, prevHigh:170},
+    "3026":{price:248.5, pct5:15.2, vol:12000, avgVol:5500, prevHigh:280},
+    "3357":{price:195, pct5:11.5, vol:5500, avgVol:3500, prevHigh:220},
+    "2478":{price:77.1, pct5:10.5, vol:9599, avgVol:5800, prevHigh:88},
+    "2375":{price:90, pct5:6.5, vol:5054, avgVol:4200, prevHigh:105}
+  };
+  if (!currentSector) {
+    currentSector = "矽光子CPO";
+    selectEl.value = currentSector;
+  }
+  render();
+};
+
+document.getElementById("exportBtn").onclick = () => {
+  const text = document.getElementById("jsonOutput").value;
+  if (!text) return alert("尚無資料");
+  navigator.clipboard.writeText(text).then(() => alert("已複製 JSON"));
+};
+
+updateCheckResult();
+render();
+</script>
+</body>
+</html>

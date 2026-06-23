@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工具 1：族群熱度評分系統</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif; background: #0f1419; color: #e6e6e6; padding: 14px; min-height: 100vh; }
+h1 { font-size: 18px; margin-bottom: 4px; color: #fff; }
+.subtitle { font-size: 11px; color: #888; margin-bottom: 14px; }
+
+.formula-card { background: #1a2026; border-radius: 8px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #4a9eff; }
+.formula-card h3 { font-size: 13px; color: #4a9eff; margin-bottom: 8px; }
+.formula-card .formula { font-family: 'SF Mono', Consolas, monospace; font-size: 13px; color: #ffc94a; background: #0f1419; padding: 10px; border-radius: 4px; margin: 8px 0; }
+.formula-card p { font-size: 11px; color: #aaa; line-height: 1.6; }
+
+.controls { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.btn { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 7px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
+.btn:hover { border-color: #4a9eff; }
+
+.ranking-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.ranking-table th { background: #1a2026; padding: 10px 6px; text-align: left; font-weight: 600; color: #aaa; font-size: 11px; cursor: pointer; white-space: nowrap; }
+.ranking-table th:hover { color: #4a9eff; }
+.ranking-table td { padding: 10px 6px; border-bottom: 1px solid #1a2026; }
+.ranking-table tbody tr:hover { background: #1a2026; }
+.ranking-table tbody tr.top1 { background: linear-gradient(90deg, rgba(255, 107, 107, 0.15), transparent); }
+.ranking-table tbody tr.top2 { background: linear-gradient(90deg, rgba(255, 153, 153, 0.10), transparent); }
+.ranking-table tbody tr.top3 { background: linear-gradient(90deg, rgba(255, 200, 200, 0.05), transparent); }
+
+.medal { font-size: 16px; }
+.score-bar { position: relative; height: 18px; background: #1a2026; border-radius: 3px; overflow: hidden; min-width: 100px; }
+.score-fill { height: 100%; background: linear-gradient(90deg, #d63031, #ff6b6b); display: flex; align-items: center; padding: 0 6px; font-size: 10px; color: #fff; font-weight: 600; }
+
+.pos-text { color: #ff6b6b; font-weight: 600; }
+.neg-text { color: #4a9d6f; font-weight: 600; }
+.flat-text { color: #888; }
+
+.decision-card { background: #1a2026; border-radius: 8px; padding: 14px; margin-top: 14px; border-left: 4px solid #ffc94a; }
+.decision-card h3 { font-size: 13px; color: #ffc94a; margin-bottom: 10px; }
+.decision-card .tier { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #2a3138; }
+.decision-card .tier:last-child { border: none; }
+.decision-card .tier-label { font-size: 14px; font-weight: 700; min-width: 50px; }
+.decision-card .tier-name { font-size: 13px; color: #fff; flex: 1; }
+.decision-card .tier-action { font-size: 11px; color: #ffc94a; }
+
+textarea { width: 100%; min-height: 100px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: 'SF Mono', monospace; font-size: 11px; margin-top: 8px; }
+
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  .ranking-table { font-size: 11px; }
+  .ranking-table th, .ranking-table td { padding: 8px 4px; }
+}
+</style>
+</head>
+<body>
+
+<h1>🔥 工具 1：族群熱度評分系統</h1>
+<div class="subtitle">每週日跑一次 → 排出 Top 3 操作族群</div>
+
+<div class="formula-card">
+  <h3>📐 評分公式</h3>
+  <div class="formula">熱度分數 = (10 日漲幅 × 0.5) + (5 日漲幅 × 0.3) + (族群成交金額 × 0.2)</div>
+  <p>
+    • <strong>10 日漲幅（50%）</strong>：判斷主要趨勢方向<br>
+    • <strong>5 日漲幅（30%）</strong>：判斷近期加速度<br>
+    • <strong>成交金額（20%）</strong>：判斷資金關注度（標準化處理）<br>
+    <br>
+    <strong>使用方式</strong>：保留前 3 名作為「操作族群」，第 4-5 名作為「觀察族群」。
+  </p>
+</div>
+
+<div class="controls">
+  <button class="btn primary" id="loadDemoBtn">🎯 載入範例資料</button>
+  <button class="btn" id="exportBtn">📤 匯出排行（JSON）</button>
+  <button class="btn" id="clearBtn">🗑 清空</button>
+</div>
+
+<table class="ranking-table" id="rankingTable">
+  <thead>
+    <tr>
+      <th>排名</th>
+      <th>族群</th>
+      <th style="text-align:right">10 日 %</th>
+      <th style="text-align:right">5 日 %</th>
+      <th style="text-align:right">金額(億)</th>
+      <th>熱度分數</th>
+      <th>建議動作</th>
+    </tr>
+  </thead>
+  <tbody id="rankingTbody">
+    <tr><td colspan="7" style="text-align:center; padding:40px; color:#666;">尚未匯入資料，請點「載入範例資料」</td></tr>
+  </tbody>
+</table>
+
+<div class="decision-card" id="decisionCard" style="display:none;">
+  <h3>💡 部位配置建議</h3>
+  <div id="decisionContent"></div>
+</div>
+
+<div class="formula-card" style="margin-top: 14px;">
+  <h3>📊 整合用資料（給 Claude Code）</h3>
+  <p>下方 JSON 可直接餵給 Claude Code 整合到主程式：</p>
+  <textarea id="jsonOutput" readonly></textarea>
+</div>
+
+<script>
+// ==================== 族群清單 ====================
+const SECTORS = [
+  "AI晶片設計", "先進封裝封測", "AI伺服器ODM", "散熱液冷", "記憶體",
+  "AI伺服器機殼", "被動元件", "PCB_CCL", "CPO矽光子", "AI電源BBU",
+  "機構件滑軌", "廠務工程", "半導體設備", "面板螢幕", "資安",
+  "AI軟體雲端", "工業電腦邊緣AI", "軍工無人機", "機器人人形機器人",
+  "AI_PC智慧手機", "低軌衛星6G", "車用自駕EV", "矽光子CPO",
+  "重電電網儲能", "消費復甦電商", "ETF權值核心",
+  "功率半導體", "邊緣運算EdgeAI", "IDM整合元件", "半導體通路"
+];
+
+let sectorData = {};  // {sectorName: {pct10, pct5, amount}}
+
+// ==================== 核心演算法：熱度分數計算 ====================
+function calculateHeatScore(pct10, pct5, amount, maxAmount) {
+  // 成交金額標準化（最大值對應為基準）
+  const normalizedAmount = maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+  
+  const score = (pct10 * 0.5) + (pct5 * 0.3) + (normalizedAmount * 0.2);
+  return score;
+}
+
+function getActionByRank(rank) {
+  if (rank === 1) return { label: "🥇 主力族群", weight: "30%", action: "龍頭+補漲 2 檔" };
+  if (rank === 2) return { label: "🥈 次主力", weight: "25%", action: "龍頭+補漲 2 檔" };
+  if (rank === 3) return { label: "🥉 觀察族群", weight: "15%", action: "只挑 1 檔龍頭" };
+  if (rank === 4) return { label: "👀 候補", weight: "0%", action: "持續觀察" };
+  if (rank === 5) return { label: "👀 候補", weight: "0%", action: "持續觀察" };
+  return { label: "⚪ 不操作", weight: "0%", action: "略過" };
+}
+
+function getMedal(rank) {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return rank;
+}
+
+function getRowClass(rank) {
+  if (rank === 1) return "top1";
+  if (rank === 2) return "top2";
+  if (rank === 3) return "top3";
+  return "";
+}
+
+// ==================== 渲染排行 ====================
+function render() {
+  const tbody = document.getElementById("rankingTbody");
+  const decisionCard = document.getElementById("decisionCard");
+  const jsonOutput = document.getElementById("jsonOutput");
+  
+  if (Object.keys(sectorData).length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#666;">尚未匯入資料</td></tr>`;
+    decisionCard.style.display = "none";
+    jsonOutput.value = "";
+    return;
+  }
+  
+  // 找最大成交金額（標準化用）
+  const maxAmount = Math.max(...Object.values(sectorData).map(d => d.amount));
+  
+  // 計算分數
+  const scored = Object.entries(sectorData).map(([name, d]) => ({
+    name,
+    pct10: d.pct10,
+    pct5: d.pct5,
+    amount: d.amount,
+    score: calculateHeatScore(d.pct10, d.pct5, d.amount, maxAmount)
+  })).sort((a, b) => b.score - a.score);
+  
+  // 找最大、最小分數（畫長條圖用）
+  const maxScore = Math.max(...scored.map(s => s.score));
+  const minScore = Math.min(...scored.map(s => s.score));
+  const range = maxScore - minScore;
+  
+  // 渲染表格
+  tbody.innerHTML = scored.map((s, i) => {
+    const rank = i + 1;
+    const action = getActionByRank(rank);
+    const barWidth = range > 0 ? ((s.score - minScore) / range * 100).toFixed(0) : 50;
+    return `
+      <tr class="${getRowClass(rank)}">
+        <td><span class="medal">${getMedal(rank)}</span></td>
+        <td>${s.name}</td>
+        <td style="text-align:right" class="${s.pct10 > 0 ? 'pos-text' : 'neg-text'}">${s.pct10.toFixed(2)}%</td>
+        <td style="text-align:right" class="${s.pct5 > 0 ? 'pos-text' : 'neg-text'}">${s.pct5.toFixed(2)}%</td>
+        <td style="text-align:right">${s.amount.toFixed(0)}</td>
+        <td>
+          <div class="score-bar">
+            <div class="score-fill" style="width:${Math.max(barWidth, 5)}%">${s.score.toFixed(1)}</div>
+          </div>
+        </td>
+        <td style="font-size:11px; color:#aaa;">${action.label}<br>${action.action}</td>
+      </tr>
+    `;
+  }).join("");
+  
+  // 決策卡
+  decisionCard.style.display = "block";
+  const top3 = scored.slice(0, 3);
+  document.getElementById("decisionContent").innerHTML = `
+    <div class="tier">
+      <div class="tier-label">🥇 30%</div>
+      <div class="tier-name">${top3[0]?.name || "-"}（分數 ${top3[0]?.score.toFixed(1) || "-"}）</div>
+      <div class="tier-action">挑龍頭 + 補漲 2 檔</div>
+    </div>
+    <div class="tier">
+      <div class="tier-label">🥈 25%</div>
+      <div class="tier-name">${top3[1]?.name || "-"}（分數 ${top3[1]?.score.toFixed(1) || "-"}）</div>
+      <div class="tier-action">挑龍頭 + 補漲 2 檔</div>
+    </div>
+    <div class="tier">
+      <div class="tier-label">🥉 15%</div>
+      <div class="tier-name">${top3[2]?.name || "-"}（分數 ${top3[2]?.score.toFixed(1) || "-"}）</div>
+      <div class="tier-action">只挑 1 檔龍頭</div>
+    </div>
+    <div class="tier">
+      <div class="tier-label">📌 30%</div>
+      <div class="tier-name">核心壓艙股</div>
+      <div class="tier-action">不變動，台積電 / 鴻海 / 台達電</div>
+    </div>
+    <div style="font-size:11px; color:#aaa; margin-top:10px; line-height:1.6;">
+      <strong>總共 7 檔以內</strong>，3 週原則檢視一次：<br>
+      • 連 2 週分數下滑的族群 → 換掉<br>
+      • 仍在 Top 3 但持股不是最強 → 換股
+    </div>
+  `;
+  
+  // JSON 輸出（給 Claude Code 整合）
+  const exportData = {
+    timestamp: new Date().toISOString(),
+    algorithm: "熱度分數 = (10日漲幅 × 0.5) + (5日漲幅 × 0.3) + (成交金額標準化 × 0.2)",
+    rankings: scored.map((s, i) => ({
+      rank: i + 1,
+      name: s.name,
+      score: parseFloat(s.score.toFixed(2)),
+      pct10: s.pct10,
+      pct5: s.pct5,
+      amount: s.amount,
+      tier: i < 3 ? "操作族群" : (i < 5 ? "觀察族群" : "略過"),
+      suggested_weight: i === 0 ? "30%" : (i === 1 ? "25%" : (i === 2 ? "15%" : "0%"))
+    }))
+  };
+  jsonOutput.value = JSON.stringify(exportData, null, 2);
+}
+
+// ==================== 載入範例資料 ====================
+document.getElementById("loadDemoBtn").onclick = () => {
+  // 範例：反映 2026/05 市況
+  sectorData = {
+    "矽光子CPO": {pct10: 28.5, pct5: 13.2, amount: 320},
+    "軍工無人機": {pct10: 35.8, pct5: 18.5, amount: 280},
+    "低軌衛星6G": {pct10: 24.5, pct5: 11.8, amount: 180},
+    "半導體設備": {pct10: 22.5, pct5: 12.3, amount: 220},
+    "重電電網儲能": {pct10: 18.5, pct5: 9.8, amount: 250},
+    "AI晶片設計": {pct10: 8.5, pct5: 3.2, amount: 850},
+    "先進封裝封測": {pct10: 11.8, pct5: 5.5, amount: 420},
+    "AI伺服器ODM": {pct10: 9.2, pct5: 4.8, amount: 680},
+    "散熱液冷": {pct10: 12.5, pct5: 5.8, amount: 380},
+    "記憶體": {pct10: -2.5, pct5: -3.8, amount: 320},
+    "AI伺服器機殼": {pct10: 18.5, pct5: 10.2, amount: 90},
+    "被動元件": {pct10: 14.5, pct5: 6.8, amount: 1850},
+    "PCB_CCL": {pct10: 13.5, pct5: 7.2, amount: 350},
+    "AI電源BBU": {pct10: 8.5, pct5: 4.2, amount: 280},
+    "廠務工程": {pct10: 11.2, pct5: 5.8, amount: 150},
+    "面板螢幕": {pct10: 15.5, pct5: 8.5, amount: 220},
+    "資安": {pct10: 5.5, pct5: 2.5, amount: 25},
+    "AI軟體雲端": {pct10: 6.5, pct5: 3.5, amount: 35},
+    "工業電腦邊緣AI": {pct10: 7.5, pct5: 3.8, amount: 95},
+    "機器人人形機器人": {pct10: 18.5, pct5: 8.5, amount: 180},
+    "AI_PC智慧手機": {pct10: 7.5, pct5: 3.5, amount: 580},
+    "車用自駕EV": {pct10: 10.5, pct5: 4.8, amount: 250},
+    "消費復甦電商": {pct10: 4.5, pct5: 2.8, amount: 180},
+    "功率半導體": {pct10: 22.5, pct5: 11.5, amount: 280},
+    "邊緣運算EdgeAI": {pct10: 9.5, pct5: 4.5, amount: 150},
+    "IDM整合元件": {pct10: 6.8, pct5: 2.8, amount: 320},
+    "半導體通路": {pct10: 8.5, pct5: 3.8, amount: 280}
+  };
+  render();
+};
+
+document.getElementById("exportBtn").onclick = () => {
+  const text = document.getElementById("jsonOutput").value;
+  if (!text) return alert("尚無資料");
+  navigator.clipboard.writeText(text).then(() => alert("已複製 JSON 到剪貼簿"));
+};
+
+document.getElementById("clearBtn").onclick = () => {
+  if (!confirm("確定清空？")) return;
+  sectorData = {};
+  render();
+};
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工具 3：信念排行榜</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif; background: #0f1419; color: #e6e6e6; padding: 14px; min-height: 100vh; }
+h1 { font-size: 18px; margin-bottom: 4px; color: #fff; }
+.subtitle { font-size: 11px; color: #888; margin-bottom: 14px; }
+
+.formula-card { background: #1a2026; border-radius: 8px; padding: 14px; margin-bottom: 14px; border-left: 4px solid #4a9eff; }
+.formula-card h3 { font-size: 13px; color: #4a9eff; margin-bottom: 8px; }
+.formula-card .formula { font-family: 'SF Mono', Consolas, monospace; font-size: 13px; color: #ffc94a; background: #0f1419; padding: 10px; border-radius: 4px; margin: 8px 0; }
+.formula-card p { font-size: 11px; color: #aaa; line-height: 1.6; }
+
+.add-form { background: #1a2026; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+.add-form h3 { font-size: 13px; color: #4a9eff; margin-bottom: 12px; }
+.form-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; margin-bottom: 8px; }
+.form-row label { font-size: 11px; color: #aaa; }
+.form-row input, .form-row select { background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; padding: 6px 8px; border-radius: 4px; font-size: 12px; }
+.score-row { display: grid; grid-template-columns: 100px 60px 1fr; gap: 8px; align-items: center; margin-bottom: 6px; font-size: 11px; }
+.score-row input[type="range"] { width: 100%; }
+.score-row .val { color: #ffc94a; font-weight: 700; text-align: center; }
+
+.btn { background: #1a2026; color: #e6e6e6; border: 1px solid #2a3138; padding: 7px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-right: 6px; }
+.btn.primary { background: #4a9eff; color: #fff; border-color: #4a9eff; }
+.btn.danger { background: #d63031; color: #fff; border-color: #d63031; }
+.btn:hover { opacity: 0.9; }
+
+.belief-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 6px; }
+.belief-table th { background: #1a2026; padding: 9px 5px; text-align: left; font-weight: 600; color: #aaa; font-size: 10px; white-space: nowrap; }
+.belief-table td { padding: 8px 5px; border-bottom: 1px solid #1a2026; }
+.belief-table tbody tr:hover { background: #1a2026; }
+.belief-table tbody tr.tier-1 { background: linear-gradient(90deg, rgba(255, 107, 107, 0.15), transparent); }
+.belief-table tbody tr.tier-2 { background: linear-gradient(90deg, rgba(255, 153, 153, 0.10), transparent); }
+.belief-table tbody tr.tier-3 { background: linear-gradient(90deg, rgba(255, 200, 200, 0.05), transparent); }
+
+.tier-badge { padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 700; }
+.tier-badge.t1 { background: #d63031; color: #fff; }
+.tier-badge.t2 { background: #ff6b6b; color: #fff; }
+.tier-badge.t3 { background: #ff9999; color: #fff; }
+.tier-badge.t4 { background: #888; color: #fff; }
+
+.allocation-card { background: #1a2026; border-radius: 8px; padding: 14px; margin-top: 14px; border-left: 4px solid #ffc94a; }
+.allocation-card h3 { font-size: 13px; color: #ffc94a; margin-bottom: 10px; }
+.alloc-row { display: grid; grid-template-columns: 70px 1fr 60px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #2a3138; font-size: 12px; }
+.alloc-row:last-child { border: none; }
+
+textarea { width: 100%; min-height: 120px; background: #0f1419; color: #e6e6e6; border: 1px solid #2a3138; border-radius: 4px; padding: 8px; font-family: 'SF Mono', monospace; font-size: 11px; margin-top: 8px; }
+
+.del-btn { background: transparent; border: none; color: #d63031; cursor: pointer; font-size: 14px; padding: 4px 8px; }
+.del-btn:hover { background: rgba(214, 48, 49, 0.2); border-radius: 3px; }
+
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  .belief-table { font-size: 10px; }
+  .belief-table th, .belief-table td { padding: 6px 3px; }
+}
+</style>
+</head>
+<body>
+
+<h1>🏆 工具 3：信念排行榜</h1>
+<div class="subtitle">為每檔股票打 4 個維度的分數 → 排出 Top 10</div>
+
+<div class="formula-card">
+  <h3>📐 信念總分公式</h3>
+  <div class="formula">信念總分 = (理解度 × 0.3) + (確信度 × 0.3) + (風險可控 × 0.2) + (爆發力 × 0.2)</div>
+  <p>
+    • <strong>理解度（30%）</strong>：你對這家公司的了解程度（不懂的別重押）<br>
+    • <strong>確信度（30%）</strong>：對成長前景的信心強度<br>
+    • <strong>風險可控（20%）</strong>：跌 30% 你扛得住嗎？流動性、波動可控嗎？<br>
+    • <strong>爆發力（20%）</strong>：題材熱度、預期報酬率<br>
+    <br>
+    <strong>分級</strong>：T1 (8.0+) / T2 (7.0-7.9) / T3 (6.0-6.9) / T4 (&lt;6.0)
+  </p>
+</div>
+
+<div class="add-form">
+  <h3>➕ 新增 / 編輯股票</h3>
+  <div class="form-row">
+    <label>代號</label>
+    <input type="text" id="inputCode" placeholder="例如 2330">
+  </div>
+  <div class="form-row">
+    <label>公司</label>
+    <input type="text" id="inputName" placeholder="例如 台積電">
+  </div>
+  <div class="form-row">
+    <label>族群</label>
+    <input type="text" id="inputSector" placeholder="例如 AI晶片設計">
+  </div>
+  
+  <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a3138;">
+    <div class="score-row">
+      <label>理解度（30%）</label>
+      <span class="val" id="val1">5</span>
+      <input type="range" id="score1" min="1" max="10" value="5">
+    </div>
+    <div class="score-row">
+      <label>確信度（30%）</label>
+      <span class="val" id="val2">5</span>
+      <input type="range" id="score2" min="1" max="10" value="5">
+    </div>
+    <div class="score-row">
+      <label>風險可控（20%）</label>
+      <span class="val" id="val3">5</span>
+      <input type="range" id="score3" min="1" max="10" value="5">
+    </div>
+    <div class="score-row">
+      <label>爆發力（20%）</label>
+      <span class="val" id="val4">5</span>
+      <input type="range" id="score4" min="1" max="10" value="5">
+    </div>
+  </div>
+  
+  <div style="margin-top: 12px; display: flex; gap: 6px;">
+    <button class="btn primary" id="addBtn">新增</button>
+    <button class="btn" id="loadDemoBtn">🎯 載入範例 (10 檔)</button>
+    <button class="btn" id="exportBtn">📤 匯出 JSON</button>
+  </div>
+</div>
+
+<table class="belief-table">
+  <thead>
+    <tr>
+      <th>名次</th>
+      <th>代號</th>
+      <th>公司</th>
+      <th>族群</th>
+      <th style="text-align:center">理解</th>
+      <th style="text-align:center">確信</th>
+      <th style="text-align:center">風控</th>
+      <th style="text-align:center">爆發</th>
+      <th style="text-align:center">總分</th>
+      <th>等級</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="rankingTbody">
+    <tr><td colspan="11" style="text-align:center; padding:40px; color:#666;">尚未新增，請從上方表單新增或載入範例</td></tr>
+  </tbody>
+</table>
+
+<div class="allocation-card" id="allocCard" style="display:none;">
+  <h3>💼 部位配置建議（依信念分級）</h3>
+  <div id="allocContent"></div>
+</div>
+
+<div class="formula-card" style="margin-top: 14px;">
+  <h3>📊 整合用資料（給 Claude Code）</h3>
+  <textarea id="jsonOutput" readonly></textarea>
+</div>
+
+<script>
+let beliefs = [];
+
+// ==================== 核心演算法 ====================
+function calculateBeliefScore(s1, s2, s3, s4) {
+  return (s1 * 0.3) + (s2 * 0.3) + (s3 * 0.2) + (s4 * 0.2);
+}
+
+function getTier(score) {
+  if (score >= 8.0) return { label: "T1 核心", class: "t1", rowClass: "tier-1" };
+  if (score >= 7.0) return { label: "T2 重要", class: "t2", rowClass: "tier-2" };
+  if (score >= 6.0) return { label: "T3 一般", class: "t3", rowClass: "tier-3" };
+  return { label: "T4 觀察", class: "t4", rowClass: "" };
+}
+
+function getSuggestedWeight(tier, rank, totalT1, totalT2, totalT3) {
+  // T1: 60-70% 平均分配
+  // T2: 20-30% 平均分配
+  // T3: 5-10% 平均分配
+  // T4: 0%
+  if (tier === "t1") {
+    if (totalT1 === 1) return "25-30%";
+    if (totalT1 === 2) return "15-20%";
+    if (totalT1 === 3) return "10-15%";
+    return "5-10%";
+  }
+  if (tier === "t2") {
+    if (totalT2 <= 2) return "10%";
+    return "5-8%";
+  }
+  if (tier === "t3") {
+    return "3-5%";
+  }
+  return "0%";
+}
+
+// ==================== 互動 ====================
+['score1', 'score2', 'score3', 'score4'].forEach((id, i) => {
+  const el = document.getElementById(id);
+  el.oninput = () => document.getElementById(`val${i+1}`).textContent = el.value;
+});
+
+function addOrUpdate() {
+  const code = document.getElementById("inputCode").value.trim();
+  const name = document.getElementById("inputName").value.trim();
+  const sector = document.getElementById("inputSector").value.trim();
+  const s1 = parseInt(document.getElementById("score1").value);
+  const s2 = parseInt(document.getElementById("score2").value);
+  const s3 = parseInt(document.getElementById("score3").value);
+  const s4 = parseInt(document.getElementById("score4").value);
+  
+  if (!code || !name) return alert("請輸入代號和公司名稱");
+  
+  const score = calculateBeliefScore(s1, s2, s3, s4);
+  
+  const existingIdx = beliefs.findIndex(b => b.code === code);
+  const item = { code, name, sector: sector || "未分類", s1, s2, s3, s4, score };
+  
+  if (existingIdx >= 0) {
+    beliefs[existingIdx] = item;
+  } else {
+    beliefs.push(item);
+  }
+  
+  // 清空表單
+  document.getElementById("inputCode").value = "";
+  document.getElementById("inputName").value = "";
+  document.getElementById("inputSector").value = "";
+  ['score1', 'score2', 'score3', 'score4'].forEach((id, i) => {
+    document.getElementById(id).value = 5;
+    document.getElementById(`val${i+1}`).textContent = 5;
+  });
+  
+  render();
+}
+
+document.getElementById("addBtn").onclick = addOrUpdate;
+
+function deleteItem(code) {
+  if (!confirm(`刪除 ${code}？`)) return;
+  beliefs = beliefs.filter(b => b.code !== code);
+  render();
+}
+
+function editItem(code) {
+  const item = beliefs.find(b => b.code === code);
+  if (!item) return;
+  document.getElementById("inputCode").value = item.code;
+  document.getElementById("inputName").value = item.name;
+  document.getElementById("inputSector").value = item.sector;
+  document.getElementById("score1").value = item.s1;
+  document.getElementById("score2").value = item.s2;
+  document.getElementById("score3").value = item.s3;
+  document.getElementById("score4").value = item.s4;
+  document.getElementById("val1").textContent = item.s1;
+  document.getElementById("val2").textContent = item.s2;
+  document.getElementById("val3").textContent = item.s3;
+  document.getElementById("val4").textContent = item.s4;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.deleteItem = deleteItem;
+window.editItem = editItem;
+
+// ==================== 渲染 ====================
+function render() {
+  const tbody = document.getElementById("rankingTbody");
+  const allocCard = document.getElementById("allocCard");
+  const jsonOutput = document.getElementById("jsonOutput");
+  
+  if (beliefs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:40px; color:#666;">尚未新增</td></tr>`;
+    allocCard.style.display = "none";
+    jsonOutput.value = "";
+    return;
+  }
+  
+  const sorted = [...beliefs].sort((a, b) => b.score - a.score);
+  
+  // 分級統計
+  const totalT1 = sorted.filter(b => b.score >= 8.0).length;
+  const totalT2 = sorted.filter(b => b.score >= 7.0 && b.score < 8.0).length;
+  const totalT3 = sorted.filter(b => b.score >= 6.0 && b.score < 7.0).length;
+  
+  tbody.innerHTML = sorted.map((b, i) => {
+    const tier = getTier(b.score);
+    return `
+      <tr class="${tier.rowClass}">
+        <td>${i + 1}</td>
+        <td>${b.code}</td>
+        <td>${b.name}</td>
+        <td style="font-size:10px; color:#aaa;">${b.sector}</td>
+        <td style="text-align:center">${b.s1}</td>
+        <td style="text-align:center">${b.s2}</td>
+        <td style="text-align:center">${b.s3}</td>
+        <td style="text-align:center">${b.s4}</td>
+        <td style="text-align:center; color:#ffc94a; font-weight:700;">${b.score.toFixed(2)}</td>
+        <td><span class="tier-badge ${tier.class}">${tier.label}</span></td>
+        <td>
+          <button class="del-btn" onclick="editItem('${b.code}')" style="color:#4a9eff;">✏️</button>
+          <button class="del-btn" onclick="deleteItem('${b.code}')">🗑</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+  
+  // 配置建議
+  allocCard.style.display = "block";
+  let html = "";
+  let rank = 0;
+  sorted.forEach(b => {
+    const tier = getTier(b.score);
+    const weight = getSuggestedWeight(tier.class, ++rank, totalT1, totalT2, totalT3);
+    if (weight !== "0%") {
+      html += `
+        <div class="alloc-row">
+          <span class="tier-badge ${tier.class}">${tier.label}</span>
+          <div>${b.code} ${b.name} <span style="color:#888; font-size:10px;">（${b.sector}）</span></div>
+          <div style="text-align:right; color:#ffc94a; font-weight:700;">${weight}</div>
+        </div>
+      `;
+    }
+  });
+  if (!html) {
+    html = `<div style="color:#aaa; font-size:11px;">尚無符合配置條件的股票（總分需 ≥ 6.0）</div>`;
+  }
+  document.getElementById("allocContent").innerHTML = html;
+  
+  // JSON 輸出
+  const exportData = {
+    timestamp: new Date().toISOString(),
+    algorithm: "信念總分 = (理解度 × 0.3) + (確信度 × 0.3) + (風險可控 × 0.2) + (爆發力 × 0.2)",
+    summary: {
+      total: sorted.length,
+      tier1: totalT1,
+      tier2: totalT2,
+      tier3: totalT3
+    },
+    rankings: sorted.map((b, i) => ({
+      rank: i + 1,
+      code: b.code,
+      name: b.name,
+      sector: b.sector,
+      scores: { understanding: b.s1, conviction: b.s2, risk_control: b.s3, explosive: b.s4 },
+      total_score: parseFloat(b.score.toFixed(2)),
+      tier: getTier(b.score).label
+    }))
+  };
+  jsonOutput.value = JSON.stringify(exportData, null, 2);
+}
+
+// ==================== 範例資料 ====================
+document.getElementById("loadDemoBtn").onclick = () => {
+  beliefs = [
+    {code:"2330", name:"台積電", sector:"AI晶片設計", s1:9, s2:9, s3:9, s4:7, score:0},
+    {code:"2308", name:"台達電", sector:"AI電源", s1:8, s2:9, s3:8, s4:8, score:0},
+    {code:"2317", name:"鴻海", sector:"AI伺服器ODM", s1:8, s2:8, s3:8, s4:7, score:0},
+    {code:"3081", name:"聯亞", sector:"矽光子CPO", s1:7, s2:9, s3:6, s4:10, score:0},
+    {code:"3231", name:"緯創", sector:"AI伺服器ODM", s1:8, s2:8, s3:7, s4:8, score:0},
+    {code:"6669", name:"緯穎", sector:"AI伺服器ODM", s1:7, s2:8, s3:7, s4:9, score:0},
+    {code:"5347", name:"世界先進", sector:"功率半導體", s1:7, s2:8, s3:7, s4:8, score:0},
+    {code:"6147", name:"頎邦", sector:"先進封裝", s1:6, s2:7, s3:6, s4:9, score:0},
+    {code:"8033", name:"雷虎", sector:"軍工", s1:5, s2:7, s3:4, s4:10, score:0},
+    {code:"6870", name:"騰雲", sector:"Physical AI", s1:6, s2:7, s3:3, s4:9, score:0}
+  ];
+  beliefs.forEach(b => {
+    b.score = calculateBeliefScore(b.s1, b.s2, b.s3, b.s4);
+  });
+  render();
+};
+
+document.getElementById("exportBtn").onclick = () => {
+  const text = document.getElementById("jsonOutput").value;
+  if (!text) return alert("尚無資料");
+  navigator.clipboard.writeText(text).then(() => alert("已複製 JSON"));
+};
+
+render();
+</script>
+</body>
+</html>
