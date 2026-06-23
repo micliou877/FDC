@@ -1615,11 +1615,32 @@ async function fetchFundamentals() {
   const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
   const startDate = oneYearAgo.toISOString().slice(0, 10);
   const apiBase = "https://api.finmindtrade.com/api/v4/data";
-  const tok = token ? `&token=${token}` : "";
   const isPaid = document.getElementById("finmindPaidPlan")?.checked;
-  // 免費方案（含免費 token）= 600 次/小時 → 每 call 間隔 6 秒；付費方案無限速
-  const DELAY_MS = isPaid ? 0 : 6000;
-  const delay = () => DELAY_MS ? new Promise(r => setTimeout(r, DELAY_MS)) : Promise.resolve();
+  // 免費方案（含免費 token）= 600 次/小時；付費方案無限速
+  let activeTok = token ? `&token=${token}` : "";
+  let currentDelay = isPaid ? 0 : 6000;
+  let fallbackMode = !token; // 一開始就是無 token 就直接是 fallback mode
+  const delay = () => currentDelay ? new Promise(r => setTimeout(r, currentDelay)) : Promise.resolve();
+
+  // 超限自動降級：偵測 FinMind 超限錯誤，切換至無 token 重試
+  const finmindFetch = async (baseUrl) => {
+    const res = await fetch(baseUrl + activeTok);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const isOverLimit = json.status === 402 || json.status === 429 ||
+      (typeof json.msg === 'string' && /limit|over|too.?many|exceed/i.test(json.msg) && json.msg !== 'success');
+    if (isOverLimit && activeTok && !fallbackMode) {
+      fallbackMode = true;
+      activeTok = "";
+      currentDelay = 6000;
+      statusEl.textContent += " ⚠️ API 超限，已自動切換無 token 繼續";
+      await new Promise(r => setTimeout(r, 2000)); // 緩衝 2 秒再重試
+      const res2 = await fetch(baseUrl);
+      if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+      return res2.json();
+    }
+    return json;
+  };
   const cacheAge = (code, key) => {
     const d = financialsCache[code]?.[key];
     return d ? (Date.now() - new Date(d)) / 86400000 : 999;
@@ -1680,9 +1701,7 @@ async function fetchFundamentals() {
     if (!isEtf && cacheAge(code, "perDate") > 1) {
       per = null;
       try {
-        const res = await fetch(`${apiBase}?dataset=TaiwanStockPER&data_id=${code}&start_date=${startDate}${tok}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+        const json = await finmindFetch(`${apiBase}?dataset=TaiwanStockPER&data_id=${code}&start_date=${startDate}`);
         if (json.msg === "success") {
           perApiOk = true;
           if (json.data?.length > 0) {
@@ -1699,9 +1718,7 @@ async function fetchFundamentals() {
     let epsApiOk = false;
     if (!isEtf && cacheAge(code, "epsDate") > 90) {
       try {
-        const res = await fetch(`${apiBase}?dataset=TaiwanStockFinancialStatements&data_id=${code}&start_date=${startDate}${tok}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+        const json = await finmindFetch(`${apiBase}?dataset=TaiwanStockFinancialStatements&data_id=${code}&start_date=${startDate}`);
         if (json.msg === "success") {
           epsApiOk = true;
           const epsRows = (json.data || []).filter(d => d.type === "EPS");
@@ -1718,9 +1735,7 @@ async function fetchFundamentals() {
     let yoy = fc.yoy ?? null;
     if (cacheAge(code, "yoyDate") > 32) {
       try {
-        const res = await fetch(`${apiBase}?dataset=TaiwanStockMonthRevenue&data_id=${code}&start_date=${startDate}${tok}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+        const json = await finmindFetch(`${apiBase}?dataset=TaiwanStockMonthRevenue&data_id=${code}&start_date=${startDate}`);
         if (json.msg === "success" && json.data?.length > 0) {
           const row = json.data[json.data.length - 1];
           if (row.last_year_revenue > 0) {
