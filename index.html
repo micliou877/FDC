@@ -569,6 +569,9 @@
     <h3>資料來源</h3>
     <div style="margin-bottom: 8px;">
       <input type="text" id="apiToken" placeholder="FinMind Token（免費用戶留空）" style="width: 250px;">
+      <label style="margin-left:12px;font-size:13px;color:#64748b;cursor:pointer;">
+        <input type="checkbox" id="finmindPaidPlan" style="margin-right:4px;">付費方案（取消限速）
+      </label>
     </div>
     <div class="button-row">
       <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
@@ -1613,8 +1616,9 @@ async function fetchFundamentals() {
   const startDate = oneYearAgo.toISOString().slice(0, 10);
   const apiBase = "https://api.finmindtrade.com/api/v4/data";
   const tok = token ? `&token=${token}` : "";
-  // 無 token 免費額度約 600 次/小時 → 每 call 間隔 6 秒才不超限
-  const DELAY_MS = token ? 0 : 6000;
+  const isPaid = document.getElementById("finmindPaidPlan")?.checked;
+  // 免費方案（含免費 token）= 600 次/小時 → 每 call 間隔 6 秒；付費方案無限速
+  const DELAY_MS = isPaid ? 0 : 6000;
   const delay = () => DELAY_MS ? new Promise(r => setTimeout(r, DELAY_MS)) : Promise.resolve();
   const cacheAge = (code, key) => {
     const d = financialsCache[code]?.[key];
