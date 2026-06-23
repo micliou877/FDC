@@ -591,7 +591,7 @@
 <div class="panel" id="strategy"></div>
 
 <script>
-// ==================== 台股 30 大族群分類 ====================
+// ==================== 台股 31 大族群分類 ====================
 const SECTORS = {
   "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"5471",name:"松翰"},{code:"5388",name:"中磊"},{code:"8081",name:"致新"}],
   "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"8038",name:"長園科"},{code:"3530",name:"晶相光"},{code:"3014",name:"聯陽"}],
@@ -678,6 +678,25 @@ const SECTORS = {
     // 二線通路
     {code:"3060",name:"銘異"},
     {code:"8121",name:"越峰"}
+  ],
+  "31. MCU微控制器": [
+    // A. 第一級：題材純度高（核心持股）
+    {code:"4919",name:"新唐"},       // 車用/工控MCU最強、BMC、TPM、IDM，92%MCU ⭐⭐⭐
+    {code:"6907",name:"雅特力-KY"},  // 純32位元MCU、邊緣AI/機器人/無人機，2026/1上櫃 ⭐⭐⭐
+    // B. 第二級：題材明確
+    {code:"6202",name:"盛群"},       // 安防/健康量測、75%MCU、訂單見度到年底 ⭐⭐
+    {code:"5471",name:"松翰"},       // AI PC晶片、無人機圖傳、車用MCU ⭐⭐
+    {code:"6716",name:"應廣"},       // 伺服器散熱風扇MCU、2026/1營收年增230% ⭐
+    // C. 第三級：漲價受惠/利基
+    {code:"2458",name:"義隆"},       // 觸控IC+MCU、PC周邊
+    {code:"2401",name:"凌陽"},       // 車用MCU、ADAS、成本轉嫁
+    {code:"4952",name:"凌通"},       // MCU+多媒體IC
+    {code:"6494",name:"九齊"},       // 消費MCU+語音IC、2026/1營收近兩年高
+    {code:"3122",name:"笙泉"},       // 工控MCU
+    {code:"6129",name:"普誠"},       // 消費MCU+Audio
+    {code:"5302",name:"太欣"},       // 消費MCU
+    // D. MCU成熟製程晶圓代工（上游受惠）
+    {code:"2303",name:"聯電"}        // Wi-Fi/MCU/PMIC 8吋成熟製程，受惠最直接 ⭐⭐⭐
   ]
 };
 
@@ -713,7 +732,9 @@ const GLOBAL_LIST = {
     {code:"META",  ex:"NASDAQ", name:"Meta (社群/AI)"},
     {code:"NFLX",  ex:"NASDAQ", name:"Netflix 網飛 (串流)"},
     {code:"QCOM",  ex:"NASDAQ", name:"Qualcomm 高通 (手機晶片)"},
-    {code:"TXN",   ex:"NASDAQ", name:"Texas Instruments 德州儀器 (類比IC)"},
+    {code:"TXN",   ex:"NASDAQ", name:"Texas Instruments 德州儀器 (類比IC/MCU)"},
+    {code:"MCHP",  ex:"NASDAQ", name:"Microchip Technology 微芯科技 (MCU+混合訊號龍頭)"},
+    {code:"NXPI",  ex:"NASDAQ", name:"NXP Semiconductors 恩智浦 (車用MCU市占最高)"},
     {code:"INTC",  ex:"NASDAQ", name:"Intel 英特爾 (CPU/晶圓代工)"},
     {code:"ARM",   ex:"NASDAQ", name:"ARM Holdings (IP授權)"},
     {code:"CRM",   ex:"NYSE",   name:"Salesforce (企業軟體/AI)"},
