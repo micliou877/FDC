@@ -576,6 +576,7 @@
     <div class="button-row">
       <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
       <button class="btn" id="fetchFundamentalsBtn">更新基本面</button>
+      <button class="btn" id="fetchFundamentalsFreeBtn" title="從 TWSE/TPEX 批次取得本益比，不需 FinMind Token">🆓 免費更新基本面</button>
       <button class="btn" id="pushCloudBtn">上傳到雲端</button>
       <button class="btn" id="pullCloudBtn">從雲端下載</button>
       <button class="btn" id="loadDemoBtn">載入範例</button>
@@ -1677,6 +1678,105 @@ function classify_quality(eps, per) {
   return "🟡普通";
 }
 
+// ==================== 免費批次 PER：TWSE + TPEX 官方 API，不需 Token ====================
+// EPS = 收盤 ÷ PER（trailing 12M EPS，與 FinMind 幾乎一致）
+async function fetchBulkPER(statusEl) {
+  const today = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const result = {}; // code -> { per, eps }
+
+  // 嘗試最近 5 個自然日，跳過假日（假日 TWSE 不回傳 data）
+  const tryTWSE = async () => {
+    for (let offset = 0; offset < 5; offset++) {
+      const d = new Date(today); d.setDate(d.getDate() - offset);
+      const ds = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+      try {
+        if (statusEl) statusEl.textContent = `🆓 TWSE 批次抓取（${ds}）...`;
+        const r = await fetch(`https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d?date=${ds}&stockNo=&response=json`);
+        const j = await r.json();
+        if (j.stat === 'OK' && Array.isArray(j.data) && j.data.length > 0) {
+          j.data.forEach(row => {
+            const code = String(row[0]).trim();
+            const per = parseFloat(row[4]);
+            if (!isNaN(per) && per > 0) {
+              const price = stockData[code]?.price;
+              result[code] = { per, eps: price ? parseFloat((price / per).toFixed(2)) : null };
+            }
+          });
+          return true;
+        }
+      } catch(e) { console.warn('TWSE bulk:', e.message); }
+    }
+    return false;
+  };
+
+  const tryTPEX = async () => {
+    for (let offset = 0; offset < 5; offset++) {
+      const d = new Date(today); d.setDate(d.getDate() - offset);
+      const ds = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
+      try {
+        if (statusEl) statusEl.textContent = `🆓 TPEX 批次抓取（${ds}）...`;
+        const r = await fetch(`https://www.tpex.org.tw/web/stock/aftertrading/peratio_listed/peListed_result.php?l=zh-tw&o=json&d=${ds}`);
+        const j = await r.json();
+        if (j.iTotalRecords > 0 && Array.isArray(j.aaData) && j.aaData.length > 0) {
+          j.aaData.forEach(row => {
+            const code = String(row[0]).trim();
+            const per = parseFloat(row[4]);
+            if (!isNaN(per) && per > 0) {
+              const price = stockData[code]?.price;
+              result[code] = { per, eps: price ? parseFloat((price / per).toFixed(2)) : null };
+            }
+          });
+          return true;
+        }
+      } catch(e) { console.warn('TPEX bulk:', e.message); }
+    }
+    return false;
+  };
+
+  await Promise.all([tryTWSE(), tryTPEX()]);
+  return result;
+}
+
+async function applyBulkPER(bulkData, statusEl) {
+  const today = new Date().toISOString().slice(0,10);
+  let count = 0;
+  Object.entries(bulkData).forEach(([code, d]) => {
+    if (!financialsCache[code]) financialsCache[code] = {};
+    financialsCache[code].per = d.per; financialsCache[code].perDate = today;
+    if (d.eps !== null) { financialsCache[code].eps = d.eps; financialsCache[code].epsDate = today; }
+    if (!stockData[code]) stockData[code] = {};
+    stockData[code].per = d.per; stockData[code].eps = d.eps;
+    let tag = classify_quality(d.eps, d.per);
+    if (tag === '✖️抓取失敗') tag = '❓缺財報';
+    stockData[code].qualityTag = stockData[code].quality_status = tag;
+    count++;
+  });
+  if (statusEl) statusEl.textContent = `🆓 完成：取得 ${count} 檔本益比（TWSE/TPEX）`;
+  return count;
+}
+
+// 獨立按鈕：純免費抓取
+async function fetchFundamentalsFree() {
+  const btn = document.getElementById('fetchFundamentalsFreeBtn');
+  const statusEl = document.getElementById('fetchStatus');
+  btn.disabled = true;
+  const bulk = await fetchBulkPER(statusEl);
+  const n = await applyBulkPER(bulk, statusEl);
+  saveLocalOnly(); updateUI();
+  const statsEl = document.getElementById('fundStats');
+  if (statsEl) {
+    const today = new Date().toISOString().slice(0,10);
+    const tagOrder = ["🟢業績股","🟡普通","⚫虧損","🔴題材股","❓缺財報","❓ETF","✖️抓取失敗"];
+    const counts = Object.fromEntries(tagOrder.map(t=>[t,0]));
+    Object.values(stockData).forEach(s => { if(counts[s.quality_status]!=null) counts[s.quality_status]++; });
+    const line = tagOrder.filter(t=>counts[t]>0).map(t=>`${t} ${counts[t]}`).join('　');
+    statsEl.innerHTML = `<strong>免費批次更新</strong>（${today}，TWSE/TPEX）共 ${n} 檔<br>${line}<br><span style="color:#92400e;font-size:11px">⚠️ 月營收YOY需 FinMind 才能更新；EPS = 收盤 ÷ PER 反推</span>`;
+  }
+  btn.disabled = false;
+  setTimeout(() => { statusEl.textContent = ''; }, 5000);
+}
+
 // ==================== 基本面抓取（優先關注→熱門族群，三欄快取）====================
 // 快取 TTL：PER 1 天、EPS 90 天、YoY 32 天
 // financialsCache[code] = { per, perDate, eps, epsDate, yoy, yoyDate }
@@ -1698,22 +1798,30 @@ async function fetchFundamentals() {
   let fallbackMode = !token; // 一開始就是無 token 就直接是 fallback mode
   const delay = () => currentDelay ? new Promise(r => setTimeout(r, currentDelay)) : Promise.resolve();
 
-  // 超限自動降級：偵測 FinMind 超限錯誤，切換至無 token 重試
+  // 先用免費批次把 PER/EPS 跑一遍（FinMind 主要補 YOY）
+  statusEl.textContent = '🆓 先用 TWSE/TPEX 批次取得本益比...';
+  progContainer.style.display = 'block';
+  const bulkPre = await fetchBulkPER(statusEl);
+  await applyBulkPER(bulkPre, null);
+
+  // 超限自動降級：FinMind 超限 → 直接用已抓好的批次資料，僅繼續抓 YOY
+  let bulkFallbackDone = false;
   const finmindFetch = async (baseUrl) => {
     const res = await fetch(baseUrl + activeTok);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     const isOverLimit = json.status === 402 || json.status === 429 ||
       (typeof json.msg === 'string' && /limit|over|too.?many|exceed/i.test(json.msg) && json.msg !== 'success');
-    if (isOverLimit && activeTok && !fallbackMode) {
+    if (isOverLimit && !fallbackMode) {
       fallbackMode = true;
       activeTok = "";
       currentDelay = 6000;
-      statusEl.textContent += " ⚠️ API 超限，已自動切換無 token 繼續";
-      await new Promise(r => setTimeout(r, 2000)); // 緩衝 2 秒再重試
-      const res2 = await fetch(baseUrl);
-      if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
-      return res2.json();
+      if (!bulkFallbackDone) {
+        bulkFallbackDone = true;
+        statusEl.textContent = '⚠️ FinMind 超限，PER/EPS 已由 TWSE/TPEX 備援，繼續抓 YOY...';
+      }
+      // PER/EPS 已有批次資料，回傳空成功讓主迴圈跳過 PER/EPS
+      return { msg: 'success', data: [] };
     }
     return json;
   };
@@ -2565,6 +2673,7 @@ document.querySelectorAll("#stocksTable th").forEach(th => { if(th.dataset.sort)
 document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>d*((b[k]??-999)-(a[k]??-999))); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
 document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
 document.getElementById("fetchFundamentalsBtn").onclick = fetchFundamentals;
+document.getElementById("fetchFundamentalsFreeBtn").onclick = fetchFundamentalsFree;
 document.getElementById("loadDemoBtn").onclick = () => {
   const allCodes = [...new Set(Object.values(SECTORS).flat().map(s => s.code)), "0050"];
   stockData = {};
