@@ -1225,6 +1225,7 @@ function loadData() {
       // 將快取中的基本面欄位合併回 stockData
       Object.entries(financialsCache).forEach(([code, f]) => {
         if (stockData[code]) {
+          if (f.per != null) stockData[code].per = f.per;
           if (f.eps != null) stockData[code].eps = f.eps;
           if (f.yoy != null) stockData[code].yoy = f.yoy;
           const tag = classify_quality(stockData[code].eps ?? null, stockData[code].per ?? null);
@@ -1597,7 +1598,9 @@ function classify_quality(eps, per) {
   return "🟡普通";
 }
 
-// ==================== 基本面抓取（PER 每次抓、EPS/月營收快取）====================
+// ==================== 基本面抓取（優先關注→熱門族群，三欄快取）====================
+// 快取 TTL：PER 1 天、EPS 90 天、YoY 32 天
+// financialsCache[code] = { per, perDate, eps, epsDate, yoy, yoyDate }
 async function fetchFundamentals() {
   const token = document.getElementById("apiToken").value.trim();
   const btn = document.getElementById("fetchFundamentalsBtn");
@@ -1605,39 +1608,80 @@ async function fetchFundamentals() {
   const progContainer = document.getElementById("progressContainer");
   const progBar = document.getElementById("progressBar");
 
-  const twCodes = [...new Set(Object.values(SECTORS).flat().map(s => s.code))];
   const today = new Date().toISOString().slice(0, 10);
   const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
   const startDate = oneYearAgo.toISOString().slice(0, 10);
-  const apiBase = `https://api.finmindtrade.com/api/v4/data`;
+  const apiBase = "https://api.finmindtrade.com/api/v4/data";
   const tok = token ? `&token=${token}` : "";
-  const delay = () => token ? Promise.resolve() : new Promise(r => setTimeout(r, 250));
+  const delay = () => token ? Promise.resolve() : new Promise(r => setTimeout(r, 300));
+  const cacheAge = (code, key) => {
+    const d = financialsCache[code]?.[key];
+    return d ? (Date.now() - new Date(d)) / 86400000 : 999;
+  };
+
+  // ── 建立優先抓取順序 ─────────────────────────────────
+  const isTW = c => !/^[A-Z]/.test(c);
+
+  // 第 1 優先：所有關注分類裡的台股
+  const wlCodes = [...new Set(Object.values(watchlists).flat())].filter(isTW);
+
+  // 第 2 優先：族群股，依目前熱度（pct10）由高到低排序
+  const sStats = calcSectorStats();
+  const sortedSectors = Object.keys(SECTORS).sort((a, b) =>
+    ((sStats[b]?.pct10 || 0) - (sStats[a]?.pct10 || 0))
+  );
+  const hotCodes = [];
+  sortedSectors.forEach(sec =>
+    (SECTORS[sec] || []).forEach(s => { if (!hotCodes.includes(s.code)) hotCodes.push(s.code); })
+  );
+
+  // 合併：關注 → 族群（去重）
+  const fullQueue = [...wlCodes];
+  hotCodes.forEach(c => { if (!fullQueue.includes(c)) fullQueue.push(c); });
+
+  // 只抓「至少一欄過期」的股票
+  const wlSet = new Set(wlCodes);
+  const needFetch = fullQueue.filter(c =>
+    cacheAge(c, "perDate") > 1 || cacheAge(c, "epsDate") > 90 || cacheAge(c, "yoyDate") > 32
+  );
+  const skipped = fullQueue.length - needFetch.length;
+
+  if (needFetch.length === 0) {
+    statusEl.textContent = `所有 ${fullQueue.length} 檔資料皆為最新，無需重抓`;
+    setTimeout(() => { statusEl.textContent = ""; }, 4000);
+    return;
+  }
 
   btn.disabled = true;
   progContainer.style.display = "block";
 
-  for (let i = 0; i < twCodes.length; i++) {
-    const code = twCodes[i];
-    statusEl.textContent = `基本面: ${code} (${i + 1}/${twCodes.length})`;
-    progBar.style.width = `${((i + 1) / twCodes.length) * 100}%`;
-    const cached = financialsCache[code] || {};
-    const age = (key) => cached[key] ? (Date.now() - new Date(cached[key])) / 86400000 : 999;
+  for (let i = 0; i < needFetch.length; i++) {
+    const code = needFetch[i];
+    const group = wlSet.has(code) ? "⭐關注" : "🔥族群";
+    statusEl.textContent = `${group} ${code}（${i + 1}/${needFetch.length}，已跳過 ${skipped} 快取）`;
+    progBar.style.width = `${((i + 1) / needFetch.length) * 100}%`;
 
-    // ── PER（每次都抓，日盤後資料）──
-    let per = null;
-    try {
-      const res = await fetch(`${apiBase}?dataset=TaiwanStockPER&data_id=${code}&start_date=${startDate}${tok}`);
-      const json = await res.json();
-      if (json.msg === "success" && json.data?.length > 0) {
-        const row = json.data[json.data.length - 1];
-        per = row.PER != null ? parseFloat(row.PER) || null : null;
-      }
-    } catch(e) {}
-    await delay();
+    const fc = financialsCache[code] || {};
 
-    // ── EPS（季更新，快取 90 天）──
-    let eps = cached.eps ?? null;
-    if (age("epsDate") > 90) {
+    // ── PER（TTL 1 天）──
+    let per = fc.per ?? null;
+    if (cacheAge(code, "perDate") > 1) {
+      per = null;
+      try {
+        const res = await fetch(`${apiBase}?dataset=TaiwanStockPER&data_id=${code}&start_date=${startDate}${tok}`);
+        const json = await res.json();
+        if (json.msg === "success" && json.data?.length > 0) {
+          const row = json.data[json.data.length - 1];
+          per = row.PER != null ? parseFloat(row.PER) || null : null;
+        }
+      } catch(e) {}
+      financialsCache[code] = { ...fc, per, perDate: today };
+      await delay();
+    }
+
+    // ── EPS（TTL 90 天）──
+    let eps = fc.eps ?? null;
+    if (cacheAge(code, "epsDate") > 90) {
       try {
         const res = await fetch(`${apiBase}?dataset=TaiwanStockFinancialStatements&data_id=${code}&start_date=${startDate}${tok}`);
         const json = await res.json();
@@ -1645,17 +1689,16 @@ async function fetchFundamentals() {
           const epsRows = json.data.filter(d => d.type === "EPS");
           if (epsRows.length > 0) {
             eps = parseFloat(epsRows[epsRows.length - 1].value) || null;
-            financialsCache[code] = { ...cached, eps, epsDate: today };
-            cached.eps = eps; cached.epsDate = today;
+            financialsCache[code] = { ...(financialsCache[code] || fc), eps, epsDate: today };
           }
         }
       } catch(e) {}
       await delay();
     }
 
-    // ── 月營收年增率（月更新，快取 32 天）──
-    let yoy = cached.yoy ?? null;
-    if (age("yoyDate") > 32) {
+    // ── 月營收年增率（TTL 32 天）──
+    let yoy = fc.yoy ?? null;
+    if (cacheAge(code, "yoyDate") > 32) {
       try {
         const res = await fetch(`${apiBase}?dataset=TaiwanStockMonthRevenue&data_id=${code}&start_date=${startDate}${tok}`);
         const json = await res.json();
@@ -1663,7 +1706,7 @@ async function fetchFundamentals() {
           const row = json.data[json.data.length - 1];
           if (row.last_year_revenue > 0) {
             yoy = parseFloat(((row.revenue - row.last_year_revenue) / row.last_year_revenue * 100).toFixed(1));
-            financialsCache[code] = { ...(financialsCache[code] || cached), yoy, yoyDate: today };
+            financialsCache[code] = { ...(financialsCache[code] || fc), yoy, yoyDate: today };
           }
         }
       } catch(e) {}
@@ -1676,7 +1719,7 @@ async function fetchFundamentals() {
     stockData[code].eps = eps;
     stockData[code].yoy = yoy;
     const tag = classify_quality(eps, per);
-    stockData[code].qualityTag   = tag;
+    stockData[code].qualityTag     = tag;
     stockData[code].quality_status = tag;
   }
 
@@ -1686,24 +1729,26 @@ async function fetchFundamentals() {
   // ── 統計 ──
   const tagOrder = ["🟢業績股", "🟡普通", "⚫虧損", "🔴題材股", "❓缺財報", "✖️抓取失敗"];
   const counts = Object.fromEntries(tagOrder.map(t => [t, 0]));
-  twCodes.forEach(c => { const t = stockData[c]?.quality_status; if (counts[t] != null) counts[t]++; });
-  const failedCodes = twCodes.filter(c => stockData[c]?.quality_status === "✖️抓取失敗");
+  fullQueue.forEach(c => { const t = stockData[c]?.quality_status; if (counts[t] != null) counts[t]++; });
+  const failedCodes = fullQueue.filter(c => stockData[c]?.quality_status === "✖️抓取失敗");
 
   const statsLine = tagOrder.filter(t => counts[t] > 0).map(t => `${t} ${counts[t]}`).join("　");
   console.log("=== 基本面抓取統計 ===");
-  tagOrder.forEach(t => console.log(`  ${t}: ${counts[t]} 檔`));
+  tagOrder.forEach(t => { if (counts[t] > 0) console.log(`  ${t}: ${counts[t]} 檔`); });
   if (failedCodes.length) console.warn("✖️抓取失敗代號:", failedCodes.join(", "));
 
   const statsEl = document.getElementById("fundStats");
   if (statsEl) {
-    statsEl.innerHTML = `<strong>最近一次基本面更新</strong>（${today}）<br>${statsLine}`
-      + (failedCodes.length ? `<br><span style="color:#dc2626;">✖️失敗代號：${failedCodes.join(", ")}</span>` : "");
+    statsEl.innerHTML =
+      `<strong>最近一次基本面更新</strong>（${today}）抓取 ${needFetch.length} 檔，跳過 ${skipped} 快取<br>` +
+      statsLine +
+      (failedCodes.length ? `<br><span style="color:#dc2626;">✖️失敗代號：${failedCodes.join(", ")}</span>` : "");
   }
 
-  statusEl.textContent = `基本面更新完成`;
+  statusEl.textContent = `基本面更新完成（抓取 ${needFetch.length} 檔，跳過 ${skipped} 快取）`;
   btn.disabled = false;
   progContainer.style.display = "none";
-  setTimeout(() => { statusEl.textContent = ""; }, 4000);
+  setTimeout(() => { statusEl.textContent = ""; }, 5000);
 }
 
 function calcSectorStats() {
