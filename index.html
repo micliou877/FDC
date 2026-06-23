@@ -121,15 +121,20 @@
       .wrap-cell .tag { display: none; }
       .wrap-cell { min-width: 0; }
 
-      /* 明細表（#stocksTable）：隱藏「金額(億)」欄 */
+      /* 明細表（#stocksTable）：手機隱藏「金額(億)」「PER」欄，保留「品質」 */
       #stocksTable th:nth-child(8),
       #stocksTable td:nth-child(8) { display: none; }
+      #stocksTable th:nth-child(9),
+      #stocksTable td:nth-child(9) { display: none; }
 
-      /* 關注表（#watchlistTable）：隱藏「順序」「金額」「複製到」「備註」欄 */
+      /* 關注表（#watchlistTable）：隱藏「順序」「金額」「PER」「複製到」「備註」欄 */
+      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9金額 10PER 11EPS 12品質 13作業 14天數 15損益 16複製到 17備註 */
       #watchlistTable th:nth-child(1), #watchlistTable td:nth-child(1) { display: none; }
       #watchlistTable th:nth-child(9),  #watchlistTable td:nth-child(9)  { display: none; }
-      #watchlistTable th:nth-child(13), #watchlistTable td:nth-child(13) { display: none; }
-      #watchlistTable th:nth-child(14), #watchlistTable td:nth-child(14) { display: none; }
+      #watchlistTable th:nth-child(10), #watchlistTable td:nth-child(10) { display: none; }
+      #watchlistTable th:nth-child(11), #watchlistTable td:nth-child(11) { display: none; }
+      #watchlistTable th:nth-child(16), #watchlistTable td:nth-child(16) { display: none; }
+      #watchlistTable th:nth-child(17), #watchlistTable td:nth-child(17) { display: none; }
 
       /* 設定頁：input 全寬（覆蓋 inline style 的固定寬度） */
       #apiToken, #ghTriggerToken { width: 100% !important; box-sizing: border-box; }
@@ -326,6 +331,9 @@
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
+          <th data-sort="per" style="text-align:right;white-space:nowrap">PER ↕</th>
+          <th data-sort="eps" style="text-align:right;white-space:nowrap">EPS ↕</th>
+          <th style="text-align:center;white-space:nowrap;cursor:default;">品質</th>
           <th style="width:36px;text-align:center;cursor:default;">作業</th>
         </tr>
       </thead>
@@ -373,6 +381,9 @@
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
+          <th data-sort="per" style="text-align:right;white-space:nowrap">PER ↕</th>
+          <th data-sort="eps" style="text-align:right;white-space:nowrap">EPS ↕</th>
+          <th style="text-align:center;white-space:nowrap;cursor:default;">品質</th>
           <th style="width:36px;text-align:center;cursor:default;">作業</th>
           <th style="text-align:right;white-space:nowrap">天數</th>
           <th style="text-align:right;white-space:nowrap">損益</th>
@@ -561,6 +572,7 @@
     </div>
     <div class="button-row">
       <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
+      <button class="btn" id="fetchFundamentalsBtn">更新基本面</button>
       <button class="btn" id="pushCloudBtn">上傳到雲端</button>
       <button class="btn" id="pullCloudBtn">從雲端下載</button>
       <button class="btn" id="loadDemoBtn">載入範例</button>
@@ -1043,6 +1055,7 @@ STOCK_NAMES["0050"] = "大盤(0050)";
 let expandedSectors = new Set();
 let heatHistory = {}; // { "2026-06-22": { "族群名": score, ... }, ... }
 let stockData = {};
+let financialsCache = {}; // { code: { eps, epsDate, yoy, yoyDate } } — 季/月快取，避免重複抓
 let watchlists = {
   "⭐ 第一級：純度最高": ["6870", "3081", "6739", "5439", "8033", "3491", "6690", "6667", "4749", "5340"], 
   "📈 第二級：基本面驗證": ["2478", "8043", "5289", "6753", "5222", "6285", "7717", "6271", "2455", "4585"],
@@ -1183,6 +1196,7 @@ function saveLocalOnly() {
       stockNotes: stockNotes,
       stockMeta: stockMeta
     }));
+    localStorage.setItem("fdc_financials_cache", JSON.stringify(financialsCache));
   } catch(e) {}
 }
 
@@ -1203,6 +1217,19 @@ function loadData() {
       stockMeta = obj.stockMeta || {};
       if (obj.watchlists && Object.keys(obj.watchlists).length > 0) watchlists = obj.watchlists;
       if (obj.watchlistsTs) watchlistsTs = obj.watchlistsTs;
+    }
+    const rawFin = localStorage.getItem("fdc_financials_cache");
+    if (rawFin) {
+      financialsCache = JSON.parse(rawFin);
+      // 將快取中的基本面欄位合併回 stockData
+      Object.entries(financialsCache).forEach(([code, f]) => {
+        if (stockData[code]) {
+          if (f.eps != null) stockData[code].eps = f.eps;
+          if (f.yoy != null) stockData[code].yoy = f.yoy;
+          if (stockData[code].per != null || f.eps != null)
+            stockData[code].qualityTag = classify_quality(stockData[code].eps ?? null, stockData[code].per ?? null);
+        }
+      });
     }
     const savedToken = localStorage.getItem("finmind_token");
     if (savedToken) document.getElementById("apiToken").value = savedToken;
@@ -1558,6 +1585,104 @@ async function fetchLiveQuotes() {
   } catch (e) { console.error("即時報價更新失敗", e); }
 }
 
+// ==================== 基本面品質分類 ====================
+function classify_quality(eps, per) {
+  if (eps == null && per == null) return null;
+  if (eps != null && eps <= 0) return "題材股🔴";
+  if (per != null && per > 100) return "題材股🔴";
+  if (eps != null && eps > 3 && per != null && per >= 10 && per <= 50) return "業績股🟢";
+  return "普通🟡";
+}
+
+// ==================== 基本面抓取（PER 每次抓、EPS/月營收快取）====================
+async function fetchFundamentals() {
+  const token = document.getElementById("apiToken").value.trim();
+  const btn = document.getElementById("fetchFundamentalsBtn");
+  const statusEl = document.getElementById("fetchStatus");
+  const progContainer = document.getElementById("progressContainer");
+  const progBar = document.getElementById("progressBar");
+
+  const twCodes = [...new Set(Object.values(SECTORS).flat().map(s => s.code))];
+  const today = new Date().toISOString().slice(0, 10);
+  const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const startDate = oneYearAgo.toISOString().slice(0, 10);
+  const apiBase = `https://api.finmindtrade.com/api/v4/data`;
+  const tok = token ? `&token=${token}` : "";
+  const delay = () => token ? Promise.resolve() : new Promise(r => setTimeout(r, 250));
+
+  btn.disabled = true;
+  progContainer.style.display = "block";
+
+  for (let i = 0; i < twCodes.length; i++) {
+    const code = twCodes[i];
+    statusEl.textContent = `基本面: ${code} (${i + 1}/${twCodes.length})`;
+    progBar.style.width = `${((i + 1) / twCodes.length) * 100}%`;
+    const cached = financialsCache[code] || {};
+    const age = (key) => cached[key] ? (Date.now() - new Date(cached[key])) / 86400000 : 999;
+
+    // ── PER（每次都抓，日盤後資料）──
+    let per = null;
+    try {
+      const res = await fetch(`${apiBase}?dataset=TaiwanStockPER&data_id=${code}&start_date=${startDate}${tok}`);
+      const json = await res.json();
+      if (json.msg === "success" && json.data?.length > 0) {
+        const row = json.data[json.data.length - 1];
+        per = row.PER != null ? parseFloat(row.PER) || null : null;
+      }
+    } catch(e) {}
+    await delay();
+
+    // ── EPS（季更新，快取 90 天）──
+    let eps = cached.eps ?? null;
+    if (age("epsDate") > 90) {
+      try {
+        const res = await fetch(`${apiBase}?dataset=TaiwanStockFinancialStatements&data_id=${code}&start_date=${startDate}${tok}`);
+        const json = await res.json();
+        if (json.msg === "success" && json.data?.length > 0) {
+          const epsRows = json.data.filter(d => d.type === "EPS");
+          if (epsRows.length > 0) {
+            eps = parseFloat(epsRows[epsRows.length - 1].value) || null;
+            financialsCache[code] = { ...cached, eps, epsDate: today };
+            cached.eps = eps; cached.epsDate = today;
+          }
+        }
+      } catch(e) {}
+      await delay();
+    }
+
+    // ── 月營收年增率（月更新，快取 32 天）──
+    let yoy = cached.yoy ?? null;
+    if (age("yoyDate") > 32) {
+      try {
+        const res = await fetch(`${apiBase}?dataset=TaiwanStockMonthRevenue&data_id=${code}&start_date=${startDate}${tok}`);
+        const json = await res.json();
+        if (json.msg === "success" && json.data?.length > 0) {
+          const row = json.data[json.data.length - 1];
+          if (row.last_year_revenue > 0) {
+            yoy = parseFloat(((row.revenue - row.last_year_revenue) / row.last_year_revenue * 100).toFixed(1));
+            financialsCache[code] = { ...(financialsCache[code] || cached), yoy, yoyDate: today };
+          }
+        }
+      } catch(e) {}
+      await delay();
+    }
+
+    // ── 合併到 stockData ──
+    if (!stockData[code]) stockData[code] = {};
+    stockData[code].per = per;
+    stockData[code].eps = eps;
+    stockData[code].yoy = yoy;
+    stockData[code].qualityTag = classify_quality(eps, per);
+  }
+
+  saveLocalOnly();
+  updateUI();
+  statusEl.textContent = `基本面更新完成（${twCodes.length} 檔）`;
+  btn.disabled = false;
+  progContainer.style.display = "none";
+  setTimeout(() => { statusEl.textContent = ""; }, 6000);
+}
+
 function calcSectorStats() {
   const stats = {}; const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
   Object.entries(SECTORS).forEach(([sector, stocks]) => {
@@ -1816,6 +1941,9 @@ function renderStocks() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
+      <td style="text-align:right;color:#64748b;font-size:11px;">${s.per != null ? s.per.toFixed(1) : "-"}</td>
+      <td style="text-align:right;color:#64748b;font-size:11px;">${s.eps != null ? s.eps.toFixed(2) : "-"}</td>
+      <td style="text-align:center;font-size:12px;" title="${s.yoy != null ? '月營收年增率: ' + (s.yoy > 0 ? '+' : '') + s.yoy + '%' : ''}">${s.qualityTag ?? "-"}</td>
       <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
     </tr>`; }).join("");
 }
@@ -1894,7 +2022,7 @@ window.manualAddGlobalStock = function() {
 
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="17" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
@@ -1936,6 +2064,9 @@ function renderWatchlist() {
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
+      <td style="text-align:right;color:#64748b;font-size:11px;">${s.per != null ? s.per.toFixed(1) : "-"}</td>
+      <td style="text-align:right;color:#64748b;font-size:11px;">${s.eps != null ? s.eps.toFixed(2) : "-"}</td>
+      <td style="text-align:center;font-size:12px;" title="${s.yoy != null ? '月營收年增率: ' + (s.yoy > 0 ? '+' : '') + s.yoy + '%' : ''}">${s.qualityTag ?? "-"}</td>
       <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price??null})" title="${hd?'更新持有資訊':'加入持有追蹤'}">${hd?'✏️':'⏰'}</span></td>
       <td style="text-align:right;font-size:12px;color:#888">${hdDays!==null?hdDays+'天':'-'}</td>
       <td style="text-align:right;white-space:nowrap">${hdRet!==null?`<span class="${pctClass(hdRet)}" style="font-weight:700;font-size:12px">${fmtPct(hdRet)}</span> <span style="cursor:pointer;font-size:10px;color:#bbb;vertical-align:middle" onclick="removeHolding('${s.code}')" title="移除持有">✕</span>`:'<span style="color:#ccc">-</span>'}</td>
@@ -2246,6 +2377,7 @@ document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.ta
 document.querySelectorAll("#stocksTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (stockSortKey === th.dataset.sort) stockSortDir *= -1; else { stockSortKey = th.dataset.sort; stockSortDir = -1; } renderStocks(); }; });
 document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>d*((b[k]??-999)-(a[k]??-999))); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
 document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
+document.getElementById("fetchFundamentalsBtn").onclick = fetchFundamentals;
 document.getElementById("loadDemoBtn").onclick = () => {
   const allCodes = [...new Set(Object.values(SECTORS).flat().map(s => s.code)), "0050"];
   stockData = {};
