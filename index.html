@@ -575,6 +575,7 @@
     </div>
     <div class="button-row">
       <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
+      <button class="btn" id="fetchLiveQuotesBtn" title="重新抓取 GitHub Actions 每 15 分鐘更新的報價快照，不需 Token">🆓 刷新報價</button>
       <button class="btn" id="fetchFundamentalsBtn">更新基本面</button>
       <button class="btn" id="fetchFundamentalsFreeBtn" title="從 TWSE/TPEX 批次取得本益比，不需 FinMind Token">🆓 免費更新基本面</button>
       <button class="btn" id="pushCloudBtn">上傳到雲端</button>
@@ -2672,6 +2673,16 @@ document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.ta
 document.querySelectorAll("#stocksTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (stockSortKey === th.dataset.sort) stockSortDir *= -1; else { stockSortKey = th.dataset.sort; stockSortDir = -1; } renderStocks(); }; });
 document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>d*((b[k]??-999)-(a[k]??-999))); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
 document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
+document.getElementById("fetchLiveQuotesBtn").onclick = async () => {
+  const btn = document.getElementById("fetchLiveQuotesBtn");
+  const statusEl = document.getElementById("fetchStatus");
+  btn.disabled = true;
+  statusEl.textContent = "🆓 刷新報價中...";
+  await fetchLiveQuotes();
+  statusEl.textContent = liveQuoteTime ? `報價已更新（快照時間：${liveQuoteTime}）` : "報價刷新完成";
+  btn.disabled = false;
+  setTimeout(() => { statusEl.textContent = ""; }, 5000);
+};
 document.getElementById("fetchFundamentalsBtn").onclick = fetchFundamentals;
 document.getElementById("fetchFundamentalsFreeBtn").onclick = fetchFundamentalsFree;
 document.getElementById("loadDemoBtn").onclick = () => {
