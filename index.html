@@ -827,6 +827,44 @@
     </table>
   </div>
 
+  <!-- 精選每天不一樣怎麼辦 -->
+  <div class="data-panel" style="border-left:4px solid #7c3aed;">
+    <h3 style="color:#4c1d95;">精選個股每天不一樣，怎麼辦？</h3>
+    <p style="font-size:12px;color:#64748b;margin:0 0 10px;">這是正常現象。精選是「候選池」，不是「買入清單」。你要建立機制判斷每天的變化，而不是讓清單每天洗牌。</p>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#f5f3ff;border-bottom:2px solid #ddd6fe;">
+          <th style="padding:8px;text-align:left;color:#4c1d95;width:140px;">情況</th>
+          <th style="padding:8px;text-align:left;color:#4c1d95;">你的動作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:8px;font-weight:600;">昨天入選，今天還在</td>
+          <td style="padding:8px;color:#475569;">不用動，繼續觀察，等 TradingView 確認買進條件</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:8px;font-weight:600;">今天新出現</td>
+          <td style="padding:8px;color:#475569;">先確認昨天在哪。差一點沒進 → 可以去 TradingView 確認；昨天完全不在範圍 → 等一天，避免追單日爆量假突破</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;font-weight:600;">昨天入選，今天消失</td>
+          <td style="padding:8px;color:#475569;">
+            近5日轉負 → 動能衰竭，移出候選<br>
+            族群跌出前3 → 更嚴重，整批候選暫停
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px;font-size:12px;background:#f5f3ff;border-radius:6px;padding:10px 12px;color:#4c1d95;line-height:1.8;">
+      <strong>正確流程：</strong><br>
+      精選個股 → 候選池（點「＋」加入今日作業清單，最多存 5~6 檔）<br>
+      → 去 TradingView 逐檔確認均線條件<br>
+      → 通過才是真正要買的<br><br>
+      候選池不用每天清掉重來：新進來的加進去，pct5 轉負的移除，剩下的繼續等訊號。
+    </div>
+  </div>
+
   <!-- 不做的事 -->
   <div class="data-panel" style="border-left:4px solid #f59e0b;">
     <h3 style="color:#92400e;">紀律清單：我不做的事</h3>
@@ -2796,7 +2834,7 @@ function renderStrategy() {
 
     <!-- 精選個股 -->
     ${topStocks.length > 0 ? `
-    ${sectionLabel('精選個股', '前3族群各取10日漲幅前3名')}
+    ${sectionLabel('精選個股', '前3強勢族群・10日漲幅排序・近5日仍正・成交≥1億')}
     <div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
       <th style="width:32px;text-align:center;">自選</th>
       ${th('t','code','代號','left')}
