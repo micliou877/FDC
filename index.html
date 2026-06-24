@@ -2701,6 +2701,7 @@ function renderStrategy() {
     (SECTORS[sector]||[])
       .filter(s => stockData[s.code])
       .map(s => ({...s, ...stockData[s.code], sectorLabel: sector.split('. ')[1]||sector}))
+      .filter(s => (s.pct5||0) > 0 && (s.amount||0) >= 1)
       .sort((a, b) => (b.pct10||0) - (a.pct10||0))
       .slice(0, 3).forEach(s => rawTop.push(s));
   });
