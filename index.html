@@ -1919,10 +1919,11 @@ async function fetchFundamentals() {
   hotCodes.forEach(c => { if (!fullQueue.includes(c)) fullQueue.push(c); });
 
   const wlSet = new Set(wlCodes);
-  // 有 token → 每次重抓 PER/EPS（FinMind 精確值，不被批次快取擋住），YoY 仍 32 天快取
-  // 無 token → 依快取 TTL 決定是否略過
+  // perDateFM / epsDateFM：只有 FinMind 成功才寫入，批次不碰
+  // 有 token → 用 FM 快取判斷（PER 1天、EPS 90天）
+  // 無 token → 用批次快取判斷（perDate / epsDate）
   const needFetch = fullQueue.filter(c => {
-    if (token) return true;
+    if (token) return cacheAge(c,"perDateFM") > 1 || cacheAge(c,"epsDateFM") > 90 || cacheAge(c,"yoyDate") > 32;
     return cacheAge(c, "perDate") > 1 || cacheAge(c, "epsDate") > 90 || cacheAge(c, "yoyDate") > 32;
   });
   const skipped = fullQueue.length - needFetch.length;
@@ -1949,29 +1950,27 @@ async function fetchFundamentals() {
     const safeFloat = v => { const n = parseFloat(v); return isNaN(n) ? null : n; };
     const isEtf = /^00[0-9]/.test(code); // ETF (0050, 0056, 006208…) 無 EPS/PER
 
-    // ── PER（有 token 每次抓；無 token TTL 1 天）──
+    // ── PER（TTL 1天；token 用 perDateFM 判斷，不被批次快取干擾）──
     let per = fc.per ?? null;
     let perApiOk = false;
-    const needPer = !isEtf && (token || cacheAge(code, "perDate") > 1);
+    const needPer = !isEtf && (token ? cacheAge(code,"perDateFM") > 1 : cacheAge(code,"perDate") > 1);
     if (needPer) {
       try {
         const json = await finmindFetch(`${apiBase}?dataset=TaiwanStockPER&data_id=${code}&start_date=${startDate}`);
         if (json.msg === "success") {
           perApiOk = true;
-          if (json.data?.length > 0) {
-            per = safeFloat(json.data[json.data.length - 1].PER);
-          }
-          // 只有 API 成功才存 perDate，限速失敗不存，下次繼續重試
-          financialsCache[code] = { ...(financialsCache[code] || fc), per, perDate: today };
+          if (json.data?.length > 0) per = safeFloat(json.data[json.data.length - 1].PER);
+          // perDateFM 只有 FinMind 成功才寫；perDate 同步更新供批次邏輯使用
+          financialsCache[code] = { ...(financialsCache[code] || fc), per, perDate: today, perDateFM: today };
         } else { console.warn(`[${code}] PER:`, json.msg); }
       } catch(e) { console.warn(`[${code}] PER fetch:`, e.message); }
       await delay();
     } else if (isEtf) { perApiOk = true; }
 
-    // ── EPS（有 token 每次抓；無 token TTL 90 天）──
+    // ── EPS（TTL 90天；token 用 epsDateFM 判斷）──
     let eps = fc.eps ?? null;
     let epsApiOk = false;
-    if (!isEtf && (token || cacheAge(code, "epsDate") > 90)) {
+    if (!isEtf && (token ? cacheAge(code,"epsDateFM") > 90 : cacheAge(code,"epsDate") > 90)) {
       try {
         const json = await finmindFetch(`${apiBase}?dataset=TaiwanStockFinancialStatements&data_id=${code}&start_date=${startDate}`);
         if (json.msg === "success") {
@@ -1979,7 +1978,7 @@ async function fetchFundamentals() {
           const epsRows = (json.data || []).filter(d => d.type === "EPS");
           if (epsRows.length > 0) {
             eps = safeFloat(epsRows[epsRows.length - 1].value);
-            financialsCache[code] = { ...(financialsCache[code] || fc), eps, epsDate: today };
+            financialsCache[code] = { ...(financialsCache[code] || fc), eps, epsDate: today, epsDateFM: today };
           }
         } else { console.warn(`[${code}] EPS:`, json.msg); }
       } catch(e) { console.warn(`[${code}] EPS fetch:`, e.message); }
