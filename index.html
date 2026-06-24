@@ -1799,13 +1799,17 @@ async function fetchFundamentals() {
   let fallbackMode = !token; // 一開始就是無 token 就直接是 fallback mode
   const delay = () => currentDelay ? new Promise(r => setTimeout(r, currentDelay)) : Promise.resolve();
 
-  // 先用免費批次把 PER/EPS 跑一遍（FinMind 主要補 YOY）
-  statusEl.textContent = '🆓 先用 TWSE/TPEX 批次取得本益比...';
   progContainer.style.display = 'block';
-  const bulkPre = await fetchBulkPER(statusEl);
-  await applyBulkPER(bulkPre, null);
 
-  // 超限自動降級：FinMind 超限 → 直接用已抓好的批次資料，僅繼續抓 YOY
+  // 無 Token → 先用 TWSE/TPEX 批次填 PER/EPS（FinMind 只補 YOY）
+  // 有 Token → 讓 FinMind 直接抓 PER/EPS/YOY，超限時再降級到批次
+  if (!token) {
+    statusEl.textContent = '🆓 無 Token，先用 TWSE/TPEX 批次取得本益比...';
+    const bulkPre = await fetchBulkPER(statusEl);
+    await applyBulkPER(bulkPre, null);
+  }
+
+  // 超限自動降級：FinMind 超限 → 抓批次資料備援 PER/EPS，繼續用無 Token 跑 YOY
   let bulkFallbackDone = false;
   const finmindFetch = async (baseUrl) => {
     const res = await fetch(baseUrl + activeTok);
@@ -1819,9 +1823,10 @@ async function fetchFundamentals() {
       currentDelay = 6000;
       if (!bulkFallbackDone) {
         bulkFallbackDone = true;
-        statusEl.textContent = '⚠️ FinMind 超限，PER/EPS 已由 TWSE/TPEX 備援，繼續抓 YOY...';
+        statusEl.textContent = '⚠️ FinMind 超限，切換 TWSE/TPEX 批次備援 PER/EPS，繼續抓 YOY...';
+        const fallbackBulk = await fetchBulkPER(statusEl);
+        await applyBulkPER(fallbackBulk, null);
       }
-      // PER/EPS 已有批次資料，回傳空成功讓主迴圈跳過 PER/EPS
       return { msg: 'success', data: [] };
     }
     return json;
