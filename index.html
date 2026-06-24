@@ -117,8 +117,8 @@
       /* 所有表格：緊縮 cell */
       .stocks-table th, .stocks-table td { padding: 5px 3px; font-size: 11px; }
 
-      /* 名稱欄內的族群標籤在手機上隱藏（省空間） */
-      .wrap-cell .tag { display: none; }
+      /* 名稱欄內的族群標籤在手機上縮小顯示 */
+      .wrap-cell .tag { font-size: 9px; padding: 1px 4px; margin-top: 2px; }
       .wrap-cell { min-width: 0; }
 
       /* 明細表（#stocksTable）：手機隱藏「金額(億)」「PER」欄，保留「品質」 */
@@ -2576,6 +2576,7 @@ function renderStrategy() {
       ${th('t','pct5','5日%')}
       ${th('t','pct1','今日%')}
       ${th('t','amount','成交')}
+      <th style="text-align:center;white-space:nowrap">品質</th>
       <th></th>
     </tr></thead><tbody>
       ${topStocks.slice(0,9).map(s => `<tr>
@@ -2587,6 +2588,7 @@ function renderStrategy() {
         <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
         <td style="text-align:right;color:#9ca3af;">${s.amount?.toFixed(1)??'-'}</td>
+        <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
         <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
       </tr>`).join('')}
     </tbody></table></div>` : ''}
@@ -2618,6 +2620,7 @@ function renderStrategy() {
           ${th('v','pct5','5日%')}
           ${th('v','pct1','今日%')}
           ${th('v','volTrend','量能')}
+          <th style="text-align:center;white-space:nowrap">品質</th>
           <th></th>
         </tr></thead><tbody>
           ${tvStocks.map(s => {
@@ -2634,6 +2637,7 @@ function renderStrategy() {
               <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
               <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
+              <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
               <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
             </tr>`;
           }).join('')}
