@@ -575,7 +575,7 @@
     </div>
     <div class="button-row">
       <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
-      <button class="btn" id="fetchLiveQuotesBtn" title="重新抓取 GitHub Actions 每 15 分鐘更新的報價快照，不需 Token">🆓 刷新報價</button>
+      <button class="btn" id="fetchLiveQuotesBtn" title="TWSE/TPEX 全市場收盤價 + PER + 品質標籤，不需 Token">🆓 刷新報價</button>
       <button class="btn" id="fetchFundamentalsBtn">更新基本面</button>
       <button class="btn" id="fetchFundamentalsFreeBtn" title="從 TWSE/TPEX 批次取得本益比，不需 FinMind Token">🆓 免費更新基本面</button>
       <button class="btn" id="pushCloudBtn">上傳到雲端</button>
@@ -1680,62 +1680,121 @@ function classify_quality(eps, per) {
 }
 
 // ==================== 免費批次 PER：TWSE + TPEX 官方 API，不需 Token ====================
-// EPS = 收盤 ÷ PER（trailing 12M EPS，與 FinMind 幾乎一致）
+// 兩段抓取：
+//   Stage 1（並聯）：TWSE STOCK_DAY_ALL + TPEX stk_quote_result → 全市場收盤價
+//   Stage 2（並聯）：TWSE BWIBBU_d + TPEX peListed → PER
+// EPS = 收盤 ÷ PER（trailing 12M，與 FinMind 幾乎一致）
 async function fetchBulkPER(statusEl) {
   const today = new Date();
   const pad = n => String(n).padStart(2,'0');
-  const result = {}; // code -> { per, eps }
+  const priceMap = {}; // code -> price（全市場）
+  const perMap = {};   // code -> per
+  const result = {};   // code -> { per, eps }
 
-  // 嘗試最近 5 個自然日，跳過假日（假日 TWSE 不回傳 data）
-  const tryTWSE = async () => {
-    for (let offset = 0; offset < 5; offset++) {
-      const d = new Date(today); d.setDate(d.getDate() - offset);
-      const ds = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+  // ── Stage 1：全市場收盤價 ──────────────────────────────
+  const tryTWSEPrice = async () => {
+    // 先試不帶日期（TWSE 回傳最近一交易日），失敗再帶日期重試
+    const urls = [
+      `https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_ALL?response=json`,
+      ...Array.from({length:5},(_,i)=>{
+        const d=new Date(today); d.setDate(d.getDate()-i);
+        const ds=`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+        return `https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_ALL?response=json&date=${ds}`;
+      })
+    ];
+    for (const url of urls) {
       try {
-        if (statusEl) statusEl.textContent = `🆓 TWSE 批次抓取（${ds}）...`;
-        const r = await fetch(`https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d?date=${ds}&stockNo=&response=json`);
-        const j = await r.json();
+        const j = await fetch(url).then(r=>r.json());
         if (j.stat === 'OK' && Array.isArray(j.data) && j.data.length > 0) {
           j.data.forEach(row => {
             const code = String(row[0]).trim();
-            const per = parseFloat(row[4]);
-            if (!isNaN(per) && per > 0) {
-              const price = stockData[code]?.price;
-              result[code] = { per, eps: price ? parseFloat((price / per).toFixed(2)) : null };
-            }
+            const price = parseFloat(String(row[8]).replace(/,/g,''));
+            if (!isNaN(price) && price > 0) priceMap[code] = price;
           });
           return true;
         }
-      } catch(e) { console.warn('TWSE bulk:', e.message); }
+      } catch(e) { console.warn('TWSE STOCK_DAY_ALL:', e.message); }
     }
     return false;
   };
 
-  const tryTPEX = async () => {
+  const tryTPEXPrice = async () => {
     for (let offset = 0; offset < 5; offset++) {
       const d = new Date(today); d.setDate(d.getDate() - offset);
       const ds = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
       try {
-        if (statusEl) statusEl.textContent = `🆓 TPEX 批次抓取（${ds}）...`;
-        const r = await fetch(`https://www.tpex.org.tw/web/stock/aftertrading/peratio_listed/peListed_result.php?l=zh-tw&o=json&d=${ds}`);
-        const j = await r.json();
+        const j = await fetch(`https://www.tpex.org.tw/web/stock/aftertrading/daily_close_quotes/stk_quote_result.php?l=zh-tw&o=json&d=${ds}`).then(r=>r.json());
         if (j.iTotalRecords > 0 && Array.isArray(j.aaData) && j.aaData.length > 0) {
           j.aaData.forEach(row => {
             const code = String(row[0]).trim();
-            const per = parseFloat(row[4]);
-            if (!isNaN(per) && per > 0) {
-              const price = stockData[code]?.price;
-              result[code] = { per, eps: price ? parseFloat((price / per).toFixed(2)) : null };
-            }
+            const price = parseFloat(String(row[2]).replace(/,/g,''));
+            if (!isNaN(price) && price > 0) priceMap[code] = price;
           });
           return true;
         }
-      } catch(e) { console.warn('TPEX bulk:', e.message); }
+      } catch(e) { console.warn('TPEX stk_quote:', e.message); }
     }
     return false;
   };
 
-  await Promise.all([tryTWSE(), tryTPEX()]);
+  if (statusEl) statusEl.textContent = '🆓 抓取全市場收盤價...';
+  await Promise.all([tryTWSEPrice(), tryTPEXPrice()]);
+
+  // 把收盤價更新進 stockData（修正刷新報價覆蓋不到的問題）
+  Object.entries(priceMap).forEach(([code, price]) => {
+    if (!stockData[code]) stockData[code] = {};
+    stockData[code].price = price;
+  });
+
+  // ── Stage 2：PER ─────────────────────────────────────
+  const tryTWSEPER = async () => {
+    for (let offset = 0; offset < 5; offset++) {
+      const d = new Date(today); d.setDate(d.getDate() - offset);
+      const ds = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+      try {
+        if (statusEl) statusEl.textContent = `🆓 TWSE 本益比（${ds}）...`;
+        const j = await fetch(`https://www.twse.com.tw/rwd/zh/afterTrading/BWIBBU_d?date=${ds}&stockNo=&response=json`).then(r=>r.json());
+        if (j.stat === 'OK' && Array.isArray(j.data) && j.data.length > 0) {
+          j.data.forEach(row => {
+            const code = String(row[0]).trim();
+            const per = parseFloat(row[4]);
+            if (!isNaN(per) && per > 0) perMap[code] = per;
+          });
+          return true;
+        }
+      } catch(e) { console.warn('TWSE BWIBBU_d:', e.message); }
+    }
+    return false;
+  };
+
+  const tryTPEXPER = async () => {
+    for (let offset = 0; offset < 5; offset++) {
+      const d = new Date(today); d.setDate(d.getDate() - offset);
+      const ds = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
+      try {
+        const j = await fetch(`https://www.tpex.org.tw/web/stock/aftertrading/peratio_listed/peListed_result.php?l=zh-tw&o=json&d=${ds}`).then(r=>r.json());
+        if (j.iTotalRecords > 0 && Array.isArray(j.aaData) && j.aaData.length > 0) {
+          j.aaData.forEach(row => {
+            const code = String(row[0]).trim();
+            const per = parseFloat(row[4]);
+            if (!isNaN(per) && per > 0) perMap[code] = per;
+          });
+          return true;
+        }
+      } catch(e) { console.warn('TPEX peListed:', e.message); }
+    }
+    return false;
+  };
+
+  await Promise.all([tryTWSEPER(), tryTPEXPER()]);
+
+  // 合併 price + per → result
+  Object.keys(perMap).forEach(code => {
+    const per = perMap[code];
+    const price = priceMap[code] ?? stockData[code]?.price;
+    result[code] = { per, eps: price ? parseFloat((price / per).toFixed(2)) : null };
+  });
+
   return result;
 }
 
@@ -2686,11 +2745,16 @@ document.getElementById("fetchLiveQuotesBtn").onclick = async () => {
   const btn = document.getElementById("fetchLiveQuotesBtn");
   const statusEl = document.getElementById("fetchStatus");
   btn.disabled = true;
-  statusEl.textContent = "🆓 刷新報價中...";
+  // Stage 1: 全市場收盤 + PER（TWSE/TPEX 官方 API）
+  const bulk = await fetchBulkPER(statusEl);
+  const n = await applyBulkPER(bulk, statusEl);
+  // Stage 2: 補 pct1/amount（quotes.json 快照，覆蓋到的 331 支更精確）
   await fetchLiveQuotes();
-  statusEl.textContent = liveQuoteTime ? `報價已更新（快照時間：${liveQuoteTime}）` : "報價刷新完成";
+  saveLocalOnly(); updateUI();
+  const priceCount = Object.values(stockData).filter(s => s.price != null).length;
+  statusEl.textContent = `🆓 刷新完成：${priceCount} 檔有收盤，${n} 檔品質標籤已更新`;
   btn.disabled = false;
-  setTimeout(() => { statusEl.textContent = ""; }, 5000);
+  setTimeout(() => { statusEl.textContent = ""; }, 6000);
 };
 document.getElementById("fetchFundamentalsBtn").onclick = fetchFundamentals;
 document.getElementById("fetchFundamentalsFreeBtn").onclick = fetchFundamentalsFree;
