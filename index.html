@@ -251,6 +251,7 @@
   <button class="tab" data-tab="tool3" style="display:none">🏆 信念</button>
   <button class="tab" data-tab="tool4" style="display:none">⏰ 持有</button>
   <button class="tab" data-tab="data">設定</button>
+  <button class="tab" data-tab="sop">操作 SOP</button>
 </div>
 
 <div class="panel active" id="overview">
@@ -680,6 +681,165 @@
       過期且虧損：顯示「虧損超過3週 → 考慮認輸」
     </div>
   </div>
+</div>
+
+<!-- ====== 操作 SOP ====== -->
+<div class="panel" id="sop">
+
+  <!-- 心態與定位 -->
+  <div class="data-panel" style="border-left:4px solid #2563eb;">
+    <h3 style="color:#1e293b;margin-bottom:4px;">上班族操作心法</h3>
+    <p style="font-size:12px;color:#64748b;line-height:1.7;margin:0;">
+      時間少、情緒多是最大弱點。FDC 的核心價值是快速找出「市場現在最強的方向」，不是叫你天天看盤。<br>
+      每天只需 <strong>收盤後 15 分鐘</strong>，按 SOP 走，不靠感覺猜。
+    </p>
+  </div>
+
+  <!-- 每日 SOP -->
+  <div class="data-panel">
+    <h3>每日 15 分鐘 SOP（13:45 收盤後）</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:8px;text-align:left;color:#64748b;width:60px;">步驟</th>
+          <th style="padding:8px;text-align:left;color:#64748b;width:80px;">時間</th>
+          <th style="padding:8px;text-align:left;color:#64748b;">動作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:8px;font-weight:700;color:#2563eb;">Step 1</td>
+          <td style="padding:8px;color:#64748b;">3 分鐘</td>
+          <td style="padding:8px;color:#475569;">開 FDC「排行」頁 → 排序選「近10日漲跌幅」→ 看前 3 名族群，近10日為負的直接略過</td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:8px;font-weight:700;color:#2563eb;">Step 2</td>
+          <td style="padding:8px;color:#64748b;">7 分鐘</td>
+          <td style="padding:8px;color:#475569;">點入強勢族群「明細」頁 → 排序近10日漲幅 → 篩出近5日仍正、成交金額夠大的個股，每族群最多選 2~3 檔</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;font-weight:700;color:#2563eb;">Step 3</td>
+          <td style="padding:8px;color:#64748b;">5 分鐘</td>
+          <td style="padding:8px;color:#475569;">開 TradingView 逐檔確認均線狀態（見下方買進條件），全部通過 → 隔日開盤買；不通過 → 等待，不追高</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 買進條件 -->
+  <div class="data-panel">
+    <h3>TradingView 買進條件（需全部符合）</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:8px;text-align:left;color:#64748b;">條件</th>
+          <th style="padding:8px;text-align:left;color:#64748b;">說明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">收盤站上 EMA20</td><td style="padding:8px;color:#475569;">短期趨勢向上</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">EMA20 &gt; EMA60</td><td style="padding:8px;color:#475569;">月線在季線之上，多頭格局確立</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">距波段高點回撤 &lt; 2%</td><td style="padding:8px;color:#475569;">尚未進入減碼警戒區</td></tr>
+        <tr><td style="padding:8px;font-weight:600;">成交量未明顯萎縮</td><td style="padding:8px;color:#475569;">動能未衰竭</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:10px 12px;color:#991b1b;line-height:1.8;">
+      <strong>不買進的情況：</strong><br>
+      背景橘色（減碼）或紅色（禁槓）→ 等待回穩<br>
+      美股同族群前一晚走弱 → 降低進場意願或不進場<br>
+      近期已大漲一段但出現減碼訊號 → 追高風險高，等拉回
+    </div>
+  </div>
+
+  <!-- 族群與個股對照 -->
+  <div class="data-panel">
+    <h3>族群排第一：選哪幾檔？（以 AI 晶片為例）</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:8px;text-align:left;color:#64748b;width:100px;">代號</th>
+          <th style="padding:8px;text-align:left;color:#64748b;width:80px;">公司</th>
+          <th style="padding:8px;text-align:left;color:#64748b;">特性</th>
+          <th style="padding:8px;text-align:left;color:#64748b;width:100px;">對應美股</th>
+          <th style="padding:8px;text-align:center;color:#64748b;width:60px;">優先</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">2330 台積電</td><td style="padding:8px;">台積電</td><td style="padding:8px;color:#475569;">最大市值、最穩，族群地基</td><td style="padding:8px;font-size:11px;color:#2563eb;">TSM、NVDA</td><td style="padding:8px;text-align:center;color:#16a34a;font-weight:700;">首選</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">2454 聯發科</td><td style="padding:8px;">聯發科</td><td style="padding:8px;color:#475569;">彈性大，跟 NVDA 連動，QCOM/AMD 漲更直接受惠</td><td style="padding:8px;font-size:11px;color:#2563eb;">QCOM、AMD</td><td style="padding:8px;text-align:center;color:#16a34a;font-weight:700;">首選</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">3661 世芯-KY</td><td style="padding:8px;">世芯</td><td style="padding:8px;color:#475569;">ASIC 設計，跟 AVGO 連動最強，純度高彈性大</td><td style="padding:8px;font-size:11px;color:#2563eb;">AVGO、MRVL</td><td style="padding:8px;text-align:center;color:#16a34a;font-weight:700;">首選</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;">3443 創意</td><td style="padding:8px;">創意</td><td style="padding:8px;color:#475569;">中型 ASIC，次選</td><td style="padding:8px;font-size:11px;color:#2563eb;">AVGO</td><td style="padding:8px;text-align:center;color:#64748b;">備選</td></tr>
+        <tr><td style="padding:8px;">5274 信驊</td><td style="padding:8px;">信驊</td><td style="padding:8px;color:#475569;">BMC、NVDA 伺服器鏈</td><td style="padding:8px;font-size:11px;color:#2563eb;">NVDA</td><td style="padding:8px;text-align:center;color:#64748b;">備選</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12px;color:#64748b;line-height:1.7;background:#f8fafc;border-radius:6px;padding:10px 12px;">
+      <strong>部位分配建議：</strong><br>
+      同時通過技術面 → 台積電 60% ＋ 世芯-KY 40%<br>
+      只有台積電通過 → 只買台積電，不追其他<br>
+      AVGO/AMD 前晚只是小漲 → 不買世芯，只買台積電<br>
+      QCOM/AMD 同步大漲 → 聯發科替代台積電，邊緣 AI 也在啟動
+    </div>
+  </div>
+
+  <!-- 美股預警對照 -->
+  <div class="data-panel">
+    <h3>早上 5–6 點：美股預警觀察（台股開盤前）</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+          <th style="padding:8px;text-align:left;color:#64748b;">看這檔美股</th>
+          <th style="padding:8px;text-align:left;color:#64748b;">預判台股族群</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">NVDA</td><td style="padding:8px;color:#475569;">台積電、聯發科、世芯-KY → AI 晶片整體族群</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">AVGO</td><td style="padding:8px;color:#475569;">世芯-KY、創意、智原 → ASIC 設計鏈</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">MU</td><td style="padding:8px;color:#475569;">南亞科、華邦電、群聯 → 記憶體族群</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">VRT</td><td style="padding:8px;color:#475569;">台達電、奇鋐、雙鴻 → 散熱電源族群</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">COHR / LITE</td><td style="padding:8px;color:#475569;">聯亞、全新、光聖 → 矽光子族群</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">TSLA</td><td style="padding:8px;color:#475569;">上銀、和大、達明 → 機器人 + EV</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">DELL</td><td style="padding:8px;color:#475569;">鴻海、廣達、緯創 → AI 伺服器 ODM</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">PANW / CRWD</td><td style="padding:8px;color:#475569;">安碁、立端、神準 → 資安族群</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;color:#2563eb;">AMAT / ASML</td><td style="padding:8px;color:#475569;">弘塑、辛耘、家登 → 半導體設備</td></tr>
+        <tr><td style="padding:8px;font-weight:600;color:#2563eb;">LMT / RTX / AVAV</td><td style="padding:8px;color:#475569;">漢翔、雷虎、龍德造船 → 軍工族群</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:10px 12px;color:#1e40af;line-height:1.8;">
+      <strong>重要：</strong>美股同族群前一晚走弱，台股個股就算技術面還沒壞，也應降低進場意願或不進場。這是超前防守。
+    </div>
+  </div>
+
+  <!-- 停損規則 -->
+  <div class="data-panel">
+    <h3>停損規則（三條紅線）</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#fef2f2;border-bottom:2px solid #fecaca;">
+          <th style="padding:8px;text-align:left;color:#991b1b;">情況</th>
+          <th style="padding:8px;text-align:left;color:#991b1b;">動作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">買進後虧損超過 8%</td><td style="padding:8px;color:#475569;">不管原因，無條件出場，保命優先</td></tr>
+        <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:8px;font-weight:600;">TradingView 出現減碼 ▼ 或禁槓 🚫</td><td style="padding:8px;color:#475569;">當天收盤前出場，不等明天</td></tr>
+        <tr><td style="padding:8px;font-weight:600;">FDC 族群近5日跌出前半段</td><td style="padding:8px;color:#475569;">先減半倉觀察，等確認再看</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 不做的事 -->
+  <div class="data-panel" style="border-left:4px solid #f59e0b;">
+    <h3 style="color:#92400e;">紀律清單：我不做的事</h3>
+    <ul style="font-size:12px;color:#475569;line-height:2;margin:0;padding-left:16px;">
+      <li>不追前一天已大漲的股票</li>
+      <li>不買族群近10日為負的個股</li>
+      <li>不在「禁槓」訊號下硬進場</li>
+      <li>不同時持有超過 5 檔（管不過來）</li>
+      <li>不因為「好像要漲」就在 Step 3 沒過的情況下買</li>
+      <li>族群對了，但美股上游前晚走弱 → 等一天再看</li>
+    </ul>
+  </div>
+
 </div>
 
 <div class="panel" id="strategy"></div>
