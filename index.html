@@ -270,6 +270,16 @@
 </div>
 
 <div class="panel" id="ranking">
+  <!-- 台灣 VIX 卡片 -->
+  <div id="vixCard" style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:10px;align-items:center;gap:14px;flex-wrap:wrap;">
+    <div style="font-size:12px;color:#64748b;white-space:nowrap;">🎯 台灣 VIX</div>
+    <div style="font-size:20px;font-weight:700;color:#1e293b;" id="vixPrice">--</div>
+    <div style="font-size:13px;font-weight:600;" id="vixPct">--</div>
+    <div style="font-size:11px;color:#9ca3af;" id="vixTime"></div>
+    <div style="flex:1;font-size:11px;color:#94a3b8;text-align:right;line-height:1.5;">
+      &lt;20 低恐慌　20-30 中性　30-40 謹慎　&gt;40 高恐慌
+    </div>
+  </div>
   <!-- 熱度分數卡 -->
   <div style="background:#fff8e1;border:1px solid #fbbf24;border-radius:8px;margin-bottom:10px;overflow:hidden;">
     <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#92400e;" onclick="var b=document.getElementById('rk_heatBody');b.hidden=!b.hidden;this.querySelector('.rk-arr').textContent=b.hidden?'▶':'▼'">
@@ -1351,6 +1361,7 @@ let cloudRoomId = "";
 
 let lastUpdateTime = null;
 let liveQuoteTime = null;
+let vixtwn = null;
 const QUOTES_URL = "https://raw.githubusercontent.com/micliou877/FDC/main/quotes.json";
 let currentSector = null;
 let syncInterval = null;
@@ -1866,6 +1877,7 @@ async function fetchLiveQuotes() {
         pct10: pct10 != null ? parseFloat(pct10.toFixed(2)) : pct10
       };
     });
+    if (json.vixtwn) vixtwn = json.vixtwn;
     liveQuoteTime = json.updated;
     updateUI();
   } catch (e) { console.error("即時報價更新失敗", e); }
@@ -2466,7 +2478,20 @@ function updateUI() {
   invalidateSectorCache();
   let updateTxt = lastUpdateTime ? ("最後更新：" + new Date(lastUpdateTime).toLocaleString("zh-TW")) : "尚未匯入資料";
   if (liveQuoteTime) updateTxt += `｜台股報價：${liveQuoteTime}`;
-  document.getElementById("lastUpdate").textContent = updateTxt;
+  if (vixtwn) {
+    const vSign = vixtwn.pct1 >= 0 ? "+" : "";
+    const vColor = vixtwn.pct1 > 0 ? "#dc2626" : vixtwn.pct1 < 0 ? "#16a34a" : "#6b7280";
+    updateTxt += `｜VIXTWN：`;
+    document.getElementById("lastUpdate").textContent = updateTxt;
+    const vSpan = document.createElement("span");
+    vSpan.style.color = vColor;
+    vSpan.style.fontWeight = "600";
+    vSpan.title = `台灣 VIX ${vixtwn.date} ${vixtwn.time}`;
+    vSpan.textContent = `${vixtwn.price} (${vSign}${vixtwn.pct1 ?? "-"}%)`;
+    document.getElementById("lastUpdate").appendChild(vSpan);
+  } else {
+    document.getElementById("lastUpdate").textContent = updateTxt;
+  }
   renderOverview();
   renderRanking();
   renderStocks();
@@ -2536,6 +2561,22 @@ function rk5okUpdate() {
 }
 
 function renderRanking() {
+  // 更新 VIX 卡片
+  const vixCard = document.getElementById("vixCard");
+  if (vixCard && vixtwn) {
+    const sign = vixtwn.pct1 >= 0 ? "+" : "";
+    const color = vixtwn.pct1 > 0 ? "#dc2626" : vixtwn.pct1 < 0 ? "#16a34a" : "#6b7280";
+    const bgColor = vixtwn.price >= 40 ? "#fff1f2" : vixtwn.price >= 30 ? "#fff7ed" : vixtwn.price >= 20 ? "#fffbeb" : "#f0fdf4";
+    const borderColor = vixtwn.price >= 40 ? "#fecdd3" : vixtwn.price >= 30 ? "#fed7aa" : vixtwn.price >= 20 ? "#fde68a" : "#bbf7d0";
+    vixCard.style.display = "flex";
+    vixCard.style.background = bgColor;
+    vixCard.style.borderColor = borderColor;
+    document.getElementById("vixPrice").textContent = vixtwn.price;
+    document.getElementById("vixPct").textContent = `${sign}${vixtwn.pct1 ?? "-"}%`;
+    document.getElementById("vixPct").style.color = color;
+    document.getElementById("vixTime").textContent = `${vixtwn.date} ${vixtwn.time}`;
+  }
+
   const stats = getSectorStats(); const sortKey = document.getElementById("rankingSort").value;
   const sorted = Object.entries(stats).filter(([_,s]) => s).sort((a,b) => (b[1][sortKey] || 0) - (a[1][sortKey] || 0));
   const container = document.getElementById("rankingBars"); container.innerHTML = ""; if (sorted.length === 0) return;
