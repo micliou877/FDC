@@ -2338,10 +2338,14 @@ function renderDiary() {
       <div style="margin-bottom:12px;">
         <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">標的</label>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-          <input type="text" id="diaryStockIn" placeholder="股票代號 如 2330" maxlength="6"
-            style="width:130px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();diaryFormAddStock();}">
-          <button onclick="diaryFormAddStock()" style="padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;">+ 加入</button>
+          <div style="position:relative;display:inline-block;">
+            <input type="text" id="diaryStockIn" placeholder="代號或名稱 如 2330 或 台積電"
+              style="width:200px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+              oninput="diarySearchStock(this.value)"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();diarySelectTopResult();}if(event.key==='Escape'){closeDiaryStockDropdown();}">
+            <div id="diaryStockDropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;z-index:300;background:#fff;border:1px solid #d1d5db;border-radius:6px;max-height:200px;overflow-y:auto;min-width:220px;box-shadow:0 4px 12px rgba(0,0,0,0.15);"></div>
+          </div>
+          <button onclick="diarySelectTopResult()" style="padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;">+ 加入</button>
           ${fs.stocks.map(code => `<span style="display:inline-flex;align-items:center;gap:3px;background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:20px;font-size:12px;">📈 ${_dEsc(code)}${_diaryStockName(code)?' '+_dEsc(_diaryStockName(code)):''}<span onclick="diaryFormRemoveStock('${_dEsc(code)}')" style="cursor:pointer;color:#6b7280;font-size:14px;line-height:1;margin-left:3px;">×</span></span>`).join('')}
         </div>
       </div>
@@ -2417,16 +2421,65 @@ function diaryDelete(id) {
   saveDiary();
   renderDiary();
 }
-function diaryFormAddStock() {
+function _diaryAllStocks() {
+  const seen = new Set();
+  const list = [];
+  for (const stocks of Object.values(SECTORS)) {
+    for (const s of stocks) {
+      if (!seen.has(s.code)) { seen.add(s.code); list.push(s); }
+    }
+  }
+  return list;
+}
+function diarySearchStock(query) {
+  const dd = document.getElementById('diaryStockDropdown');
+  if (!dd) return;
+  const q = query.trim();
+  if (!q) { dd.style.display = 'none'; return; }
+  const isCode = /^\d+$/.test(q);
+  const results = _diaryAllStocks().filter(s =>
+    isCode ? s.code.startsWith(q) : (s.code.startsWith(q) || s.name.includes(q))
+  ).slice(0, 12);
+  if (!results.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = results.map(s =>
+    `<div onclick="diarySelectStock('${s.code}')"
+      style="padding:7px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f3f4f6;display:flex;gap:8px;"
+      onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background=''">
+      <span style="color:#6b7280;font-family:monospace;">${s.code}</span>
+      <span style="color:#1e293b;">${s.name}</span>
+    </div>`
+  ).join('');
+  dd.style.display = 'block';
+}
+function diarySelectStock(code) {
+  closeDiaryStockDropdown();
   _syncDiaryForm();
-  const inp = document.getElementById('diaryStockIn');
-  if (!inp || !diaryFormState) return;
-  const code = inp.value.trim().replace(/\D/g,'');
-  if (!code || diaryFormState.stocks.includes(code)) { if(inp) inp.value=''; return; }
+  if (!diaryFormState || diaryFormState.stocks.includes(code)) return;
   diaryFormState.stocks.push(code);
   renderDiary();
   setTimeout(() => { const el = document.getElementById('diaryStockIn'); if (el) el.focus(); }, 30);
 }
+function diarySelectTopResult() {
+  const dd = document.getElementById('diaryStockDropdown');
+  if (dd && dd.style.display !== 'none') {
+    const first = dd.querySelector('div');
+    if (first) { first.click(); return; }
+  }
+  // fallback：純數字代號直接加入
+  const inp = document.getElementById('diaryStockIn');
+  if (!inp || !diaryFormState) return;
+  const code = inp.value.trim().replace(/\D/g, '');
+  if (!code || diaryFormState.stocks.includes(code)) { inp.value = ''; return; }
+  _syncDiaryForm();
+  diaryFormState.stocks.push(code);
+  renderDiary();
+  setTimeout(() => { const el = document.getElementById('diaryStockIn'); if (el) el.focus(); }, 30);
+}
+function closeDiaryStockDropdown() {
+  const dd = document.getElementById('diaryStockDropdown');
+  if (dd) dd.style.display = 'none';
+}
+function diaryFormAddStock() { diarySelectTopResult(); }
 function diaryFormRemoveStock(code) {
   _syncDiaryForm();
   if (!diaryFormState) return;
