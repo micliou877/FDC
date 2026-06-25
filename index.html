@@ -240,8 +240,8 @@
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="overview">概覽</button>
-  <button class="tab" data-tab="strategy">今日精選</button>
+  <button class="tab" data-tab="overview" style="display:none">概覽</button>
+  <button class="tab active" data-tab="strategy">今日精選</button>
   <button class="tab" data-tab="ranking">排行</button>
   <button class="tab" data-tab="stocks">明細</button>
   <button class="tab" data-tab="watchlist">關注</button>
@@ -252,9 +252,10 @@
   <button class="tab" data-tab="tool4" style="display:none">⏰ 持有</button>
   <button class="tab" data-tab="data">設定</button>
   <button class="tab" data-tab="sop">操作 SOP</button>
+  <button class="tab" data-tab="diary">交易日記</button>
 </div>
 
-<div class="panel active" id="overview">
+<div class="panel" id="overview">
   <div class="summary-cards" id="summaryCards"></div>
   <div class="legend">
     <span><span class="legend-box" style="background:#7a3030"></span>>5%</span>
@@ -880,7 +881,9 @@
 
 </div>
 
-<div class="panel" id="strategy"></div>
+<div class="panel active" id="strategy"></div>
+
+<div class="panel" id="diary"></div>
 
 <script>
 // ==================== 台股 31 大族群分類 ====================
@@ -1523,6 +1526,7 @@ function loadData() {
       setTimeout(connectCloud, 800);
     }
     loadHeatHistory();
+    loadDiary();
     updateUI();
     loadDailyPlan();
   } catch(e) {}
@@ -2004,7 +2008,8 @@ async function applyBulkPER(bulkData, statusEl) {
     financialsCache[code].per = d.per; financialsCache[code].perDate = today;
     if (d.eps !== null) { financialsCache[code].eps = d.eps; financialsCache[code].epsDate = today; }
     if (!stockData[code]) stockData[code] = {};
-    stockData[code].per = d.per; stockData[code].eps = d.eps;
+    stockData[code].per = d.per;
+    if (d.eps !== null) stockData[code].eps = d.eps;
     let tag = classify_quality(d.eps, d.per);
     if (tag === '✖️抓取失敗') tag = '❓缺財報';
     stockData[code].qualityTag = stockData[code].quality_status = tag;
@@ -2202,10 +2207,10 @@ async function fetchFundamentals() {
     // ── 合併到 stockData ──
     if (!stockData[code]) stockData[code] = {};
     if (isEtf) { stockData[code].qualityTag = stockData[code].quality_status = "❓ETF"; stockData[code].per = stockData[code].eps = null; continue; }
-    stockData[code].per = per;
-    stockData[code].eps = eps;
-    stockData[code].yoy = yoy;
-    let tag = classify_quality(eps, per);
+    if (per !== null) stockData[code].per = per;
+    if (eps !== null) stockData[code].eps = eps;
+    if (yoy !== null) stockData[code].yoy = yoy;
+    let tag = classify_quality(stockData[code].eps, stockData[code].per);
     // API 有回應但兩個都沒資料 → 缺財報，不是抓取失敗
     if (tag === "✖️抓取失敗" && perApiOk && epsApiOk) tag = "❓缺財報";
     stockData[code].qualityTag     = tag;
@@ -2268,6 +2273,188 @@ function renderDataPanel() {
   document.getElementById("dbCount").textContent = Object.keys(stockData).length;
 }
 
+// ==================== 交易日記 ====================
+let diaryEntries = [];
+let diaryFormState = null; // null=關閉, {...}=開啟
+
+function loadDiary() {
+  try { const r = localStorage.getItem('fdc_diary'); if (r) diaryEntries = JSON.parse(r); } catch(e) {}
+}
+function saveDiary() {
+  try { localStorage.setItem('fdc_diary', JSON.stringify(diaryEntries)); } catch(e) {}
+}
+function _dEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function _diaryStockName(code) {
+  for (const stocks of Object.values(SECTORS)) {
+    const s = stocks.find(s => s.code === code);
+    if (s) return s.name;
+  }
+  return '';
+}
+function _diaryTvUrl(code) {
+  const mkt = stockData[code]?.market || 'TWSE';
+  return `https://tw.tradingview.com/chart/?symbol=${mkt}:${code}`;
+}
+function _syncDiaryForm() {
+  const d = document.getElementById('diaryDateIn');
+  const c = document.getElementById('diaryContentIn');
+  if (d && diaryFormState) diaryFormState.date = d.value;
+  if (c && diaryFormState) diaryFormState.content = c.value;
+}
+
+function renderDiary() {
+  const panel = document.getElementById('diary');
+  if (!panel) return;
+
+  const fs = diaryFormState;
+  let formHtml = '';
+  if (fs) {
+    const secOpts = Object.keys(SECTORS).filter(s => !fs.sectors.includes(s))
+      .map(s => `<option value="${_dEsc(s)}">${_dEsc(s)}</option>`).join('');
+    formHtml = `
+    <div style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:10px;padding:16px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+        <label style="font-size:13px;font-weight:600;color:#374151;white-space:nowrap;">日期</label>
+        <input type="date" id="diaryDateIn" value="${_dEsc(fs.date)}" style="padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">內容</label>
+        <textarea id="diaryContentIn" rows="3" placeholder="今天的觀察、交易筆記..." style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;resize:vertical;">${_dEsc(fs.content)}</textarea>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">標的</label>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <input type="text" id="diaryStockIn" placeholder="股票代號 如 2330" maxlength="6"
+            style="width:130px;padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();diaryFormAddStock();}">
+          <button onclick="diaryFormAddStock()" style="padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;">+ 加入</button>
+          ${fs.stocks.map(code => `<span style="display:inline-flex;align-items:center;gap:3px;background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:20px;font-size:12px;">📈 ${_dEsc(code)}${_diaryStockName(code)?' '+_dEsc(_diaryStockName(code)):''}<span onclick="diaryFormRemoveStock('${_dEsc(code)}')" style="cursor:pointer;color:#6b7280;font-size:14px;line-height:1;margin-left:3px;">×</span></span>`).join('')}
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">族群</label>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <select id="diarySecIn" style="padding:5px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;max-width:230px;">
+            <option value="">選擇族群…</option>${secOpts}
+          </select>
+          <button onclick="diaryFormAddSector()" style="padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;white-space:nowrap;">+ 加入</button>
+          ${fs.sectors.map(sec => `<span style="display:inline-flex;align-items:center;gap:3px;background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:20px;font-size:12px;">🏷️ ${_dEsc(sec.replace(/^\d+\.\s*/,''))}<span onclick="diaryFormRemoveSector(${JSON.stringify(sec)})" style="cursor:pointer;color:#6b7280;font-size:14px;line-height:1;margin-left:3px;">×</span></span>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="diarySave()" style="padding:7px 18px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">儲存</button>
+        <button onclick="diaryCancel()" style="padding:7px 18px;background:#e5e7eb;color:#374151;border:none;border-radius:6px;cursor:pointer;font-size:13px;">取消</button>
+      </div>
+    </div>`;
+  }
+
+  const sorted = [...diaryEntries].sort((a, b) => b.date.localeCompare(a.date));
+  const listHtml = sorted.length === 0
+    ? '<div style="color:#9ca3af;text-align:center;padding:48px 0;font-size:14px;">尚無日記記錄，點「+ 新增記錄」開始吧</div>'
+    : sorted.map(e => {
+        const stocks = (e.stocks || []);
+        const sectors = (e.sectors || []);
+        return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-weight:700;color:#1e293b;font-size:14px;">${_dEsc(e.date)}</span>
+            <div style="display:flex;gap:6px;">
+              <button onclick="diaryStartEdit('${e.id}')" style="padding:3px 10px;font-size:11px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;color:#475569;">編輯</button>
+              <button onclick="diaryDelete('${e.id}')" style="padding:3px 10px;font-size:11px;background:#fff0f0;border:1px solid #fecaca;border-radius:5px;cursor:pointer;color:#dc2626;">刪除</button>
+            </div>
+          </div>
+          ${e.content ? `<div style="color:#374151;font-size:13px;white-space:pre-wrap;margin-bottom:10px;line-height:1.7;">${_dEsc(e.content)}</div>` : ''}
+          ${stocks.length ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:${sectors.length?'8px':'0'};">
+            ${stocks.map(code => `<a href="${_diaryTvUrl(code)}" target="_blank"
+              style="display:inline-flex;align-items:center;gap:3px;background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:3px 10px;border-radius:20px;font-size:12px;text-decoration:none;">
+              📈 ${_dEsc(code)}${_diaryStockName(code)?' '+_dEsc(_diaryStockName(code)):''}</a>`).join('')}
+          </div>` : ''}
+          ${sectors.length ? `<div style="display:flex;flex-wrap:wrap;gap:5px;">
+            ${sectors.map(sec => `<span onclick="currentSector=${JSON.stringify(sec)};switchTab('stocks')"
+              style="display:inline-flex;align-items:center;gap:3px;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:3px 10px;border-radius:20px;font-size:12px;cursor:pointer;">
+              🏷️ ${_dEsc(sec.replace(/^\d+\.\s*/,''))} →</span>`).join('')}
+          </div>` : ''}
+        </div>`;
+      }).join('');
+
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="margin:0;font-size:16px;font-weight:700;color:#1e293b;">📔 交易日記</h3>
+      <button onclick="diaryNew()" style="padding:7px 16px;background:#2563eb;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;">+ 新增記錄</button>
+    </div>
+    ${formHtml}
+    ${listHtml}`;
+}
+
+function diaryNew() {
+  _syncDiaryForm();
+  diaryFormState = { id: null, date: new Date().toISOString().slice(0,10), content: '', stocks: [], sectors: [] };
+  renderDiary();
+}
+function diaryStartEdit(id) {
+  _syncDiaryForm();
+  const e = diaryEntries.find(e => e.id === id);
+  if (!e) return;
+  diaryFormState = { id: e.id, date: e.date, content: e.content || '', stocks: [...(e.stocks||[])], sectors: [...(e.sectors||[])] };
+  renderDiary();
+}
+function diaryDelete(id) {
+  if (!confirm('確定刪除這筆記錄？')) return;
+  diaryEntries = diaryEntries.filter(e => e.id !== id);
+  saveDiary();
+  renderDiary();
+}
+function diaryFormAddStock() {
+  _syncDiaryForm();
+  const inp = document.getElementById('diaryStockIn');
+  if (!inp || !diaryFormState) return;
+  const code = inp.value.trim().replace(/\D/g,'');
+  if (!code || diaryFormState.stocks.includes(code)) { if(inp) inp.value=''; return; }
+  diaryFormState.stocks.push(code);
+  renderDiary();
+  setTimeout(() => { const el = document.getElementById('diaryStockIn'); if (el) el.focus(); }, 30);
+}
+function diaryFormRemoveStock(code) {
+  _syncDiaryForm();
+  if (!diaryFormState) return;
+  diaryFormState.stocks = diaryFormState.stocks.filter(c => c !== code);
+  renderDiary();
+}
+function diaryFormAddSector() {
+  _syncDiaryForm();
+  const sel = document.getElementById('diarySecIn');
+  if (!sel || !diaryFormState) return;
+  const sec = sel.value;
+  if (!sec || diaryFormState.sectors.includes(sec)) return;
+  diaryFormState.sectors.push(sec);
+  renderDiary();
+}
+function diaryFormRemoveSector(sec) {
+  _syncDiaryForm();
+  if (!diaryFormState) return;
+  diaryFormState.sectors = diaryFormState.sectors.filter(s => s !== sec);
+  renderDiary();
+}
+function diarySave() {
+  _syncDiaryForm();
+  if (!diaryFormState) return;
+  if (!diaryFormState.date) { alert('請填入日期'); return; }
+  if (diaryFormState.id) {
+    const idx = diaryEntries.findIndex(e => e.id === diaryFormState.id);
+    if (idx >= 0) diaryEntries[idx] = { ...diaryEntries[idx], ...diaryFormState };
+  } else {
+    diaryEntries.push({ ...diaryFormState, id: Date.now().toString(36) + Math.random().toString(36).slice(2,6) });
+  }
+  diaryFormState = null;
+  saveDiary();
+  renderDiary();
+}
+function diaryCancel() {
+  diaryFormState = null;
+  renderDiary();
+}
+
 let _cachedSectorStats = null;
 function getSectorStats() {
   if (!_cachedSectorStats) _cachedSectorStats = calcSectorStats();
@@ -2304,6 +2491,7 @@ function switchTab(tab) {
   if(tab === "tool2" && !window._t2_inited) { window._t2_inited=true; t2_init(); }
   if(tab === "tool3" && !window._t3_inited) { window._t3_inited=true; t3_init(); }
   if(tab === "tool4" && !window._t4_inited) { window._t4_inited=true; t4_init(); }
+  if(tab === "diary") renderDiary();
 }
 
 // ==================== 面板渲染邏輯 ====================
