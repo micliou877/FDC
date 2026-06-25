@@ -3083,7 +3083,37 @@ function renderStrategy() {
             </tbody></table>`}
     </div>`;
 
+  // VIX 卡片
+  let vixHtml = '';
+  if (vixtwn) {
+    const vSign = vixtwn.pct1 >= 0 ? '+' : '';
+    const vPctColor = vixtwn.pct1 > 0 ? '#dc2626' : vixtwn.pct1 < 0 ? '#16a34a' : '#6b7280';
+    const vLvl = vixtwn.price >= 40 ? { label:'高恐慌 ⚠️', bg:'#fff1f2', border:'#fecdd3', c:'#dc2626' }
+               : vixtwn.price >= 30 ? { label:'謹慎 🟠',   bg:'#fff7ed', border:'#fed7aa', c:'#ea580c' }
+               : vixtwn.price >= 20 ? { label:'中性 🟡',   bg:'#fffbeb', border:'#fde68a', c:'#ca8a04' }
+               :                      { label:'低恐慌 🟢',  bg:'#f0fdf4', border:'#bbf7d0', c:'#16a34a' };
+    vixHtml = `
+      <div style="background:${vLvl.bg};border:2px solid ${vLvl.border};border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.5px;margin-bottom:4px;">🎯 台灣 VIX（臺指選擇權波動率）</div>
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <span style="font-size:32px;font-weight:800;color:${vLvl.c};line-height:1;">${vixtwn.price}</span>
+            <span style="font-size:14px;font-weight:700;color:${vPctColor};">${vSign}${vixtwn.pct1 ?? '-'}%</span>
+          </div>
+        </div>
+        <div style="border-left:2px solid ${vLvl.border};padding-left:18px;">
+          <div style="font-size:18px;font-weight:800;color:${vLvl.c};">${vLvl.label}</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:4px;">${vixtwn.date} ${vixtwn.time}</div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:#9ca3af;line-height:1.8;text-align:right;">
+          &lt;20 低恐慌<br>20–30 中性<br>30–40 謹慎<br>&gt;40 高恐慌
+        </div>
+      </div>`;
+  }
+
   panel.innerHTML = `
+    <!-- 台灣 VIX -->
+    ${vixHtml}
     <!-- 今日作業清單 -->
     ${planHtml}
     <!-- 市場體溫 -->
