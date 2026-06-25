@@ -1381,7 +1381,9 @@ const FIREBASE_URL = "https://fdc43-56da5-default-rtdb.firebaseio.com/";
 
 let _pushInFlight = false;
 let _pendingPush = false;
-let watchlistsTs = 0; // 本地 watchlists 最後修改時間戳
+let watchlistsTs = 0;  // 本地 watchlists 最後修改時間戳
+let dailyPlanTs  = 0;  // 本地 dailyPlan 最後修改時間戳
+let diaryTs      = 0;  // 本地 diaryEntries 最後修改時間戳
 
 async function pushToCloud() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
@@ -1390,7 +1392,7 @@ async function pushToCloud() {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockMeta, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "" })
+      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockMeta, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "", dailyPlan, dailyPlanTs, diaryEntries, diaryTs })
     });
     _pendingPush = false;
   } catch (e) { console.error("雲端同步失敗", e); _pendingPush = true; }
@@ -1425,6 +1427,23 @@ async function connectCloud() {
       if (cloudData.finmindToken && !localStorage.getItem("finmind_token")) {
         localStorage.setItem("finmind_token", cloudData.finmindToken);
         document.getElementById("apiToken").value = cloudData.finmindToken;
+      }
+      // 今日作業清單：時間戳較新的獲勝
+      if (cloudData.dailyPlan && (cloudData.dailyPlanTs || 0) > dailyPlanTs) {
+        dailyPlan = cloudData.dailyPlan;
+        dailyPlanTs = cloudData.dailyPlanTs || 0;
+        saveDailyPlan();
+      }
+      // 交易日記：union by id（本機版優先，雲端獨有的補入）
+      if (Array.isArray(cloudData.diaryEntries) && cloudData.diaryEntries.length > 0) {
+        const localIds = new Set(diaryEntries.map(e => e.id));
+        let added = 0;
+        cloudData.diaryEntries.forEach(e => { if (!localIds.has(e.id)) { diaryEntries.push(e); added++; } });
+        if (added > 0 || (cloudData.diaryTs || 0) > diaryTs) {
+          diaryEntries.sort((a, b) => b.date.localeCompare(a.date));
+          diaryTs = Math.max(cloudData.diaryTs || 0, diaryTs);
+          saveDiary();
+        }
       }
     }
     // 連線後一律推送目前狀態，確保雲端一定有最新資料
@@ -1473,6 +1492,25 @@ async function syncPull() {
       if (cloudData.finmindToken && !localStorage.getItem("finmind_token")) {
         localStorage.setItem("finmind_token", cloudData.finmindToken);
         document.getElementById("apiToken").value = cloudData.finmindToken;
+      }
+      // 今日作業清單
+      if (cloudData.dailyPlan && (cloudData.dailyPlanTs || 0) > dailyPlanTs) {
+        dailyPlan = cloudData.dailyPlan;
+        dailyPlanTs = cloudData.dailyPlanTs || 0;
+        saveDailyPlan();
+        changed = true;
+      }
+      // 交易日記：union by id
+      if (Array.isArray(cloudData.diaryEntries) && cloudData.diaryEntries.length > 0) {
+        const localIds = new Set(diaryEntries.map(e => e.id));
+        let added = 0;
+        cloudData.diaryEntries.forEach(e => { if (!localIds.has(e.id)) { diaryEntries.push(e); added++; } });
+        if (added > 0 || (cloudData.diaryTs || 0) > diaryTs) {
+          diaryEntries.sort((a, b) => b.date.localeCompare(a.date));
+          diaryTs = Math.max(cloudData.diaryTs || 0, diaryTs);
+          saveDiary();
+          changed = true;
+        }
       }
       if (changed) { saveLocalOnly(); renderWatchlist(); updateUI(); }
     }
@@ -1595,10 +1633,17 @@ function renderHeatSparkline(sectorName) {
 }
 
 function saveDailyPlan() {
-  try { localStorage.setItem("fdc_daily_plan", JSON.stringify(dailyPlan)); } catch(e) {}
+  dailyPlanTs = Date.now();
+  try {
+    localStorage.setItem("fdc_daily_plan", JSON.stringify(dailyPlan));
+    localStorage.setItem("fdc_daily_plan_ts", dailyPlanTs);
+  } catch(e) {}
 }
 function loadDailyPlan() {
-  try { const r = localStorage.getItem("fdc_daily_plan"); if (r) dailyPlan = JSON.parse(r); } catch(e) {}
+  try {
+    const r = localStorage.getItem("fdc_daily_plan"); if (r) dailyPlan = JSON.parse(r);
+    const ts = localStorage.getItem("fdc_daily_plan_ts"); if (ts) dailyPlanTs = Number(ts);
+  } catch(e) {}
 }
 window.addToDailyPlan = function(code, name) {
   if (dailyPlan.find(p => p.code === code)) { alert(`${code} 已在作業清單中`); return; }
@@ -2303,10 +2348,17 @@ let diaryEntries = [];
 let diaryFormState = null; // null=關閉, {...}=開啟
 
 function loadDiary() {
-  try { const r = localStorage.getItem('fdc_diary'); if (r) diaryEntries = JSON.parse(r); } catch(e) {}
+  try {
+    const r = localStorage.getItem('fdc_diary'); if (r) diaryEntries = JSON.parse(r);
+    const ts = localStorage.getItem('fdc_diary_ts'); if (ts) diaryTs = Number(ts);
+  } catch(e) {}
 }
 function saveDiary() {
-  try { localStorage.setItem('fdc_diary', JSON.stringify(diaryEntries)); } catch(e) {}
+  diaryTs = Date.now();
+  try {
+    localStorage.setItem('fdc_diary', JSON.stringify(diaryEntries));
+    localStorage.setItem('fdc_diary_ts', diaryTs);
+  } catch(e) {}
 }
 function _dEsc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');

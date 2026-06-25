@@ -78,41 +78,71 @@ def parse_meta(code, market, meta):
 
 
 def fetch_vixtwn(opener):
-    """從 wantgoo.com 抓取台灣 VIX（server-rendered HTML，regex 解析）"""
-    url = "https://www.wantgoo.com/index/vixtwn"
-    try:
-        with opener.open(url, timeout=15) as res:
-            html = res.read().decode("utf-8", errors="ignore")
+    """從 TAIFEX getVixData 抓台灣 VIX 分時資料（官方端點，不需登入，不擋雲端 IP）。"""
+    tz8 = timezone(timedelta(hours=8))
+    today = datetime.now(tz=tz8)
 
-        # 找日期與時間：VIXTWN 2026-06-24 13:45
-        m_dt = re.search(r'VIXTWN\s+(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})', html)
-        if not m_dt:
-            print("fetch_vixtwn: 找不到日期時間標記", file=sys.stderr)
-            return None
+    def parse_vix_file(content):
+        """解析 tab-separated VIX 檔，回傳最後一筆 (price, raw_time_str)。"""
+        last_price, last_time = None, None
+        for line in content.split("\n")[1:]:   # 跳過 header
+            parts = line.strip().split("\t")
+            if len(parts) < 5:
+                continue
+            try:
+                price = float(parts[-1].strip())
+                if price > 0:
+                    last_price = price
+                    last_time = parts[1].strip()
+            except ValueError:
+                pass
+        return last_price, last_time
 
-        # 在日期時間之後，找第一個浮點數（VIX 通常在 10~100 之間）
-        after_dt = html[m_dt.end():]
-        m_price = re.search(r'\b(\d{1,3}\.\d{2})\b', after_dt)
-        if not m_price:
-            print("fetch_vixtwn: 找不到主數值", file=sys.stderr)
-            return None
-        price = float(m_price.group(1))
+    # 嘗試最近 5 個自然日（跳假日）
+    for offset in range(5):
+        d = today - timedelta(days=offset)
+        ds = d.strftime("%Y%m%d")
+        url = f"https://www.taifex.com.tw/cht/7/getVixData?filesname={ds}"
+        try:
+            with opener.open(url, timeout=12) as r:
+                content = r.read().decode("big5", errors="ignore")
+            price, raw_time = parse_vix_file(content)
+            if not price:
+                continue
 
-        # 昨收（前日收盤），用來算漲跌幅
-        m_prev = re.search(r'昨收[_>\s]*(\d+\.\d+)', html)
-        prev_close = float(m_prev.group(1)) if m_prev else None
-        pct1 = round((price - prev_close) / prev_close * 100, 2) if prev_close else None
+            # 時間字串：'9000000' → '09:00'
+            if raw_time and raw_time.isdigit():
+                t = int(raw_time)
+                hour, minute = t // 1000000, (t % 1000000) // 10000
+                time_str = f"{hour:02d}:{minute:02d}"
+            else:
+                time_str = today.strftime("%H:%M")
 
-        return {
-            "price": price,
-            "pct1": pct1,
-            "prev_close": prev_close,
-            "date": m_dt.group(1),
-            "time": m_dt.group(2),
-        }
-    except Exception as e:
-        print(f"fetch_vixtwn failed: {e}", file=sys.stderr)
-        return None
+            # 抓前一交易日最後收盤，算 pct1
+            pct1 = None
+            for prev_off in range(1, 6):
+                pd = d - timedelta(days=prev_off)
+                try:
+                    with opener.open(
+                        f"https://www.taifex.com.tw/cht/7/getVixData?filesname={pd.strftime('%Y%m%d')}",
+                        timeout=8
+                    ) as r2:
+                        prev_content = r2.read().decode("big5", errors="ignore")
+                    prev_price, _ = parse_vix_file(prev_content)
+                    if prev_price:
+                        pct1 = round((price - prev_price) / prev_price * 100, 2)
+                        break
+                except Exception:
+                    pass
+
+            print(f"fetch_vixtwn: TAIFEX {ds} → {price}")
+            return {"price": price, "pct1": pct1, "prev_close": None,
+                    "date": d.strftime("%Y-%m-%d"), "time": time_str}
+        except Exception as e:
+            print(f"fetch_vixtwn: {ds} failed: {e}", file=sys.stderr)
+
+    print("fetch_vixtwn: 所有日期均失敗", file=sys.stderr)
+    return None
 
 
 def main():
