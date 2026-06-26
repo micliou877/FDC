@@ -2596,6 +2596,14 @@ function getSectorStats() {
 }
 function invalidateSectorCache() { _cachedSectorStats = null; }
 
+async function refreshVIX() {
+  const btn = document.getElementById('vixRefreshBtn');
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  await fetchLiveQuotes();
+  saveLocalOnly();
+  if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+}
+
 function updateUI() {
   invalidateSectorCache();
   let updateTxt = lastUpdateTime ? ("最後更新：" + new Date(lastUpdateTime).toLocaleString("zh-TW")) : "尚未匯入資料";
@@ -3171,7 +3179,7 @@ function renderStrategy() {
       ? `<span style="font-size:10px;background:#fef3c7;color:#92400e;border-radius:3px;padding:1px 5px;margin-left:4px;">前日收盤</span>`
       : '';
     vixHtml = `
-      <div style="background:${vLvl.bg};border:2px solid ${vLvl.border};border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+      <div style="background:${vLvl.bg};border:2px solid ${vLvl.border};border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;">
         <div>
           <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.5px;margin-bottom:4px;">🎯 台灣 VIX（臺指選擇權波動率）</div>
           <div style="display:flex;align-items:baseline;gap:10px;">
@@ -3186,6 +3194,13 @@ function renderStrategy() {
         <div style="margin-left:auto;font-size:11px;color:#9ca3af;line-height:1.8;text-align:right;">
           &lt;20 低恐慌<br>20–30 中性<br>30–40 謹慎<br>&gt;40 高恐慌
         </div>
+        <button id="vixRefreshBtn" onclick="refreshVIX()" title="重新抓取 VIX" style="position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;font-size:15px;color:#94a3b8;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='#475569'" onmouseout="this.style.color='#94a3b8'">🔄</button>
+      </div>`;
+  } else {
+    vixHtml = `
+      <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:11px;color:#94a3b8;">🎯 台灣 VIX：尚無資料</span>
+        <button onclick="refreshVIX()" style="font-size:11px;padding:3px 10px;background:#e2e8f0;border:none;border-radius:4px;cursor:pointer;color:#475569;font-weight:600;" onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#e2e8f0'">載入</button>
       </div>`;
   }
 
