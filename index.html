@@ -3444,23 +3444,46 @@ async function triggerQuoteUpdate() {
     });
     if (res.status === 204) {
       const beforeTime = liveQuoteTime;
-      statusEl.style.color = "#15803d";
-      statusEl.textContent = "已觸發！要查 300+ 支股票，約需 1.5～2 分鐘，請耐心等候...";
+      const startTime = Date.now();
+      const ESTIMATE_MS = 90000;
+      statusEl.style.color = "";
+      statusEl.innerHTML = `
+        <div style="font-size:12px;color:#15803d;font-weight:600;margin-bottom:5px;">✅ 已觸發 GitHub Actions，抓取中...</div>
+        <div style="background:#e2e8f0;border-radius:4px;height:8px;overflow:hidden;margin-bottom:5px;">
+          <div id="ghProgBar" style="height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,#3b82f6,#06b6d4);transition:width 0.8s linear;"></div>
+        </div>
+        <div id="ghProgTxt" style="font-size:11px;color:#64748b;">已等候 0 秒，預計共需約 90 秒...</div>`;
+      const tickInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const pct = Math.min(95, (elapsed / (ESTIMATE_MS / 1000)) * 100);
+        const bar = document.getElementById('ghProgBar');
+        const txt = document.getElementById('ghProgTxt');
+        if (bar) bar.style.width = pct + '%';
+        if (txt) txt.textContent = `已等候 ${elapsed} 秒，預計共需約 90 秒...`;
+      }, 1000);
       let attempts = 0;
       const maxAttempts = 10;
       const poll = async () => {
         attempts++;
         await fetchLiveQuotes();
         if (liveQuoteTime && liveQuoteTime !== beforeTime) {
-          statusEl.style.color = "#15803d";
-          statusEl.textContent = `更新完成！台股報價：${liveQuoteTime}`;
+          clearInterval(tickInterval);
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          const bar = document.getElementById('ghProgBar');
+          const txt = document.getElementById('ghProgTxt');
+          if (bar) { bar.style.background = '#16a34a'; bar.style.width = '100%'; bar.style.transition = 'width 0.3s'; }
+          if (txt) txt.textContent = `🎉 完成！共花 ${elapsed} 秒。台股報價：${liveQuoteTime}`;
           btn.disabled = false;
           return;
         }
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const txt = document.getElementById('ghProgTxt');
+        if (txt) txt.textContent = `等候中，已 ${elapsed} 秒（第 ${attempts} 次確認）...`;
         if (attempts < maxAttempts) {
-          statusEl.textContent = `仍在等候 GitHub Actions 執行完成...（第 ${attempts} 次檢查）`;
           setTimeout(poll, 15000);
         } else {
+          clearInterval(tickInterval);
+          statusEl.innerHTML = '';
           statusEl.style.color = "#b91c1c";
           statusEl.textContent = "等待逾時，請稍後手動重新整理頁面，或到 GitHub Actions 頁面查看執行狀態。";
           btn.disabled = false;
