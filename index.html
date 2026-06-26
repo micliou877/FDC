@@ -3165,6 +3165,11 @@ function renderStrategy() {
                : vixtwn.price >= 30 ? { label:'謹慎 🟠',   bg:'#fff7ed', border:'#fed7aa', c:'#ea580c' }
                : vixtwn.price >= 20 ? { label:'中性 🟡',   bg:'#fffbeb', border:'#fde68a', c:'#ca8a04' }
                :                      { label:'低恐慌 🟢',  bg:'#f0fdf4', border:'#bbf7d0', c:'#16a34a' };
+    const todayTW = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
+    const isPrevDay = vixtwn.date !== todayTW;
+    const dateLabel = isPrevDay
+      ? `<span style="font-size:10px;background:#fef3c7;color:#92400e;border-radius:3px;padding:1px 5px;margin-left:4px;">前日收盤</span>`
+      : '';
     vixHtml = `
       <div style="background:${vLvl.bg};border:2px solid ${vLvl.border};border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
         <div>
@@ -3176,7 +3181,7 @@ function renderStrategy() {
         </div>
         <div style="border-left:2px solid ${vLvl.border};padding-left:18px;">
           <div style="font-size:18px;font-weight:800;color:${vLvl.c};">${vLvl.label}</div>
-          <div style="font-size:11px;color:#9ca3af;margin-top:4px;">${vixtwn.date} ${vixtwn.time}</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:4px;">${vixtwn.date} ${vixtwn.time}${dateLabel}</div>
         </div>
         <div style="margin-left:auto;font-size:11px;color:#9ca3af;line-height:1.8;text-align:right;">
           &lt;20 低恐慌<br>20–30 中性<br>30–40 謹慎<br>&gt;40 高恐慌

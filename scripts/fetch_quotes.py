@@ -83,22 +83,28 @@ def fetch_vixtwn(opener):
     today = datetime.now(tz=tz8)
 
     def parse_vix_file(content):
-        """解析 tab-separated VIX 檔，回傳最後一筆 (price, raw_time_str)。"""
+        """解析 tab-separated VIX 檔，只取時間欄為純數字的列，回傳最後一筆 (price, time_str)。
+        TAIFEX 盤中不發布當日檔（返回 HTML），收盤後才有。"""
+        if content.lstrip().startswith("<"):  # HTML 錯誤頁，非資料
+            return None, None
         last_price, last_time = None, None
-        for line in content.split("\n")[1:]:   # 跳過 header
+        for line in content.split("\n"):
             parts = line.strip().split("\t")
             if len(parts) < 5:
+                continue
+            time_col = parts[1].strip()
+            if not time_col.isdigit():  # 跳過 "Last 1 min AVG" 等非時間列
                 continue
             try:
                 price = float(parts[-1].strip())
                 if price > 0:
                     last_price = price
-                    last_time = parts[1].strip()
+                    last_time = time_col
             except ValueError:
                 pass
         return last_price, last_time
 
-    # 嘗試最近 5 個自然日（跳假日）
+    # 嘗試最近 5 個自然日（跳假日、盤中當日檔未發布等情況）
     for offset in range(5):
         d = today - timedelta(days=offset)
         ds = d.strftime("%Y%m%d")
@@ -110,13 +116,10 @@ def fetch_vixtwn(opener):
             if not price:
                 continue
 
-            # 時間字串：'9000000' → '09:00'
-            if raw_time and raw_time.isdigit():
-                t = int(raw_time)
-                hour, minute = t // 1000000, (t % 1000000) // 10000
-                time_str = f"{hour:02d}:{minute:02d}"
-            else:
-                time_str = today.strftime("%H:%M")
+            # 時間：13450000 → "13:45"
+            t = int(raw_time)
+            hour, minute = t // 1000000, (t % 1000000) // 10000
+            time_str = f"{hour:02d}:{minute:02d}"
 
             # 抓前一交易日最後收盤，算 pct1
             pct1 = None
