@@ -1526,7 +1526,9 @@ function saveLocalOnly() {
       watchlists: watchlists,
       watchlistsTs: watchlistsTs,
       stockNotes: stockNotes,
-      stockMeta: stockMeta
+      stockMeta: stockMeta,
+      vixtwn: vixtwn,
+      liveQuoteTime: liveQuoteTime
     }));
     localStorage.setItem("fdc_financials_cache", JSON.stringify(financialsCache));
   } catch(e) {}
@@ -1549,6 +1551,8 @@ function loadData() {
       stockMeta = obj.stockMeta || {};
       if (obj.watchlists && Object.keys(obj.watchlists).length > 0) watchlists = obj.watchlists;
       if (obj.watchlistsTs) watchlistsTs = obj.watchlistsTs;
+      if (obj.vixtwn) vixtwn = obj.vixtwn;
+      if (obj.liveQuoteTime) liveQuoteTime = obj.liveQuoteTime;
     }
     const rawFin = localStorage.getItem("fdc_financials_cache");
     if (rawFin) {
