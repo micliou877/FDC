@@ -2842,13 +2842,27 @@ function renderStocks() {
 
   const banner = document.getElementById('sectorUSBanner');
   if (banner) {
-    const usInfo = currentSector && currentSector !== "__all__" ? SECTOR_US[currentSector] : null;
-    banner.innerHTML = usInfo
-      ? `<div style="background:#eff8ff;border:1px solid #bae8ff;border-radius:6px;padding:7px 12px;font-size:12px;color:#1d6fa4;line-height:1.6;">
-           <strong>核心美股參考：</strong>${usInfo}
-           <span style="color:#9ca3af;margin-left:8px;font-size:10px;">★=NVIDIA點名</span>
-         </div>`
-      : '';
+    const isSector = currentSector && currentSector !== "__all__";
+    const usInfo = isSector ? SECTOR_US[currentSector] : null;
+    const ss = isSector ? (getSectorStats()[currentSector] || null) : null;
+    const spark = isSector ? renderHeatSparkline(currentSector) : '';
+    const sparkRow = ss ? `
+      <div style="display:flex;align-items:center;gap:14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 14px;margin-bottom:6px;flex-wrap:wrap;">
+        ${spark ? `<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;font-weight:600;color:#64748b;white-space:nowrap;">近期走勢</span>${spark}</div>` : ''}
+        <div style="display:flex;gap:14px;font-size:12px;flex-wrap:wrap;align-items:center;">
+          <span>10日 <span class="${pctClass(ss.pct10)}">${fmtPct(ss.pct10)}</span></span>
+          <span>5日 <span class="${pctClass(ss.pct5)}">${fmtPct(ss.pct5)}</span></span>
+          <span>今日 <span class="${pctClass(ss.pct1)}">${fmtPct(ss.pct1)}</span></span>
+          <span>量能 ${volTrendBadge(ss.volTrend)}</span>
+          <span style="color:#9ca3af;font-size:11px;">${ss.count}/${ss.total}檔</span>
+        </div>
+      </div>` : '';
+    const usRow = usInfo ? `
+      <div style="background:#eff8ff;border:1px solid #bae8ff;border-radius:6px;padding:7px 12px;font-size:12px;color:#1d6fa4;line-height:1.6;margin-bottom:6px;">
+        <strong>核心美股參考：</strong>${usInfo}
+        <span style="color:#9ca3af;margin-left:8px;font-size:10px;">★=NVIDIA點名</span>
+      </div>` : '';
+    banner.innerHTML = sparkRow + usRow;
   }
 
   const tbody = document.getElementById("stocksTbody"); const currentList = watchlists[currentWatchGroup] || [];
