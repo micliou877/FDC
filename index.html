@@ -1716,7 +1716,7 @@ window.handleSearch = function() {
     const marketTag = isTW ? '' : `<span style="font-size:10px;background:#1e3a5f;color:#60a5fa;padding:1px 5px;border-radius:3px;margin-left:6px;">${m.market}</span>`;
     return `
     <div style="display:flex; justify-content:space-between; align-items:center; background:#212b36; padding:10px 14px; margin-bottom:6px; border-radius:6px; border:1px solid #2a3138; gap:10px;">
-      <span style="font-size:14px; font-weight:bold; color:#e6e6e6; cursor:pointer; flex:1;" onclick="${isTW ? `goToStock('${m.code}')` : ''}" title="${isTW ? '點擊查看標的資料' : ''}">${m.code}${marketTag} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span></span>
+      <span style="font-size:14px; font-weight:bold; color:#e6e6e6; cursor:pointer; flex:1;" onclick="${isTW ? `goToStock('${m.code}')` : ''}" title="${isTW ? '點擊查看標的資料' : ''}">${m.code}${marketTag} <span style="font-weight:normal; font-size:12px; color:#aaa; margin-left:6px;">${m.name}</span>${stockData[m.code]?.price != null ? `<span style="font-size:12px;color:#93c5fd;font-weight:600;margin-left:10px;">${stockData[m.code].price.toFixed(2)}</span>` : ''}</span>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
         <a href="${getTVLink(m.code, m.market)}" target="_blank" style="display:inline-block;padding:4px 10px;font-size:12px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a>
         ${inWL
@@ -2776,6 +2776,7 @@ function renderRanking() {
             <td style="padding:3px 2px;text-align:center;"><select onchange="addToWatchGroup(this,'${st.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;" onclick="event.stopPropagation()"><option value="">${inWl?"⭐":"☆"} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
             <td style="padding:4px 6px;"><a href="${getTVLink(st.code, st.market)}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;" onclick="event.stopPropagation()">${st.code}</a></td>
             <td style="padding:4px 6px;color:#374151;">${st.name}</td>
+            <td style="padding:4px 6px;text-align:right;">${st.price?.toFixed(2) ?? "-"}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct10)}">${fmtPct(st.pct10)}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct5)}">${fmtPct(st.pct5)}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct1)}">${fmtPct(st.pct1)}</td>
@@ -2795,6 +2796,7 @@ function renderRanking() {
               <th style="width:28px;padding:2px;"></th>
               <th style="text-align:left;padding:3px 6px;">代號</th>
               <th style="text-align:left;padding:3px 6px;">名稱</th>
+              ${sortTh('price','股價')}
               ${sortTh('pct10','10日%')}
               ${sortTh('pct5','5日%')}
               ${sortTh('pct1','今日%')}
@@ -3147,6 +3149,7 @@ function renderStrategy() {
         : `<table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
             <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
               ${th('p','code','標的','left')}
+              ${th('p','price','股價')}
               ${th('p','pct10','10日%')}
               ${th('p','pct5','5日%')}
               ${th('p','pct1','今日%')}
@@ -3155,6 +3158,7 @@ function renderStrategy() {
             </tr></thead><tbody>
               ${sortedPlan.map(p => `<tr class="${selectedPlanCode === p.code ? 'row-selected' : ''}" onclick="togglePlanSelect('${p.code}', event)" style="cursor:pointer;">
                 <td style="padding:5px 6px;font-weight:600;"><a href="${getTVLink(p.code,p.market)}" target="_blank" style="color:#374151;text-decoration:none;">${p.code}</a> <a href="${getTVLink(p.code,p.market)}" target="_blank" style="font-weight:400;color:#64748b;text-decoration:none;">${p.name}</a>${(STOCK_SECTORS_MAP[p.code]||[]).length?`<br>${(STOCK_SECTORS_MAP[p.code]||[]).map(t=>`<span class="tag" style="font-size:10px;padding:1px 4px;" onclick="goToSector('${t}',event)">${t}</span>`).join('')}`:''}</td>
+                <td style="padding:5px 6px;text-align:right;">${p.price?.toFixed(2) ?? "-"}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct10)}">${fmtPct(p.pct10)}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct5)}">${fmtPct(p.pct5)}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct1)}">${fmtPct(p.pct1)}</td>
@@ -3245,6 +3249,7 @@ function renderStrategy() {
       ${th('t','code','代號','left')}
       ${th('t','name','名稱','left')}
       <th style="text-align:left;">族群</th>
+      ${th('t','price','股價')}
       ${th('t','pct10','10日%')}
       ${th('t','pct5','5日%')}
       ${th('t','pct1','今日%')}
@@ -3257,6 +3262,7 @@ function renderStrategy() {
         <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
         <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
         <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
+        <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
         <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
         <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
@@ -3289,6 +3295,7 @@ function renderStrategy() {
           ${th('v','name','名稱','left')}
           <th style="text-align:left;">族群</th>
           <th style="text-align:right;">訊號</th>
+          ${th('v','price','股價')}
           ${th('v','pct10','10日%')}
           ${th('v','pct5','5日%')}
           ${th('v','pct1','今日%')}
@@ -3306,6 +3313,7 @@ function renderStrategy() {
               <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
               <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;">${s.sectorLabel}</span></td>
               <td style="text-align:right;">${sig}</td>
+              <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
               <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
               <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
