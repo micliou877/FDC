@@ -1362,6 +1362,7 @@ let cloudRoomId = "";
 let lastUpdateTime = null;
 let liveQuoteTime = null;
 let vixtwn = null;
+let vixRefreshing = false;
 const QUOTES_URL = "https://raw.githubusercontent.com/micliou877/FDC/main/quotes.json";
 let currentSector = null;
 let syncInterval = null;
@@ -2597,11 +2598,34 @@ function getSectorStats() {
 function invalidateSectorCache() { _cachedSectorStats = null; }
 
 async function refreshVIX() {
-  const btn = document.getElementById('vixRefreshBtn');
-  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  if (vixRefreshing) return;
+  vixRefreshing = true;
+  // Re-render so newly-created button already shows spinner state
+  const stratPanel = document.getElementById('strategy');
+  if (stratPanel && stratPanel.classList.contains('active')) renderStrategy();
+  else { const b = document.getElementById('vixRefreshBtn'); if (b) { b.textContent = '⏳'; b.disabled = true; } }
+
+  // If a GitHub dispatch token is stored, trigger Actions to fetch fresh VIX
+  const ghToken = localStorage.getItem('gh_dispatch_token');
+  if (ghToken) {
+    try {
+      await fetch("https://api.github.com/repos/micliou877/FDC/actions/workflows/update-quotes.yml/dispatches", {
+        method: "POST",
+        headers: { "Authorization": `token ${ghToken}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+        body: JSON.stringify({ ref: "main" })
+      });
+    } catch (e) {}
+  }
+
   await fetchLiveQuotes();
   saveLocalOnly();
-  if (btn) { btn.textContent = '🔄'; btn.disabled = false; }
+  vixRefreshing = false;
+  // Re-render to restore button, then show brief status toast
+  const stratPanel2 = document.getElementById('strategy');
+  if (stratPanel2 && stratPanel2.classList.contains('active')) renderStrategy();
+  else { const b = document.getElementById('vixRefreshBtn'); if (b) { b.textContent = '🔄'; b.disabled = false; } }
+  const msg = vixtwn ? `VIX 已重整：${vixtwn.price}（${vixtwn.date} ${vixtwn.time}）` : 'VIX 重整完成（資料暫無）';
+  const s = document.getElementById('fetchStatus'); if (s) { s.textContent = msg; setTimeout(() => { s.textContent = ''; }, 5000); }
 }
 
 function updateUI() {
@@ -3229,7 +3253,7 @@ function renderStrategy() {
         <div style="margin-left:auto;font-size:11px;color:#9ca3af;line-height:1.8;text-align:right;">
           &lt;20 低恐慌<br>20–30 中性<br>30–40 謹慎<br>&gt;40 高恐慌
         </div>
-        <button id="vixRefreshBtn" onclick="refreshVIX()" title="重新抓取 VIX" style="position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;font-size:15px;color:#94a3b8;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='#475569'" onmouseout="this.style.color='#94a3b8'">🔄</button>
+        <button id="vixRefreshBtn" onclick="refreshVIX()" title="重新抓取 VIX" ${vixRefreshing ? 'disabled' : ''} style="position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;font-size:15px;color:#94a3b8;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='#475569'" onmouseout="this.style.color='#94a3b8'">${vixRefreshing ? '⏳' : '🔄'}</button>
       </div>`;
   } else {
     vixHtml = `
