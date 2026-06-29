@@ -2600,32 +2600,55 @@ function invalidateSectorCache() { _cachedSectorStats = null; }
 async function refreshVIX() {
   if (vixRefreshing) return;
   vixRefreshing = true;
-  // Re-render so newly-created button already shows spinner state
-  const stratPanel = document.getElementById('strategy');
-  if (stratPanel && stratPanel.classList.contains('active')) renderStrategy();
-  else { const b = document.getElementById('vixRefreshBtn'); if (b) { b.textContent = '⏳'; b.disabled = true; } }
+  const isStratActive = () => { const p = document.getElementById('strategy'); return p && p.classList.contains('active'); };
+  const rerender = () => { if (isStratActive()) renderStrategy(); else { const b = document.getElementById('vixRefreshBtn'); if (b) { b.textContent = vixRefreshing ? '⏳' : '🔄'; b.disabled = vixRefreshing; } } };
+  const statusEl = document.getElementById('fetchStatus');
+  const showMsg = (msg, color, ms) => { if (!statusEl) return; statusEl.style.color = color || ''; statusEl.textContent = msg; if (ms) setTimeout(() => { statusEl.textContent = ''; statusEl.style.color = ''; }, ms); };
+  const done = (msg, color) => { vixRefreshing = false; rerender(); showMsg(msg, color, 8000); };
 
-  // If a GitHub dispatch token is stored, trigger Actions to fetch fresh VIX
+  rerender(); // show spinner
+
   const ghToken = localStorage.getItem('gh_dispatch_token');
-  if (ghToken) {
-    try {
-      await fetch("https://api.github.com/repos/micliou877/FDC/actions/workflows/update-quotes.yml/dispatches", {
-        method: "POST",
-        headers: { "Authorization": `token ${ghToken}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: "main" })
-      });
-    } catch (e) {}
+  if (!ghToken) {
+    await fetchLiveQuotes();
+    saveLocalOnly();
+    const vixMsg = vixtwn ? `VIX ${vixtwn.price}（${vixtwn.date} ${vixtwn.time}）｜盤後需 GitHub Token 才能觸發更新，請到設定區「立即更新台股報價」` : '無 VIX 資料，請到設定區設定 GitHub Token';
+    done(vixMsg, '#b91c1c');
+    return;
   }
 
-  await fetchLiveQuotes();
-  saveLocalOnly();
-  vixRefreshing = false;
-  // Re-render to restore button, then show brief status toast
-  const stratPanel2 = document.getElementById('strategy');
-  if (stratPanel2 && stratPanel2.classList.contains('active')) renderStrategy();
-  else { const b = document.getElementById('vixRefreshBtn'); if (b) { b.textContent = '🔄'; b.disabled = false; } }
-  const msg = vixtwn ? `VIX 已重整：${vixtwn.price}（${vixtwn.date} ${vixtwn.time}）` : 'VIX 重整完成（資料暫無）';
-  const s = document.getElementById('fetchStatus'); if (s) { s.textContent = msg; setTimeout(() => { s.textContent = ''; }, 5000); }
+  // Has token: trigger workflow_dispatch then poll until quotes.json is refreshed
+  showMsg('觸發 GitHub Actions 中...', '#64748b');
+  let dispatchOk = false;
+  try {
+    const res = await fetch("https://api.github.com/repos/micliou877/FDC/actions/workflows/update-quotes.yml/dispatches", {
+      method: "POST",
+      headers: { "Authorization": `token ${ghToken}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+      body: JSON.stringify({ ref: "main" })
+    });
+    if (res.status === 204) dispatchOk = true;
+    else { done(`觸發失敗（HTTP ${res.status}），請確認 GitHub Token 是否有效。`, '#b91c1c'); return; }
+  } catch (e) { done('觸發失敗（網路錯誤）', '#b91c1c'); return; }
+
+  showMsg('✅ 已觸發！抓取中，約需 90 秒，請稍候...', '#15803d');
+  const beforeTime = liveQuoteTime;
+  const startTime = Date.now();
+  let attempts = 0;
+  const pollVix = async () => {
+    attempts++;
+    await fetchLiveQuotes();
+    if (liveQuoteTime !== beforeTime) {
+      saveLocalOnly();
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      done(vixtwn ? `✅ VIX 更新完成：${vixtwn.price}（${vixtwn.date} ${vixtwn.time}）共花 ${elapsed} 秒` : `✅ 更新完成（${elapsed} 秒）`, '#15803d');
+      return;
+    }
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    showMsg(`等候 Actions 完成（第 ${attempts} 次，已 ${elapsed} 秒）...`, '#64748b');
+    if (attempts < 10) setTimeout(pollVix, 15000);
+    else done('等待逾時，請稍後手動重整或到 GitHub Actions 頁面查看狀態。', '#b91c1c');
+  };
+  setTimeout(pollVix, 80000); // Actions 約需 80-90 秒
 }
 
 function updateUI() {
