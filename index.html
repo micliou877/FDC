@@ -3113,7 +3113,7 @@ window.wlMove = function(idx, dir) {
 };
 
 // 策略頁排序狀態
-window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1, vk:'pct10', vd:-1, pk:'pct10', pd:-1, bk:'pct5', bd:-1 };
+window._ss = { lk:'vsMarket10', ld:-1, rk:'pct1', rd:-1, tk:'pct10', td:-1, vk:'pct10', vd:-1, pk:'pct10', pd:-1, bk:'pct5', bd:-1, zk:'pct5', zd:-1, wk:'pct10', wd:-1, qk:'pct10', qd:-1 };
 window.sortStrat = function(t, k) {
   if (window._ss[t+'k'] === k) window._ss[t+'d'] *= -1;
   else { window._ss[t+'k'] = k; window._ss[t+'d'] = -1; }
@@ -3206,6 +3206,67 @@ function renderStrategy() {
       return d * ((b[k]||0) - (a[k]||0));
     })
     .slice(0, 25);
+
+  // 族群輪動起漲：10日還落後大盤（未表態）、但近5日轉強且量能放大的族群，
+  // 比「推薦族群」（已 vs大盤>+2%）更早一步抓輪動；假訊號較多，僅供早期觀察。
+  const rotationSectors = validStats.filter(([_,s]) =>
+    s.vsMarket10 < 0 && s.pct5 > 1 && s.volTrend >= 1.15);
+  let rotationRaw = [];
+  rotationSectors.forEach(([sector]) => {
+    (SECTORS[sector]||[])
+      .filter(s => stockData[s.code])
+      .map(s => ({...s, ...stockData[s.code], sectorLabel: sector.split('. ')[1]||sector}))
+      .filter(s => (s.pct5||0) > 0 && (s.amount||0) >= 1)
+      .sort((a, b) => (b.pct5||0) - (a.pct5||0))
+      .slice(0, 3).forEach(s => rotationRaw.push(s));
+  });
+  const rotations = rotationRaw
+    .filter((v,i,a) => a.findIndex(t => t.code === v.code) === i)
+    .sort((a,b) => {
+      const k = window._ss.zk, d = window._ss.zd;
+      if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
+      return d * ((b[k]||0) - (a[k]||0));
+    });
+
+  // 強勢拉回承接：10日強勢、近5日量縮休息、今日止穩 —— 對應策略「不追高，等拉回確認支撐」。
+  // 量縮回檔（volTrend<1.0）代表籌碼穩定，搭配 TradingView 確認 EMA20 支撐即為買點。
+  const pullbackRaw = Object.entries(SECTORS).flatMap(([sector, list]) =>
+    list
+      .filter(s => stockData[s.code])
+      .map(s => ({...s, ...stockData[s.code], sectorLabel: sector.split('. ')[1]||sector}))
+      .filter(s => (s.pct10 ?? -999) >= 5 &&
+                   (s.pct5 ?? 999) >= -4 && (s.pct5 ?? 999) <= 1 &&
+                   (s.pct1 ?? -999) >= -0.5 &&
+                   (s.volTrend ?? 99) < 1.0 &&
+                   (s.amount ?? 0) >= 1)
+  );
+  const pullbacks = pullbackRaw
+    .filter((v,i,a) => a.findIndex(t => t.code === v.code) === i)
+    .sort((a,b) => {
+      const k = window._ss.wk, d = window._ss.wd;
+      if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
+      return d * ((b[k]||0) - (a[k]||0));
+    })
+    .slice(0, 20);
+
+  // 質優動能股：動能 + 基本面雙重確認，避開無獲利的純投機股，適合 3 週以上波段。
+  const qualityRaw = Object.entries(SECTORS).flatMap(([sector, list]) =>
+    list
+      .filter(s => stockData[s.code])
+      .map(s => ({...s, ...stockData[s.code], sectorLabel: sector.split('. ')[1]||sector}))
+      .filter(s => (s.eps ?? 0) > 0 && s.per != null && s.per <= 25 &&
+                   (s.pct10 ?? -999) >= 3 && (s.pct5 ?? -999) > 0 &&
+                   (s.volTrend ?? 0) >= 1.0 && (s.amount ?? 0) >= 1)
+  );
+  const qualityMomentum = qualityRaw
+    .filter((v,i,a) => a.findIndex(t => t.code === v.code) === i)
+    .sort((a,b) => {
+      const k = window._ss.qk, d = window._ss.qd;
+      if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
+      return d * ((b[k]||0) - (a[k]||0));
+    })
+    .slice(0, 20);
+  const hasFundamentals = Object.values(stockData).filter(d => d.per != null).length >= 5;
 
   const sectionLabel = (title, hint) =>
     `<div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.5px;padding:12px 0 8px;border-top:1px solid #f1f5f9;margin-top:4px;">
@@ -3350,6 +3411,38 @@ function renderStrategy() {
       </tr>`).join('')}
     </tbody></table></div>` : ''}
 
+    <!-- 強勢拉回承接 -->
+    ${sectionLabel('強勢拉回承接 🎯', '10日≥+5%・5日-4%~+1%休息・今日止穩・量縮<1.0x・成交≥1億｜搭配TV確認EMA20支撐')}
+    ${pullbacks.length === 0
+      ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無「強勢股健康拉回」的個股</div>'
+      : `<div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
+          <th style="width:32px;text-align:center;">自選</th>
+          ${th('w','code','代號','left')}
+          ${th('w','name','名稱','left')}
+          <th style="text-align:left;">族群</th>
+          ${th('w','price','股價')}
+          ${th('w','pct10','10日%')}
+          ${th('w','pct5','5日%')}
+          ${th('w','pct1','今日%')}
+          ${th('w','volTrend','量能')}
+          <th style="text-align:center;white-space:nowrap">品質</th>
+          <th></th>
+        </tr></thead><tbody>
+          ${pullbacks.map(s => `<tr>
+            <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
+            <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
+            <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
+            <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;cursor:pointer;" onclick="goToSector('${s.sectorLabel}',event)">${s.sectorLabel}</span></td>
+            <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+            <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
+            <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
+            <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+          </tr>`).join('')}
+        </tbody></table></div>`}
+
     <!-- 翻轉觀察：chip 式 -->
     ${reversals.length > 0 ? `
     ${sectionLabel('翻轉觀察', '10日跌>5%・今日轉正')}
@@ -3362,6 +3455,49 @@ function renderStrategy() {
           <span class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</span>
         </div>`).join('')}
     </div>` : ''}
+
+    <!-- 族群輪動起漲 -->
+    ${rotationSectors.length > 0 ? `
+    ${sectionLabel('族群輪動起漲 ⚡', '族群10日落後大盤・5日轉強>+1%・族群量能≥1.15x｜早期訊號，假訊號較多')}
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+      ${rotationSectors.map(([sec2,s]) => `
+        <div style="display:inline-flex;align-items:center;gap:6px;background:#fefce8;border:1px solid #fde68a;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;" onclick="currentSector='${sec2}';switchTab('stocks')">
+          <span style="font-weight:600;color:#713f12;">${sec2.split('. ')[1]||sec2}</span>
+          <span style="color:#9ca3af;font-size:11px;">10日</span><span class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</span>
+          <span style="color:#ccc;">→</span>
+          <span style="color:#9ca3af;font-size:11px;">5日</span><span class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</span>
+          ${volTrendBadge(s.volTrend)}
+        </div>`).join('')}
+    </div>
+    ${rotations.length === 0
+      ? '<div style="font-size:12px;color:#9ca3af;padding:0 0 8px;">族群已轉強，但族群內尚無「5日轉正且成交≥1億」的個股</div>'
+      : `<div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
+          <th style="width:32px;text-align:center;">自選</th>
+          ${th('z','code','代號','left')}
+          ${th('z','name','名稱','left')}
+          <th style="text-align:left;">族群</th>
+          ${th('z','price','股價')}
+          ${th('z','pct5','5日%')}
+          ${th('z','pct10','10日%')}
+          ${th('z','pct1','今日%')}
+          ${th('z','volTrend','量能')}
+          <th style="text-align:center;white-space:nowrap">品質</th>
+          <th></th>
+        </tr></thead><tbody>
+          ${rotations.map(s => `<tr>
+            <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
+            <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
+            <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
+            <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;cursor:pointer;" onclick="goToSector('${s.sectorLabel}',event)">${s.sectorLabel}</span></td>
+            <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+            <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
+            <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
+            <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+          </tr>`).join('')}
+        </tbody></table></div>`}` : ''}
 
     <!-- 起漲候選 -->
     ${sectionLabel('起漲候選', '5日剛轉正・10日<6%・量能≥1.1x・成交≥0.5億')}
@@ -3391,6 +3527,42 @@ function renderStrategy() {
             <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
             <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
             <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
+            <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+          </tr>`).join('')}
+        </tbody></table></div>`}
+
+    <!-- 質優動能股 -->
+    ${sectionLabel('質優動能股 💎', 'EPS>0・本益比≤25・10日≥+3%・5日>0・量能≥1.0x・成交≥1億｜適合3週以上波段')}
+    ${!hasFundamentals
+      ? '<div style="font-size:12px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-bottom:4px;">⚠️ 尚無本益比/EPS 資料，請到「設定」→「更新基本面」後才能計算此清單</div>'
+      : qualityMomentum.length === 0
+      ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無符合條件的個股</div>'
+      : `<div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
+          <th style="width:32px;text-align:center;">自選</th>
+          ${th('q','code','代號','left')}
+          ${th('q','name','名稱','left')}
+          <th style="text-align:left;">族群</th>
+          ${th('q','price','股價')}
+          ${th('q','per','本益比')}
+          ${th('q','eps','EPS')}
+          ${th('q','pct10','10日%')}
+          ${th('q','pct5','5日%')}
+          ${th('q','pct1','今日%')}
+          ${th('q','volTrend','量能')}
+          <th></th>
+        </tr></thead><tbody>
+          ${qualityMomentum.map(s => `<tr>
+            <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
+            <td style="font-weight:600;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.code}</a></td>
+            <td><a href="${getTVLink(s.code,s.market)}" target="_blank" style="color:#374151;text-decoration:none;">${s.name}</a></td>
+            <td><span class="tag" style="background:#f9fafb;color:#6b7280;border-color:#e5e7eb;cursor:pointer;" onclick="goToSector('${s.sectorLabel}',event)">${s.sectorLabel}</span></td>
+            <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
+            <td style="text-align:right;color:#64748b;">${s.per?.toFixed(1) ?? "-"}</td>
+            <td style="text-align:right;color:#64748b;">${s.eps?.toFixed(2) ?? "-"}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
+            <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
+            <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
             <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`).join('')}
         </tbody></table></div>`}
