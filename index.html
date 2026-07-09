@@ -231,6 +231,17 @@
     .tool-panel .t-check-item input[type="checkbox"] { width:16px; height:16px; }
     .tool-panel .t-pass { color:#ff6b6b; font-weight:700; }
     .tool-panel .t-fail { color:#4a9d6f; font-weight:700; }
+
+    /* ====== 閱讀體驗：區塊導覽 / 錨點 / 斑馬紋 / 回頂部 ====== */
+    .sec-nav { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+    .sec-nav a { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:#475569; background:#fff; border:1px solid #e2e8f0; border-radius:20px; padding:4px 12px; text-decoration:none; white-space:nowrap; }
+    .sec-nav a:hover { border-color:#2563eb; color:#2563eb; }
+    .sec-nav a .cnt { font-size:11px; font-weight:700; color:#2563eb; background:#eff6ff; border-radius:10px; padding:0 6px; min-width:14px; text-align:center; }
+    .sec-nav a .cnt.zero { color:#94a3b8; background:#f1f5f9; }
+    .sec-anchor { scroll-margin-top: 64px; }
+    .stocks-table tbody tr:nth-child(even):not(:hover):not(.row-selected) { background:#fafbfd; }
+    #backToTop { position:fixed; right:16px; bottom:20px; width:42px; height:42px; border-radius:50%; background:rgba(37,99,235,0.88); color:#fff; border:none; font-size:18px; cursor:pointer; display:none; z-index:998; box-shadow:0 2px 8px rgba(0,0,0,0.25); }
+    #backToTop:hover { background:#1d4ed8; }
   </style>
 </head>
 <body>
@@ -697,6 +708,18 @@
 <!-- ====== 操作 SOP ====== -->
 <div class="panel" id="sop">
 
+  <!-- 目錄導覽 -->
+  <div class="sec-nav">
+    <a href="#sop-daily">📋 每日SOP</a>
+    <a href="#sop-lists">🧭 三套清單</a>
+    <a href="#sop-buy">✅ 買進條件</a>
+    <a href="#sop-pick">🏆 族群選股</a>
+    <a href="#sop-us">🌙 美股預警</a>
+    <a href="#sop-stop">🛑 停損紅線</a>
+    <a href="#sop-change">♻️ 精選變動</a>
+    <a href="#sop-discipline">🚫 紀律清單</a>
+  </div>
+
   <!-- 心態與定位 -->
   <div class="data-panel" style="border-left:4px solid #2563eb;">
     <h3 style="color:#1e293b;margin-bottom:4px;">上班族操作心法</h3>
@@ -707,8 +730,8 @@
   </div>
 
   <!-- 每日 SOP -->
-  <div class="data-panel">
-    <h3>每日 15 分鐘 SOP（13:45 收盤後）</h3>
+  <div class="data-panel sec-anchor" id="sop-daily">
+    <h3>📋 每日 15 分鐘 SOP（13:45 收盤後）</h3>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
         <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
@@ -738,8 +761,8 @@
   </div>
 
   <!-- 三套選股邏輯說明 -->
-  <div class="data-panel" style="border-left:4px solid #0891b2;">
-    <h3 style="color:#155e75;">「今日精選」三套選股清單怎麼用</h3>
+  <div class="data-panel sec-anchor" id="sop-lists" style="border-left:4px solid #0891b2;">
+    <h3 style="color:#155e75;">🧭「今日精選」三套選股清單怎麼用</h3>
     <p style="font-size:12px;color:#64748b;margin:0 0 10px;line-height:1.7;">
       今日精選頁除了原有的精選個股／起漲候選／TV 觀察清單，另有三套互補邏輯，各自對應不同的進場情境。<br>
       共通原則：<strong>入選只是候選，仍要到 TradingView 確認 EMA20/60 買進條件才進場。</strong>
@@ -804,8 +827,8 @@
   </div>
 
   <!-- 買進條件 -->
-  <div class="data-panel">
-    <h3>TradingView 買進條件（需全部符合）</h3>
+  <div class="data-panel sec-anchor" id="sop-buy">
+    <h3>✅ TradingView 買進條件（需全部符合）</h3>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
         <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
@@ -829,8 +852,8 @@
   </div>
 
   <!-- 族群與個股對照 -->
-  <div class="data-panel">
-    <h3>族群排第一：選哪幾檔？（以 AI 晶片為例）</h3>
+  <div class="data-panel sec-anchor" id="sop-pick">
+    <h3>🏆 族群排第一：選哪幾檔？（以 AI 晶片為例）</h3>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
         <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
@@ -859,8 +882,8 @@
   </div>
 
   <!-- 美股預警對照 -->
-  <div class="data-panel">
-    <h3>早上 5–6 點：美股預警觀察（台股開盤前）</h3>
+  <div class="data-panel sec-anchor" id="sop-us">
+    <h3>🌙 早上 5–6 點：美股預警觀察（台股開盤前）</h3>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
         <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
@@ -887,8 +910,8 @@
   </div>
 
   <!-- 停損規則 -->
-  <div class="data-panel">
-    <h3>停損規則（三條紅線）</h3>
+  <div class="data-panel sec-anchor" id="sop-stop">
+    <h3>🛑 停損規則（三條紅線）</h3>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
         <tr style="background:#fef2f2;border-bottom:2px solid #fecaca;">
@@ -905,8 +928,8 @@
   </div>
 
   <!-- 精選每天不一樣怎麼辦 -->
-  <div class="data-panel" style="border-left:4px solid #7c3aed;">
-    <h3 style="color:#4c1d95;">精選個股每天不一樣，怎麼辦？</h3>
+  <div class="data-panel sec-anchor" id="sop-change" style="border-left:4px solid #7c3aed;">
+    <h3 style="color:#4c1d95;">♻️ 精選個股每天不一樣，怎麼辦？</h3>
     <p style="font-size:12px;color:#64748b;margin:0 0 10px;">這是正常現象。精選是「候選池」，不是「買入清單」。你要建立機制判斷每天的變化，而不是讓清單每天洗牌。</p>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
@@ -943,8 +966,8 @@
   </div>
 
   <!-- 不做的事 -->
-  <div class="data-panel" style="border-left:4px solid #f59e0b;">
-    <h3 style="color:#92400e;">紀律清單：我不做的事</h3>
+  <div class="data-panel sec-anchor" id="sop-discipline" style="border-left:4px solid #f59e0b;">
+    <h3 style="color:#92400e;">🚫 紀律清單：我不做的事</h3>
     <ul style="font-size:12px;color:#475569;line-height:2;margin:0;padding-left:16px;">
       <li>不追前一天已大漲的股票</li>
       <li>不買族群近10日為負的個股</li>
@@ -3334,9 +3357,10 @@ function renderStrategy() {
     .slice(0, 20);
   const hasFundamentals = Object.values(stockData).filter(d => d.per != null).length >= 5;
 
-  const sectionLabel = (title, hint) =>
-    `<div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.5px;padding:12px 0 8px;border-top:1px solid #f1f5f9;margin-top:4px;">
-      ${title}<span style="font-weight:400;color:#9ca3af;letter-spacing:0;margin-left:6px;">${hint}</span>
+  const sectionLabel = (title, hint, id) =>
+    `<div ${id ? `id="${id}" class="sec-anchor"` : ''} style="padding:14px 0 8px;border-top:1px solid #e5e7eb;margin-top:8px;">
+      <span style="font-size:13px;font-weight:700;color:#334155;">${title}</span>
+      <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:8px;">${hint}</span>
     </div>`;
 
   const sortedPlan = [...dailyPlan].map(p => ({...p, ...stockData[p.code]})).sort((a,b) => {
@@ -3413,6 +3437,19 @@ function renderStrategy() {
       </div>`;
   }
 
+  // 區塊快速導覽：只列出會渲染的區塊，數字為該清單目前筆數
+  const secNavHtml = `<div class="sec-nav">${[
+    ['sec-longs','🚀 推薦族群', longs.length],
+    topStocks.length ? ['sec-top','⭐ 精選個股', Math.min(topStocks.length, 9)] : null,
+    ['sec-pullback','🎯 拉回承接', pullbacks.length],
+    reversals.length ? ['sec-reversal','🔄 翻轉觀察', reversals.length] : null,
+    rotationSectors.length ? ['sec-rotation','⚡ 族群輪動', rotations.length] : null,
+    ['sec-breakout','🌱 起漲候選', breakouts.length],
+    ['sec-quality','💎 質優動能', hasFundamentals ? qualityMomentum.length : 0],
+    ['sec-tv','📈 TV觀察', tvStocks.length],
+  ].filter(Boolean).map(([id, label, cnt]) =>
+    `<a href="#${id}">${label}<span class="cnt${cnt ? '' : ' zero'}">${cnt}</span></a>`).join('')}</div>`;
+
   panel.innerHTML = `
     <!-- 台灣 VIX -->
     ${vixHtml}
@@ -3432,8 +3469,11 @@ function renderStrategy() {
       </div>
     </div>
 
+    <!-- 區塊快速導覽 -->
+    ${secNavHtml}
+
     <!-- 推薦族群卡片 -->
-    <div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.5px;margin-bottom:8px;">推薦族群 <span style="font-weight:400;color:#9ca3af;letter-spacing:0;">vs大盤>+2%・5日↑・量能≥1.1x</span></div>
+    <div id="sec-longs" class="sec-anchor" style="margin-bottom:8px;"><span style="font-size:13px;font-weight:700;color:#334155;">🚀 推薦族群</span> <span style="font-size:11px;color:#9ca3af;margin-left:8px;">vs大盤>+2%・5日↑・量能≥1.1x</span></div>
     ${longs.length === 0
       ? `<div style="font-size:12px;color:#9ca3af;padding:8px 0 4px;">目前無強勢族群</div>${noPct5Hint}`
       : `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;margin-bottom:4px;">
@@ -3448,7 +3488,7 @@ function renderStrategy() {
 
     <!-- 精選個股 -->
     ${topStocks.length > 0 ? `
-    ${sectionLabel('精選個股', '前3強勢族群・10日漲幅排序・近5日仍正・成交≥1億')}
+    ${sectionLabel('⭐ 精選個股', '前3強勢族群・10日漲幅排序・近5日仍正・成交≥1億', 'sec-top')}
     <div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
       <th style="width:32px;text-align:center;">自選</th>
       ${th('t','code','代號','left')}
@@ -3478,7 +3518,7 @@ function renderStrategy() {
     </tbody></table></div>` : ''}
 
     <!-- 強勢拉回承接 -->
-    ${sectionLabel('強勢拉回承接 🎯', '10日≥+5%・5日-4%~+1%休息・今日止穩・量縮<1.0x・成交≥1億｜搭配TV確認EMA20支撐')}
+    ${sectionLabel('🎯 強勢拉回承接', '10日≥+5%・5日-4%~+1%休息・今日止穩・量縮<1.0x・成交≥1億｜搭配TV確認EMA20支撐', 'sec-pullback')}
     ${pullbacks.length === 0
       ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無「強勢股健康拉回」的個股</div>'
       : `<div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
@@ -3511,7 +3551,7 @@ function renderStrategy() {
 
     <!-- 翻轉觀察：chip 式 -->
     ${reversals.length > 0 ? `
-    ${sectionLabel('翻轉觀察', '10日跌>5%・今日轉正')}
+    ${sectionLabel('🔄 翻轉觀察', '10日跌>5%・今日轉正', 'sec-reversal')}
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;padding-bottom:4px;">
       ${reversals.map(([sec2,s]) => `
         <div style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;" onclick="currentSector='${sec2}';switchTab('stocks')">
@@ -3524,7 +3564,7 @@ function renderStrategy() {
 
     <!-- 族群輪動起漲 -->
     ${rotationSectors.length > 0 ? `
-    ${sectionLabel('族群輪動起漲 ⚡', '族群10日落後大盤・5日轉強>+1%・族群量能≥1.15x｜早期訊號，假訊號較多')}
+    ${sectionLabel('⚡ 族群輪動起漲', '族群10日落後大盤・5日轉強>+1%・族群量能≥1.15x｜早期訊號，假訊號較多', 'sec-rotation')}
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
       ${rotationSectors.map(([sec2,s]) => `
         <div style="display:inline-flex;align-items:center;gap:6px;background:#fefce8;border:1px solid #fde68a;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;" onclick="currentSector='${sec2}';switchTab('stocks')">
@@ -3566,7 +3606,7 @@ function renderStrategy() {
         </tbody></table></div>`}` : ''}
 
     <!-- 起漲候選 -->
-    ${sectionLabel('起漲候選', '5日剛轉正・10日<6%・量能≥1.1x・成交≥0.5億')}
+    ${sectionLabel('🌱 起漲候選', '5日剛轉正・10日<6%・量能≥1.1x・成交≥0.5億', 'sec-breakout')}
     ${breakouts.length === 0
       ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無符合條件的個股</div>'
       : `<div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
@@ -3598,7 +3638,7 @@ function renderStrategy() {
         </tbody></table></div>`}
 
     <!-- 質優動能股 -->
-    ${sectionLabel('質優動能股 💎', 'EPS>0・本益比≤25・10日≥+3%・5日>0・量能≥1.0x・成交≥1億｜適合3週以上波段')}
+    ${sectionLabel('💎 質優動能股', 'EPS>0・本益比≤25・10日≥+3%・5日>0・量能≥1.0x・成交≥1億｜適合3週以上波段', 'sec-quality')}
     ${!hasFundamentals
       ? '<div style="font-size:12px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-bottom:4px;">⚠️ 尚無本益比/EPS 資料，請到「設定」→「更新基本面」後才能計算此清單</div>'
       : qualityMomentum.length === 0
@@ -3634,7 +3674,7 @@ function renderStrategy() {
         </tbody></table></div>`}
 
     <!-- TV 觀察清單 -->
-    ${sectionLabel('TV觀察清單', '確認 EMA20/60 再進場')}
+    ${sectionLabel('📈 TV觀察清單', '確認 EMA20/60 再進場', 'sec-tv')}
     ${tvStocks.length === 0
       ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無符合條件的個股</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
@@ -4384,6 +4424,13 @@ function t4_init() {
   document.getElementById('t4_export').onclick=()=>{const j=document.getElementById('t4_json');if(j){j.select();document.execCommand('copy');alert('已複製！');}};
   t4_render();
 }
+</script>
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">↑</button>
+<script>
+window.addEventListener('scroll', () => {
+  const b = document.getElementById('backToTop');
+  if (b) b.style.display = window.scrollY > 600 ? 'block' : 'none';
+}, { passive: true });
 </script>
 </body>
 </html>
