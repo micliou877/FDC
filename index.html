@@ -737,6 +737,72 @@
     </table>
   </div>
 
+  <!-- 三套選股邏輯說明 -->
+  <div class="data-panel" style="border-left:4px solid #0891b2;">
+    <h3 style="color:#155e75;">「今日精選」三套選股清單怎麼用</h3>
+    <p style="font-size:12px;color:#64748b;margin:0 0 10px;line-height:1.7;">
+      今日精選頁除了原有的精選個股／起漲候選／TV 觀察清單，另有三套互補邏輯，各自對應不同的進場情境。<br>
+      共通原則：<strong>入選只是候選，仍要到 TradingView 確認 EMA20/60 買進條件才進場。</strong>
+    </p>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:#ecfeff;border-bottom:2px solid #a5f3fc;">
+          <th style="padding:8px;text-align:left;color:#155e75;width:120px;">清單</th>
+          <th style="padding:8px;text-align:left;color:#155e75;">篩選條件</th>
+          <th style="padding:8px;text-align:left;color:#155e75;">用途與注意</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:8px;font-weight:700;color:#0891b2;">🎯 強勢拉回承接</td>
+          <td style="padding:8px;color:#475569;line-height:1.7;">
+            近10日 ≥ +5%（確認強勢）<br>
+            近5日 -4%～+1%（休息拉回）<br>
+            今日 ≥ -0.5%（止穩不續跌）<br>
+            量能 &lt; 1.0x（量縮回檔，籌碼穩定）<br>
+            成交 ≥ 1億
+          </td>
+          <td style="padding:8px;color:#475569;line-height:1.7;">
+            對應「不追高、等拉回確認支撐再進場」。強勢股量縮回檔是最好的承接點，去 TradingView 看是否守住 EMA20，守住即為買點。<br>
+            <strong>注意：</strong>量增下跌不會入選（那是出貨疑慮，不是健康拉回）。
+          </td>
+        </tr>
+        <tr style="border-bottom:1px solid #f1f5f9;">
+          <td style="padding:8px;font-weight:700;color:#0891b2;">⚡ 族群輪動起漲</td>
+          <td style="padding:8px;color:#475569;line-height:1.7;">
+            族群近10日落後大盤（還沒表態）<br>
+            族群近5日 &gt; +1%（開始轉強）<br>
+            族群量能 ≥ 1.15x（資金進駐）<br>
+            個股：族群內5日最強前3檔、5日為正、成交 ≥ 1億
+          </td>
+          <td style="padding:8px;color:#475569;line-height:1.7;">
+            比族群排行更早一步抓輪動：資金先進、價格才動。黃色 chip 顯示族群「10日 → 5日」轉強軌跡，點擊可進明細頁。<br>
+            <strong>注意：</strong>早期訊號假訊號較多，倉位要小，且務必等 TradingView 條件通過。
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px;font-weight:700;color:#0891b2;">💎 質優動能股</td>
+          <td style="padding:8px;color:#475569;line-height:1.7;">
+            EPS &gt; 0（有獲利）<br>
+            本益比 ≤ 25（估值合理）<br>
+            近10日 ≥ +3%、近5日 &gt; 0%<br>
+            量能 ≥ 1.0x、成交 ≥ 1億
+          </td>
+          <td style="padding:8px;color:#475569;line-height:1.7;">
+            動能＋基本面雙重確認，避開無獲利的純投機股，適合 3 週以上的波段持有。<br>
+            <strong>注意：</strong>需先在「設定」頁更新基本面（本益比/EPS）資料才會有內容。
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:12px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:6px;padding:10px 12px;color:#155e75;line-height:1.8;">
+      <strong>三套怎麼搭配：</strong><br>
+      行情正熱 → 看「精選個股」追強勢主流，「強勢拉回承接」等回檔買點<br>
+      主流漲多休息 → 看「族群輪動起漲」找下一棒（小倉位試單）<br>
+      想拿長一點的波段 → 從「質優動能股」挑有基本面保護的標的
+    </div>
+  </div>
+
   <!-- 買進條件 -->
   <div class="data-panel">
     <h3>TradingView 買進條件（需全部符合）</h3>
