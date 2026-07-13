@@ -409,7 +409,7 @@
           <th data-sort="pct1" style="text-align:right">當日% ↕</th>
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
-          <th style="text-align:center;white-space:nowrap;cursor:default;">今日建議</th>
+          <th data-sort="advice" style="text-align:center;white-space:nowrap;">今日建議 ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
           <th data-sort="per" style="text-align:right;white-space:nowrap">PER ↕</th>
           <th data-sort="eps" style="text-align:right;white-space:nowrap">EPS ↕</th>
@@ -3128,6 +3128,15 @@ function getActionAdvice(s, hdRet) {
   return { label: "觀察", cls: "watch", reason: "動能不足或漲幅未達加碼門檻，持續觀察" };
 }
 
+// 今日建議排序等級：加碼=2 > 觀察=1 > 減碼=0
+function wlAdviceRank(code) {
+  const s = stockData[code] || {};
+  const hd = (window._t4_data||[]).find(h=>h.code===code);
+  const hdRet = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
+  const label = getActionAdvice(s, hdRet).label;
+  return label === "加碼" ? 2 : label === "觀察" ? 1 : 0;
+}
+
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
   if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
@@ -3780,7 +3789,7 @@ document.getElementById("stockSort").onchange = (e) => { stockSortKey = e.target
 document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.target.value === "__all__" ? null : e.target.value; renderStocks(); };
 
 document.querySelectorAll("#stocksTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (stockSortKey === th.dataset.sort) stockSortDir *= -1; else { stockSortKey = th.dataset.sort; stockSortDir = -1; } renderStocks(); }; });
-document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>d*((b[k]??-999)-(a[k]??-999))); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
+document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>{ if(k==='advice') return d*(wlAdviceRank(b.c)-wlAdviceRank(a.c)); return d*((b[k]??-999)-(a[k]??-999)); }); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
 document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
 document.getElementById("fetchLiveQuotesBtn").onclick = async () => {
   const btn = document.getElementById("fetchLiveQuotesBtn");
