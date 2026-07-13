@@ -128,13 +128,13 @@
       #stocksTable td:nth-child(9) { display: none; }
 
       /* 關注表（#watchlistTable）：隱藏「順序」「金額」「PER」「複製到」「備註」欄 */
-      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9金額 10PER 11EPS 12品質 13作業 14天數 15損益 16複製到 17備註 */
+      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9建議 10金額 11PER 12EPS 13品質 14作業 15天數 16損益 17複製到 18備註 */
       #watchlistTable th:nth-child(1), #watchlistTable td:nth-child(1) { display: none; }
-      #watchlistTable th:nth-child(9),  #watchlistTable td:nth-child(9)  { display: none; }
       #watchlistTable th:nth-child(10), #watchlistTable td:nth-child(10) { display: none; }
       #watchlistTable th:nth-child(11), #watchlistTable td:nth-child(11) { display: none; }
-      #watchlistTable th:nth-child(16), #watchlistTable td:nth-child(16) { display: none; }
+      #watchlistTable th:nth-child(12), #watchlistTable td:nth-child(12) { display: none; }
       #watchlistTable th:nth-child(17), #watchlistTable td:nth-child(17) { display: none; }
+      #watchlistTable th:nth-child(18), #watchlistTable td:nth-child(18) { display: none; }
 
       /* 設定頁：input 全寬（覆蓋 inline style 的固定寬度） */
       #apiToken, #ghTriggerToken { width: 100% !important; box-sizing: border-box; }
@@ -146,6 +146,12 @@
       /* 按鈕觸控目標放大 */
       button.btn { min-height: 40px; }
     }
+
+    /* ====== 今日動作建議標籤 ====== */
+    .advice-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; white-space:nowrap; cursor:help; }
+    .advice-buy   { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+    .advice-sell  { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+    .advice-watch { background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; }
 
     /* ====== 工具 panel 暗色主題 ====== */
     .tool-panel { background:#0f1419; color:#e6e6e6; padding:14px; border-radius:8px; }
@@ -403,6 +409,7 @@
           <th data-sort="pct1" style="text-align:right">當日% ↕</th>
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
+          <th style="text-align:center;white-space:nowrap;cursor:default;">今日建議</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
           <th data-sort="per" style="text-align:right;white-space:nowrap">PER ↕</th>
           <th data-sort="eps" style="text-align:right;white-space:nowrap">EPS ↕</th>
@@ -416,6 +423,9 @@
       </thead>
       <tbody id="watchlistTbody"></tbody>
     </table>
+  </div>
+  <div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.7;">
+    今日建議規則（依操作策略）：<span class="advice-badge advice-buy">加碼</span> 10日漲幅≥3%、5日續強、量能未萎縮｜<span class="advice-badge advice-sell">減碼</span> 持有虧損逾8%停損、當日重挫逾5%、或5日+10日動能同步轉弱｜<span class="advice-badge advice-watch">觀察</span> 其餘情況。滑鼠停在標籤上可看個股判斷原因；最終進場仍以 TradingView 均線確認為準。
   </div>
 </div>
 
@@ -3094,9 +3104,33 @@ window.manualAddGlobalStock = function() {
   alert(`已加入 ${code} 到「${currentWatchGroup}」`);
 };
 
+// ==================== 今日動作建議（依 策略.md 規則）====================
+// 減碼優先於加碼判斷（風險控管優先）；pct5/pct10 需 FinMind 歷史行情才有值
+function getActionAdvice(s, hdRet) {
+  if (s.pct5 == null || s.pct10 == null) {
+    return { label: "觀察", cls: "watch", reason: "尚無5日/10日資料，請到「設定」更新歷史行情" };
+  }
+  if (hdRet !== null && hdRet <= -8) {
+    return { label: "減碼", cls: "sell", reason: `持有虧損 ${hdRet.toFixed(1)}%，已超過 8% 停損線` };
+  }
+  if (s.pct1 != null && s.pct1 <= -5) {
+    return { label: "減碼", cls: "sell", reason: `當日重挫 ${s.pct1.toFixed(1)}%，訊號轉壞` };
+  }
+  if (s.pct5 < 0 && s.pct10 < 0) {
+    return { label: "減碼", cls: "sell", reason: "5日與10日動能同步轉弱，趨勢轉空" };
+  }
+  if (s.pct10 >= 3 && s.pct5 > 0 && (s.pct1 ?? 0) > -2 && (s.volTrend ?? 1) >= 1.0) {
+    return { label: "加碼", cls: "buy", reason: "10日趨勢強、5日動能延續、量能未萎縮" };
+  }
+  if (s.pct5 < 0) {
+    return { label: "觀察", cls: "watch", reason: "5日動能轉負但10日趨勢仍在，等待回穩" };
+  }
+  return { label: "觀察", cls: "watch", reason: "動能不足或漲幅未達加碼門檻，持續觀察" };
+}
+
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="17" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
@@ -3121,6 +3155,7 @@ function renderWatchlist() {
     const hd = (window._t4_data||[]).find(h=>h.code===s.code);
     const hdDays = hd ? Math.floor((Date.now()-new Date(hd.date))/86400000) : null;
     const hdRet  = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
+    const adv = getActionAdvice(s, hdRet);
     return `
     <tr id="wlr_${idx}" ondragover="wlDragOver(event,${idx})" ondrop="wlDrop(event,${idx})" ondragend="wlDragEnd(event)" ondragstart="wlDragStart(event,${idx})" style="transition:opacity 0.15s;">
       <td style="text-align:center;padding:2px 4px;color:#94a3b8;user-select:none;">
@@ -3137,6 +3172,7 @@ function renderWatchlist() {
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+      <td style="text-align:center;"><span class="advice-badge advice-${adv.cls}" title="${adv.reason}">${adv.label}</span></td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
       <td style="text-align:right;color:#64748b;font-size:11px;">${s.per != null ? s.per.toFixed(1) : "-"}</td>
       <td style="text-align:right;color:#64748b;font-size:11px;">${s.eps != null ? s.eps.toFixed(2) : "-"}</td>
