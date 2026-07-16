@@ -129,13 +129,13 @@
       #stocksTable td:nth-child(9) { display: none; }
 
       /* 關注表（#watchlistTable）：隱藏「順序」「金額」「PER」「複製到」「備註」欄 */
-      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9金額 10PER 11EPS 12品質 13作業 14天數 15損益 16複製到 17備註 */
+      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9建議 10金額 11PER 12EPS 13品質 14作業 15天數 16損益 17複製到 18備註 */
       #watchlistTable th:nth-child(1), #watchlistTable td:nth-child(1) { display: none; }
-      #watchlistTable th:nth-child(9),  #watchlistTable td:nth-child(9)  { display: none; }
       #watchlistTable th:nth-child(10), #watchlistTable td:nth-child(10) { display: none; }
       #watchlistTable th:nth-child(11), #watchlistTable td:nth-child(11) { display: none; }
-      #watchlistTable th:nth-child(16), #watchlistTable td:nth-child(16) { display: none; }
+      #watchlistTable th:nth-child(12), #watchlistTable td:nth-child(12) { display: none; }
       #watchlistTable th:nth-child(17), #watchlistTable td:nth-child(17) { display: none; }
+      #watchlistTable th:nth-child(18), #watchlistTable td:nth-child(18) { display: none; }
 
       /* 設定頁：input 全寬（覆蓋 inline style 的固定寬度） */
       #apiToken, #ghTriggerToken { width: 100% !important; box-sizing: border-box; }
@@ -147,6 +147,12 @@
       /* 按鈕觸控目標放大 */
       button.btn { min-height: 40px; }
     }
+
+    /* ====== 今日動作建議標籤 ====== */
+    .advice-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; white-space:nowrap; cursor:help; }
+    .advice-buy   { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+    .advice-sell  { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+    .advice-watch { background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; }
 
     /* ====== 工具 panel 暗色主題 ====== */
     .tool-panel { background:#0f1419; color:#e6e6e6; padding:14px; border-radius:8px; }
@@ -404,6 +410,7 @@
           <th data-sort="pct1" style="text-align:right">當日% ↕</th>
           <th data-sort="pct5" style="text-align:right">5日% ↕</th>
           <th data-sort="pct10" style="text-align:right">10日% ↕</th>
+          <th data-sort="advice" style="text-align:center;white-space:nowrap;">今日建議 ↕</th>
           <th data-sort="amount" style="text-align:right">金額(億) ↕</th>
           <th data-sort="per" style="text-align:right;white-space:nowrap">PER ↕</th>
           <th data-sort="eps" style="text-align:right;white-space:nowrap">EPS ↕</th>
@@ -417,6 +424,9 @@
       </thead>
       <tbody id="watchlistTbody"></tbody>
     </table>
+  </div>
+  <div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.7;">
+    今日建議規則（依操作策略）：<span class="advice-badge advice-buy">加碼</span> 10日漲幅≥3%、5日續強、量能未萎縮｜<span class="advice-badge advice-sell">減碼</span> 持有虧損逾8%停損、當日重挫逾5%、或5日+10日動能同步轉弱｜<span class="advice-badge advice-watch">觀察</span> 其餘情況。滑鼠停在標籤上可看個股判斷原因；最終進場仍以 TradingView 均線確認為準。
   </div>
 </div>
 
@@ -1225,7 +1235,7 @@ const STOCK_EXCHANGE = {
   "1466":"TWSE","1474":"TWSE","1476":"TWSE","1503":"TWSE","1504":"TWSE",
   "1513":"TWSE","1514":"TWSE","1519":"TWSE","1536":"TWSE","1560":"TWSE",
   "1590":"TWSE","1603":"TWSE","1604":"TWSE","1605":"TWSE","1609":"TWSE",
-  "1611":"TWSE","1612":"TWSE","1615":"TWSE","1626":"TWSE","1815":"TWSE",
+  "1611":"TWSE","1612":"TWSE","1615":"TWSE","1626":"TWSE","1815":"TPEX",
   "2002":"TWSE","2049":"TWSE","2059":"TWSE","2207":"TWSE","2208":"TWSE",
   "2233":"TWSE","2301":"TWSE","2303":"TWSE","2308":"TWSE","2313":"TWSE",
   "2317":"TWSE","2324":"TWSE","2327":"TWSE","2329":"TWSE","2330":"TWSE",
@@ -1238,56 +1248,56 @@ const STOCK_EXCHANGE = {
   "2451":"TWSE","2454":"TWSE","2455":"TWSE","2467":"TWSE","2471":"TWSE",
   "2472":"TWSE","2474":"TWSE","2478":"TWSE","2480":"TWSE","2481":"TWSE","2489":"TWSE",
   "2492":"TWSE","2603":"TWSE","2609":"TWSE","2610":"TWSE","2615":"TWSE",
-  "2618":"TWSE","2630":"TWSE","2634":"TWSE","2637":"TWSE","2644":"TWSE",
+  "2618":"TWSE","2630":"TWSE","2634":"TWSE","2637":"TWSE","2644":"TPEX",
   "2645":"TWSE","2706":"TWSE","2723":"TWSE","2727":"TWSE","2731":"TWSE",
   "2881":"TWSE","2882":"TWSE","2884":"TWSE","2886":"TWSE","2891":"TWSE",
-  "2453":"TWSE","2912":"TWSE","2929":"TWSE","2949":"TWSE","3008":"TWSE","3034":"TWSE",
-  "3036":"TWSE","3037":"TWSE","3044":"TWSE","3231":"TWSE","3260":"TWSE","3443":"TWSE",
+  "2453":"TWSE","2912":"TWSE","2929":"TWSE","2949":"TPEX","3008":"TWSE","3034":"TWSE",
+  "3036":"TWSE","3037":"TWSE","3044":"TWSE","3231":"TWSE","3260":"TPEX","3443":"TWSE",
   "3481":"TWSE","3491":"TPEX","3515":"TWSE","3673":"TWSE","3702":"TWSE","3706":"TWSE",
   "3711":"TWSE","4763":"TWSE","4938":"TWSE","4958":"TWSE","4967":"TWSE",
-  "5285":"TWSE","5299":"TPEX","5328":"TWSE","5347":"TPEX","5371":"TPEX","5536":"TPEX",
-  "5706":"TWSE","5871":"TWSE","5903":"TWSE","6168":"TWSE","6214":"TWSE",
+  "5285":"TWSE","5299":"TPEX","5328":"TPEX","5347":"TPEX","5371":"TPEX","5536":"TPEX",
+  "5706":"TWSE","5871":"TWSE","5903":"TPEX","6168":"TWSE","6214":"TWSE",
   "6239":"TWSE","6414":"TWSE","6488":"TPEX","6669":"TWSE","6753":"TWSE",
   "6770":"TWSE","7750":"TWSE","8016":"TWSE","8046":"TWSE","8473":"TWSE",
   "9910":"TWSE","9914":"TWSE","9919":"TWSE","9921":"TWSE","9941":"TWSE",
   // ── 上櫃 TPEX ─────────────────────────────────
-  "1597":"TPEX","1784":"TPEX",
-  "2231":"TPEX","2236":"TPEX","2359":"TPEX","2464":"TPEX","2494":"TPEX",
-  "3005":"TPEX","3006":"TPEX","3013":"TPEX","3014":"TPEX","3016":"TWSE",
-  "3017":"TWSE","3022":"TWSE","3024":"TPEX","3026":"TWSE","3027":"TPEX",
-  "3029":"TPEX","3030":"TPEX","3032":"TPEX","3035":"TWSE","3060":"TPEX","3081":"TPEX",
+  "1597":"TWSE","1784":"TPEX",
+  "2231":"TWSE","2236":"TWSE","2359":"TWSE","2464":"TWSE","2494":"TPEX",
+  "3005":"TWSE","3006":"TWSE","3013":"TWSE","3014":"TWSE","3016":"TWSE",
+  "3017":"TWSE","3022":"TWSE","3024":"TWSE","3026":"TWSE","3027":"TWSE",
+  "3029":"TWSE","3030":"TWSE","3032":"TWSE","3035":"TWSE","3060":"TWSE","3081":"TPEX",
   "3088":"TPEX","3105":"TPEX","3131":"TPEX","3163":"TPEX","3167":"TWSE",
-  "3189":"TPEX","3324":"TPEX","3357":"TPEX","3363":"TPEX","3376":"TPEX",
-  "3402":"TPEX","3413":"TPEX","3416":"TPEX","3450":"TPEX","3454":"TPEX",
-  "3479":"TPEX","3483":"TPEX","3530":"TPEX","3551":"TPEX","3556":"TPEX","3558":"TPEX",
-  "3564":"TPEX","3583":"TPEX","3594":"TPEX","3596":"TPEX","3653":"TPEX","3661":"TPEX",
-  "3665":"TPEX","3680":"TPEX","3686":"TPEX","3693":"TPEX","3704":"TPEX",
+  "3189":"TWSE","3324":"TPEX","3357":"TPEX","3363":"TPEX","3376":"TWSE",
+  "3402":"TPEX","3413":"TWSE","3416":"TWSE","3450":"TWSE","3454":"TPEX",
+  "3479":"TPEX","3483":"TPEX","3530":"TWSE","3551":"TPEX","3556":"TPEX","3558":"TPEX",
+  "3564":"TPEX","3583":"TWSE","3594":"TPEX","3596":"TWSE","3653":"TWSE","3661":"TWSE",
+  "3665":"TWSE","3680":"TPEX","3686":"TWSE","3693":"TPEX","3704":"TWSE",
   "3707":"TPEX",
-  "4540":"TPEX","4541":"TPEX","4576":"TPEX","4585":"TPEX","4749":"TPEX",
-  "4772":"TPEX","4906":"TPEX","4916":"TPEX","4943":"TPEX","4953":"TPEX",
-  "4961":"TPEX","4966":"TPEX","4971":"TPEX","4977":"TPEX","4979":"TPEX",
-  "5222":"TWSE","5258":"TPEX","5269":"TPEX","5274":"TPEX","5289":"TPEX",
-  "5340":"TPEX","5388":"TPEX","5439":"TPEX","5443":"TPEX","5471":"TWSE",
+  "4540":"TWSE","4541":"TPEX","4576":"TWSE","4585":"TWSE","4749":"TPEX",
+  "4772":"TPEX","4906":"TWSE","4916":"TWSE","4943":"TWSE","4953":"TPEX",
+  "4961":"TWSE","4966":"TPEX","4971":"TPEX","4977":"TWSE","4979":"TPEX",
+  "5222":"TWSE","5258":"TWSE","5269":"TWSE","5274":"TPEX","5289":"TPEX",
+  "5340":"TPEX","5388":"TWSE","5439":"TPEX","5443":"TPEX","5471":"TWSE",
   "5474":"TPEX",
-  "6112":"TPEX","6116":"TPEX","6117":"TPEX","6121":"TPEX","6125":"TPEX",
-  "6128":"TPEX","6138":"TPEX","6139":"TWSE","6147":"TPEX","6155":"TWSE",
-  "6163":"TPEX","6166":"TPEX","6173":"TPEX","6182":"TPEX","6187":"TPEX",
-  "6188":"TPEX","6196":"TWSE","6202":"TWSE","6206":"TPEX","6213":"TPEX",
-  "6223":"TPEX","6244":"TPEX","6245":"TPEX","6263":"TPEX","6271":"TPEX",
-  "6274":"TPEX","6278":"TPEX","6282":"TPEX","6285":"TPEX","6286":"TWSE",
-  "6415":"TWSE","6416":"TWSE","6435":"TPEX","6442":"TPEX","6443":"TPEX","6451":"TPEX",
-  "6485":"TPEX","6510":"TPEX","6515":"TPEX","6531":"TWSE","6561":"TPEX",
+  "6112":"TWSE","6116":"TWSE","6117":"TWSE","6121":"TPEX","6125":"TPEX",
+  "6128":"TWSE","6138":"TPEX","6139":"TWSE","6147":"TPEX","6155":"TWSE",
+  "6163":"TPEX","6166":"TWSE","6173":"TPEX","6182":"TPEX","6187":"TPEX",
+  "6188":"TPEX","6196":"TWSE","6202":"TWSE","6206":"TWSE","6213":"TWSE",
+  "6223":"TPEX","6244":"TPEX","6245":"TPEX","6263":"TPEX","6271":"TWSE",
+  "6274":"TPEX","6278":"TWSE","6282":"TWSE","6285":"TWSE","6286":"TWSE",
+  "6415":"TWSE","6416":"TWSE","6435":"TPEX","6442":"TWSE","6443":"TWSE","6451":"TWSE",
+  "6485":"TPEX","6510":"TPEX","6515":"TWSE","6531":"TWSE","6561":"TPEX",
   "6569":"TPEX","6570":"TPEX","6573":"TWSE","6640":"TPEX","6643":"TPEX",
-  "6667":"TPEX","6680":"TPEX","6689":"TPEX","6690":"TPEX","6691":"TWSE",
-  "6739":"TPEX","6788":"TPEX","6789":"TPEX","6805":"TPEX","6811":"TPEX",
+  "6667":"TPEX","6680":"TPEX","6689":"TWSE","6690":"TPEX","6691":"TWSE",
+  "6739":"TPEX","6788":"TPEX","6789":"TWSE","6805":"TWSE","6811":"TPEX",
   "6829":"TPEX","6870":"TPEX",
-  "7703":"TPEX","7717":"TPEX","7719":"TPEX","7769":"TPEX",
-  "8021":"TWSE","8028":"TPEX","8033":"TWSE","8038":"TPEX","8043":"TPEX",
-  "8044":"TPEX","8048":"TPEX","8050":"TPEX","8069":"TPEX","8081":"TPEX",
-  "8086":"TPEX","8099":"TPEX","8101":"TPEX","8114":"TPEX","8121":"TPEX","8131":"TPEX",
-  "8210":"TPEX","8222":"TPEX","8234":"TPEX","8255":"TPEX","8261":"TWSE",
-  "8299":"TPEX","8358":"TPEX","8374":"TPEX",
-  "9802":"TPEX",
+  "7703":"TPEX","7717":"TPEX","7719":"TPEX","7769":"TWSE",
+  "8021":"TWSE","8028":"TWSE","8033":"TWSE","8038":"TPEX","8043":"TPEX",
+  "8044":"TPEX","8048":"TPEX","8050":"TPEX","8069":"TPEX","8081":"TWSE",
+  "8086":"TPEX","8099":"TPEX","8101":"TWSE","8114":"TWSE","8121":"TPEX","8131":"TWSE",
+  "8210":"TWSE","8222":"TWSE","8234":"TPEX","8255":"TPEX","8261":"TWSE",
+  "8299":"TPEX","8358":"TPEX","8374":"TWSE",
+  "9802":"TWSE",
 };
 
 // 後備（STOCK_EXCHANGE 未涵蓋的股票才會用到）
@@ -1921,8 +1931,11 @@ function getTVLink(code, market) {
   }
   if (market === 'JP') return `https://tw.tradingview.com/chart/?symbol=TSE:${code}`;
   if (market === 'KR') return `https://tw.tradingview.com/chart/?symbol=KRX:${code}`;
-  // 台股：STOCK_EXCHANGE > MANUAL_MARKETS > FinMind market > TPEX_CODES > 預設 TWSE
-  const twEx = STOCK_EXCHANGE[code] || MANUAL_MARKETS[code] || market || (TPEX_CODES.has(code) ? 'TPEX' : 'TWSE');
+  // 台股：MANUAL_MARKETS（手動覆寫）> 報價實測市場（quotes.json 對 Yahoo .TW/.TWO 實測，
+  // 上櫃轉上市等異動自動反映）> STOCK_EXCHANGE 靜態表 > FinMind market > TPEX_CODES > 預設 TWSE
+  const liveMkt = stockData[code]?.market;
+  const liveEx = (liveMkt === 'TWSE' || liveMkt === 'TPEX') ? liveMkt : null;
+  const twEx = MANUAL_MARKETS[code] || liveEx || STOCK_EXCHANGE[code] || market || (TPEX_CODES.has(code) ? 'TPEX' : 'TWSE');
   return `https://tw.tradingview.com/chart/?symbol=${twEx}:${code}`;
 }
 
@@ -3095,9 +3108,42 @@ window.manualAddGlobalStock = function() {
   alert(`已加入 ${code} 到「${currentWatchGroup}」`);
 };
 
+// ==================== 今日動作建議（依 策略.md 規則）====================
+// 減碼優先於加碼判斷（風險控管優先）；pct5/pct10 需 FinMind 歷史行情才有值
+function getActionAdvice(s, hdRet) {
+  if (s.pct5 == null || s.pct10 == null) {
+    return { label: "觀察", cls: "watch", reason: "尚無5日/10日資料，請到「設定」更新歷史行情" };
+  }
+  if (hdRet !== null && hdRet <= -8) {
+    return { label: "減碼", cls: "sell", reason: `持有虧損 ${hdRet.toFixed(1)}%，已超過 8% 停損線` };
+  }
+  if (s.pct1 != null && s.pct1 <= -5) {
+    return { label: "減碼", cls: "sell", reason: `當日重挫 ${s.pct1.toFixed(1)}%，訊號轉壞` };
+  }
+  if (s.pct5 < 0 && s.pct10 < 0) {
+    return { label: "減碼", cls: "sell", reason: "5日與10日動能同步轉弱，趨勢轉空" };
+  }
+  if (s.pct10 >= 3 && s.pct5 > 0 && (s.pct1 ?? 0) > -2 && (s.volTrend ?? 1) >= 1.0) {
+    return { label: "加碼", cls: "buy", reason: "10日趨勢強、5日動能延續、量能未萎縮" };
+  }
+  if (s.pct5 < 0) {
+    return { label: "觀察", cls: "watch", reason: "5日動能轉負但10日趨勢仍在，等待回穩" };
+  }
+  return { label: "觀察", cls: "watch", reason: "動能不足或漲幅未達加碼門檻，持續觀察" };
+}
+
+// 今日建議排序等級：加碼=2 > 觀察=1 > 減碼=0
+function wlAdviceRank(code) {
+  const s = stockData[code] || {};
+  const hd = (window._t4_data||[]).find(h=>h.code===code);
+  const hdRet = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
+  const label = getActionAdvice(s, hdRet).label;
+  return label === "加碼" ? 2 : label === "觀察" ? 1 : 0;
+}
+
 function renderWatchlist() {
   updateWatchGroupOptions(); const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="17" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
@@ -3122,6 +3168,7 @@ function renderWatchlist() {
     const hd = (window._t4_data||[]).find(h=>h.code===s.code);
     const hdDays = hd ? Math.floor((Date.now()-new Date(hd.date))/86400000) : null;
     const hdRet  = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
+    const adv = getActionAdvice(s, hdRet);
     return `
     <tr id="wlr_${idx}" ondragover="wlDragOver(event,${idx})" ondrop="wlDrop(event,${idx})" ondragend="wlDragEnd(event)" ondragstart="wlDragStart(event,${idx})" style="transition:opacity 0.15s;">
       <td style="text-align:center;padding:2px 4px;color:#94a3b8;user-select:none;">
@@ -3138,6 +3185,7 @@ function renderWatchlist() {
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
+      <td style="text-align:center;"><span class="advice-badge advice-${adv.cls}" title="${adv.reason}">${adv.label}</span></td>
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
       <td style="text-align:right;color:#64748b;font-size:11px;">${s.per != null ? s.per.toFixed(1) : "-"}</td>
       <td style="text-align:right;color:#64748b;font-size:11px;">${s.eps != null ? s.eps.toFixed(2) : "-"}</td>
@@ -3745,7 +3793,7 @@ document.getElementById("stockSort").onchange = (e) => { stockSortKey = e.target
 document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.target.value === "__all__" ? null : e.target.value; renderStocks(); };
 
 document.querySelectorAll("#stocksTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (stockSortKey === th.dataset.sort) stockSortDir *= -1; else { stockSortKey = th.dataset.sort; stockSortDir = -1; } renderStocks(); }; });
-document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>d*((b[k]??-999)-(a[k]??-999))); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
+document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>{ if(k==='advice') return d*(wlAdviceRank(b.c)-wlAdviceRank(a.c)); return d*((b[k]??-999)-(a[k]??-999)); }); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
 document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
 document.getElementById("fetchLiveQuotesBtn").onclick = async () => {
   const btn = document.getElementById("fetchLiveQuotesBtn");
