@@ -2912,9 +2912,9 @@ function renderRanking() {
     if(hb) {
       const medals=['🥇','🥈','🥉'], allocs=['35-40%','20-25%','10-15%'];
       hb.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:4px">${
-        top3.map((h,i)=>`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px">
+        top3.map((h,i)=>`<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px;cursor:pointer;" onclick="event.stopPropagation();currentSector='${h.name}';switchTab('stocks')">
           <div style="font-size:11px;color:#92400e">${medals[i]} ${['主力倉','次要倉','觀察倉'][i]}</div>
-          <div style="font-weight:700;font-size:13px;margin:2px 0;color:#78350f">${h.name}</div>
+          <div style="font-weight:700;font-size:13px;margin:2px 0;color:#78350f;text-decoration:underline;">${h.name}</div>
           <div style="font-size:11px;color:#d97706">熱度 <strong>${h.score.toFixed(1)}</strong>　建議 <strong>${allocs[i]}</strong></div>
         </div>`).join('')
       }</div><div style="margin-top:6px;font-size:10px;color:#b45309">公式：10日漲幅×0.5 + 5日漲幅×0.3 + 成交金額標準化×0.2</div>`;
