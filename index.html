@@ -597,6 +597,10 @@
       <button class="btn primary" onclick="connectCloud()">連線</button>
     </div>
     <div id="cloudStatus" style="font-size: 12px; color: #92400e; font-weight: 600;">目前為本機模式</div>
+    <div style="margin-top:10px;">
+      <button class="btn" onclick="forceHardRefresh()">🔄 強制重新整理（清除快取）</button>
+      <p style="font-size:11px;color:#64748b;margin-top:4px;">畫面資料看起來過舊、或同步無效時按這個，會清掉瀏覽器快取並重新載入最新版網頁。</p>
+    </div>
   </div>
 
   <div class="data-panel">
@@ -1647,6 +1651,20 @@ async function syncPull() {
     }
   } catch (e) {}
 }
+
+window.forceHardRefresh = async function() {
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (e) {}
+  location.href = location.pathname + '?_r=' + Date.now();
+};
 
 // ==================== 本地資料儲存 ====================
 function saveLocalOnly() {
