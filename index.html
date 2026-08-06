@@ -1804,6 +1804,7 @@ window.toggleWatchlist = function(code) {
   } else {
     watchlists[currentWatchGroup].push(code);
   }
+  watchlistsTs = Date.now();
   saveData(); updateUI();
   if (document.getElementById("searchInput").value) handleSearch();
 };
@@ -3072,6 +3073,7 @@ window.copyToGroup = function(code, targetGroup) {
     alert(`${code} 已在「${targetGroup}」中`); return;
   }
   watchlists[targetGroup].push(code);
+  watchlistsTs = Date.now();
   saveData();
   const sel = document.getElementById(`cpy_${code}`);
   if (sel) { sel.style.color = '#166534'; setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800); }
@@ -3088,6 +3090,7 @@ window.addToWatchGroup = function(sel, code, market) {
     const globalEntry = (GLOBAL_LIST[market]||[]).find(g => g.code === code);
     stockMeta[code] = { market, name: globalEntry?.name || `自訂標的（${code}）` };
   }
+  watchlistsTs = Date.now();
   saveData();
   if (targetGroup === currentWatchGroup) renderWatchlist();
   handleSearch();
@@ -3133,6 +3136,7 @@ window.manualAddGlobalStock = function() {
   const name = prompt("標的名稱（選填，方便辨識）：", code) || code;
   watchlists[currentWatchGroup].push(code);
   stockMeta[code] = { market: 'US', name };
+  watchlistsTs = Date.now();
   saveData();
   renderWatchlist();
   alert(`已加入 ${code} 到「${currentWatchGroup}」`);
@@ -3269,6 +3273,7 @@ window.wlDrop = function(e, idx) {
   list.splice(idx, 0, moved);
   watchlists[currentWatchGroup] = list;
   _wlDragIdx = null;
+  watchlistsTs = Date.now();
   saveData(); renderWatchlist();
 };
 window.wlMove = function(idx, dir) {
@@ -3277,6 +3282,7 @@ window.wlMove = function(idx, dir) {
   if (newIdx < 0 || newIdx >= list.length) return;
   [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
   watchlists[currentWatchGroup] = list;
+  watchlistsTs = Date.now();
   saveData(); renderWatchlist();
 };
 
@@ -3823,7 +3829,7 @@ document.getElementById("stockSort").onchange = (e) => { stockSortKey = e.target
 document.getElementById("sectorSelect").onchange = (e) => { currentSector = e.target.value === "__all__" ? null : e.target.value; renderStocks(); };
 
 document.querySelectorAll("#stocksTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (stockSortKey === th.dataset.sort) stockSortDir *= -1; else { stockSortKey = th.dataset.sort; stockSortDir = -1; } renderStocks(); }; });
-document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>{ if(k==='advice') return d*(wlAdviceRank(b.c)-wlAdviceRank(a.c)); return d*((b[k]??-999)-(a[k]??-999)); }); watchlists[currentWatchGroup]=sorted.map(r=>r.c); saveData(); renderWatchlist(); }; });
+document.querySelectorAll("#watchlistTable th").forEach(th => { if(th.dataset.sort) th.onclick = () => { if (wlSortKey === th.dataset.sort) wlSortDir *= -1; else { wlSortKey = th.dataset.sort; wlSortDir = -1; } const k=wlSortKey,d=wlSortDir; const sorted=[...(watchlists[currentWatchGroup]||[])].map(c=>({c,...(stockData[c]||{})})).sort((a,b)=>{ if(k==='advice') return d*(wlAdviceRank(b.c)-wlAdviceRank(a.c)); return d*((b[k]??-999)-(a[k]??-999)); }); watchlists[currentWatchGroup]=sorted.map(r=>r.c); watchlistsTs = Date.now(); saveData(); renderWatchlist(); }; });
 document.getElementById("fetchFinMindBtn").onclick = fetchFinMindData;
 document.getElementById("fetchLiveQuotesBtn").onclick = async () => {
   const btn = document.getElementById("fetchLiveQuotesBtn");
