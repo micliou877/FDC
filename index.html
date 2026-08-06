@@ -246,6 +246,14 @@
     .sec-nav a .cnt { font-size:11px; font-weight:700; color:#2563eb; background:#eff6ff; border-radius:10px; padding:0 6px; min-width:14px; text-align:center; }
     .sec-nav a .cnt.zero { color:#94a3b8; background:#f1f5f9; }
     .sec-anchor { scroll-margin-top: 64px; }
+    .strat-collapse { scroll-margin-top: 64px; border-top:1px solid #e5e7eb; margin-top:8px; }
+    .strat-collapse > summary { padding:14px 4px; cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; }
+    .strat-collapse > summary::-webkit-details-marker { display:none; }
+    .strat-collapse > summary .strat-title { font-size:13px; font-weight:700; color:#334155; }
+    .strat-collapse > summary .strat-hint { font-size:11px; font-weight:400; color:#9ca3af; }
+    .strat-collapse > summary .strat-chev { margin-left:auto; font-size:11px; color:#94a3b8; display:flex; align-items:center; gap:4px; transition:transform .15s; }
+    .strat-collapse[open] > summary .strat-chev { transform:rotate(90deg); }
+    .strat-collapse > .strat-collapse-body { padding-top:4px; }
     .stocks-table tbody tr:nth-child(even):not(:hover):not(.row-selected) { background:#fafbfd; }
     #backToTop { position:fixed; right:16px; bottom:20px; width:42px; height:42px; border-radius:50%; background:rgba(37,99,235,0.88); color:#fff; border:none; font-size:18px; cursor:pointer; display:none; z-index:998; box-shadow:0 2px 8px rgba(0,0,0,0.25); }
     #backToTop:hover { background:#1d4ed8; }
@@ -3466,6 +3474,17 @@ function renderStrategy() {
       <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:8px;">${hint}</span>
     </div>`;
 
+  // 次要清單預設收合，展開後內容與原本完全一致；點快速導覽會自動展開對應區塊
+  const collapseSection = (id, title, hint, count, bodyHtml) =>
+    `<details id="${id}" class="strat-collapse">
+      <summary>
+        <span class="strat-title">${title}</span>
+        <span class="strat-hint">${hint}</span>
+        <span class="strat-chev">${count} 檔 ▸</span>
+      </summary>
+      <div class="strat-collapse-body">${bodyHtml}</div>
+    </details>`;
+
   const sortedPlan = [...dailyPlan].map(p => ({...p, ...stockData[p.code]})).sort((a,b) => {
     const k = window._ss.pk, d = window._ss.pd;
     if (k === 'code' || k === 'name') return d * (a[k]||'').localeCompare(b[k]||'');
@@ -3542,16 +3561,16 @@ function renderStrategy() {
 
   // 區塊快速導覽：只列出會渲染的區塊，數字為該清單目前筆數
   const secNavHtml = `<div class="sec-nav">${[
-    ['sec-longs','🚀 推薦族群', longs.length],
-    topStocks.length ? ['sec-top','⭐ 精選個股', Math.min(topStocks.length, 9)] : null,
-    ['sec-pullback','🎯 拉回承接', pullbacks.length],
-    reversals.length ? ['sec-reversal','🔄 翻轉觀察', reversals.length] : null,
-    rotationSectors.length ? ['sec-rotation','⚡ 族群輪動', rotations.length] : null,
-    ['sec-breakout','🌱 起漲候選', breakouts.length],
-    ['sec-quality','💎 質優動能', hasFundamentals ? qualityMomentum.length : 0],
-    ['sec-tv','📈 TV觀察', tvStocks.length],
-  ].filter(Boolean).map(([id, label, cnt]) =>
-    `<a href="#${id}">${label}<span class="cnt${cnt ? '' : ' zero'}">${cnt}</span></a>`).join('')}</div>`;
+    ['sec-longs','🚀 推薦族群', longs.length, false],
+    topStocks.length ? ['sec-top','⭐ 精選個股', Math.min(topStocks.length, 9), false] : null,
+    ['sec-pullback','🎯 拉回承接', pullbacks.length, true],
+    reversals.length ? ['sec-reversal','🔄 翻轉觀察', reversals.length, true] : null,
+    rotationSectors.length ? ['sec-rotation','⚡ 族群輪動', rotations.length, true] : null,
+    ['sec-breakout','🌱 起漲候選', breakouts.length, true],
+    ['sec-quality','💎 質優動能', hasFundamentals ? qualityMomentum.length : 0, true],
+    ['sec-tv','📈 TV觀察', tvStocks.length, true],
+  ].filter(Boolean).map(([id, label, cnt, collapsible]) =>
+    `<a href="#${id}" ${collapsible ? `onclick="const d=document.getElementById('${id}'); if(d) d.open=true;"` : ''}>${label}<span class="cnt${cnt ? '' : ' zero'}">${cnt}</span></a>`).join('')}</div>`;
 
   panel.innerHTML = `
     <!-- 台灣 VIX -->
@@ -3620,9 +3639,9 @@ function renderStrategy() {
       </tr>`).join('')}
     </tbody></table></div>` : ''}
 
-    <!-- 強勢拉回承接 -->
-    ${sectionLabel('🎯 強勢拉回承接', '10日≥+5%・5日-4%~+1%休息・今日止穩・量縮<1.0x・成交≥1億｜搭配TV確認EMA20支撐', 'sec-pullback')}
-    ${pullbacks.length === 0
+    <!-- 強勢拉回承接（預設收合） -->
+    ${collapseSection('sec-pullback', '🎯 強勢拉回承接', '10日≥+5%・5日-4%~+1%休息・今日止穩・量縮<1.0x・成交≥1億｜搭配TV確認EMA20支撐', pullbacks.length,
+      pullbacks.length === 0
       ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無「強勢股健康拉回」的個股</div>'
       : `<div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
           <th style="width:32px;text-align:center;">自選</th>
@@ -3650,11 +3669,11 @@ function renderStrategy() {
             <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
             <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`).join('')}
-        </tbody></table></div>`}
+        </tbody></table></div>`
+    )}
 
-    <!-- 翻轉觀察：chip 式 -->
-    ${reversals.length > 0 ? `
-    ${sectionLabel('🔄 翻轉觀察', '10日跌>5%・今日轉正', 'sec-reversal')}
+    <!-- 翻轉觀察：chip 式（預設收合） -->
+    ${reversals.length > 0 ? collapseSection('sec-reversal', '🔄 翻轉觀察', '10日跌>5%・今日轉正', reversals.length, `
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px;padding-bottom:4px;">
       ${reversals.map(([sec2,s]) => `
         <div style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;" onclick="currentSector='${sec2}';switchTab('stocks')">
@@ -3663,11 +3682,10 @@ function renderStrategy() {
           <span style="color:#ccc;">→</span>
           <span class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</span>
         </div>`).join('')}
-    </div>` : ''}
+    </div>`) : ''}
 
-    <!-- 族群輪動起漲 -->
-    ${rotationSectors.length > 0 ? `
-    ${sectionLabel('⚡ 族群輪動起漲', '族群10日落後大盤・5日轉強>+1%・族群量能≥1.15x｜早期訊號，假訊號較多', 'sec-rotation')}
+    <!-- 族群輪動起漲（預設收合） -->
+    ${rotationSectors.length > 0 ? collapseSection('sec-rotation', '⚡ 族群輪動起漲', '族群10日落後大盤・5日轉強>+1%・族群量能≥1.15x｜早期訊號，假訊號較多', rotations.length, `
     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
       ${rotationSectors.map(([sec2,s]) => `
         <div style="display:inline-flex;align-items:center;gap:6px;background:#fefce8;border:1px solid #fde68a;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;" onclick="currentSector='${sec2}';switchTab('stocks')">
@@ -3706,11 +3724,11 @@ function renderStrategy() {
             <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
             <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`).join('')}
-        </tbody></table></div>`}` : ''}
+        </tbody></table></div>`}`) : ''}
 
-    <!-- 起漲候選 -->
-    ${sectionLabel('🌱 起漲候選', '5日剛轉正・10日<6%・量能≥1.1x・成交≥0.5億', 'sec-breakout')}
-    ${breakouts.length === 0
+    <!-- 起漲候選（預設收合） -->
+    ${collapseSection('sec-breakout', '🌱 起漲候選', '5日剛轉正・10日<6%・量能≥1.1x・成交≥0.5億', breakouts.length,
+      breakouts.length === 0
       ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無符合條件的個股</div>'
       : `<div style="overflow-x:auto;margin-bottom:4px;"><table class="stocks-table"><thead><tr>
           <th style="width:32px;text-align:center;">自選</th>
@@ -3738,11 +3756,12 @@ function renderStrategy() {
             <td style="text-align:center;font-size:12px;" title="${stockData[s.code]?.yoy!=null?'YOY: '+(stockData[s.code].yoy>0?'+':'')+stockData[s.code].yoy+'%':''}">${stockData[s.code]?.qualityTag??'-'}</td>
             <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`).join('')}
-        </tbody></table></div>`}
+        </tbody></table></div>`
+    )}
 
-    <!-- 質優動能股 -->
-    ${sectionLabel('💎 質優動能股', 'EPS>0・本益比≤25・10日≥+3%・5日>0・量能≥1.0x・成交≥1億｜適合3週以上波段', 'sec-quality')}
-    ${!hasFundamentals
+    <!-- 質優動能股（預設收合） -->
+    ${collapseSection('sec-quality', '💎 質優動能股', 'EPS>0・本益比≤25・10日≥+3%・5日>0・量能≥1.0x・成交≥1億｜適合3週以上波段', hasFundamentals ? qualityMomentum.length : 0,
+      !hasFundamentals
       ? '<div style="font-size:12px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 12px;margin-bottom:4px;">⚠️ 尚無本益比/EPS 資料，請到「設定」→「更新基本面」後才能計算此清單</div>'
       : qualityMomentum.length === 0
       ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無符合條件的個股</div>'
@@ -3774,11 +3793,12 @@ function renderStrategy() {
             <td style="text-align:right;">${volTrendBadge(s.volTrend)}</td>
             <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
           </tr>`).join('')}
-        </tbody></table></div>`}
+        </tbody></table></div>`
+    )}
 
-    <!-- TV 觀察清單 -->
-    ${sectionLabel('📈 TV觀察清單', '確認 EMA20/60 再進場', 'sec-tv')}
-    ${tvStocks.length === 0
+    <!-- TV 觀察清單（預設收合） -->
+    ${collapseSection('sec-tv', '📈 TV觀察清單', '確認 EMA20/60 再進場', tvStocks.length,
+      tvStocks.length === 0
       ? '<div style="font-size:12px;color:#9ca3af;padding:8px 0;">目前無符合條件的個股</div>'
       : `<div style="overflow-x:auto;"><table class="stocks-table"><thead><tr>
           <th style="width:32px;text-align:center;">自選</th>
@@ -3813,7 +3833,8 @@ function renderStrategy() {
               <td style="white-space:nowrap;"><a href="${getTVLink(s.code,s.market)}" target="_blank" style="display:inline-block;padding:2px 8px;font-size:11px;background:#2563eb;color:#fff;border-radius:4px;text-decoration:none;font-weight:600;">圖↗</a> <span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
             </tr>`;
           }).join('')}
-        </tbody></table></div>`}
+        </tbody></table></div>`
+    )}
   `;
 }
 
