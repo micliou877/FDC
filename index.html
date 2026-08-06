@@ -129,11 +129,11 @@
       #stocksTable td:nth-child(9) { display: none; }
 
       /* 關注表（#watchlistTable）：隱藏「順序」「金額」「複製到」「備註」欄 */
-      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9建議 10金額 11對比大盤 12品質 13作業 14天數 15損益 16複製到 17備註 */
+      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9建議 10金額 11對比大盤 12品質 13作業 14天數 15成本 16損益 17複製到 18備註 */
       #watchlistTable th:nth-child(1), #watchlistTable td:nth-child(1) { display: none; }
       #watchlistTable th:nth-child(10), #watchlistTable td:nth-child(10) { display: none; }
-      #watchlistTable th:nth-child(16), #watchlistTable td:nth-child(16) { display: none; }
       #watchlistTable th:nth-child(17), #watchlistTable td:nth-child(17) { display: none; }
+      #watchlistTable th:nth-child(18), #watchlistTable td:nth-child(18) { display: none; }
 
       /* 設定頁：input 全寬（覆蓋 inline style 的固定寬度） */
       #apiToken, #ghTriggerToken { width: 100% !important; box-sizing: border-box; }
@@ -423,8 +423,9 @@
           <th style="text-align:right;white-space:nowrap;cursor:default;">對比大盤</th>
           <th style="text-align:center;white-space:nowrap;cursor:default;">品質</th>
           <th style="width:36px;text-align:center;cursor:default;">作業</th>
-          <th style="text-align:right;white-space:nowrap">天數</th>
-          <th style="text-align:right;white-space:nowrap">損益</th>
+          <th style="text-align:right;white-space:nowrap;cursor:default;">天數</th>
+          <th style="text-align:right;white-space:nowrap;cursor:default;">成本</th>
+          <th style="text-align:right;white-space:nowrap;cursor:default;">損益</th>
           <th style="min-width:80px;">複製到</th>
           <th style="min-width:120px;">備註</th>
         </tr>
@@ -3140,26 +3141,61 @@ window.removeHolding = function(code) {
   if (window._t4_render) window._t4_render();
   if (typeof renderWatchlist === 'function') renderWatchlist();
 };
-window.addToHolding = function(code, name, price) {
-  const today = new Date().toISOString().slice(0,10);
-  if (!window._t4_data) window._t4_data = [];
-  const existIdx = window._t4_data.findIndex(p => p.code === code);
-  const rawDate = prompt(`持有追蹤：${code} ${name}\n\n進場日期：`, existIdx!==-1 ? window._t4_data[existIdx].date : today);
-  if (rawDate === null || rawDate.trim() === '') return;
-  if (isNaN(new Date(rawDate.trim()).getTime())) { alert('請輸入有效日期（格式：YYYY-MM-DD）'); return; }
-  const suggested = existIdx!==-1 ? window._t4_data[existIdx].entry : (price ?? '');
-  const raw = prompt(`持有追蹤：${code} ${name}\n\n進場價格：`, suggested);
-  if (raw === null || raw.trim() === '') return;
-  const entry = parseFloat(raw);
-  if (isNaN(entry) || entry <= 0) { alert('請輸入有效價格'); return; }
-  if (existIdx !== -1) {
-    window._t4_data[existIdx] = { code, name, date: rawDate.trim(), entry };
-  } else {
-    window._t4_data.push({ code, name, date: rawDate.trim(), entry });
-  }
-  try{localStorage.setItem("fdc_holdings",JSON.stringify(window._t4_data));}catch(e){}
+// 建立或更新一筆持有記錄；沒有有效成本價就不建立（天數是配角，成本才是必要欄位）
+function upsertHolding(code, name, date, entry) {
+  if (entry == null || isNaN(entry) || entry <= 0) return false;
+  window._t4_data = window._t4_data || [];
+  const idx = window._t4_data.findIndex(h => h.code === code);
+  if (idx !== -1) window._t4_data[idx] = { code, name, date, entry };
+  else window._t4_data.push({ code, name, date, entry });
+  try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); } catch(e) {}
   if (window._t4_render) window._t4_render();
-  if (typeof renderWatchlist === 'function') renderWatchlist();
+  return true;
+}
+// 表格內直接點「天數」欄填數字（幾天前買的），自動換算進場日期
+window.editHoldingDays = function(tdElement, code, name, price) {
+  const hd = (window._t4_data||[]).find(h=>h.code===code);
+  const currentDays = hd ? Math.floor((Date.now()-new Date(hd.date))/86400000) : '';
+  tdElement.onclick = null;
+  tdElement.innerHTML = `<input type="number" class="note-input" value="${currentDays}" placeholder="天數" min="0" style="width:52px;text-align:right;">`;
+  const input = tdElement.querySelector('.note-input');
+  input.focus(); input.select();
+  const saveAction = () => {
+    const raw = input.value.trim();
+    if (raw !== '') {
+      const days = parseInt(raw, 10);
+      if (!isNaN(days) && days >= 0) {
+        const date = new Date(Date.now() - days*86400000).toISOString().slice(0,10);
+        const entry = hd ? hd.entry : price;
+        if (entry == null) { alert('請先在「成本」欄填入成本價，才能建立持有記錄'); renderWatchlist(); return; }
+        upsertHolding(code, name, date, entry);
+      }
+    }
+    renderWatchlist();
+  };
+  input.onblur = saveAction;
+  input.onkeypress = (e) => { if(e.key === 'Enter') saveAction(); };
+};
+// 表格內直接點「成本」欄填成本價
+window.editHoldingCost = function(tdElement, code, name, price) {
+  const hd = (window._t4_data||[]).find(h=>h.code===code);
+  tdElement.onclick = null;
+  tdElement.innerHTML = `<input type="number" class="note-input" value="${hd?hd.entry:''}" placeholder="成本" step="0.01" style="width:64px;text-align:right;">`;
+  const input = tdElement.querySelector('.note-input');
+  input.focus(); input.select();
+  const saveAction = () => {
+    const raw = input.value.trim();
+    if (raw !== '') {
+      const entry = parseFloat(raw);
+      if (!isNaN(entry) && entry > 0) {
+        const date = hd ? hd.date : new Date().toISOString().slice(0,10);
+        upsertHolding(code, name, date, entry);
+      }
+    }
+    renderWatchlist();
+  };
+  input.onblur = saveAction;
+  input.onkeypress = (e) => { if(e.key === 'Enter') saveAction(); };
 };
 
 window.manualAddGlobalStock = function() {
@@ -3241,7 +3277,7 @@ function renderWatchlist() {
   updateWatchGroupOptions();
   renderWlHoldingsSummary();
   const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="17" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
@@ -3287,8 +3323,9 @@ function renderWatchlist() {
       <td style="text-align:right;">${s.amount?.toFixed(1) ?? "-"}</td>
       <td style="text-align:right;font-size:11px;white-space:nowrap;" title="個股近5日/10日漲跌幅 － 大盤(0050)同期漲跌幅">${wlVsCell(vsMarketPct(s.code,'pct5'))} <span style="color:#cbd5e1;">/</span> ${wlVsCell(vsMarketPct(s.code,'pct10'))}</td>
       <td style="text-align:center;font-size:12px;" title="${s.yoy != null ? '月營收年增率: ' + (s.yoy > 0 ? '+' : '') + s.yoy + '%' : ''}">${s.qualityTag ?? "-"}</td>
-      <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span> <span style="cursor:pointer;padding:2px 5px;font-size:11px;background:#f0fdf4;border-radius:4px;color:#16a34a;font-weight:600;border:1px solid #bbf7d0;" onclick="addToHolding('${s.code}','${s.name}',${s.price??null})" title="${hd?'更新持有資訊':'加入持有追蹤'}">${hd?'✏️':'⏰'}</span></td>
-      <td style="text-align:right;font-size:12px;color:#888">${hdDays!==null?hdDays+'天':'-'}</td>
+      <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
+      <td onclick="editHoldingDays(this,'${s.code}','${s.name}',${s.price??null})" style="text-align:right;font-size:12px;color:#888;cursor:pointer;" title="點擊直接填天數（幾天前買的）">${hdDays!==null?`<span class="note-display">${hdDays}天</span>`:'<span class="note-display">&nbsp;</span>'}</td>
+      <td onclick="editHoldingCost(this,'${s.code}','${s.name}',${s.price??null})" style="text-align:right;font-size:12px;color:#888;cursor:pointer;" title="點擊直接填成本價">${hd?`<span class="note-display">${hd.entry}</span>`:'<span class="note-display">&nbsp;</span>'}</td>
       <td style="text-align:right;white-space:nowrap">${hdRet!==null?`<span class="${pctClass(hdRet)}" style="font-weight:700;font-size:12px">${fmtPct(hdRet)}</span> <span style="cursor:pointer;font-size:10px;color:#bbb;vertical-align:middle" onclick="removeHolding('${s.code}')" title="移除持有">✕</span>`:'<span style="color:#ccc">-</span>'}</td>
       <td>
         <select id="cpy_${s.code}" onchange="copyToGroup('${s.code}',this.value)" style="font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;color:#64748b;background:#fff;cursor:pointer;max-width:110px;">
