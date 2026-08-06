@@ -583,8 +583,8 @@
     <datalist id="t4_stockList"></datalist>
   </div>
   <div id="t4_selectedInfo" style="font-size:12px;padding:2px 0 8px 0;display:none;"></div>
-  <div class="t-form-row"><label>進場日</label><input type="date" id="t4_date"></div>
-  <div class="t-form-row"><label>進場價</label><input type="number" id="t4_entry" placeholder="成本價" step="0.01"></div>
+  <div class="t-form-row"><label>進場日</label><div style="display:flex;gap:6px;"><input type="date" id="t4_date" style="flex:1;"><button type="button" class="t-btn" style="padding:4px 10px;font-size:11px;white-space:nowrap;" onclick="t4_setToday()">今天</button></div></div>
+  <div class="t-form-row"><label>進場價</label><div style="display:flex;gap:6px;"><input type="number" id="t4_entry" placeholder="成本價（選好標的會自動帶入現價，可自行修改）" step="0.01" style="flex:1;min-width:0;"><button type="button" class="t-btn" style="padding:4px 10px;font-size:11px;white-space:nowrap;" onclick="t4_useLivePrice('t4_entry')">用現價</button></div></div>
   <div style="margin-top:12px;display:flex;gap:6px;">
     <button class="t-btn primary" id="t4_add">➕ 加入追蹤</button>
     <button class="t-btn" id="t4_loadDemo">🎯 載入範例</button>
@@ -4345,14 +4345,49 @@ function t4_init() {
       const live=typeof stockData!=='undefined'?stockData[found.code]?.price:null;
       info.innerHTML=`<span style="color:#4a9eff">✓ ${found.name}（${found.code}）</span>${live!=null?`<span style="color:#ffc94a;margin-left:8px">現價 ${live.toFixed(2)}</span>`:`<span style="color:#888;margin-left:8px">（股池無報價）</span>`}`;
       info.style.display='block';
+      // 選好標的時，若進場價還沒填，直接帶入現價，省得手動輸入
+      const entryEl=document.getElementById('t4_entry');
+      if(live!=null && entryEl && !entryEl.value) entryEl.value=live.toFixed(2);
     } else {
       info.style.display='none';
     }
   }
   if(inp) inp.addEventListener('input', t4_showInfo);
   if(inp) inp.addEventListener('change', t4_showInfo);
+  window.t4_setToday=function(){
+    const el=document.getElementById('t4_date');
+    if(el) el.value=new Date().toISOString().slice(0,10);
+  };
+  window.t4_useLivePrice=function(targetId, code){
+    let liveCode=code;
+    if(!liveCode){
+      const val=document.getElementById('t4_stockInput')?.value.trim();
+      liveCode=t4_stockMap[val]?.code;
+    }
+    const live=liveCode&&typeof stockData!=='undefined'?stockData[liveCode]?.price:null;
+    if(live==null){alert('目前沒有這檔的即時報價');return;}
+    const el=document.getElementById(targetId);
+    if(el) el.value=live.toFixed(2);
+  };
 
   function t4_livePrice(code){ return (typeof stockData!=='undefined'&&stockData[code]?.price!=null)?stockData[code].price:null; }
+  // 個股近5日/10日漲跌幅 vs 大盤(0050)，沿用族群頁 vsMarket 的算法：個股% - 大盤%
+  function t4_vsMkt(code, key){
+    const s = typeof stockData!=='undefined' ? stockData[code] : null;
+    const m = typeof stockData!=='undefined' ? stockData['0050'] : null;
+    if(!s || !m || s[key]==null || m[key]==null) return null;
+    return s[key] - m[key];
+  }
+  function t4_primarySector(code){ return (typeof STOCK_SECTORS_MAP!=='undefined' && STOCK_SECTORS_MAP[code]?.[0]) || '其他'; }
+  function t4_groupBreakdown(){
+    const list=_t4();
+    if(!list.length) return [];
+    const counts={};
+    list.forEach(d=>{ const g=t4_primarySector(d.code); counts[g]=(counts[g]||0)+1; });
+    return Object.entries(counts)
+      .map(([name,count])=>({name,count,pct:count/list.length*100}))
+      .sort((a,b)=>b.count-a.count);
+  }
   function t4_days(dateStr){return Math.floor((Date.now()-new Date(dateStr))/(86400000));}
   function t4_phase(d){
     const days=t4_days(d.date);
@@ -4377,6 +4412,21 @@ function t4_init() {
   window._t4_editIdx  = window._t4_editIdx  ?? -1;
   window._t4_sortKey  = window._t4_sortKey  ?? null;
   window._t4_sortDir  = window._t4_sortDir  ?? -1;
+
+  function t4_groupBreakdownHtml(){
+    const groups=t4_groupBreakdown();
+    if(!groups.length) return '';
+    const barColors=['#4a9eff','#ffc94a','#2d8659','#d63031','#a15ee8','#e88a5e','#5ee8c7'];
+    return `<div style="background:#1a2026;border-radius:8px;padding:10px 12px;margin-bottom:10px;">
+      <div style="font-size:11px;color:#888;margin-bottom:8px;">族群持股比例（依檔數，可能跨族群重複計算）</div>
+      <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:8px;">
+        ${groups.map((g,gi)=>`<div style="width:${g.pct}%;background:${barColors[gi%barColors.length]};" title="${g.name} ${g.pct.toFixed(0)}%"></div>`).join('')}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${groups.map((g,gi)=>`<span style="font-size:11px;color:#ccc;background:#0f1419;border:1px solid #2a3138;border-radius:12px;padding:3px 10px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${barColors[gi%barColors.length]};margin-right:5px;"></span>${g.name} ${g.count}檔・${g.pct.toFixed(0)}%</span>`).join('')}
+      </div>
+    </div>`;
+  }
 
   function t4_render() {
     const list=document.getElementById('t4_list');
@@ -4409,6 +4459,8 @@ function t4_init() {
       const retStr=(ret>=0?'+':'')+ret.toFixed(2)+'%';
       const retCls=ret>=0?'t-pos':'t-neg';
       const shortTip=act.cls==='danger'?'⚠️ '+act.text.slice(0,8):act.cls==='success'?'✅ '+act.text.slice(0,8):ph.tip.slice(0,10);
+      const vs5=t4_vsMkt(d.code,'pct5'), vs10=t4_vsMkt(d.code,'pct10');
+      const vsCell=(v)=>v==null?'<span style="color:#555">-</span>':`<span class="${v>=0?'t-pos':'t-neg'}">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
       rows+=`<tr id="t4r_${di}" style="border-bottom:1px solid #1a2026"
         ondragover="t4_dragOver(event,${di})"
         ondragleave="t4_dragLeave(event)"
@@ -4425,16 +4477,18 @@ function t4_init() {
         <td style="padding:6px 4px;text-align:right;font-size:11px;color:#aaa">${d.date}<br>進場 ${d.entry}</td>
         <td style="padding:6px 4px;text-align:right"><span style="${ret>=0?'color:#ff6b6b':'color:#4a9d6f'};font-size:13px;font-weight:600">${cur.toFixed(2)}</span>${hasLive?'<span style="font-size:9px;color:#2d8659;display:block">●即時</span>':'<span style="font-size:9px;color:#666;display:block">○</span>'}</td>
         <td style="padding:6px 4px;text-align:right"><span class="${retCls}" style="font-weight:700">${retStr}</span><br><span style="font-size:10px;color:#888">${shortTip}</span></td>
+        <td style="padding:6px 4px;text-align:right;font-size:11px;white-space:nowrap" title="個股同期漲跌幅 - 大盤(0050)同期漲跌幅">5日${vsCell(vs5)}<br>10日${vsCell(vs10)}</td>
         <td style="padding:6px 4px;text-align:center"><button class="t-btn" style="padding:2px 8px;font-size:11px" onclick="t4_editToggle(${i})">${editing?'✕':'✏'}</button></td>
       </tr>`;
       if(editing){
         rows+=`<tr style="background:#1a2026">
-          <td colspan="7" style="padding:8px 12px">
+          <td colspan="8" style="padding:8px 12px">
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               <label style="font-size:11px;color:#aaa">進場日</label>
               <input type="date" id="t4_ed_date" value="${d.date}" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px">
               <label style="font-size:11px;color:#aaa">進場價</label>
               <input type="number" id="t4_ed_entry" value="${d.entry}" step="0.01" style="background:#0f1419;color:#e6e6e6;border:1px solid #2a3138;padding:4px 8px;border-radius:4px;font-size:12px;width:90px">
+              <button class="t-btn" style="padding:4px 10px;font-size:11px" onclick="t4_useLivePrice('t4_ed_entry','${d.code}')">用現價</button>
               <button class="t-btn primary" style="padding:4px 12px;font-size:11px" onclick="t4_save(${i})">✓ 儲存</button>
               <button class="t-btn" style="padding:4px 12px;font-size:11px" onclick="t4_editToggle(-1)">取消</button>
             </div>
@@ -4442,7 +4496,7 @@ function t4_init() {
         </tr>`;
       }
     });
-    list.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+    list.innerHTML=`${t4_groupBreakdownHtml()}<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
       <thead><tr style="border-bottom:2px solid #2a3138">
         <th style="padding:6px 4px;font-size:11px;color:#888;text-align:left"></th>
         ${thS('code','代號/公司','left')}
@@ -4450,6 +4504,7 @@ function t4_init() {
         ${thS('date','進場','right')}
         ${thS('cur','現價','right')}
         ${thS('ret','損益','right')}
+        <th style="padding:6px 4px;font-size:11px;color:#888;text-align:right;white-space:nowrap">vs大盤</th>
         <th style="padding:6px 4px;font-size:11px;color:#888"></th>
       </tr></thead><tbody>${rows}</tbody></table></div>`;
     const tj=document.getElementById('t4_json');
@@ -4542,6 +4597,8 @@ function t4_init() {
     if(!date||!entry){alert('請填進場日與進場價');return;}
     _t4().push({code:found.code,name:found.name,date,entry});
     if(inp){inp.value='';if(info)info.style.display='none';}
+    const entryEl=document.getElementById('t4_entry');
+    if(entryEl) entryEl.value='';
     t4_render();
   };
   document.getElementById('t4_loadDemo').onclick=()=>{window._t4_data=T4_DEMO.map(d=>({...d}));t4_render();};
