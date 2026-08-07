@@ -129,11 +129,11 @@
       #stocksTable td:nth-child(9) { display: none; }
 
       /* 關注表（#watchlistTable）：隱藏「順序」「金額」「複製到」「備註」欄 */
-      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9建議 10金額 11對比大盤 12品質 13作業 14天數 15成本 16損益 17複製到 18備註 */
+      /* 欄位順序：1順序 2移除 3代號 4公司 5收盤 6當日% 7五日% 8十日% 9建議 10金額 11對比大盤 12品質 13作業 14天數 15成本 16股數 17占比 18損益 19複製到 20備註 */
       #watchlistTable th:nth-child(1), #watchlistTable td:nth-child(1) { display: none; }
       #watchlistTable th:nth-child(10), #watchlistTable td:nth-child(10) { display: none; }
-      #watchlistTable th:nth-child(17), #watchlistTable td:nth-child(17) { display: none; }
-      #watchlistTable th:nth-child(18), #watchlistTable td:nth-child(18) { display: none; }
+      #watchlistTable th:nth-child(19), #watchlistTable td:nth-child(19) { display: none; }
+      #watchlistTable th:nth-child(20), #watchlistTable td:nth-child(20) { display: none; }
 
       /* 設定頁：input 全寬（覆蓋 inline style 的固定寬度） */
       #apiToken, #ghTriggerToken { width: 100% !important; box-sizing: border-box; }
@@ -425,6 +425,8 @@
           <th style="width:36px;text-align:center;cursor:default;">作業</th>
           <th style="text-align:right;white-space:nowrap;cursor:default;">天數</th>
           <th style="text-align:right;white-space:nowrap;cursor:default;">成本</th>
+          <th style="text-align:right;white-space:nowrap;cursor:default;">股數</th>
+          <th style="text-align:right;white-space:nowrap;cursor:default;" title="佔總持有市值比例">占比</th>
           <th style="text-align:right;white-space:nowrap;cursor:default;">損益</th>
           <th style="min-width:80px;">複製到</th>
           <th style="min-width:120px;">備註</th>
@@ -3141,13 +3143,15 @@ window.removeHolding = function(code) {
   if (window._t4_render) window._t4_render();
   if (typeof renderWatchlist === 'function') renderWatchlist();
 };
-// 建立或更新一筆持有記錄；沒有有效成本價就不建立（天數是配角，成本才是必要欄位）
-function upsertHolding(code, name, date, entry) {
+// 建立或更新一筆持有記錄；沒有有效成本價就不建立（天數/股數是配角，成本才是必要欄位）
+function upsertHolding(code, name, date, entry, shares) {
   if (entry == null || isNaN(entry) || entry <= 0) return false;
   window._t4_data = window._t4_data || [];
   const idx = window._t4_data.findIndex(h => h.code === code);
-  if (idx !== -1) window._t4_data[idx] = { code, name, date, entry };
-  else window._t4_data.push({ code, name, date, entry });
+  const existingShares = idx !== -1 ? window._t4_data[idx].shares : undefined;
+  const rec = { code, name, date, entry, shares: shares !== undefined ? shares : existingShares };
+  if (idx !== -1) window._t4_data[idx] = rec;
+  else window._t4_data.push(rec);
   try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); } catch(e) {}
   if (window._t4_render) window._t4_render();
   return true;
@@ -3190,6 +3194,27 @@ window.editHoldingCost = function(tdElement, code, name, price) {
       if (!isNaN(entry) && entry > 0) {
         const date = hd ? hd.date : new Date().toISOString().slice(0,10);
         upsertHolding(code, name, date, entry);
+      }
+    }
+    renderWatchlist();
+  };
+  input.onblur = saveAction;
+  input.onkeypress = (e) => { if(e.key === 'Enter') saveAction(); };
+};
+// 表格內直接點「股數」欄填持有股數，用來換算個股/族群的持有市值占比
+window.editHoldingShares = function(tdElement, code, name, price) {
+  const hd = (window._t4_data||[]).find(h=>h.code===code);
+  tdElement.onclick = null;
+  tdElement.innerHTML = `<input type="number" class="note-input" value="${hd&&hd.shares?hd.shares:''}" placeholder="股數" min="0" step="1" style="width:64px;text-align:right;">`;
+  const input = tdElement.querySelector('.note-input');
+  input.focus(); input.select();
+  const saveAction = () => {
+    const raw = input.value.trim();
+    if (raw !== '') {
+      if (!hd) { alert('請先在「成本」欄填入成本價，才能設定股數'); renderWatchlist(); return; }
+      const shares = parseInt(raw, 10);
+      if (!isNaN(shares) && shares >= 0) {
+        upsertHolding(code, name, hd.date, hd.entry, shares);
       }
     }
     renderWatchlist();
@@ -3249,26 +3274,47 @@ function wlAdviceRank(code) {
 function primarySector(code) {
   return (STOCK_SECTORS_MAP[code] && STOCK_SECTORS_MAP[code][0]) || '其他';
 }
+// 每筆持有記錄換算現值（現價optional，沒有現價就用成本價）；沒填股數的記錄 value 為 null，不計入市值統計
+function holdingsWithValue() {
+  return (window._t4_data || []).map(h => {
+    const price = stockData[h.code]?.price ?? h.entry;
+    const value = h.shares ? price * h.shares : null;
+    return { ...h, price, value };
+  });
+}
+function holdingsTotalValue() {
+  return holdingsWithValue().reduce((a, h) => a + (h.value || 0), 0);
+}
 function holdingsGroupBreakdown() {
-  const list = window._t4_data || [];
+  const list = holdingsWithValue().filter(h => h.value != null);
   if (!list.length) return [];
-  const counts = {};
-  list.forEach(d => { const g = primarySector(d.code); counts[g] = (counts[g]||0) + 1; });
-  return Object.entries(counts).map(([name, count]) => ({ name, count, pct: count / list.length * 100 })).sort((a, b) => b.count - a.count);
+  const total = list.reduce((a, h) => a + h.value, 0);
+  const sums = {};
+  list.forEach(h => { const g = primarySector(h.code); sums[g] = (sums[g]||0) + h.value; });
+  return Object.entries(sums).map(([name, value]) => ({ name, value, pct: value / total * 100 })).sort((a, b) => b.value - a.value);
 }
 function renderWlHoldingsSummary() {
   const el = document.getElementById('wlHoldingsSummary');
   if (!el) return;
+  const all = window._t4_data || [];
+  if (!all.length) { el.innerHTML = ''; return; }
+  const withShares = holdingsWithValue().filter(h => h.value != null);
+  const noShares = all.length - withShares.length;
   const groups = holdingsGroupBreakdown();
-  if (!groups.length) { el.innerHTML = ''; return; }
+  const noSharesHint = noShares ? `，另有 ${noShares} 檔尚未填「股數」不計入比例` : '';
+  if (!groups.length) {
+    el.innerHTML = `<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">已有 ${all.length} 檔持有記錄，在表格內點「股數」欄填入持有股數，即可計算個股／族群的持有市值占比</div>`;
+    return;
+  }
+  const totalValue = withShares.reduce((a, h) => a + h.value, 0);
   const barColors = ['#2563eb','#d97706','#16a34a','#dc2626','#7c3aed','#0891b2','#db2777'];
   el.innerHTML = `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
-    <div style="font-size:12px;color:#64748b;margin-bottom:8px;">📊 族群持股比例（依實際持有 ${groups.reduce((a,g)=>a+g.count,0)} 檔計算，跨族群標的會重複計入）</div>
+    <div style="font-size:12px;color:#64748b;margin-bottom:8px;">📊 族群持股比例（依市值計算，共 ${withShares.length} 檔・總市值約 ${Math.round(totalValue).toLocaleString()} 元${noSharesHint}；跨族群標的會重複計入）</div>
     <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:8px;">
       ${groups.map((g, gi) => `<div style="width:${g.pct}%;background:${barColors[gi % barColors.length]};" title="${g.name} ${g.pct.toFixed(0)}%"></div>`).join('')}
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:6px;">
-      ${groups.map((g, gi) => `<span style="font-size:11px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:3px 10px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${barColors[gi % barColors.length]};margin-right:5px;"></span>${g.name} ${g.count}檔・${g.pct.toFixed(0)}%</span>`).join('')}
+      ${groups.map((g, gi) => `<span style="font-size:11px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:3px 10px;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${barColors[gi % barColors.length]};margin-right:5px;"></span>${g.name} ${g.pct.toFixed(0)}%</span>`).join('')}
     </div>
   </div>`;
 }
@@ -3277,7 +3323,8 @@ function renderWatchlist() {
   updateWatchGroupOptions();
   renderWlHoldingsSummary();
   const tbody = document.getElementById("watchlistTbody"); const currentList = watchlists[currentWatchGroup] || [];
-  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="18" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  if (currentList.length === 0) { tbody.innerHTML = `<tr><td colspan="20" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】目前是空的</td></tr>`; return; }
+  const totalHoldingsValue = holdingsTotalValue();
 
   let rows = currentList.map(code => {
     let d = stockData[code] || {};
@@ -3302,6 +3349,8 @@ function renderWatchlist() {
     const hd = (window._t4_data||[]).find(h=>h.code===s.code);
     const hdDays = hd ? Math.floor((Date.now()-new Date(hd.date))/86400000) : null;
     const hdRet  = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
+    const hdValue = hd && hd.shares ? (s.price ?? hd.entry) * hd.shares : null;
+    const hdPct = hdValue != null && totalHoldingsValue > 0 ? hdValue / totalHoldingsValue * 100 : null;
     const adv = getActionAdvice(s, hdRet);
     return `
     <tr id="wlr_${idx}" ondragover="wlDragOver(event,${idx})" ondrop="wlDrop(event,${idx})" ondragend="wlDragEnd(event)" ondragstart="wlDragStart(event,${idx})" style="transition:opacity 0.15s;">
@@ -3326,6 +3375,8 @@ function renderWatchlist() {
       <td style="text-align:center;white-space:nowrap;"><span style="cursor:pointer;padding:2px 7px;font-size:11px;background:#f1f5f9;border-radius:4px;color:#475569;font-weight:600;" onclick="addToDailyPlan('${s.code}','${s.name}')" title="加入今日作業清單">＋</span></td>
       <td onclick="editHoldingDays(this,'${s.code}','${s.name}',${s.price??null})" style="text-align:right;font-size:12px;color:#888;cursor:pointer;" title="點擊直接填天數（幾天前買的）">${hdDays!==null?`<span class="note-display">${hdDays}天</span>`:'<span class="note-display">&nbsp;</span>'}</td>
       <td onclick="editHoldingCost(this,'${s.code}','${s.name}',${s.price??null})" style="text-align:right;font-size:12px;color:#888;cursor:pointer;" title="點擊直接填成本價">${hd?`<span class="note-display">${hd.entry}</span>`:'<span class="note-display">&nbsp;</span>'}</td>
+      <td onclick="editHoldingShares(this,'${s.code}','${s.name}',${s.price??null})" style="text-align:right;font-size:12px;color:#888;cursor:pointer;" title="點擊填入持有股數，用來換算個股/族群的持有占比">${hd&&hd.shares?`<span class="note-display">${hd.shares.toLocaleString()}</span>`:'<span class="note-display">&nbsp;</span>'}</td>
+      <td style="text-align:right;font-size:11px;color:#94a3b8;white-space:nowrap;" title="佔目前所有持有標的總市值的比例">${hdPct!=null?hdPct.toFixed(1)+'%':'-'}</td>
       <td style="text-align:right;white-space:nowrap">${hdRet!==null?`<span class="${pctClass(hdRet)}" style="font-weight:700;font-size:12px">${fmtPct(hdRet)}</span> <span style="cursor:pointer;font-size:10px;color:#bbb;vertical-align:middle" onclick="removeHolding('${s.code}')" title="移除持有">✕</span>`:'<span style="color:#ccc">-</span>'}</td>
       <td>
         <select id="cpy_${s.code}" onchange="copyToGroup('${s.code}',this.value)" style="font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;color:#64748b;background:#fff;cursor:pointer;max-width:110px;">
