@@ -150,6 +150,7 @@
     .advice-badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; white-space:nowrap; cursor:help; }
     .advice-buy   { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
     .advice-sell  { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+    .advice-profit{ background:#fffbeb; color:#b45309; border:1px solid #fde68a; }
     .advice-watch { background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; }
 
     /* ====== 工具 panel 暗色主題 ====== */
@@ -436,7 +437,7 @@
     </table>
   </div>
   <div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.7;">
-    今日建議規則（依操作策略）：<span class="advice-badge advice-buy">加碼</span> 10日漲幅≥3%、5日續強、量能未萎縮｜<span class="advice-badge advice-sell">減碼</span> 持有虧損逾8%停損、當日重挫逾5%、或5日+10日動能同步轉弱｜<span class="advice-badge advice-watch">觀察</span> 其餘情況。滑鼠停在標籤上可看個股判斷原因；最終進場仍以 TradingView 均線確認為準。
+    今日建議規則（依操作策略）：<span class="advice-badge advice-buy">加碼</span> 10日漲幅≥3%、5日續強、量能未萎縮｜<span class="advice-badge advice-profit">獲利了結</span> 持有損益為正，但當日重挫逾5%或5日+10日動能同步轉弱｜<span class="advice-badge advice-sell">減碼</span> 持有虧損逾8%停損、或無持有成本下出現當日重挫逾5%／5日+10日動能同步轉弱｜<span class="advice-badge advice-watch">觀察</span> 其餘情況。滑鼠停在標籤上可看個股判斷原因；最終進場仍以 TradingView 均線確認為準。
   </div>
 </div>
 
@@ -1330,7 +1331,7 @@ const STOCK_EXCHANGE = {
   "6569":"TPEX","6570":"TPEX","6573":"TWSE","6640":"TPEX","6643":"TPEX",
   "6667":"TPEX","6680":"TPEX","6689":"TWSE","6690":"TPEX","6691":"TWSE",
   "6739":"TPEX","6788":"TPEX","6789":"TWSE","6805":"TWSE","6811":"TPEX",
-  "6829":"TPEX","6870":"TPEX",
+  "6829":"TPEX","6870":"TPEX","6907":"TPEX",
   "7703":"TPEX","7717":"TPEX","7719":"TPEX","7769":"TWSE",
   "8021":"TWSE","8028":"TWSE","8033":"TWSE","8038":"TPEX","8043":"TPEX",
   "8044":"TPEX","8048":"TPEX","8050":"TPEX","8069":"TPEX","8081":"TWSE",
@@ -3239,6 +3240,7 @@ window.manualAddGlobalStock = function() {
 
 // ==================== 今日動作建議（依 策略.md 規則）====================
 // 減碼優先於加碼判斷（風險控管優先）；pct5/pct10 需 FinMind 歷史行情才有值
+// 同一組「賣出訊號」（重挫/動能轉弱）套用在有持有成本的標的上時，依損益正負拆成「停損」或「獲利了結」，方便分辨是認賠還是落袋
 function getActionAdvice(s, hdRet) {
   if (s.pct5 == null || s.pct10 == null) {
     return { label: "觀察", cls: "watch", reason: "尚無5日/10日資料，請到「設定」更新歷史行情" };
@@ -3246,11 +3248,14 @@ function getActionAdvice(s, hdRet) {
   if (hdRet !== null && hdRet <= -8) {
     return { label: "減碼", cls: "sell", reason: `持有虧損 ${hdRet.toFixed(1)}%，已超過 8% 停損線` };
   }
-  if (s.pct1 != null && s.pct1 <= -5) {
-    return { label: "減碼", cls: "sell", reason: `當日重挫 ${s.pct1.toFixed(1)}%，訊號轉壞` };
-  }
-  if (s.pct5 < 0 && s.pct10 < 0) {
-    return { label: "減碼", cls: "sell", reason: "5日與10日動能同步轉弱，趨勢轉空" };
+  const crashToday = s.pct1 != null && s.pct1 <= -5;
+  const momentumReversed = s.pct5 < 0 && s.pct10 < 0;
+  if (crashToday || momentumReversed) {
+    const reason = crashToday ? `當日重挫 ${s.pct1.toFixed(1)}%，訊號轉壞` : "5日與10日動能同步轉弱，趨勢轉空";
+    if (hdRet !== null && hdRet > 0) {
+      return { label: "獲利了結", cls: "profit", reason: `持有獲利 +${hdRet.toFixed(1)}%，${reason}，建議落袋為安` };
+    }
+    return { label: "減碼", cls: "sell", reason };
   }
   if (s.pct10 >= 3 && s.pct5 > 0 && (s.pct1 ?? 0) > -2 && (s.volTrend ?? 1) >= 1.0) {
     return { label: "加碼", cls: "buy", reason: "10日趨勢強、5日動能延續、量能未萎縮" };
@@ -3261,13 +3266,13 @@ function getActionAdvice(s, hdRet) {
   return { label: "觀察", cls: "watch", reason: "動能不足或漲幅未達加碼門檻，持續觀察" };
 }
 
-// 今日建議排序等級：加碼=2 > 觀察=1 > 減碼=0
+// 今日建議排序等級：加碼=3 > 獲利了結=2 > 觀察=1 > 減碼=0
 function wlAdviceRank(code) {
   const s = stockData[code] || {};
   const hd = (window._t4_data||[]).find(h=>h.code===code);
   const hdRet = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
   const label = getActionAdvice(s, hdRet).label;
-  return label === "加碼" ? 2 : label === "觀察" ? 1 : 0;
+  return label === "加碼" ? 3 : label === "獲利了結" ? 2 : label === "觀察" ? 1 : 0;
 }
 
 // 品質標籤排序等級：業績股 > 普通 > 題材股 > 虧損 > 其他（缺財報/抓取失敗等）
@@ -3316,6 +3321,14 @@ function holdingsGroupBreakdown(codes) {
   list.forEach(h => { const g = primarySector(h.code); sums[g] = (sums[g]||0) + h.value; });
   return Object.entries(sums).map(([name, value]) => ({ name, value, pct: value / total * 100 })).sort((a, b) => b.value - a.value);
 }
+// 依市值加權計算持有部位「當日」綜合漲跌幅；只納入已填股數（換算得出市值）且當日有報價的持有記錄，缺成本/股數/報價的一律不計入
+function holdingsWeightedPct1(codes) {
+  const list = holdingsWithValue(codes).filter(h => h.value != null && stockData[h.code]?.pct1 != null);
+  if (!list.length) return null;
+  const total = list.reduce((a, h) => a + h.value, 0);
+  const pct = list.reduce((a, h) => a + stockData[h.code].pct1 * h.value, 0) / total;
+  return { pct, count: list.length };
+}
 function renderWlHoldingsSummary() {
   const el = document.getElementById('wlHoldingsSummary');
   if (!el) return;
@@ -3326,13 +3339,16 @@ function renderWlHoldingsSummary() {
   const noShares = all.length - withShares.length;
   const groups = holdingsGroupBreakdown(codes);
   const noSharesHint = noShares ? `，另有 ${noShares} 檔尚未填「股數」不計入比例` : '';
+  const daily = holdingsWeightedPct1(codes);
+  const dailyNoPct = withShares.length - (daily ? daily.count : 0);
+  const dailyHtml = daily ? `<div style="font-size:12px;margin-bottom:8px;">📈「${currentWatchGroup}」持股今日綜合漲跌幅：<span class="${pctClass(daily.pct)}" style="font-weight:700">${fmtPct(daily.pct)}</span> <span style="color:#94a3b8;">（依市值加權，納入 ${daily.count} 檔${dailyNoPct?`，另 ${dailyNoPct} 檔缺當日報價未列入`:''}）</span></div>` : '';
   if (!groups.length) {
-    el.innerHTML = `<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">「${currentWatchGroup}」內已有 ${all.length} 檔持有記錄，在表格內點「股數」欄填入持有股數，即可計算個股／族群的持有市值占比</div>`;
+    el.innerHTML = `${dailyHtml}<div style="font-size:12px;color:#94a3b8;margin-bottom:12px;">「${currentWatchGroup}」內已有 ${all.length} 檔持有記錄，在表格內點「股數」欄填入持有股數，即可計算個股／族群的持有市值占比</div>`;
     return;
   }
   const totalValue = withShares.reduce((a, h) => a + h.value, 0);
   const barColors = ['#2563eb','#d97706','#16a34a','#dc2626','#7c3aed','#0891b2','#db2777'];
-  el.innerHTML = `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+  el.innerHTML = `${dailyHtml}<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
     <div style="font-size:12px;color:#64748b;margin-bottom:8px;">📊「${currentWatchGroup}」族群持股比例（依市值計算，共 ${withShares.length} 檔・總市值約 ${Math.round(totalValue).toLocaleString()} 元${noSharesHint}；跨族群標的會重複計入）</div>
     <div style="display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:8px;">
       ${groups.map((g, gi) => `<div style="width:${g.pct}%;background:${barColors[gi % barColors.length]};" title="${g.name} ${g.pct.toFixed(0)}%"></div>`).join('')}
