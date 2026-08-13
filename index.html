@@ -59,11 +59,35 @@
     .pos-text { color: #a84848; font-weight: 600; }
     .neg-text { color: #3a7a58; font-weight: 600; }
     .flat-text { color: #94a3b8; }
-    .rk-badge { display:inline-flex; align-items:center; gap:2px; font-size:10px; padding:2px 6px; border-radius:9px; font-weight:700; white-space:nowrap; margin-left:4px; }
-    .rk-badge.up { background:rgba(168,72,72,0.12); color:#a84848; }
-    .rk-badge.down { background:rgba(58,122,88,0.12); color:#3a7a58; }
-    .rk-badge.same { background:rgba(148,163,184,0.15); color:#64748b; }
-    .rk-badge.new { background:rgba(217,119,6,0.15); color:#b45309; }
+    /* 「今日精選」信箱偽裝 UI */
+    .mailbox { display:flex; flex-direction:column; background:#fff; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; margin-bottom:14px; }
+    .mailbox-head { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; border-bottom:1px solid #e5e7eb; background:#f8fafc; }
+    .mailbox-head .mb-title { font-size:13px; font-weight:700; color:#1e293b; }
+    .mailbox-head .mb-count { font-size:11px; color:#fff; background:#64748b; border-radius:9px; padding:1px 7px; font-weight:700; }
+    .mail-row { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid #f1f5f9; text-decoration:none; }
+    .mail-row:last-child { border-bottom:none; }
+    .mail-row:hover { background:#f8fafc; }
+    .mail-star { font-size:14px; color:#cbd5e1; flex-shrink:0; width:14px; text-align:center; }
+    .mail-star.active { color:#eab308; }
+    .mail-avatar { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; flex-shrink:0; }
+    .mail-sender { width:112px; flex-shrink:0; font-size:12.5px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mail-sender.unread { color:#0f172a; font-weight:700; }
+    .mail-sender .mail-code { font-size:10.5px; color:#94a3b8; font-weight:400; margin-left:3px; }
+    .mail-subject { flex:1; min-width:0; font-size:12.5px; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mail-subject.unread { color:#1e293b; font-weight:600; }
+    .mail-subject .mail-snippet { color:#94a3b8; font-weight:400; }
+    .mail-time { font-size:11px; color:#94a3b8; flex-shrink:0; width:44px; text-align:right; }
+    .mail-thread > summary { list-style:none; cursor:pointer; }
+    .mail-thread > summary::-webkit-details-marker { display:none; }
+    .mail-thread .thread-body { background:#fafbfc; padding:4px 14px 10px 50px; border-bottom:1px solid #f1f5f9; }
+    .mail-thread .thread-reply { display:flex; align-items:baseline; gap:8px; padding:5px 0; font-size:12px; border-bottom:1px dashed #eef2f6; flex-wrap:wrap; text-decoration:none; color:inherit; }
+    .mail-thread .thread-reply:last-child { border-bottom:none; }
+    .mail-thread .thread-reply strong { color:#1e293b; }
+    .mail-thread .thread-figs { color:#94a3b8; }
+    .mail-thread .thread-label { font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:#a1a1aa; font-weight:700; margin:8px 0 2px; }
+    .mail-avatar-stack { display:flex; flex-shrink:0; }
+    .mail-avatar-stack .mail-avatar { width:22px; height:22px; font-size:9.5px; margin-left:-8px; border:2px solid #fff; }
+    .mail-avatar-stack .mail-avatar:first-child { margin-left:0; }
 
     .tag { display: inline-block; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #3b82f6; margin-top: 3px; margin-right: 3px; white-space: nowrap; border: 1px solid #bfdbfe; cursor: pointer; }
     .tag:hover { background: #dbeafe; border-color: #93c5fd; }
@@ -188,46 +212,6 @@
       🔥 複合熱度分數 &amp; Top 3 配置建議 <span class="rk-arr">▼</span>
     </div>
     <div id="rk_heatBody" style="padding:0 12px 12px;font-size:12px;"><div style="color:#aaa;font-size:11px;padding:4px 0">載入報價後自動計算…</div></div>
-  </div>
-  <!-- 個股 10 日漲幅排行 Top 20 -->
-  <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;margin-bottom:10px;overflow:hidden;">
-    <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#1e40af;" onclick="var b=document.getElementById('rk_gainBody');b.hidden=!b.hidden;this.querySelector('.gain-arr').textContent=b.hidden?'▶':'▼'">
-      📈 個股 10 日漲幅排行 Top 20（含名次變化） <span class="gain-arr">▼</span>
-    </div>
-    <div id="rk_gainBody" style="padding:0 12px 12px;font-size:12px;">
-      <div style="font-size:11px;color:#64748b;margin:4px 0 6px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <span>比較基準：<b id="gainBaseDate">—</b></span>
-        <span style="margin-left:auto;white-space:nowrap;">
-          <span class="rk-badge up">▲ 晉升</span>
-          <span class="rk-badge down">▼ 下降</span>
-          <span class="rk-badge same">－ 持平</span>
-          <span class="rk-badge new">🆕 新進榜</span>
-        </span>
-      </div>
-      <div style="overflow-x:auto;">
-        <table class="stocks-table" style="width:100%;">
-          <thead><tr style="color:#64748b;font-size:11px;">
-            <th style="text-align:center;padding:3px 6px;">名次</th>
-            <th style="text-align:center;padding:3px 6px;">變化</th>
-            <th style="text-align:left;padding:3px 6px;">代號</th>
-            <th style="text-align:left;padding:3px 6px;">名稱</th>
-            <th style="text-align:right;padding:3px 6px;">股價</th>
-            <th style="text-align:right;padding:3px 6px;">10日%</th>
-            <th style="text-align:right;padding:3px 6px;">成交(億)</th>
-          </tr></thead>
-          <tbody id="rk_gainTbody"><tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:12px;">尚無資料</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  <!-- 族群題材輪動分析 -->
-  <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;margin-bottom:10px;overflow:hidden;">
-    <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#5b21b6;" onclick="var b=document.getElementById('rk_themeBody');b.hidden=!b.hidden;this.querySelector('.theme-arr').textContent=b.hidden?'▶':'▼'">
-      🧭 族群題材輪動分析（Top 20 內誰在領頭、誰是候補） <span class="theme-arr">▼</span>
-    </div>
-    <div id="rk_themeBody" style="padding:0 12px 12px;font-size:12px;">
-      <div id="rk_themeContent" style="font-size:12px;color:#9ca3af;padding:8px 0;">尚無資料</div>
-    </div>
   </div>
   <div class="section-header">
     <div class="section-title">族群排行榜</div>
@@ -2641,84 +2625,93 @@ function saveGain10History(history) {
   localStorage.setItem(STOCK_GAIN10_HISTORY_KEY, JSON.stringify(history));
 }
 
-function gain10RankBadge(code, currentRank, prevRanks) {
-  if (!(code in prevRanks)) return `<span class="rk-badge new">🆕 新進榜</span>`;
-  const diff = prevRanks[code] - currentRank;
-  if (diff > 0) return `<span class="rk-badge up">▲${diff}</span>`;
-  if (diff < 0) return `<span class="rk-badge down">▼${-diff}</span>`;
-  return `<span class="rk-badge same">－</span>`;
-}
-
-function renderStockGainRanking() {
-  const tbody = document.getElementById("rk_gainTbody");
-  if (!tbody) return;
-
-  const list = Object.entries(stockData)
-    .filter(([code, d]) => code !== "0050" && d && typeof d.pct10 === "number")
-    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, amount: d.amount }))
-    .sort((a, b) => b.pct10 - a.pct10)
-    .slice(0, 20);
-
-  const snapshotDate = (lastUpdateTime ? new Date(lastUpdateTime) : new Date()).toISOString().slice(0, 10);
-  const history = loadGain10History();
-  const priorDates = Object.keys(history).filter(d => d < snapshotDate).sort();
-  const baseDate = priorDates.length ? priorDates[priorDates.length - 1] : null;
-  const prevRanks = baseDate ? history[baseDate] : {};
-
-  const baseEl = document.getElementById("gainBaseDate");
-  if (baseEl) baseEl.textContent = baseDate || "尚無先前記錄";
-
-  if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:12px;">尚無 10 日漲跌幅資料，請先更新歷史行情</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = list.map((s, i) => {
-    const rank = i + 1;
-    return `<tr>
-      <td style="text-align:center;padding:4px 6px;font-weight:600;">${rank}</td>
-      <td style="text-align:center;padding:4px 6px;">${gain10RankBadge(s.code, rank, prevRanks)}</td>
-      <td style="padding:4px 6px;"><a href="${getTVLink(s.code, stockData[s.code]?.market || 'TWSE')}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;">${s.code}</a></td>
-      <td style="padding:4px 6px;color:#374151;">${s.name}</td>
-      <td style="padding:4px 6px;text-align:right;">${s.price != null ? s.price.toFixed(2) : "-"}</td>
-      <td style="padding:4px 6px;text-align:right;" class="${pctClass(s.pct10)}">${fmtPct(s.pct10)}</td>
-      <td style="padding:4px 6px;text-align:right;color:#9ca3af;">${s.amount != null ? s.amount.toFixed(1) : "-"}</td>
-    </tr>`;
-  }).join("");
-
-  const currentRanks = {};
-  list.forEach((s, i) => { currentRanks[s.code] = i + 1; });
-  history[snapshotDate] = currentRanks;
-  saveGain10History(history);
-}
-
 // 族群全名 SECTORS 用「N. 名稱」當 key，其他地方（STOCK_SECTORS_MAP／goToSector）都用去掉編號的短名，這裡沿用同樣的還原方式
 function sectorFullKeyByShortName(shortName) {
   return Object.keys(SECTORS).find(k => (k.split('. ')[1] || k) === shortName);
 }
 
-function renderThemeRotation() {
-  const content = document.getElementById("rk_themeContent");
-  if (!content) return;
+// ==================== 「今日精選」偽裝成信箱的動能清單 ====================
+// 個股10日漲幅排行／族群題材輪動，UI 刻意做成郵件列表的樣子（寄件者/主旨/預覽/時間），
+// 內容還是真數據，只是不用漲跌色塊、圖示，遠看/被瞄到時比較不明顯。
+const MAIL_AVATAR_COLORS = ['#2563eb','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#4338ca','#0d9488'];
+function mailAvatarColor(seed) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return MAIL_AVATAR_COLORS[h % MAIL_AVATAR_COLORS.length];
+}
+function mailTimeLabel() {
+  const d = lastUpdateTime ? new Date(lastUpdateTime) : new Date();
+  return d.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Taipei' });
+}
+function mailPct(v) {
+  if (v == null || isNaN(v)) return '-';
+  return (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+}
+function mailRankChangeText(code, rank, prevRanks) {
+  if (!(code in prevRanks)) return '🆕 新進榜';
+  const diff = prevRanks[code] - rank;
+  if (diff > 0) return `名次▲${diff}`;
+  if (diff < 0) return `名次▼${-diff}`;
+  return '名次持平';
+}
 
+// 算一次 Top20＋跟上次記錄比較的名次，兩個信箱區塊共用，並在這裡順便寫入本次快照
+function computeGain10Snapshot() {
   const top20 = Object.entries(stockData)
     .filter(([code, d]) => code !== "0050" && d && typeof d.pct10 === "number")
-    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1 }))
+    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market }))
     .sort((a, b) => b.pct10 - a.pct10)
     .slice(0, 20);
 
-  if (!top20.length) {
-    content.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:8px 0;">尚無 10 日漲跌幅資料，請先更新歷史行情</div>`;
-    return;
-  }
+  if (!top20.length) return { top20: [], prevRanks: {} };
 
-  const top20Codes = new Set(top20.map(s => s.code));
-  const history = loadGain10History();
   const snapshotDate = (lastUpdateTime ? new Date(lastUpdateTime) : new Date()).toISOString().slice(0, 10);
+  const history = loadGain10History();
   const priorDates = Object.keys(history).filter(d => d < snapshotDate).sort();
   const prevRanks = priorDates.length ? history[priorDates[priorDates.length - 1]] : {};
 
-  // 依族群把 Top20 內的個股分組
+  const currentRanks = {};
+  top20.forEach((s, i) => { currentRanks[s.code] = i + 1; });
+  history[snapshotDate] = currentRanks;
+  saveGain10History(history);
+
+  return { top20, prevRanks };
+}
+
+function buildMailInboxHtml(snapshot) {
+  const { top20, prevRanks } = snapshot;
+  if (!top20.length) return '';
+  const timeLabel = mailTimeLabel();
+
+  const rows = top20.map((s, i) => {
+    const rank = i + 1;
+    const isNew = !(s.code in prevRanks);
+    const diff = isNew ? null : prevRanks[s.code] - rank;
+    const isHot = isNew || (diff != null && diff >= 100);
+    const isUnread = isNew || (diff != null && diff > 0);
+    const sectors = (STOCK_SECTORS_MAP[s.code] || []).slice(0, 2).join('、');
+    return `
+      <a class="mail-row" href="${getTVLink(s.code, s.market || 'TWSE')}" target="_blank">
+        <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
+        <span class="mail-avatar" style="background:${mailAvatarColor(s.code)}">${rank}</span>
+        <span class="mail-sender ${isUnread ? 'unread' : ''}">${s.name}<span class="mail-code">${s.code}</span></span>
+        <span class="mail-subject ${isUnread ? 'unread' : ''}">近10日 ${mailPct(s.pct10)}（5日 ${mailPct(s.pct5)}） <span class="mail-snippet">— ${mailRankChangeText(s.code, rank, prevRanks)}${sectors ? '・' + sectors : ''}</span></span>
+        <span class="mail-time">${timeLabel}</span>
+      </a>`;
+  }).join('');
+
+  return `
+    <div class="mailbox">
+      <div class="mailbox-head"><span class="mb-title">📥 收件匣</span><span class="mb-count">${top20.length}</span></div>
+      ${rows}
+    </div>`;
+}
+
+function buildMailThreadsHtml(snapshot) {
+  const { top20, prevRanks } = snapshot;
+  if (!top20.length) return '';
+  const top20Codes = new Set(top20.map(s => s.code));
+
   const groups = {};
   top20.forEach((s, i) => {
     (STOCK_SECTORS_MAP[s.code] || []).forEach(sector => {
@@ -2732,12 +2725,11 @@ function renderThemeRotation() {
     .sort((a, b) => b[1].length - a[1].length || Math.min(...a[1].map(m => m.rank)) - Math.min(...b[1].map(m => m.rank)))
     .slice(0, 6);
 
-  if (!themes.length) {
-    content.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:8px 0;">Top 20 內目前沒有同族群 2 檔以上同步入榜，看不出明顯的輪動主線</div>`;
-    return;
-  }
+  if (!themes.length) return '';
+  const timeLabel = mailTimeLabel();
 
-  content.innerHTML = themes.map(([sector, members]) => {
+  const threadRows = themes.map(([sector, membersRaw]) => {
+    const members = membersRaw.sort((a, b) => a.rank - b.rank);
     const fullKey = sectorFullKeyByShortName(sector);
     const sectorStocks = fullKey ? (SECTORS[fullKey] || []) : [];
     const candidates = sectorStocks
@@ -2746,52 +2738,49 @@ function renderThemeRotation() {
       .sort((a, b) => (b.pct5 ?? -999) - (a.pct5 ?? -999))
       .slice(0, 3);
 
-    const memberRows = members.sort((a, b) => a.rank - b.rank).map(m => `
-      <tr>
-        <td style="padding:3px 6px;text-align:left;">#${m.rank}</td>
-        <td style="padding:3px 6px;text-align:left;"><a href="${getTVLink(m.code, stockData[m.code]?.market || 'TWSE')}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;">${m.code}</a> ${m.name}</td>
-        <td style="padding:3px 6px;text-align:center;">${gain10RankBadge(m.code, m.rank, prevRanks)}</td>
-        <td style="padding:3px 6px;text-align:right;" class="${pctClass(m.pct10)}">${fmtPct(m.pct10)}</td>
-        <td style="padding:3px 6px;text-align:right;" class="${pctClass(m.pct5)}">${fmtPct(m.pct5)}</td>
-        <td style="padding:3px 6px;text-align:right;" class="${pctClass(m.pct1)}">${fmtPct(m.pct1)}</td>
-      </tr>`).join("");
+    const avatarStack = members.slice(0, 4).map(m => `<span class="mail-avatar" style="background:${mailAvatarColor(m.code)}">${m.rank}</span>`).join('');
+    const msgCount = members.length + candidates.length;
 
-    const candHtml = candidates.length
-      ? candidates.map(c => `
-        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:11.5px;padding:3px 0;">
-          <a href="${getTVLink(c.code, c.market || 'TWSE')}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;">${c.code}</a>
-          <strong>${c.name}</strong>
-          <span style="color:#78716c;">10日 ${fmtPct(c.pct10)} ・ 5日 ${fmtPct(c.pct5)} ・ 今日 ${fmtPct(c.pct1)}</span>
-        </div>`).join("")
-      : `<div style="font-size:11.5px;color:#9ca3af;padding:3px 0;">同族群其他個股尚無明顯加速跡象</div>`;
+    const memberReplies = members.map(m => `
+      <a class="thread-reply" href="${getTVLink(m.code, stockData[m.code]?.market || 'TWSE')}" target="_blank">
+        <span class="mail-avatar" style="background:${mailAvatarColor(m.code)};width:20px;height:20px;font-size:9px;">${m.rank}</span>
+        <strong>${m.name}</strong><span class="mail-code">${m.code}</span>
+        <span class="thread-figs">10日 ${mailPct(m.pct10)} ・5日 ${mailPct(m.pct5)} ・${mailRankChangeText(m.code, m.rank, prevRanks)}</span>
+      </a>`).join('');
+
+    const candReplies = candidates.length ? `
+      <div class="thread-label">草稿・尚未進榜</div>
+      ${candidates.map(c => `
+        <a class="thread-reply" href="${getTVLink(c.code, c.market || 'TWSE')}" target="_blank">
+          <span class="mail-avatar" style="background:#cbd5e1;width:20px;height:20px;font-size:9px;">·</span>
+          <strong>${c.name}</strong><span class="mail-code">${c.code}</span>
+          <span class="thread-figs">10日 ${mailPct(c.pct10)} ・5日 ${mailPct(c.pct5)} ・今日 ${mailPct(c.pct1)}</span>
+        </a>`).join('')}` : '';
 
     return `
-      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
-          <span style="font-weight:700;color:#5b21b6;font-size:13px;">${sector}</span>
-          <span style="font-size:10px;color:#7c3aed;background:#f5f3ff;padding:1px 8px;border-radius:9px;font-weight:700;">Top 20 內 ${members.length} 檔</span>
+      <details class="mail-thread">
+        <summary class="mail-row">
+          <span class="mail-star">☆</span>
+          <span class="mail-avatar-stack">${avatarStack}</span>
+          <span class="mail-sender unread">${sector}</span>
+          <span class="mail-subject unread">共 ${msgCount} 封 <span class="mail-snippet">— 目前最高名次第 ${members[0].rank} 名</span></span>
+          <span class="mail-time">${timeLabel}</span>
+        </summary>
+        <div class="thread-body">
+          ${memberReplies}
+          ${candReplies}
         </div>
-        <div style="overflow-x:auto;">
-          <table style="width:100%;font-size:11.5px;border-collapse:collapse;">
-            <thead><tr style="color:#9ca3af;font-size:10px;">
-              <th style="padding:2px 6px;text-align:left;">名次</th><th style="padding:2px 6px;text-align:left;">標的</th>
-              <th style="padding:2px 6px;text-align:center;">變化</th><th style="padding:2px 6px;text-align:right;">10日%</th>
-              <th style="padding:2px 6px;text-align:right;">5日%</th><th style="padding:2px 6px;text-align:right;">今日%</th>
-            </tr></thead>
-            <tbody>${memberRows}</tbody>
-          </table>
-        </div>
-        <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #e5e7eb;">
-          <div style="font-size:10px;color:#a78bfa;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;">候補潛力股（同族群、尚未進榜、5日漲幅最強）</div>
-          ${candHtml}
-        </div>
-      </div>`;
-  }).join("");
+      </details>`;
+  }).join('');
+
+  return `
+    <div class="mailbox" style="margin-top:14px;">
+      <div class="mailbox-head"><span class="mb-title">🔔 更新</span><span class="mb-count">${themes.length}</span></div>
+      ${threadRows}
+    </div>`;
 }
 
 function renderRanking() {
-  renderStockGainRanking();
-  renderThemeRotation();
   // 更新 VIX 卡片
   const vixCard = document.getElementById("vixCard");
   if (vixCard && vixtwn) {
@@ -3619,6 +3608,10 @@ function renderStrategy() {
   ].filter(Boolean).map(([id, label, cnt, collapsible]) =>
     `<a href="#${id}" ${collapsible ? `onclick="const d=document.getElementById('${id}'); if(d) d.open=true;"` : ''}>${label}<span class="cnt${cnt ? '' : ' zero'}">${cnt}</span></a>`).join('')}</div>`;
 
+  const gain10Snapshot = computeGain10Snapshot();
+  const mailInboxHtml = buildMailInboxHtml(gain10Snapshot);
+  const mailThreadsHtml = buildMailThreadsHtml(gain10Snapshot);
+
   panel.innerHTML = `
     <!-- 台灣 VIX -->
     ${vixHtml}
@@ -3637,6 +3630,17 @@ function renderStrategy() {
         <span>今日 <span class="${pctClass(market.pct1)}">${fmtPct(market.pct1)}</span></span>
       </div>
     </div>
+
+    ${mailInboxHtml}
+    ${mailThreadsHtml}
+
+    <details class="strat-collapse">
+      <summary>
+        <span class="strat-title">📎 進階篩選</span>
+        <span class="strat-hint">推薦族群・精選個股・拉回承接・翻轉觀察・族群輪動・起漲候選・質優動能・TV觀察</span>
+        <span class="strat-chev">展開 ▸</span>
+      </summary>
+      <div class="strat-collapse-body">
 
     <!-- 區塊快速導覽 -->
     ${secNavHtml}
@@ -3882,6 +3886,9 @@ function renderStrategy() {
           }).join('')}
         </tbody></table></div>`
     )}
+
+      </div>
+    </details>
   `;
 }
 
