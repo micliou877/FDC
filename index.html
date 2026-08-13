@@ -220,6 +220,15 @@
       </div>
     </div>
   </div>
+  <!-- 族群題材輪動分析 -->
+  <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;margin-bottom:10px;overflow:hidden;">
+    <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#5b21b6;" onclick="var b=document.getElementById('rk_themeBody');b.hidden=!b.hidden;this.querySelector('.theme-arr').textContent=b.hidden?'▶':'▼'">
+      🧭 族群題材輪動分析（Top 20 內誰在領頭、誰是候補） <span class="theme-arr">▼</span>
+    </div>
+    <div id="rk_themeBody" style="padding:0 12px 12px;font-size:12px;">
+      <div id="rk_themeContent" style="font-size:12px;color:#9ca3af;padding:8px 0;">尚無資料</div>
+    </div>
+  </div>
   <div class="section-header">
     <div class="section-title">族群排行榜</div>
     <div class="controls">
@@ -2683,8 +2692,106 @@ function renderStockGainRanking() {
   saveGain10History(history);
 }
 
+// 族群全名 SECTORS 用「N. 名稱」當 key，其他地方（STOCK_SECTORS_MAP／goToSector）都用去掉編號的短名，這裡沿用同樣的還原方式
+function sectorFullKeyByShortName(shortName) {
+  return Object.keys(SECTORS).find(k => (k.split('. ')[1] || k) === shortName);
+}
+
+function renderThemeRotation() {
+  const content = document.getElementById("rk_themeContent");
+  if (!content) return;
+
+  const top20 = Object.entries(stockData)
+    .filter(([code, d]) => code !== "0050" && d && typeof d.pct10 === "number")
+    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1 }))
+    .sort((a, b) => b.pct10 - a.pct10)
+    .slice(0, 20);
+
+  if (!top20.length) {
+    content.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:8px 0;">尚無 10 日漲跌幅資料，請先更新歷史行情</div>`;
+    return;
+  }
+
+  const top20Codes = new Set(top20.map(s => s.code));
+  const history = loadGain10History();
+  const snapshotDate = (lastUpdateTime ? new Date(lastUpdateTime) : new Date()).toISOString().slice(0, 10);
+  const priorDates = Object.keys(history).filter(d => d < snapshotDate).sort();
+  const prevRanks = priorDates.length ? history[priorDates[priorDates.length - 1]] : {};
+
+  // 依族群把 Top20 內的個股分組
+  const groups = {};
+  top20.forEach((s, i) => {
+    (STOCK_SECTORS_MAP[s.code] || []).forEach(sector => {
+      if (!groups[sector]) groups[sector] = [];
+      groups[sector].push({ ...s, rank: i + 1 });
+    });
+  });
+
+  const themes = Object.entries(groups)
+    .filter(([_, members]) => members.length >= 2)
+    .sort((a, b) => b[1].length - a[1].length || Math.min(...a[1].map(m => m.rank)) - Math.min(...b[1].map(m => m.rank)))
+    .slice(0, 6);
+
+  if (!themes.length) {
+    content.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:8px 0;">Top 20 內目前沒有同族群 2 檔以上同步入榜，看不出明顯的輪動主線</div>`;
+    return;
+  }
+
+  content.innerHTML = themes.map(([sector, members]) => {
+    const fullKey = sectorFullKeyByShortName(sector);
+    const sectorStocks = fullKey ? (SECTORS[fullKey] || []) : [];
+    const candidates = sectorStocks
+      .filter(st => !top20Codes.has(st.code) && stockData[st.code] && typeof stockData[st.code].pct10 === "number")
+      .map(st => ({ code: st.code, name: STOCK_NAMES[st.code] || st.name, ...stockData[st.code] }))
+      .sort((a, b) => (b.pct5 ?? -999) - (a.pct5 ?? -999))
+      .slice(0, 3);
+
+    const memberRows = members.sort((a, b) => a.rank - b.rank).map(m => `
+      <tr>
+        <td style="padding:3px 6px;text-align:left;">#${m.rank}</td>
+        <td style="padding:3px 6px;text-align:left;"><a href="${getTVLink(m.code, stockData[m.code]?.market || 'TWSE')}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;">${m.code}</a> ${m.name}</td>
+        <td style="padding:3px 6px;text-align:center;">${gain10RankBadge(m.code, m.rank, prevRanks)}</td>
+        <td style="padding:3px 6px;text-align:right;" class="${pctClass(m.pct10)}">${fmtPct(m.pct10)}</td>
+        <td style="padding:3px 6px;text-align:right;" class="${pctClass(m.pct5)}">${fmtPct(m.pct5)}</td>
+        <td style="padding:3px 6px;text-align:right;" class="${pctClass(m.pct1)}">${fmtPct(m.pct1)}</td>
+      </tr>`).join("");
+
+    const candHtml = candidates.length
+      ? candidates.map(c => `
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:11.5px;padding:3px 0;">
+          <a href="${getTVLink(c.code, c.market || 'TWSE')}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;">${c.code}</a>
+          <strong>${c.name}</strong>
+          <span style="color:#78716c;">10日 ${fmtPct(c.pct10)} ・ 5日 ${fmtPct(c.pct5)} ・ 今日 ${fmtPct(c.pct1)}</span>
+        </div>`).join("")
+      : `<div style="font-size:11.5px;color:#9ca3af;padding:3px 0;">同族群其他個股尚無明顯加速跡象</div>`;
+
+    return `
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          <span style="font-weight:700;color:#5b21b6;font-size:13px;">${sector}</span>
+          <span style="font-size:10px;color:#7c3aed;background:#f5f3ff;padding:1px 8px;border-radius:9px;font-weight:700;">Top 20 內 ${members.length} 檔</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="width:100%;font-size:11.5px;border-collapse:collapse;">
+            <thead><tr style="color:#9ca3af;font-size:10px;">
+              <th style="padding:2px 6px;text-align:left;">名次</th><th style="padding:2px 6px;text-align:left;">標的</th>
+              <th style="padding:2px 6px;text-align:center;">變化</th><th style="padding:2px 6px;text-align:right;">10日%</th>
+              <th style="padding:2px 6px;text-align:right;">5日%</th><th style="padding:2px 6px;text-align:right;">今日%</th>
+            </tr></thead>
+            <tbody>${memberRows}</tbody>
+          </table>
+        </div>
+        <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #e5e7eb;">
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px;">候補潛力股（同族群、尚未進榜、5日漲幅最強）</div>
+          ${candHtml}
+        </div>
+      </div>`;
+  }).join("");
+}
+
 function renderRanking() {
   renderStockGainRanking();
+  renderThemeRotation();
   // 更新 VIX 卡片
   const vixCard = document.getElementById("vixCard");
   if (vixCard && vixtwn) {
