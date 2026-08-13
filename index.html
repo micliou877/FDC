@@ -61,8 +61,13 @@
     .flat-text { color: #94a3b8; }
     /* 「今日精選」信箱偽裝 UI */
     .mailbox { display:flex; flex-direction:column; background:#fff; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; margin-bottom:14px; }
-    .mailbox-head { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; border-bottom:1px solid #e5e7eb; background:#f8fafc; }
-    .mailbox-head .mb-title { font-size:13px; font-weight:700; color:#1e293b; }
+    .mailbox > summary.mailbox-head { list-style:none; cursor:pointer; }
+    .mailbox > summary.mailbox-head::-webkit-details-marker { display:none; }
+    .mailbox-head { display:flex; align-items:center; gap:8px; padding:9px 14px; border-bottom:1px solid #e5e7eb; background:#f8fafc; }
+    .mailbox:not([open]) > .mailbox-head { border-bottom:none; }
+    .mailbox-head .mb-title { font-size:13px; font-weight:700; color:#1e293b; flex:1; }
+    .mailbox-head .mb-chev { font-size:10px; color:#94a3b8; transition:transform .15s; }
+    .mailbox[open] > .mailbox-head .mb-chev { transform:rotate(90deg); }
     .mailbox-head .mb-count { font-size:11px; color:#fff; background:#64748b; border-radius:9px; padding:1px 7px; font-weight:700; }
     .mail-row { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid #f1f5f9; text-decoration:none; }
     .mail-row:last-child { border-bottom:none; }
@@ -2701,10 +2706,10 @@ function buildMailInboxHtml(snapshot) {
   }).join('');
 
   return `
-    <div class="mailbox">
-      <div class="mailbox-head"><span class="mb-title">📥 收件匣</span><span class="mb-count">${top20.length}</span></div>
+    <details class="mailbox">
+      <summary class="mailbox-head"><span class="mb-title">📥 收件匣</span><span class="mb-chev">▸</span><span class="mb-count">${top20.length}</span></summary>
       ${rows}
-    </div>`;
+    </details>`;
 }
 
 function buildMailThreadsHtml(snapshot) {
@@ -2774,10 +2779,10 @@ function buildMailThreadsHtml(snapshot) {
   }).join('');
 
   return `
-    <div class="mailbox" style="margin-top:14px;">
-      <div class="mailbox-head"><span class="mb-title">🔔 更新</span><span class="mb-count">${themes.length}</span></div>
+    <details class="mailbox" style="margin-top:10px;">
+      <summary class="mailbox-head"><span class="mb-title">🔔 更新</span><span class="mb-chev">▸</span><span class="mb-count">${themes.length}</span></summary>
       ${threadRows}
-    </div>`;
+    </details>`;
 }
 
 function renderRanking() {
@@ -3555,43 +3560,37 @@ function renderStrategy() {
             </tbody></table>`}
     </div>`;
 
-  // VIX 卡片
+  // VIX 卡片：偽裝成收件匣裡的一封「系統通知」，點一下＝重新整理
   let vixHtml = '';
   if (vixtwn) {
     const vSign = vixtwn.pct1 >= 0 ? '+' : '';
-    const vPctColor = vixtwn.pct1 > 0 ? '#dc2626' : vixtwn.pct1 < 0 ? '#16a34a' : '#6b7280';
-    const vLvl = vixtwn.price >= 40 ? { label:'高恐慌 ⚠️', bg:'#fff1f2', border:'#fecdd3', c:'#dc2626' }
-               : vixtwn.price >= 30 ? { label:'謹慎 🟠',   bg:'#fff7ed', border:'#fed7aa', c:'#ea580c' }
-               : vixtwn.price >= 20 ? { label:'中性 🟡',   bg:'#fffbeb', border:'#fde68a', c:'#ca8a04' }
-               :                      { label:'低恐慌 🟢',  bg:'#f0fdf4', border:'#bbf7d0', c:'#16a34a' };
+    const vLvl = vixtwn.price >= 40 ? { label:'高恐慌', c:'#b91c1c' }
+               : vixtwn.price >= 30 ? { label:'謹慎',   c:'#b45309' }
+               : vixtwn.price >= 20 ? { label:'中性',   c:'#6b7280' }
+               :                      { label:'低恐慌',  c:'#475569' };
     const todayTW = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
     const isPrevDay = vixtwn.date !== todayTW;
-    const dateLabel = isPrevDay
-      ? `<span style="font-size:10px;background:#fef3c7;color:#92400e;border-radius:3px;padding:1px 5px;margin-left:4px;">前日收盤</span>`
-      : '';
+    const isHot = vixtwn.price >= 30;
     vixHtml = `
-      <div style="background:${vLvl.bg};border:2px solid ${vLvl.border};border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;">
-        <div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:.5px;margin-bottom:4px;">🎯 台灣 VIX（臺指選擇權波動率）</div>
-          <div style="display:flex;align-items:baseline;gap:10px;">
-            <span style="font-size:32px;font-weight:800;color:${vLvl.c};line-height:1;">${vixtwn.price}</span>
-            <span style="font-size:14px;font-weight:700;color:${vPctColor};">${vSign}${vixtwn.pct1 ?? '-'}%</span>
-          </div>
+      <div class="mailbox" style="margin-bottom:10px;">
+        <div class="mail-row" style="cursor:pointer;" onclick="refreshVIX()" title="點一下重新抓取">
+          <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
+          <span class="mail-avatar" style="background:${vLvl.c};">V</span>
+          <span class="mail-sender ${isHot ? 'unread' : ''}">系統通知</span>
+          <span class="mail-subject ${isHot ? 'unread' : ''}">波動率指標更新 ${vixtwn.price}（${vSign}${vixtwn.pct1 ?? '-'}%） <span class="mail-snippet">— ${vLvl.label}${isPrevDay ? '・前日收盤' : ''}</span></span>
+          <span class="mail-time">${vixRefreshing ? '⏳' : (vixtwn.time || '')}</span>
         </div>
-        <div style="border-left:2px solid ${vLvl.border};padding-left:18px;">
-          <div style="font-size:18px;font-weight:800;color:${vLvl.c};">${vLvl.label}</div>
-          <div style="font-size:11px;color:#9ca3af;margin-top:4px;">${vixtwn.date} ${vixtwn.time}${dateLabel}</div>
-        </div>
-        <div style="margin-left:auto;font-size:11px;color:#9ca3af;line-height:1.8;text-align:right;">
-          &lt;20 低恐慌<br>20–30 中性<br>30–40 謹慎<br>&gt;40 高恐慌
-        </div>
-        <button id="vixRefreshBtn" onclick="refreshVIX()" title="重新抓取 VIX" ${vixRefreshing ? 'disabled' : ''} style="position:absolute;top:8px;right:10px;background:none;border:none;cursor:pointer;font-size:15px;color:#94a3b8;padding:2px 4px;border-radius:4px;" onmouseover="this.style.color='#475569'" onmouseout="this.style.color='#94a3b8'">${vixRefreshing ? '⏳' : '🔄'}</button>
       </div>`;
   } else {
     vixHtml = `
-      <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;">
-        <span style="font-size:11px;color:#94a3b8;">🎯 台灣 VIX：尚無資料</span>
-        <button onclick="refreshVIX()" style="font-size:11px;padding:3px 10px;background:#e2e8f0;border:none;border-radius:4px;cursor:pointer;color:#475569;font-weight:600;" onmouseover="this.style.background='#cbd5e1'" onmouseout="this.style.background='#e2e8f0'">載入</button>
+      <div class="mailbox" style="margin-bottom:10px;">
+        <div class="mail-row" style="cursor:pointer;" onclick="refreshVIX()" title="點一下載入">
+          <span class="mail-star">☆</span>
+          <span class="mail-avatar" style="background:#94a3b8;">V</span>
+          <span class="mail-sender">系統通知</span>
+          <span class="mail-subject">尚無資料 <span class="mail-snippet">— 點此載入</span></span>
+          <span class="mail-time">${vixRefreshing ? '⏳' : ''}</span>
+        </div>
       </div>`;
   }
 
