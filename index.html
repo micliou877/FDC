@@ -317,21 +317,6 @@
     </div>
     <div id="rk_heatBody" style="padding:0 12px 12px;font-size:12px;"><div style="color:#aaa;font-size:11px;padding:4px 0">載入報價後自動計算…</div></div>
   </div>
-  <!-- 5 OK 條件清單 -->
-  <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;margin-bottom:10px;overflow:hidden;">
-    <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#166534;" onclick="var b=document.getElementById('rk_5okBody');b.hidden=!b.hidden;this.querySelector('.ok-arr').textContent=b.hidden?'▶':'▼'">
-      ✅ 起漲股 5 OK 條件確認 <span class="ok-arr">▶</span>
-    </div>
-    <div id="rk_5okBody" hidden style="padding:4px 12px 12px">
-      <div style="font-size:12px;color:#166534;margin-bottom:8px">4 個以上才進場　當前：<span id="rk_5ok_count" style="font-weight:700">0</span>/5　<span id="rk_5ok_pass" style="font-weight:700;color:#dc2626">不夠 ❌</span></div>
-      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok1" onchange="rk5okUpdate()"> 站上 60 日均線（季線）</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok2" onchange="rk5okUpdate()"> 月線、季線轉強或多頭排列</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok3" onchange="rk5okUpdate()"> 近 5 日均量 ≥ 60 日均量 × 1.5 倍</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer;border-bottom:1px solid #dcfce7"><input type="checkbox" id="rk_ok4" onchange="rk5okUpdate()"> 同族群至少 3 檔同步走強</label>
-      <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;cursor:pointer"><input type="checkbox" id="rk_ok5" onchange="rk5okUpdate()"> 距前波高點還有 30%+ 上漲空間</label>
-      <button onclick="['rk_ok1','rk_ok2','rk_ok3','rk_ok4','rk_ok5'].forEach(id=>document.getElementById(id).checked=false);rk5okUpdate()" style="margin-top:8px;font-size:11px;padding:3px 10px;border:1px solid #86efac;border-radius:4px;background:#fff;cursor:pointer;color:#166534">清空</button>
-    </div>
-  </div>
   <!-- 個股 10 日漲幅排行 Top 20 -->
   <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;margin-bottom:10px;overflow:hidden;">
     <div style="padding:8px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13px;color:#1e40af;" onclick="var b=document.getElementById('rk_gainBody');b.hidden=!b.hidden;this.querySelector('.gain-arr').textContent=b.hidden?'▶':'▼'">
@@ -2935,14 +2920,6 @@ function volTrendBadge(vt) {
   if (vt >= 1.1) return `<span style="font-size:12px;color:#c49494;" title="資金流入 ${vt.toFixed(2)}x">↑</span>`;
   if (vt >= 0.9) return `<span style="font-size:12px;color:#9ca3af;" title="量能持平 ${vt.toFixed(2)}x">—</span>`;
   return `<span style="font-size:12px;color:#4a7a60;font-weight:700;" title="資金流出 ${vt.toFixed(2)}x">↓</span>`;
-}
-
-function rk5okUpdate() {
-  let cnt = ['rk_ok1','rk_ok2','rk_ok3','rk_ok4','rk_ok5'].filter(id => document.getElementById(id)?.checked).length;
-  const cEl = document.getElementById('rk_5ok_count');
-  const pEl = document.getElementById('rk_5ok_pass');
-  if(cEl) cEl.textContent = cnt;
-  if(pEl) { pEl.textContent = cnt>=4 ? '達標 ✅' : '不夠 ❌'; pEl.style.color = cnt>=4 ? '#16a34a' : '#dc2626'; }
 }
 
 const STOCK_GAIN10_HISTORY_KEY = "fdc_stock_gain10_rank_history_v1";
