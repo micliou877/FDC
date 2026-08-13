@@ -74,19 +74,26 @@
     .mail-row:hover { background:#f8fafc; }
     .mail-star { font-size:14px; color:#cbd5e1; flex-shrink:0; width:14px; text-align:center; }
     .mail-star.active { color:#eab308; }
-    .mail-avatar { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; flex-shrink:0; }
-    .mail-sender { width:112px; flex-shrink:0; font-size:12.5px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mail-avatar { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; flex-shrink:0; text-decoration:none; }
+    .mail-sender-link { text-decoration:none; color:inherit; flex-shrink:0; }
+    .mail-sender { width:112px; flex-shrink:0; font-size:12.5px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
     .mail-sender.unread { color:#0f172a; font-weight:700; }
     .mail-sender .mail-code { font-size:10.5px; color:#94a3b8; font-weight:400; margin-left:3px; }
     .mail-subject { flex:1; min-width:0; font-size:12.5px; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .mail-subject.unread { color:#1e293b; font-weight:600; }
     .mail-subject .mail-snippet { color:#94a3b8; font-weight:400; }
     .mail-time { font-size:11px; color:#94a3b8; flex-shrink:0; width:44px; text-align:right; }
+    .mail-actions { display:flex; align-items:center; gap:5px; flex-shrink:0; visibility:hidden; }
+    .mail-row:hover .mail-actions, .thread-reply:hover .mail-actions { visibility:visible; }
+    .mail-select { font-size:10.5px; padding:1px 3px; border:1px solid #e2e8f0; border-radius:4px; color:#475569; background:#fff; cursor:pointer; max-width:56px; }
+    .mail-add { cursor:pointer; font-size:11px; padding:1px 6px; background:#f1f5f9; border-radius:4px; color:#475569; font-weight:700; }
+    .mail-add:hover { background:#e2e8f0; }
     .mail-thread > summary { list-style:none; cursor:pointer; }
     .mail-thread > summary::-webkit-details-marker { display:none; }
     .mail-thread .thread-body { background:#fafbfc; padding:4px 14px 10px 50px; border-bottom:1px solid #f1f5f9; }
-    .mail-thread .thread-reply { display:flex; align-items:baseline; gap:8px; padding:5px 0; font-size:12px; border-bottom:1px dashed #eef2f6; flex-wrap:wrap; text-decoration:none; color:inherit; }
+    .mail-thread .thread-reply { display:flex; align-items:baseline; gap:8px; padding:5px 0; font-size:12px; border-bottom:1px dashed #eef2f6; flex-wrap:wrap; }
     .mail-thread .thread-reply:last-child { border-bottom:none; }
+    .mail-thread .thread-reply-link { display:inline-flex; align-items:baseline; gap:8px; text-decoration:none; color:inherit; }
     .mail-thread .thread-reply strong { color:#1e293b; }
     .mail-thread .thread-figs { color:#94a3b8; }
     .mail-thread .thread-label { font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:#a1a1aa; font-weight:700; margin:8px 0 2px; }
@@ -2659,6 +2666,15 @@ function mailRankChangeText(code, rank, prevRanks) {
   if (diff < 0) return `名次▼${-diff}`;
   return '名次持平';
 }
+// 滑鼠移到信件列上才會浮現「關注／加入作業清單」，平常收起來不露餡
+function mailActionsHtml(code, name, currentList) {
+  const inWL = currentList.includes(code);
+  const options = Object.keys(watchlists).map(k => `<option value="${k}">${k}</option>`).join('');
+  return `<span class="mail-actions" onclick="event.stopPropagation()">
+    <select onchange="addToWatchGroup(this,'${code}')" class="mail-select" title="加入關注分類"><option value="">${inWL ? '⭐' : '☆'}</option>${options}</select>
+    <span class="mail-add" onclick="addToDailyPlan('${code}','${name}')" title="加入今日作業清單">＋</span>
+  </span>`;
+}
 
 // 算一次 Top20＋跟上次記錄比較的名次，兩個信箱區塊共用，並在這裡順便寫入本次快照
 function computeGain10Snapshot() {
@@ -2683,7 +2699,7 @@ function computeGain10Snapshot() {
   return { top20, prevRanks };
 }
 
-function buildMailInboxHtml(snapshot) {
+function buildMailInboxHtml(snapshot, currentList) {
   const { top20, prevRanks } = snapshot;
   if (!top20.length) return '';
   const timeLabel = mailTimeLabel();
@@ -2695,14 +2711,18 @@ function buildMailInboxHtml(snapshot) {
     const isHot = isNew || (diff != null && diff >= 100);
     const isUnread = isNew || (diff != null && diff > 0);
     const sectors = (STOCK_SECTORS_MAP[s.code] || []).slice(0, 2).join('、');
+    const tvLink = getTVLink(s.code, s.market || 'TWSE');
     return `
-      <a class="mail-row" href="${getTVLink(s.code, s.market || 'TWSE')}" target="_blank">
+      <div class="mail-row">
         <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
-        <span class="mail-avatar" style="background:${mailAvatarColor(s.code)}">${rank}</span>
-        <span class="mail-sender ${isUnread ? 'unread' : ''}">${s.name}<span class="mail-code">${s.code}</span></span>
+        <a class="mail-avatar" href="${tvLink}" target="_blank">${rank}</a>
+        <a class="mail-sender-link" href="${tvLink}" target="_blank">
+          <span class="mail-sender ${isUnread ? 'unread' : ''}">${s.name}<span class="mail-code">${s.code}</span></span>
+        </a>
         <span class="mail-subject ${isUnread ? 'unread' : ''}">近10日 ${mailPct(s.pct10)}（5日 ${mailPct(s.pct5)}） <span class="mail-snippet">— ${mailRankChangeText(s.code, rank, prevRanks)}${sectors ? '・' + sectors : ''}</span></span>
+        ${mailActionsHtml(s.code, s.name, currentList)}
         <span class="mail-time">${timeLabel}</span>
-      </a>`;
+      </div>`;
   }).join('');
 
   return `
@@ -2712,7 +2732,7 @@ function buildMailInboxHtml(snapshot) {
     </details>`;
 }
 
-function buildMailThreadsHtml(snapshot) {
+function buildMailThreadsHtml(snapshot, currentList) {
   const { top20, prevRanks } = snapshot;
   if (!top20.length) return '';
   const top20Codes = new Set(top20.map(s => s.code));
@@ -2747,20 +2767,26 @@ function buildMailThreadsHtml(snapshot) {
     const msgCount = members.length + candidates.length;
 
     const memberReplies = members.map(m => `
-      <a class="thread-reply" href="${getTVLink(m.code, stockData[m.code]?.market || 'TWSE')}" target="_blank">
-        <span class="mail-avatar" style="background:${mailAvatarColor(m.code)};width:20px;height:20px;font-size:9px;">${m.rank}</span>
-        <strong>${m.name}</strong><span class="mail-code">${m.code}</span>
+      <div class="thread-reply">
+        <a class="thread-reply-link" href="${getTVLink(m.code, stockData[m.code]?.market || 'TWSE')}" target="_blank">
+          <span class="mail-avatar" style="background:${mailAvatarColor(m.code)};width:20px;height:20px;font-size:9px;">${m.rank}</span>
+          <strong>${m.name}</strong><span class="mail-code">${m.code}</span>
+        </a>
         <span class="thread-figs">10日 ${mailPct(m.pct10)} ・5日 ${mailPct(m.pct5)} ・${mailRankChangeText(m.code, m.rank, prevRanks)}</span>
-      </a>`).join('');
+        ${mailActionsHtml(m.code, m.name, currentList)}
+      </div>`).join('');
 
     const candReplies = candidates.length ? `
       <div class="thread-label">草稿・尚未進榜</div>
       ${candidates.map(c => `
-        <a class="thread-reply" href="${getTVLink(c.code, c.market || 'TWSE')}" target="_blank">
-          <span class="mail-avatar" style="background:#cbd5e1;width:20px;height:20px;font-size:9px;">·</span>
-          <strong>${c.name}</strong><span class="mail-code">${c.code}</span>
+        <div class="thread-reply">
+          <a class="thread-reply-link" href="${getTVLink(c.code, c.market || 'TWSE')}" target="_blank">
+            <span class="mail-avatar" style="background:#cbd5e1;width:20px;height:20px;font-size:9px;">·</span>
+            <strong>${c.name}</strong><span class="mail-code">${c.code}</span>
+          </a>
           <span class="thread-figs">10日 ${mailPct(c.pct10)} ・5日 ${mailPct(c.pct5)} ・今日 ${mailPct(c.pct1)}</span>
-        </a>`).join('')}` : '';
+          ${mailActionsHtml(c.code, c.name, currentList)}
+        </div>`).join('')}` : '';
 
     return `
       <details class="mail-thread">
@@ -3608,8 +3634,8 @@ function renderStrategy() {
     `<a href="#${id}" ${collapsible ? `onclick="const d=document.getElementById('${id}'); if(d) d.open=true;"` : ''}>${label}<span class="cnt${cnt ? '' : ' zero'}">${cnt}</span></a>`).join('')}</div>`;
 
   const gain10Snapshot = computeGain10Snapshot();
-  const mailInboxHtml = buildMailInboxHtml(gain10Snapshot);
-  const mailThreadsHtml = buildMailThreadsHtml(gain10Snapshot);
+  const mailInboxHtml = buildMailInboxHtml(gain10Snapshot, currentList);
+  const mailThreadsHtml = buildMailThreadsHtml(gain10Snapshot, currentList);
 
   panel.innerHTML = `
     <!-- 台灣 VIX -->
