@@ -101,6 +101,20 @@
     .mail-avatar-stack .mail-avatar { width:22px; height:22px; font-size:9.5px; margin-left:-8px; border:2px solid #fff; }
     .mail-avatar-stack .mail-avatar:first-child { margin-left:0; }
 
+    .score-chip { flex-shrink:0; min-width:26px; text-align:center; font-size:11px; font-weight:700; padding:2px 6px; border-radius:10px; background:#f1f5f9; cursor:default; }
+    .score-chip.na { font-size:10px; font-weight:600; background:#fef3c7; color:#92400e; }
+    .score-gear { cursor:pointer; font-size:12px; color:#94a3b8; padding:0 2px; }
+    .score-gear:hover { color:#475569; }
+    .mail-elim-row { opacity:.72; }
+    .mail-elim-reason { color:#b45309 !important; font-weight:400 !important; }
+    .mail-score-panel { padding:10px 14px; background:#f8fafc; border-bottom:1px solid #e5e7eb; display:flex; flex-direction:column; gap:7px; cursor:default; }
+    .mail-score-panel .msp-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:11px; color:#64748b; }
+    .mail-score-panel .msp-row strong { color:#334155; font-size:11px; flex-shrink:0; min-width:64px; }
+    .mail-score-panel .msp-row label { display:flex; align-items:center; gap:3px; white-space:nowrap; }
+    .mail-score-panel input[type=number] { width:48px; font-size:11px; padding:2px 4px; border:1px solid #e2e8f0; border-radius:4px; color:#334155; }
+    .mail-score-panel .msp-reset { cursor:pointer; font-size:11px; color:#64748b; background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 8px; margin-left:auto; }
+    .mail-score-panel .msp-reset:hover { background:#f1f5f9; }
+
     .tag { display: inline-block; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #3b82f6; margin-top: 3px; margin-right: 3px; white-space: nowrap; border: 1px solid #bfdbfe; cursor: pointer; }
     .tag:hover { background: #dbeafe; border-color: #93c5fd; }
 
@@ -2676,6 +2690,217 @@ function mailActionsHtml(code, name, currentList) {
   </span>`;
 }
 
+// ==================== 收件匣加權分數（名次分＋加速度分＋族群分） ====================
+// 純規則、不綁個股：每天用當天 top20 榜重算，同一套公式套用在不同的當日榜上。
+const MAIL_SCORE_PARAMS_KEY = "fdc_mail_score_params_v1";
+const MAIL_SCORE_DEFAULTS = {
+  elimReturn5dMin: 5.0,       // 5日漲幅 <= 此值 → 完全淘汰（weight=0）
+  elimReturn5dBuffer: 2.0,    // 門檻上方緩衝帶寬度：<=min+buffer 時分數線性打折，>=min+buffer 才算安全
+  elimRankDropMax: 5,         // 名次退步 >= 此值 → 完全淘汰（weight=0）
+  elimRankDropBuffer: 2,      // 門檻下方緩衝帶寬度（名次數），同上邏輯
+  accelMinReturn10d: 20,      // 10日漲幅 <= 此值（或 <=0）→ 加速度不適用
+  accelBreaks: [0.45, 0.35, 0.25, 0.15],
+  accelScores: [20, 14, 8, 3, -5],
+  sectorHomeMin: 3,           // 合格池內同族群檔數 >= 此值 → 主場
+  sectorScores: { home: 10, pair: 4, solo: 0 },
+  rankStepUpBase: 6,
+  rankStepUp: 2,
+  rankStepUpCap: 18,
+  rankStepDownBase: 1,
+  rankStepDownMult: 3,
+  rankFlatScore: 3,
+  newEntryBase: 22,
+  newEntryMult: 2,
+  newEntryRankCutoff: 10,
+  newEntryFloorScore: 1,
+};
+
+function loadMailScoreParams() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MAIL_SCORE_PARAMS_KEY) || "{}");
+    return {
+      ...MAIL_SCORE_DEFAULTS,
+      ...saved,
+      accelBreaks: saved.accelBreaks || MAIL_SCORE_DEFAULTS.accelBreaks,
+      accelScores: saved.accelScores || MAIL_SCORE_DEFAULTS.accelScores,
+      sectorScores: { ...MAIL_SCORE_DEFAULTS.sectorScores, ...(saved.sectorScores || {}) },
+    };
+  } catch (e) { return JSON.parse(JSON.stringify(MAIL_SCORE_DEFAULTS)); }
+}
+function saveMailScoreParams(params) {
+  localStorage.setItem(MAIL_SCORE_PARAMS_KEY, JSON.stringify(params));
+}
+
+let mailScoreParams = loadMailScoreParams();
+let mailScorePanelOpen = false;
+let mailUiState = { inboxOpen: false, eliminatedOpen: false };
+
+function updateMailScoreParam(path, rawVal) {
+  const val = parseFloat(rawVal);
+  if (isNaN(val)) return;
+  const keys = path.split('.');
+  let obj = mailScoreParams;
+  for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
+  obj[keys[keys.length - 1]] = val;
+  saveMailScoreParams(mailScoreParams);
+  renderStrategy();
+}
+function resetMailScoreParams() {
+  mailScoreParams = JSON.parse(JSON.stringify(MAIL_SCORE_DEFAULTS));
+  saveMailScoreParams(mailScoreParams);
+  renderStrategy();
+}
+function toggleMailScorePanel() {
+  mailScorePanelOpen = !mailScorePanelOpen;
+  if (mailScorePanelOpen) mailUiState.inboxOpen = true;
+  renderStrategy();
+}
+
+// 兩條淘汰線各自算一個 0~1 的「合格權重」，門檻正下方是緩衝帶、線性打折，不是非黑即白直接砍到0；
+// 兩個權重取較小值（哪個原因比較嚴重就用哪個），完全跌破門檻才會是 weight=0（真正淘汰）。
+function mailEliminationWeight(s, params) {
+  if (s.incomplete) return { weight: 0, reasons: [] };
+  const reasons = [];
+
+  const safe5d = params.elimReturn5dMin + params.elimReturn5dBuffer;
+  let w5d = 1;
+  if (s.pct5 <= params.elimReturn5dMin) { w5d = 0; reasons.push(`5日漲幅 ${mailPct(s.pct5)} ≤ ${params.elimReturn5dMin}%（完全淘汰）`); }
+  else if (s.pct5 < safe5d) {
+    w5d = (s.pct5 - params.elimReturn5dMin) / params.elimReturn5dBuffer;
+    reasons.push(`5日漲幅 ${mailPct(s.pct5)} 接近門檻 ${params.elimReturn5dMin}%，打折 ×${w5d.toFixed(2)}`);
+  }
+
+  let wRank = 1;
+  if (!s.isNew && s.rankChange != null && s.rankChange < 0) {
+    const drop = Math.abs(s.rankChange);
+    const softStart = params.elimRankDropMax - params.elimRankDropBuffer;
+    if (drop >= params.elimRankDropMax) { wRank = 0; reasons.push(`名次退步 ${drop} ≥ ${params.elimRankDropMax}名（完全淘汰）`); }
+    else if (drop > softStart) {
+      wRank = (params.elimRankDropMax - drop) / params.elimRankDropBuffer;
+      reasons.push(`名次退步 ${drop} 接近門檻 ${params.elimRankDropMax}名，打折 ×${wRank.toFixed(2)}`);
+    }
+  }
+
+  return { weight: Math.min(w5d, wRank), reasons };
+}
+
+// 合格池族群密度 → 三項分數加總 → 依合格權重打折，回傳整個 top20（含淘汰／資料不全者，total=0）
+function computeWeightedScores(top20, prevRanks, params) {
+  params = params || mailScoreParams;
+  const base = top20.map((s, i) => {
+    const rank = i + 1;
+    const isNew = !(s.code in prevRanks);
+    const rankChange = isNew ? null : (prevRanks[s.code] - rank);
+    const sectors = STOCK_SECTORS_MAP[s.code] || [];
+    const incomplete = s.pct5 == null || isNaN(s.pct5);
+    const { weight, reasons } = mailEliminationWeight({ ...s, isNew, rankChange, incomplete }, params);
+    return { ...s, rank, isNew, rankChange, sectors, incomplete, eliminatedReasons: reasons, qualifiedWeight: weight, isEliminated: weight <= 0 };
+  });
+
+  const pool = base.filter(s => !s.incomplete && s.qualifiedWeight > 0);
+  const sectorCount = {};
+  pool.forEach(s => s.sectors.forEach(sec => { sectorCount[sec] = (sectorCount[sec] || 0) + 1; }));
+
+  return base.map(s => {
+    if (s.incomplete || s.isEliminated) {
+      return { ...s, rankScore: 0, accelScore: 0, accelNA: true, sectorScore: 0, sectorDensity: 0, total: 0 };
+    }
+
+    let rankScore;
+    if (s.isNew) {
+      rankScore = s.rank <= params.newEntryRankCutoff
+        ? (params.newEntryBase - params.newEntryMult * s.rank)
+        : params.newEntryFloorScore;
+    } else if (s.rankChange > 0) {
+      rankScore = Math.min(params.rankStepUpBase + params.rankStepUp * s.rankChange, params.rankStepUpCap);
+    } else if (s.rankChange < 0) {
+      rankScore = -(params.rankStepDownBase + params.rankStepDownMult * Math.abs(s.rankChange));
+    } else {
+      rankScore = params.rankFlatScore;
+    }
+
+    let accelScore = 0, accelNA = false;
+    if (s.pct10 == null || s.pct10 <= params.accelMinReturn10d || s.pct10 <= 0) {
+      accelNA = true;
+    } else {
+      const ratio = s.pct5 / s.pct10;
+      const [b1, b2, b3, b4] = params.accelBreaks;
+      const [v1, v2, v3, v4, v5] = params.accelScores;
+      accelScore = ratio >= b1 ? v1 : ratio >= b2 ? v2 : ratio >= b3 ? v3 : ratio >= b4 ? v4 : v5;
+    }
+
+    const density = s.sectors.length ? Math.max(...s.sectors.map(sec => sectorCount[sec] || 0)) : 0;
+    const sectorScore = density >= params.sectorHomeMin ? params.sectorScores.home
+      : density === 2 ? params.sectorScores.pair
+      : params.sectorScores.solo;
+
+    const rawTotal = rankScore + accelScore + sectorScore;
+    const total = Math.round(rawTotal * s.qualifiedWeight * 10) / 10;
+    return { ...s, rankScore, accelScore, accelNA, sectorScore, sectorDensity: density, rawTotal, total };
+  });
+}
+
+function buildMailScorePanelHtml(p) {
+  const inp = (path, val, step = 0.5) => `<input type="number" step="${step}" value="${val}" onchange="updateMailScoreParam('${path}', this.value)">`;
+  return `
+    <div class="mail-score-panel" onclick="event.stopPropagation()">
+      <div class="msp-row">
+        <strong>淘汰門檻</strong>
+        <label>5日漲幅下限 ${inp('elimReturn5dMin', p.elimReturn5dMin)}%（緩衝帶 ${inp('elimReturn5dBuffer', p.elimReturn5dBuffer, 0.5)}%）</label>
+        <label>退步淘汰名數 ${inp('elimRankDropMax', p.elimRankDropMax, 1)}（緩衝帶 ${inp('elimRankDropBuffer', p.elimRankDropBuffer, 1)}名）</label>
+      </div>
+      <div class="msp-row">
+        <strong>加速度切點</strong>
+        <label>≥${inp('accelBreaks.0', p.accelBreaks[0], 0.01)}→${inp('accelScores.0', p.accelScores[0], 1)}分</label>
+        <label>≥${inp('accelBreaks.1', p.accelBreaks[1], 0.01)}→${inp('accelScores.1', p.accelScores[1], 1)}分</label>
+        <label>≥${inp('accelBreaks.2', p.accelBreaks[2], 0.01)}→${inp('accelScores.2', p.accelScores[2], 1)}分</label>
+        <label>≥${inp('accelBreaks.3', p.accelBreaks[3], 0.01)}→${inp('accelScores.3', p.accelScores[3], 1)}分</label>
+        <label>其餘→${inp('accelScores.4', p.accelScores[4], 1)}分</label>
+        <label>10日下限 ${inp('accelMinReturn10d', p.accelMinReturn10d, 1)}%</label>
+      </div>
+      <div class="msp-row">
+        <strong>族群分</strong>
+        <label>主場門檻 ${inp('sectorHomeMin', p.sectorHomeMin, 1)}檔→${inp('sectorScores.home', p.sectorScores.home, 1)}分</label>
+        <label>2檔→${inp('sectorScores.pair', p.sectorScores.pair, 1)}分</label>
+        <label>孤棋→${inp('sectorScores.solo', p.sectorScores.solo, 1)}分</label>
+      </div>
+      <div class="msp-row">
+        <strong>名次分</strong>
+        <label>進步 ${inp('rankStepUpBase', p.rankStepUpBase, 1)}+${inp('rankStepUp', p.rankStepUp, 1)}×n（封頂${inp('rankStepUpCap', p.rankStepUpCap, 1)}）</label>
+        <label>退步 −(${inp('rankStepDownBase', p.rankStepDownBase, 1)}+${inp('rankStepDownMult', p.rankStepDownMult, 1)}×n)</label>
+        <label>持平 ${inp('rankFlatScore', p.rankFlatScore, 1)}</label>
+        <label>新進 ${inp('newEntryBase', p.newEntryBase, 1)}−${inp('newEntryMult', p.newEntryMult, 1)}×名次（前${inp('newEntryRankCutoff', p.newEntryRankCutoff, 1)}名，否則${inp('newEntryFloorScore', p.newEntryFloorScore, 1)}分）</label>
+        <span class="msp-reset" onclick="resetMailScoreParams()">↺ 還原預設值</span>
+      </div>
+    </div>`;
+}
+
+function downloadMailScoreJson() {
+  const snapshot = computeGain10Snapshot();
+  const scored = computeWeightedScores(snapshot.top20, snapshot.prevRanks, mailScoreParams);
+  const payload = {
+    generatedAt: new Date().toISOString(),
+    params: mailScoreParams,
+    stocks: scored.map(s => ({
+      code: s.code, name: s.name, listRank: s.rank,
+      return10d: s.pct10, return5d: s.pct5,
+      isNewEntry: s.isNew, rankChange: s.rankChange,
+      sectors: s.sectors,
+      incomplete: !!s.incomplete,
+      eliminated: s.isEliminated, qualifiedWeight: s.qualifiedWeight, notes: s.eliminatedReasons,
+      rankScore: s.rankScore, accelScore: s.accelScore, accelNA: s.accelNA,
+      sectorScore: s.sectorScore, sectorDensity: s.sectorDensity,
+      rawTotal: s.rawTotal, total: s.total,
+    })),
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `mail-score-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // 算一次 Top20＋跟上次記錄比較的名次，兩個信箱區塊共用，並在這裡順便寫入本次快照
 function computeGain10Snapshot() {
   const top20 = Object.entries(stockData)
@@ -2703,33 +2928,70 @@ function buildMailInboxHtml(snapshot, currentList) {
   const { top20, prevRanks } = snapshot;
   if (!top20.length) return '';
   const timeLabel = mailTimeLabel();
+  const scored = computeWeightedScores(top20, prevRanks, mailScoreParams);
+  const ranked = scored.filter(s => !s.isEliminated && !s.incomplete).sort((a, b) => b.total - a.total);
+  const eliminated = scored.filter(s => s.isEliminated);
+  const incomplete = scored.filter(s => s.incomplete);
 
-  const rows = top20.map((s, i) => {
-    const rank = i + 1;
-    const isNew = !(s.code in prevRanks);
-    const diff = isNew ? null : prevRanks[s.code] - rank;
-    const isHot = isNew || (diff != null && diff >= 100);
-    const isUnread = isNew || (diff != null && diff > 0);
-    const sectors = (STOCK_SECTORS_MAP[s.code] || []).slice(0, 2).join('、');
+  const scoreChip = (s) => {
+    const color = s.total > 0 ? '#166534' : s.total < 0 ? '#b91c1c' : '#64748b';
+    const bg = s.total > 0 ? '#f0fdf4' : s.total < 0 ? '#fef2f2' : '#f1f5f9';
+    const tapered = s.qualifiedWeight < 1;
+    let tip = `名次分 ${s.rankScore >= 0 ? '+' : ''}${s.rankScore}　加速度分 ${s.accelNA ? '不適用' : (s.accelScore >= 0 ? '+' : '') + s.accelScore}　族群分 +${s.sectorScore}（同族群最多 ${s.sectorDensity} 檔）`;
+    if (tapered) tip += `\n原始總分 ${s.rawTotal} → 緩衝帶打折 ×${s.qualifiedWeight.toFixed(2)}\n${s.eliminatedReasons.join('\n')}`;
+    return `<span class="score-chip" style="color:${color};background:${bg};${tapered ? 'box-shadow:inset 0 0 0 1px #fbbf24;' : ''}" title="${tip}">${s.total >= 0 ? '+' : ''}${s.total}${tapered ? '⚡' : ''}</span>`;
+  };
+
+  const rows = ranked.map(s => {
+    const isHot = s.isNew || (s.rankChange != null && s.rankChange >= 100);
+    const isUnread = s.isNew || (s.rankChange != null && s.rankChange > 0);
+    const sectors = s.sectors.slice(0, 2).join('、');
     const tvLink = getTVLink(s.code, s.market || 'TWSE');
     return `
       <div class="mail-row">
         <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
-        <a class="mail-avatar" href="${tvLink}" target="_blank">${rank}</a>
+        <a class="mail-avatar" href="${tvLink}" target="_blank">${s.rank}</a>
         <a class="mail-sender-link" href="${tvLink}" target="_blank">
           <span class="mail-sender ${isUnread ? 'unread' : ''}">${s.name}<span class="mail-code">${s.code}</span></span>
         </a>
-        <span class="mail-subject ${isUnread ? 'unread' : ''}">近10日 ${mailPct(s.pct10)}（5日 ${mailPct(s.pct5)}） <span class="mail-snippet">— ${mailRankChangeText(s.code, rank, prevRanks)}${sectors ? '・' + sectors : ''}</span></span>
+        <span class="mail-subject ${isUnread ? 'unread' : ''}">近10日 ${mailPct(s.pct10)}（5日 ${mailPct(s.pct5)}） <span class="mail-snippet">— ${mailRankChangeText(s.code, s.rank, prevRanks)}${sectors ? '・' + sectors : ''}</span></span>
+        ${scoreChip(s)}
         ${mailActionsHtml(s.code, s.name, currentList)}
         <span class="mail-time">${timeLabel}</span>
       </div>`;
   }).join('');
 
+  const elimRow = (s, reason) => `
+    <div class="mail-row mail-elim-row">
+      <span class="mail-star">·</span>
+      <span class="mail-avatar" style="background:#cbd5e1;">${s.rank}</span>
+      <span class="mail-sender">${s.name}<span class="mail-code">${s.code}</span></span>
+      <span class="mail-subject mail-elim-reason">${reason}</span>
+      <span class="mail-time">${timeLabel}</span>
+    </div>`;
+  const elimRows = eliminated.map(s => elimRow(s, s.eliminatedReasons.join('；'))).join('');
+  const incRows = incomplete.map(s => elimRow(s, '資料不全，未計分')).join('');
+
+  const panelHtml = mailScorePanelOpen ? buildMailScorePanelHtml(mailScoreParams) : '';
+
+  const elimSectionHtml = (eliminated.length || incomplete.length) ? `
+    <details class="mailbox" style="margin-top:10px;" ${mailUiState.eliminatedOpen ? 'open' : ''} ontoggle="mailUiState.eliminatedOpen=this.open">
+      <summary class="mailbox-head"><span class="mb-title">🗑 淘汰區</span><span class="mb-chev">▸</span><span class="mb-count">${eliminated.length + incomplete.length}</span></summary>
+      ${elimRows}${incRows}
+    </details>` : '';
+
   return `
-    <details class="mailbox">
-      <summary class="mailbox-head"><span class="mb-title">📥 收件匣</span><span class="mb-chev">▸</span><span class="mb-count">${top20.length}</span></summary>
+    <details class="mailbox" ${mailUiState.inboxOpen ? 'open' : ''} ontoggle="mailUiState.inboxOpen=this.open">
+      <summary class="mailbox-head">
+        <span class="mb-title">📥 收件匣</span>
+        <span class="score-gear" title="調整加權分數參數" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">⚙</span>
+        <span class="score-gear" title="匯出當日分數 JSON" onclick="event.preventDefault();event.stopPropagation();downloadMailScoreJson();">⬇</span>
+        <span class="mb-chev">▸</span><span class="mb-count">${ranked.length}</span>
+      </summary>
+      ${panelHtml}
       ${rows}
-    </details>`;
+    </details>
+    ${elimSectionHtml}`;
 }
 
 function buildMailThreadsHtml(snapshot, currentList) {
