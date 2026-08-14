@@ -105,8 +105,6 @@
     .score-chip.na { font-size:10px; font-weight:600; background:#fef3c7; color:#92400e; }
     .score-gear { cursor:pointer; font-size:12px; color:#94a3b8; padding:0 2px; }
     .score-gear:hover { color:#475569; }
-    .mail-elim-row { opacity:.72; }
-    .mail-elim-reason { color:#b45309 !important; font-weight:400 !important; }
     .mail-score-panel { padding:10px 14px; background:#f8fafc; border-bottom:1px solid #e5e7eb; display:flex; flex-direction:column; gap:7px; cursor:default; }
     .mail-score-panel .msp-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:11px; color:#64748b; }
     .mail-score-panel .msp-row strong { color:#334155; font-size:11px; flex-shrink:0; min-width:64px; }
@@ -2733,7 +2731,7 @@ function saveMailScoreParams(params) {
 
 let mailScoreParams = loadMailScoreParams();
 let mailScorePanelOpen = false;
-let mailUiState = { inboxOpen: false, eliminatedOpen: false };
+let mailUiState = { inboxOpen: false };
 
 function updateMailScoreParam(path, rawVal) {
   const val = parseFloat(rawVal);
@@ -2784,25 +2782,28 @@ function mailEliminationWeight(s, params) {
   return { weight: Math.min(w5d, wRank), reasons };
 }
 
-// 合格池族群密度 → 三項分數加總 → 依合格權重打折，回傳整個 top20（含淘汰／資料不全者，total=0）
-function computeWeightedScores(top20, prevRanks, params) {
+// 只有漲幅榜前 scopeLimit 名才計分（不影響信箱原本依 10 日漲幅排序的順序，分數只是附加參考）；
+// 合格池族群密度 → 三項分數加總 → 依合格權重打折，回傳整個 top20（含超出範圍／淘汰／資料不全者，inScope=false 或 total=0）
+function computeWeightedScores(top20, prevRanks, params, scopeLimit) {
   params = params || mailScoreParams;
+  scopeLimit = scopeLimit == null ? 10 : scopeLimit;
   const base = top20.map((s, i) => {
     const rank = i + 1;
+    const inScope = rank <= scopeLimit;
     const isNew = !(s.code in prevRanks);
     const rankChange = isNew ? null : (prevRanks[s.code] - rank);
     const sectors = STOCK_SECTORS_MAP[s.code] || [];
     const incomplete = s.pct5 == null || isNaN(s.pct5);
-    const { weight, reasons } = mailEliminationWeight({ ...s, isNew, rankChange, incomplete }, params);
-    return { ...s, rank, isNew, rankChange, sectors, incomplete, eliminatedReasons: reasons, qualifiedWeight: weight, isEliminated: weight <= 0 };
+    const { weight, reasons } = (inScope && !incomplete) ? mailEliminationWeight({ ...s, isNew, rankChange, incomplete }, params) : { weight: 0, reasons: [] };
+    return { ...s, rank, inScope, isNew, rankChange, sectors, incomplete, eliminatedReasons: reasons, qualifiedWeight: weight, isEliminated: inScope && weight <= 0 };
   });
 
-  const pool = base.filter(s => !s.incomplete && s.qualifiedWeight > 0);
+  const pool = base.filter(s => s.inScope && !s.incomplete && s.qualifiedWeight > 0);
   const sectorCount = {};
   pool.forEach(s => s.sectors.forEach(sec => { sectorCount[sec] = (sectorCount[sec] || 0) + 1; }));
 
   return base.map(s => {
-    if (s.incomplete || s.isEliminated) {
+    if (!s.inScope || s.incomplete || s.isEliminated) {
       return { ...s, rankScore: 0, accelScore: 0, accelNA: true, sectorScore: 0, sectorDensity: 0, total: 0 };
     }
 
@@ -2877,12 +2878,13 @@ function buildMailScorePanelHtml(p) {
 
 function downloadMailScoreJson() {
   const snapshot = computeGain10Snapshot();
-  const scored = computeWeightedScores(snapshot.top20, snapshot.prevRanks, mailScoreParams);
+  const scored = computeWeightedScores(snapshot.top20, snapshot.prevRanks, mailScoreParams, 10);
   const payload = {
     generatedAt: new Date().toISOString(),
     params: mailScoreParams,
+    scopeLimit: 10,
     stocks: scored.map(s => ({
-      code: s.code, name: s.name, listRank: s.rank,
+      code: s.code, name: s.name, listRank: s.rank, inScope: s.inScope,
       return10d: s.pct10, return5d: s.pct5,
       isNewEntry: s.isNew, rankChange: s.rankChange,
       sectors: s.sectors,
@@ -2928,12 +2930,12 @@ function buildMailInboxHtml(snapshot, currentList) {
   const { top20, prevRanks } = snapshot;
   if (!top20.length) return '';
   const timeLabel = mailTimeLabel();
-  const scored = computeWeightedScores(top20, prevRanks, mailScoreParams);
-  const ranked = scored.filter(s => !s.isEliminated && !s.incomplete).sort((a, b) => b.total - a.total);
-  const eliminated = scored.filter(s => s.isEliminated);
-  const incomplete = scored.filter(s => s.incomplete);
+  // 排序沿用原本 10 日漲幅榜順序，完全不動；加權分數只算前 10 名，附加在每列後面當參考用
+  const scored = computeWeightedScores(top20, prevRanks, mailScoreParams, 10);
 
   const scoreChip = (s) => {
+    if (!s.inScope) return '';
+    if (s.incomplete) return `<span class="score-chip na" title="資料不全，不計分">資料不全</span>`;
     const color = s.total > 0 ? '#166534' : s.total < 0 ? '#b91c1c' : '#64748b';
     const bg = s.total > 0 ? '#f0fdf4' : s.total < 0 ? '#fef2f2' : '#f1f5f9';
     const tapered = s.qualifiedWeight < 1;
@@ -2942,7 +2944,7 @@ function buildMailInboxHtml(snapshot, currentList) {
     return `<span class="score-chip" style="color:${color};background:${bg};${tapered ? 'box-shadow:inset 0 0 0 1px #fbbf24;' : ''}" title="${tip}">${s.total >= 0 ? '+' : ''}${s.total}${tapered ? '⚡' : ''}</span>`;
   };
 
-  const rows = ranked.map(s => {
+  const rows = scored.map(s => {
     const isHot = s.isNew || (s.rankChange != null && s.rankChange >= 100);
     const isUnread = s.isNew || (s.rankChange != null && s.rankChange > 0);
     const sectors = s.sectors.slice(0, 2).join('、');
@@ -2961,37 +2963,19 @@ function buildMailInboxHtml(snapshot, currentList) {
       </div>`;
   }).join('');
 
-  const elimRow = (s, reason) => `
-    <div class="mail-row mail-elim-row">
-      <span class="mail-star">·</span>
-      <span class="mail-avatar" style="background:#cbd5e1;">${s.rank}</span>
-      <span class="mail-sender">${s.name}<span class="mail-code">${s.code}</span></span>
-      <span class="mail-subject mail-elim-reason">${reason}</span>
-      <span class="mail-time">${timeLabel}</span>
-    </div>`;
-  const elimRows = eliminated.map(s => elimRow(s, s.eliminatedReasons.join('；'))).join('');
-  const incRows = incomplete.map(s => elimRow(s, '資料不全，未計分')).join('');
-
   const panelHtml = mailScorePanelOpen ? buildMailScorePanelHtml(mailScoreParams) : '';
-
-  const elimSectionHtml = (eliminated.length || incomplete.length) ? `
-    <details class="mailbox" style="margin-top:10px;" ${mailUiState.eliminatedOpen ? 'open' : ''} ontoggle="mailUiState.eliminatedOpen=this.open">
-      <summary class="mailbox-head"><span class="mb-title">🗑 淘汰區</span><span class="mb-chev">▸</span><span class="mb-count">${eliminated.length + incomplete.length}</span></summary>
-      ${elimRows}${incRows}
-    </details>` : '';
 
   return `
     <details class="mailbox" ${mailUiState.inboxOpen ? 'open' : ''} ontoggle="mailUiState.inboxOpen=this.open">
       <summary class="mailbox-head">
         <span class="mb-title">📥 收件匣</span>
-        <span class="score-gear" title="調整加權分數參數" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">⚙</span>
+        <span class="score-gear" title="調整加權分數參數（前10名）" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">⚙</span>
         <span class="score-gear" title="匯出當日分數 JSON" onclick="event.preventDefault();event.stopPropagation();downloadMailScoreJson();">⬇</span>
-        <span class="mb-chev">▸</span><span class="mb-count">${ranked.length}</span>
+        <span class="mb-chev">▸</span><span class="mb-count">${top20.length}</span>
       </summary>
       ${panelHtml}
       ${rows}
-    </details>
-    ${elimSectionHtml}`;
+    </details>`;
 }
 
 function buildMailThreadsHtml(snapshot, currentList) {
