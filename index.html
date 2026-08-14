@@ -106,6 +106,8 @@
     .score-gear { cursor:pointer; font-size:12px; color:#94a3b8; padding:0 2px; }
     .score-gear:hover { color:#475569; }
     .mail-score-panel { padding:10px 14px; background:#f8fafc; border-bottom:1px solid #e5e7eb; display:flex; flex-direction:column; gap:7px; cursor:default; }
+    .mail-score-panel .msp-note { font-size:11.5px; line-height:1.6; color:#475569; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; margin-bottom:2px; }
+    .mail-score-panel .msp-note strong:first-child { display:block; color:#1e293b; font-size:12px; margin-bottom:3px; }
     .mail-score-panel .msp-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:11px; color:#64748b; }
     .mail-score-panel .msp-row strong { color:#334155; font-size:11px; flex-shrink:0; min-width:64px; }
     .mail-score-panel .msp-row label { display:flex; align-items:center; gap:3px; white-space:nowrap; }
@@ -2786,7 +2788,7 @@ function mailEliminationWeight(s, params) {
 // 合格池族群密度 → 三項分數加總 → 依合格權重打折，回傳整個 top20（含超出範圍／淘汰／資料不全者，inScope=false 或 total=0）
 function computeWeightedScores(top20, prevRanks, params, scopeLimit) {
   params = params || mailScoreParams;
-  scopeLimit = scopeLimit == null ? 10 : scopeLimit;
+  scopeLimit = scopeLimit == null ? 20 : scopeLimit;
   const base = top20.map((s, i) => {
     const rank = i + 1;
     const inScope = rank <= scopeLimit;
@@ -2845,6 +2847,14 @@ function buildMailScorePanelHtml(p) {
   const inp = (path, val, step = 0.5) => `<input type="number" step="${step}" value="${val}" onchange="updateMailScoreParam('${path}', this.value)">`;
   return `
     <div class="mail-score-panel" onclick="event.stopPropagation()">
+      <div class="msp-note">
+        <strong>分數怎麼算（前20名都算，純規則、不綁個股，每天依當天榜重算）</strong>
+        <div>總分 = 名次分 + 加速度分 + 族群分，三項獨立計算後加總；若踩到下面的淘汰門檻會被打折甚至歸零。</div>
+        <div>① <strong>名次分</strong>：比較「今天名次」跟「上次記錄的名次」——新進榜依進榜位置給分（越前面越高分，第10名以後只給1分）；名次進步每1名+2分（封頂18分）；名次退步扣分更重，−(1+3×退步名數)；名次沒變則固定+3分。</div>
+        <div>② <strong>加速度分</strong>：看「5日漲幅 ÷ 10日漲幅」的比值，比值越高代表漲勢集中在最近幾天（正在加速），依比值分5級給分（20/14/8/3/−5分）；10日漲幅太小或是負的，代表分母不可靠，標記「不適用」不計分。</div>
+        <div>③ <strong>族群分</strong>：只在「合格股票」的池子裡數同族群有幾檔一起上榜，≥3檔算主場（+10分）、剛好2檔算搭伴（+4分）、只有自己一檔算孤棋（0分）。</div>
+        <div>④ <strong>淘汰門檻（緩衝帶漸進打折，不是非黑即白）</strong>：5日漲幅太低、或名次退步太多，會先進入緩衝帶依比例打折，完全跌破門檻才會整檔歸零（見下方分數旁 ⚡ 標記）。</div>
+      </div>
       <div class="msp-row">
         <strong>淘汰門檻</strong>
         <label>5日漲幅下限 ${inp('elimReturn5dMin', p.elimReturn5dMin)}%（緩衝帶 ${inp('elimReturn5dBuffer', p.elimReturn5dBuffer, 0.5)}%）</label>
@@ -2878,7 +2888,7 @@ function buildMailScorePanelHtml(p) {
 
 function downloadMailScoreJson() {
   const snapshot = computeGain10Snapshot();
-  const scored = computeWeightedScores(snapshot.top20, snapshot.prevRanks, mailScoreParams, 10);
+  const scored = computeWeightedScores(snapshot.top20, snapshot.prevRanks, mailScoreParams, 20);
   const payload = {
     generatedAt: new Date().toISOString(),
     params: mailScoreParams,
@@ -2930,8 +2940,8 @@ function buildMailInboxHtml(snapshot, currentList) {
   const { top20, prevRanks } = snapshot;
   if (!top20.length) return '';
   const timeLabel = mailTimeLabel();
-  // 排序沿用原本 10 日漲幅榜順序，完全不動；加權分數只算前 10 名，附加在每列後面當參考用
-  const scored = computeWeightedScores(top20, prevRanks, mailScoreParams, 10);
+  // 排序沿用原本 10 日漲幅榜順序，完全不動；加權分數20檔都算，附加在每列後面當參考用
+  const scored = computeWeightedScores(top20, prevRanks, mailScoreParams, 20);
 
   const scoreChip = (s) => {
     if (!s.inScope) return '';
@@ -2939,7 +2949,7 @@ function buildMailInboxHtml(snapshot, currentList) {
     const color = s.total > 0 ? '#166534' : s.total < 0 ? '#b91c1c' : '#64748b';
     const bg = s.total > 0 ? '#f0fdf4' : s.total < 0 ? '#fef2f2' : '#f1f5f9';
     const tapered = s.qualifiedWeight < 1;
-    let tip = `名次分 ${s.rankScore >= 0 ? '+' : ''}${s.rankScore}　加速度分 ${s.accelNA ? '不適用' : (s.accelScore >= 0 ? '+' : '') + s.accelScore}　族群分 +${s.sectorScore}（同族群最多 ${s.sectorDensity} 檔）`;
+    let tip = `總分＝名次分＋加速度分＋族群分\n名次分 ${s.rankScore >= 0 ? '+' : ''}${s.rankScore}　加速度分 ${s.accelNA ? '不適用' : (s.accelScore >= 0 ? '+' : '') + s.accelScore}　族群分 +${s.sectorScore}（同族群最多 ${s.sectorDensity} 檔）`;
     if (tapered) tip += `\n原始總分 ${s.rawTotal} → 緩衝帶打折 ×${s.qualifiedWeight.toFixed(2)}\n${s.eliminatedReasons.join('\n')}`;
     return `<span class="score-chip" style="color:${color};background:${bg};${tapered ? 'box-shadow:inset 0 0 0 1px #fbbf24;' : ''}" title="${tip}">${s.total >= 0 ? '+' : ''}${s.total}${tapered ? '⚡' : ''}</span>`;
   };
@@ -2969,7 +2979,7 @@ function buildMailInboxHtml(snapshot, currentList) {
     <details class="mailbox" ${mailUiState.inboxOpen ? 'open' : ''} ontoggle="mailUiState.inboxOpen=this.open">
       <summary class="mailbox-head">
         <span class="mb-title">📥 收件匣</span>
-        <span class="score-gear" title="調整加權分數參數（前10名）" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">⚙</span>
+        <span class="score-gear" title="說明／調整加權分數參數" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">ⓘ</span>
         <span class="score-gear" title="匯出當日分數 JSON" onclick="event.preventDefault();event.stopPropagation();downloadMailScoreJson();">⬇</span>
         <span class="mb-chev">▸</span><span class="mb-count">${top20.length}</span>
       </summary>
