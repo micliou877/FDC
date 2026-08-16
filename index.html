@@ -2692,27 +2692,52 @@ function mailActionsHtml(code, name, currentList) {
 
 // ==================== 收件匣加權分數（名次分＋加速度分＋族群分） ====================
 // 純規則、不綁個股：每天用當天 top20 榜重算，同一套公式套用在不同的當日榜上。
+// 設計原則：①②③各自算出的「原始分」尺度不同，一律先正規化到 0~1 再乘上可調權重相加（見④），
+// 權重不再被各項分數的隨意區間暗中決定。
 const MAIL_SCORE_PARAMS_KEY = "fdc_mail_score_params_v1";
 const MAIL_SCORE_DEFAULTS = {
+  // 淘汰門檻（緩衝帶漸進打折，設計沿用不變）
   elimReturn5dMin: 5.0,       // 5日漲幅 <= 此值 → 完全淘汰（weight=0）
   elimReturn5dBuffer: 2.0,    // 門檻上方緩衝帶寬度：<=min+buffer 時分數線性打折，>=min+buffer 才算安全
   elimRankDropMax: 5,         // 名次退步 >= 此值 → 完全淘汰（weight=0）
   elimRankDropBuffer: 2,      // 門檻下方緩衝帶寬度（名次數），同上邏輯
-  accelMinReturn10d: 20,      // 10日漲幅 <= 此值（或 <=0）→ 加速度不適用
+
+  // ① 名次分：位階分（近N日名次移動平均）為主分數，delta 只是小幅微調
+  // 「掉出榜再回榜」的定義：只要不在「上一次有記錄的榜單」上就視為新進榜──
+  // 位階分的移動平均會從當天重新起算，不會回頭銜接舊名次；delta 微調也不計算（無前一名次可比）。
+  rankMaDays: 3,                // 名次移動平均天數，抑制「別檔進出榜」造成的單日雜訊
+  rankLevelBase: 22,            // 位階分 = base − mult × (名次移動平均)，主分數
+  rankLevelMult: 2,
+  rankLevelCutoffRank: 10,      // 移動平均名次超過此名次 → 只給地板分
+  rankLevelFloorScore: 1,
+  rankDeltaWeight: 0.4,         // delta 微調：每退／進步1名 × 此權重，尺度明顯小於位階分（位階分區間可達20分）
+  rankDeltaCapUp: 4,            // 進步微調上限
+  rankDeltaCapDown: 4,          // 退步微調上限（絕對值）──退步仍扣分，但不再無上限尖刺
+
+  // ② 加速度分：不重疊雙窗口──近5日報酬 vs 前一個5日報酬（第−10~−5日），取代舊版 5日/10日重疊比值
+  accelPriorMinReturn: 5,           // 前一個5日報酬 <= 此值 → 分母不可靠，標記N/A
   accelBreaks: [0.45, 0.35, 0.25, 0.15],
   accelScores: [20, 14, 8, 3, -5],
-  sectorHomeMin: 3,           // 合格池內同族群檔數 >= 此值 → 主場
-  sectorScores: { home: 10, pair: 4, solo: 0 },
-  rankStepUpBase: 6,
-  rankStepUp: 2,
-  rankStepUpCap: 18,
-  rankStepDownBase: 1,
-  rankStepDownMult: 3,
-  rankFlatScore: 3,
-  newEntryBase: 22,
-  newEntryMult: 2,
-  newEntryRankCutoff: 10,
-  newEntryFloorScore: 1,
+  accelFreshBreakoutFloor: -3,      // 前一個5日報酬 > 此值（沒有破底，屬於盤整）才算「新鮮起漲」候選
+  accelFreshBreakoutMinReturn5d: 8, // 近5日報酬 >= 此值 才算噴出
+  accelFreshBreakoutScore: 8,       // 新鮮起漲（前段盤整導致N/A）的中性基本分，不再一律歸零
+
+  // ③ 族群分：平滑函數，隨合格池同族群檔數上升到上限（漸近線），不是 +10 硬懸崖
+  // sectorScore(density) = cap × (density−1) / (density−1+halfLife)，density<=1 時為0
+  sectorScoreCap: 10,           // 檔數→∞時的漸近上限
+  sectorScoreHalfLife: 1.5,     // 半飽和參數：越小分數上升越快
+  sectorMatchMode: "all",       // "all"=採計個股所有族群標籤（較粗）／"primary"=只採計第一個族群標籤（較細）── 分類粒度可調
+
+  // ④ 正規化方式＋三項權重（正規化後才相加）
+  normalizeMethod: "minmax",    // "minmax"=每日在合格池內縮放到0~1／"zscore"=每日在合格池內取標準分數
+  weightRank: 50,
+  weightAccel: 30,
+  weightSector: 20,
+
+  // ⑥ 回測
+  backtestTopK: 5,              // 回測時比較「前K名」的未來報酬平均
+  backtestForwardMinOffset: 3,  // 未來第3~5筆快照（近似未來3~5個交易日）
+  backtestForwardMaxOffset: 5,
 };
 
 function loadMailScoreParams() {
@@ -2723,7 +2748,6 @@ function loadMailScoreParams() {
       ...saved,
       accelBreaks: saved.accelBreaks || MAIL_SCORE_DEFAULTS.accelBreaks,
       accelScores: saved.accelScores || MAIL_SCORE_DEFAULTS.accelScores,
-      sectorScores: { ...MAIL_SCORE_DEFAULTS.sectorScores, ...(saved.sectorScores || {}) },
     };
   } catch (e) { return JSON.parse(JSON.stringify(MAIL_SCORE_DEFAULTS)); }
 }
@@ -2742,6 +2766,14 @@ function updateMailScoreParam(path, rawVal) {
   let obj = mailScoreParams;
   for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
   obj[keys[keys.length - 1]] = val;
+  saveMailScoreParams(mailScoreParams);
+  renderStrategy();
+}
+function updateMailScoreParamStr(path, rawVal) {
+  const keys = path.split('.');
+  let obj = mailScoreParams;
+  for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
+  obj[keys[keys.length - 1]] = rawVal;
   saveMailScoreParams(mailScoreParams);
   renderStrategy();
 }
@@ -2784,11 +2816,49 @@ function mailEliminationWeight(s, params) {
   return { weight: Math.min(w5d, wRank), reasons };
 }
 
+// 名次移動平均：從今天往回走，只要連續在榜（history 有記錄）就一路累計到 rankMaDays 天，
+// 一遇到中斷（掉出過榜）立刻停止──這就是「掉出榜再回榜視為新進榜」的具體實作：
+// 重新進榜當天的移動平均自然只剩「今天」這一筆，不會回頭銜接中斷前的舊名次。
+function computeRankMovingAverages(top20, history, snapshotDate, rankMaDays) {
+  const sortedDates = Object.keys(history).sort();
+  const todayIdx = sortedDates.indexOf(snapshotDate);
+  const result = {};
+  top20.forEach(s => {
+    const vals = [];
+    for (let i = todayIdx; i >= 0 && vals.length < rankMaDays; i--) {
+      const d = sortedDates[i];
+      const r = history[d] && history[d][s.code];
+      if (r == null) break;
+      vals.push(r);
+    }
+    result[s.code] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  });
+  return result;
+}
+
+// 依 method 回傳一個把原始值映射到可比較尺度的函式：
+// minmax → 縮放到 0~1（同一批候選內最低分=0，最高分=1）；zscore → 標準分數（均值0，標準差1）。
+// 候選只有 1 檔或全部同值時，range/std 會是 0，一律回傳中性值，避免除以 0。
+function makeMailScoreNormalizer(values, method) {
+  if (!values.length) return () => 0.5;
+  if (method === "zscore") {
+    const mean = values.reduce((a, b) => a + b, 0) / values.length;
+    const variance = values.reduce((a, b) => a + (b - mean) * (b - mean), 0) / values.length;
+    const std = Math.sqrt(variance);
+    return v => std > 1e-9 ? (v - mean) / std : 0;
+  }
+  const min = Math.min(...values), max = Math.max(...values), range = max - min;
+  return v => range > 1e-9 ? (v - min) / range : 0.5;
+}
+
 // 只有漲幅榜前 scopeLimit 名才計分（不影響信箱原本依 10 日漲幅排序的順序，分數只是附加參考）；
-// 合格池族群密度 → 三項分數加總 → 依合格權重打折，回傳整個 top20（含超出範圍／淘汰／資料不全者，inScope=false 或 total=0）
-function computeWeightedScores(top20, prevRanks, params, scopeLimit) {
+// 流程：淘汰權重 → 合格池族群密度 → 三項「原始分」→ 池內正規化 → 乘權重加總 → 依合格權重打折。
+// rankMaLookup 由呼叫端（computeGain10Snapshot）用 computeRankMovingAverages 算好傳入；
+// 沒有提供時（例如外部單獨呼叫）退化成直接用今天名次，不做移動平均。
+function computeWeightedScores(top20, prevRanks, params, scopeLimit, rankMaLookup) {
   params = params || mailScoreParams;
   scopeLimit = scopeLimit == null ? 20 : scopeLimit;
+  rankMaLookup = rankMaLookup || {};
   const base = top20.map((s, i) => {
     const rank = i + 1;
     const inScope = rank <= scopeLimit;
@@ -2796,64 +2866,98 @@ function computeWeightedScores(top20, prevRanks, params, scopeLimit) {
     const rankChange = isNew ? null : (prevRanks[s.code] - rank);
     const sectors = STOCK_SECTORS_MAP[s.code] || [];
     const incomplete = s.pct5 == null || isNaN(s.pct5);
+    const rankMa = rankMaLookup[s.code] != null ? rankMaLookup[s.code] : rank;
     const { weight, reasons } = (inScope && !incomplete) ? mailEliminationWeight({ ...s, isNew, rankChange, incomplete }, params) : { weight: 0, reasons: [] };
-    return { ...s, rank, inScope, isNew, rankChange, sectors, incomplete, eliminatedReasons: reasons, qualifiedWeight: weight, isEliminated: inScope && weight <= 0 };
+    return { ...s, rank, inScope, isNew, rankChange, sectors, incomplete, rankMa, eliminatedReasons: reasons, qualifiedWeight: weight, isEliminated: inScope && weight <= 0 };
   });
 
   const pool = base.filter(s => s.inScope && !s.incomplete && s.qualifiedWeight > 0);
+  const groupSectors = s => params.sectorMatchMode === "primary"
+    ? (s.sectors.length ? [s.sectors[0]] : [])
+    : s.sectors;
   const sectorCount = {};
-  pool.forEach(s => s.sectors.forEach(sec => { sectorCount[sec] = (sectorCount[sec] || 0) + 1; }));
+  pool.forEach(s => groupSectors(s).forEach(sec => { sectorCount[sec] = (sectorCount[sec] || 0) + 1; }));
+
+  // 第一輪：算出每檔的三項「原始分」（尺度互不相同，還沒正規化）
+  const raw = pool.map(s => {
+    // ① 名次分：位階分（近N日名次移動平均）為主，delta 只是小幅微調且退步有上限
+    const rankLevelScore = s.rankMa <= params.rankLevelCutoffRank
+      ? (params.rankLevelBase - params.rankLevelMult * s.rankMa)
+      : params.rankLevelFloorScore;
+    let rankDeltaScore = 0;
+    if (!s.isNew && s.rankChange) {
+      rankDeltaScore = s.rankChange > 0
+        ? Math.min(params.rankDeltaWeight * s.rankChange, params.rankDeltaCapUp)
+        : -Math.min(params.rankDeltaWeight * Math.abs(s.rankChange), params.rankDeltaCapDown);
+    }
+    const rankScore = rankLevelScore + rankDeltaScore;
+
+    // ② 加速度分：不重疊雙窗口──近5日報酬(pct5) vs 前一個5日報酬(close5Ref→close10Ref區間)
+    let accelScore = 0, accelNA = false, accelNote = "";
+    if (s.close5Ref == null || !s.close10Ref) {
+      accelNA = true; accelNote = "缺少前一個5日參考價，資料不全";
+    } else {
+      const prior5 = ((s.close5Ref - s.close10Ref) / s.close10Ref) * 100;
+      const recent5 = s.pct5;
+      if (prior5 <= params.accelPriorMinReturn) {
+        accelNA = true;
+        const isConsolidation = prior5 > params.accelFreshBreakoutFloor;
+        const isBreakoutStrong = recent5 != null && recent5 >= params.accelFreshBreakoutMinReturn5d;
+        if (isConsolidation && isBreakoutStrong) {
+          accelScore = params.accelFreshBreakoutScore;
+          accelNote = `前一個5日報酬 ${prior5.toFixed(1)}%（盤整未破底）＋近5日 ${recent5.toFixed(1)}%（噴出）→ 新鮮起漲基本分`;
+        } else {
+          accelNote = `前一個5日報酬 ${prior5.toFixed(1)}% 太小或為負，加速度不適用`;
+        }
+      } else {
+        const ratio = recent5 / prior5;
+        const [b1, b2, b3, b4] = params.accelBreaks;
+        const [v1, v2, v3, v4, v5] = params.accelScores;
+        accelScore = ratio >= b1 ? v1 : ratio >= b2 ? v2 : ratio >= b3 ? v3 : ratio >= b4 ? v4 : v5;
+      }
+    }
+
+    // ③ 族群分：平滑函數，隨合格池同族群檔數上升到上限（漸近線），不是懸崖
+    const density = groupSectors(s).length ? Math.max(...groupSectors(s).map(sec => sectorCount[sec] || 0)) : 0;
+    const sectorScore = density <= 1 ? 0 : params.sectorScoreCap * (density - 1) / (density - 1 + params.sectorScoreHalfLife);
+
+    return { code: s.code, rankLevelScore, rankDeltaScore, rankScore, accelScore, accelNA, accelNote, sectorScore, sectorDensity: density };
+  });
+
+  // 第二輪：三項各自在合格池內正規化到可比較尺度，再乘上設定檔權重相加
+  const normRank = makeMailScoreNormalizer(raw.map(r => r.rankScore), params.normalizeMethod);
+  const normAccel = makeMailScoreNormalizer(raw.map(r => r.accelScore), params.normalizeMethod);
+  const normSector = makeMailScoreNormalizer(raw.map(r => r.sectorScore), params.normalizeMethod);
+  const rawByCode = {};
+  raw.forEach(r => { rawByCode[r.code] = r; });
 
   return base.map(s => {
-    if (!s.inScope || s.incomplete || s.isEliminated) {
-      return { ...s, rankScore: 0, accelScore: 0, accelNA: true, sectorScore: 0, sectorDensity: 0, total: 0 };
+    const r = rawByCode[s.code];
+    if (!s.inScope || s.incomplete || s.isEliminated || !r) {
+      return { ...s, rankScore: 0, rankLevelScore: 0, rankDeltaScore: 0, accelScore: 0, accelNA: true, accelNote: "",
+        sectorScore: 0, sectorDensity: 0, normRankScore: 0, normAccelScore: 0, normSectorScore: 0, rawTotal: 0, total: 0 };
     }
-
-    let rankScore;
-    if (s.isNew) {
-      rankScore = s.rank <= params.newEntryRankCutoff
-        ? (params.newEntryBase - params.newEntryMult * s.rank)
-        : params.newEntryFloorScore;
-    } else if (s.rankChange > 0) {
-      rankScore = Math.min(params.rankStepUpBase + params.rankStepUp * s.rankChange, params.rankStepUpCap);
-    } else if (s.rankChange < 0) {
-      rankScore = -(params.rankStepDownBase + params.rankStepDownMult * Math.abs(s.rankChange));
-    } else {
-      rankScore = params.rankFlatScore;
-    }
-
-    let accelScore = 0, accelNA = false;
-    if (s.pct10 == null || s.pct10 <= params.accelMinReturn10d || s.pct10 <= 0) {
-      accelNA = true;
-    } else {
-      const ratio = s.pct5 / s.pct10;
-      const [b1, b2, b3, b4] = params.accelBreaks;
-      const [v1, v2, v3, v4, v5] = params.accelScores;
-      accelScore = ratio >= b1 ? v1 : ratio >= b2 ? v2 : ratio >= b3 ? v3 : ratio >= b4 ? v4 : v5;
-    }
-
-    const density = s.sectors.length ? Math.max(...s.sectors.map(sec => sectorCount[sec] || 0)) : 0;
-    const sectorScore = density >= params.sectorHomeMin ? params.sectorScores.home
-      : density === 2 ? params.sectorScores.pair
-      : params.sectorScores.solo;
-
-    const rawTotal = rankScore + accelScore + sectorScore;
+    const nRank = normRank(r.rankScore), nAccel = normAccel(r.accelScore), nSector = normSector(r.sectorScore);
+    const rawTotal = nRank * params.weightRank + nAccel * params.weightAccel + nSector * params.weightSector;
     const total = Math.round(rawTotal * s.qualifiedWeight * 10) / 10;
-    return { ...s, rankScore, accelScore, accelNA, sectorScore, sectorDensity: density, rawTotal, total };
+    return { ...s, ...r, normRankScore: nRank, normAccelScore: nAccel, normSectorScore: nSector,
+      rawTotal: Math.round(rawTotal * 10) / 10, total };
   });
 }
 
 function buildMailScorePanelHtml(p) {
   const inp = (path, val, step = 0.5) => `<input type="number" step="${step}" value="${val}" onchange="updateMailScoreParam('${path}', this.value)">`;
+  const sel = (path, val, options) => `<select onchange="updateMailScoreParamStr('${path}', this.value)">${options.map(o => `<option value="${o}" ${o === val ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
   return `
     <div class="mail-score-panel" onclick="event.stopPropagation()">
       <div class="msp-note">
         <strong>分數怎麼算（前20名都算，純規則、不綁個股，每天依當天榜重算）</strong>
-        <div>總分 = 名次分 + 加速度分 + 族群分，三項獨立計算後加總；若踩到下面的淘汰門檻會被打折甚至歸零。</div>
-        <div>① <strong>名次分</strong>：比較「今天名次」跟「上次記錄的名次」——新進榜依進榜位置給分（越前面越高分，第10名以後只給1分）；名次進步每1名+2分（封頂18分）；名次退步扣分更重，−(1+3×退步名數)；名次沒變則固定+3分。</div>
-        <div>② <strong>加速度分</strong>：看「5日漲幅 ÷ 10日漲幅」的比值，比值越高代表漲勢集中在最近幾天（正在加速），依比值分5級給分（20/14/8/3/−5分）；10日漲幅太小或是負的，代表分母不可靠，標記「不適用」不計分。</div>
-        <div>③ <strong>族群分</strong>：只在「合格股票」的池子裡數同族群有幾檔一起上榜，≥3檔算主場（+10分）、剛好2檔算搭伴（+4分）、只有自己一檔算孤棋（0分）。</div>
+        <div>總分 = 正規化(名次分)×權重 + 正規化(加速度分)×權重 + 正規化(族群分)×權重──三項先各自在當天合格池內縮放到同一尺度，再乘上下面設定的權重相加，權重不會被各項分數的原始區間暗中決定。</div>
+        <div>① <strong>名次分</strong>：主分數看「近${p.rankMaDays}日名次移動平均」換算的位階分（位階分＝${p.rankLevelBase}−${p.rankLevelMult}×移動平均名次，超過第${p.rankLevelCutoffRank}名只給${p.rankLevelFloorScore}分），用移動平均抑制別檔進出榜造成的單日雜訊；「今天 vs 上次」的名次變化只再疊加一個小幅微調（進/退步都有上限，不再無上限尖刺）。掉出榜再回榜視為新進榜，移動平均從當天重新起算。</div>
+        <div>② <strong>加速度分</strong>：比較「近5日報酬」與不重疊的「前一個5日報酬（第−10~−5日）」，比值越高代表漲勢正在加速。前一個5日報酬太小或為負時分母不可靠，原則上標記「不適用」；但若前段只是盤整（沒有明顯破底）且近5日噴出，會改給一個中性基本分，不再一律歸零。</div>
+        <div>③ <strong>族群分</strong>：在「合格股票」池子裡看同族群有幾檔一起上榜，用平滑函數隨檔數增加緩步趨近上限（不是 +10 的懸崖式跳分）；「同族群」的判定粒度可切換：計算個股所有族群標籤，或只計算第一個（較細）。</div>
         <div>④ <strong>淘汰門檻（緩衝帶漸進打折，不是非黑即白）</strong>：5日漲幅太低、或名次退步太多，會先進入緩衝帶依比例打折，完全跌破門檻才會整檔歸零（見下方分數旁 ⚡ 標記）。</div>
+        <div>⑥ <strong>回測</strong>：點收件匣列上的 🧪 會用累積的每日快照，比較「加權總分前K名」「近5日報酬前K名」「前20整體平均」「前20外其餘個股平均」的未來3~5日報酬，驗證這套加權排名有沒有真的贏過單純看報酬或單純看有沒有上榜。快照從今天開始累積，需要等幾天資料夠了才有結果。</div>
       </div>
       <div class="msp-row">
         <strong>淘汰門檻</strong>
@@ -2861,26 +2965,37 @@ function buildMailScorePanelHtml(p) {
         <label>退步淘汰名數 ${inp('elimRankDropMax', p.elimRankDropMax, 1)}（緩衝帶 ${inp('elimRankDropBuffer', p.elimRankDropBuffer, 1)}名）</label>
       </div>
       <div class="msp-row">
-        <strong>加速度切點</strong>
+        <strong>名次分（位階分為主，delta 為微調）</strong>
+        <label>移動平均天數 ${inp('rankMaDays', p.rankMaDays, 1)}</label>
+        <label>位階分 ${inp('rankLevelBase', p.rankLevelBase, 1)}−${inp('rankLevelMult', p.rankLevelMult, 1)}×平均名次（超過第${inp('rankLevelCutoffRank', p.rankLevelCutoffRank, 1)}名→${inp('rankLevelFloorScore', p.rankLevelFloorScore, 1)}分）</label>
+        <label>delta 權重 ${inp('rankDeltaWeight', p.rankDeltaWeight, 0.1)}／進步上限${inp('rankDeltaCapUp', p.rankDeltaCapUp, 1)}／退步上限${inp('rankDeltaCapDown', p.rankDeltaCapDown, 1)}</label>
+      </div>
+      <div class="msp-row">
+        <strong>加速度分（近5日 vs 前一個5日）</strong>
+        <label>前段下限 ${inp('accelPriorMinReturn', p.accelPriorMinReturn, 0.5)}%</label>
         <label>≥${inp('accelBreaks.0', p.accelBreaks[0], 0.01)}→${inp('accelScores.0', p.accelScores[0], 1)}分</label>
         <label>≥${inp('accelBreaks.1', p.accelBreaks[1], 0.01)}→${inp('accelScores.1', p.accelScores[1], 1)}分</label>
         <label>≥${inp('accelBreaks.2', p.accelBreaks[2], 0.01)}→${inp('accelScores.2', p.accelScores[2], 1)}分</label>
         <label>≥${inp('accelBreaks.3', p.accelBreaks[3], 0.01)}→${inp('accelScores.3', p.accelScores[3], 1)}分</label>
         <label>其餘→${inp('accelScores.4', p.accelScores[4], 1)}分</label>
-        <label>10日下限 ${inp('accelMinReturn10d', p.accelMinReturn10d, 1)}%</label>
+        <label>新鮮起漲：前段未破底下限${inp('accelFreshBreakoutFloor', p.accelFreshBreakoutFloor, 0.5)}%／近5日噴出下限${inp('accelFreshBreakoutMinReturn5d', p.accelFreshBreakoutMinReturn5d, 0.5)}%／基本分${inp('accelFreshBreakoutScore', p.accelFreshBreakoutScore, 1)}</label>
       </div>
       <div class="msp-row">
-        <strong>族群分</strong>
-        <label>主場門檻 ${inp('sectorHomeMin', p.sectorHomeMin, 1)}檔→${inp('sectorScores.home', p.sectorScores.home, 1)}分</label>
-        <label>2檔→${inp('sectorScores.pair', p.sectorScores.pair, 1)}分</label>
-        <label>孤棋→${inp('sectorScores.solo', p.sectorScores.solo, 1)}分</label>
+        <strong>族群分（平滑遞增，隨檔數趨近上限）</strong>
+        <label>上限 ${inp('sectorScoreCap', p.sectorScoreCap, 0.5)}分／半飽和 ${inp('sectorScoreHalfLife', p.sectorScoreHalfLife, 0.1)}</label>
+        <label>分類粒度 ${sel('sectorMatchMode', p.sectorMatchMode, ['all', 'primary'])}</label>
       </div>
       <div class="msp-row">
-        <strong>名次分</strong>
-        <label>進步 ${inp('rankStepUpBase', p.rankStepUpBase, 1)}+${inp('rankStepUp', p.rankStepUp, 1)}×n（封頂${inp('rankStepUpCap', p.rankStepUpCap, 1)}）</label>
-        <label>退步 −(${inp('rankStepDownBase', p.rankStepDownBase, 1)}+${inp('rankStepDownMult', p.rankStepDownMult, 1)}×n)</label>
-        <label>持平 ${inp('rankFlatScore', p.rankFlatScore, 1)}</label>
-        <label>新進 ${inp('newEntryBase', p.newEntryBase, 1)}−${inp('newEntryMult', p.newEntryMult, 1)}×名次（前${inp('newEntryRankCutoff', p.newEntryRankCutoff, 1)}名，否則${inp('newEntryFloorScore', p.newEntryFloorScore, 1)}分）</label>
+        <strong>正規化與權重</strong>
+        <label>方式 ${sel('normalizeMethod', p.normalizeMethod, ['minmax', 'zscore'])}</label>
+        <label>名次分權重 ${inp('weightRank', p.weightRank, 1)}</label>
+        <label>加速度分權重 ${inp('weightAccel', p.weightAccel, 1)}</label>
+        <label>族群分權重 ${inp('weightSector', p.weightSector, 1)}</label>
+      </div>
+      <div class="msp-row">
+        <strong>回測</strong>
+        <label>前K名 ${inp('backtestTopK', p.backtestTopK, 1)}</label>
+        <label>未來快照offset ${inp('backtestForwardMinOffset', p.backtestForwardMinOffset, 1)}~${inp('backtestForwardMaxOffset', p.backtestForwardMaxOffset, 1)}</label>
         <span class="msp-reset" onclick="resetMailScoreParams()">↺ 還原預設值</span>
       </div>
     </div>`;
@@ -2888,7 +3003,7 @@ function buildMailScorePanelHtml(p) {
 
 function downloadMailScoreJson() {
   const snapshot = computeGain10Snapshot();
-  const scored = computeWeightedScores(snapshot.top20, snapshot.prevRanks, mailScoreParams, 20);
+  const scored = snapshot.scored;
   const payload = {
     generatedAt: new Date().toISOString(),
     params: mailScoreParams,
@@ -2896,12 +3011,14 @@ function downloadMailScoreJson() {
     stocks: scored.map(s => ({
       code: s.code, name: s.name, listRank: s.rank, inScope: s.inScope,
       return10d: s.pct10, return5d: s.pct5,
-      isNewEntry: s.isNew, rankChange: s.rankChange,
+      isNewEntry: s.isNew, rankChange: s.rankChange, rankMa: s.rankMa,
       sectors: s.sectors,
       incomplete: !!s.incomplete,
       eliminated: s.isEliminated, qualifiedWeight: s.qualifiedWeight, notes: s.eliminatedReasons,
-      rankScore: s.rankScore, accelScore: s.accelScore, accelNA: s.accelNA,
+      rankScore: s.rankScore, rankLevelScore: s.rankLevelScore, rankDeltaScore: s.rankDeltaScore,
+      accelScore: s.accelScore, accelNA: s.accelNA, accelNote: s.accelNote,
       sectorScore: s.sectorScore, sectorDensity: s.sectorDensity,
+      normRankScore: s.normRankScore, normAccelScore: s.normAccelScore, normSectorScore: s.normSectorScore,
       rawTotal: s.rawTotal, total: s.total,
     })),
   };
@@ -2913,15 +3030,152 @@ function downloadMailScoreJson() {
   URL.revokeObjectURL(url);
 }
 
-// 算一次 Top20＋跟上次記錄比較的名次，兩個信箱區塊共用，並在這裡順便寫入本次快照
+// ==================== 回測：驗證加權總分排序是否真的贏過基準 ====================
+// 每天算一次收件匣快照時，順便把「當天 top20 的分數與收盤價」＋「當天整個追蹤宇宙的收盤價」
+// 存進獨立的歷史庫（跟名次歷史分開存，避免互相干擾）。之後累積夠天數，就能回頭比較
+// 「當時分數排序」和「幾天後的實際報酬」，藉此驗證加權設計是否真的有效，而不是憑感覺。
+const MAIL_SCORE_BACKTEST_KEY = "fdc_mail_score_backtest_history_v1";
+const MAIL_SCORE_BACKTEST_MAX_DAYS = 150;
+
+function loadMailScoreBacktestHistory() {
+  try { return JSON.parse(localStorage.getItem(MAIL_SCORE_BACKTEST_KEY) || "{}"); } catch (e) { return {}; }
+}
+
+// top20：當天有算分的 20 檔（含 rank/收盤價/近5日報酬/總分），供「加權總分前K名」與「近5日報酬前K名」比較用。
+// universe：當天整個追蹤宇宙（含 top20 以外）的收盤價，只存價格，用來算「有沒有上前20」這個基準──
+// 沒有上榜的個股沒有分數可比，只能比「有沒有上榜」本身跟未來報酬的關係。
+function saveMailScoreBacktestSnapshot(date, scored) {
+  const history = loadMailScoreBacktestHistory();
+  const top20Entry = {};
+  scored.forEach(s => {
+    if (!s.inScope || s.incomplete || typeof s.price !== "number") return;
+    top20Entry[s.code] = { rank: s.rank, price: s.price, pct5: s.pct5, total: s.total };
+  });
+  const universe = {};
+  Object.entries(stockData).forEach(([code, d]) => {
+    if (code === "0050" || !d || typeof d.price !== "number") return;
+    universe[code] = d.price;
+  });
+  history[date] = { top20: top20Entry, universe };
+  const dates = Object.keys(history).sort();
+  while (dates.length > MAIL_SCORE_BACKTEST_MAX_DAYS) { delete history[dates.shift()]; }
+  try { localStorage.setItem(MAIL_SCORE_BACKTEST_KEY, JSON.stringify(history)); } catch (e) {}
+}
+
+function mailScoreAvg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null; }
+
+// 對每一天的快照，往後找「offset 落在 [backtestForwardMinOffset, backtestForwardMaxOffset] 之間的第一筆快照」
+// 當作未來 3~5 個交易日的參考點，算出四種未來報酬：
+//  ① 加權總分前K名平均　② 近5日報酬前K名平均（基準1：單純近5日報酬排序）
+//  ③ 前20整體平均　　　④ 前20以外其餘個股平均（基準2：單純「在不在前20」）
+function computeBacktestReport(params) {
+  params = params || mailScoreParams;
+  const history = loadMailScoreBacktestHistory();
+  const dates = Object.keys(history).sort();
+  const days = [];
+
+  dates.forEach((date, idx) => {
+    const today = history[date];
+    const top20Codes = Object.keys(today.top20 || {});
+    if (!top20Codes.length) return;
+
+    let futureIdx = null;
+    for (let off = params.backtestForwardMinOffset; off <= params.backtestForwardMaxOffset; off++) {
+      if (idx + off < dates.length) { futureIdx = idx + off; break; }
+    }
+    if (futureIdx == null) return; // 還沒有足夠的未來快照，這幾天要等資料累積後才能回測
+
+    const future = history[dates[futureIdx]];
+    if (!future.universe) return;
+
+    const top20Rows = top20Codes
+      .filter(code => today.top20[code].price > 0 && future.universe[code] != null)
+      .map(code => ({
+        code, total: today.top20[code].total, pct5: today.top20[code].pct5,
+        fwdReturn: ((future.universe[code] - today.top20[code].price) / today.top20[code].price) * 100,
+      }));
+    if (top20Rows.length < 3) return; // 樣本太少，這天不採計
+
+    const restReturns = Object.keys(today.universe || {})
+      .filter(code => !today.top20[code] && today.universe[code] > 0 && future.universe[code] != null)
+      .map(code => ((future.universe[code] - today.universe[code]) / today.universe[code]) * 100);
+
+    const topKWeighted = [...top20Rows].sort((a, b) => b.total - a.total).slice(0, params.backtestTopK);
+    const topKPct5 = [...top20Rows].sort((a, b) => b.pct5 - a.pct5).slice(0, params.backtestTopK);
+    const avgWeighted = mailScoreAvg(topKWeighted.map(r => r.fwdReturn));
+    const avgPct5 = mailScoreAvg(topKPct5.map(r => r.fwdReturn));
+    const avgAllTop20 = mailScoreAvg(top20Rows.map(r => r.fwdReturn));
+    const avgRest = restReturns.length ? mailScoreAvg(restReturns) : null;
+
+    days.push({
+      date, futureDate: dates[futureIdx], top20Sample: top20Rows.length, restSample: restReturns.length,
+      avgFwdReturnWeightedTopK: +avgWeighted.toFixed(2),
+      avgFwdReturnPct5TopK: +avgPct5.toFixed(2),
+      avgFwdReturnAllTop20: +avgAllTop20.toFixed(2),
+      avgFwdReturnRestOfMarket: avgRest != null ? +avgRest.toFixed(2) : null,
+      weightedBeatsPct5: avgWeighted > avgPct5,
+      top20BeatsRest: avgRest != null ? avgAllTop20 > avgRest : null,
+    });
+  });
+
+  if (!days.length) {
+    return {
+      ready: false,
+      note: `快照資料還不足以回測：需要累積到「未來第${params.backtestForwardMinOffset}~${params.backtestForwardMaxOffset}筆快照」才能算未來報酬。每次開啟頁面重算收件匣就會自動存一筆快照，過幾天資料累積夠了再匯出即可。`,
+      days: [],
+    };
+  }
+
+  const rateOf = key => {
+    const known = days.filter(d => d[key] != null);
+    return known.length ? +((known.filter(d => d[key] === true).length / known.length) * 100).toFixed(1) : null;
+  };
+  const meanOf = key => {
+    const vals = days.map(d => d[key]).filter(v => v != null);
+    return vals.length ? +mailScoreAvg(vals).toFixed(2) : null;
+  };
+
+  return {
+    ready: true,
+    sampleDays: days.length,
+    summary: {
+      avgFwdReturnWeightedTopK: meanOf('avgFwdReturnWeightedTopK'),
+      avgFwdReturnPct5TopK: meanOf('avgFwdReturnPct5TopK'),
+      avgFwdReturnAllTop20: meanOf('avgFwdReturnAllTop20'),
+      avgFwdReturnRestOfMarket: meanOf('avgFwdReturnRestOfMarket'),
+      weightedVsPct5WinRate: rateOf('weightedBeatsPct5'),
+      top20VsRestWinRate: rateOf('top20BeatsRest'),
+    },
+    note: '基準1＝單純依近5日報酬排序取前K名；基準2＝單純看「有沒有在前20」（前20整體平均 vs 前20以外其餘個股平均）。加權總分前K名平均若持續高於這兩個基準，才算是這套加權排名真的比基準更有效。',
+    days,
+  };
+}
+
+function downloadBacktestJson() {
+  const report = computeBacktestReport(mailScoreParams);
+  const payload = { generatedAt: new Date().toISOString(), params: mailScoreParams, ...report };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `mail-score-backtest-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  if (!report.ready) {
+    alert(report.note);
+  } else {
+    alert(`回測完成（樣本 ${report.sampleDays} 天，已下載完整 JSON）\n\n加權總分前${mailScoreParams.backtestTopK}名　未來報酬均值：${report.summary.avgFwdReturnWeightedTopK}%\n近5日報酬前${mailScoreParams.backtestTopK}名　未來報酬均值：${report.summary.avgFwdReturnPct5TopK}%\n前20整體平均：${report.summary.avgFwdReturnAllTop20}%\n前20以外其餘個股平均：${report.summary.avgFwdReturnRestOfMarket}%\n\n加權分贏過近5日報酬排序的天數比例：${report.summary.weightedVsPct5WinRate}%\n前20整體贏過前20以外的天數比例：${report.summary.top20VsRestWinRate}%`);
+  }
+}
+
+// 算一次 Top20＋跟上次記錄比較的名次，兩個信箱區塊共用，並在這裡順便寫入名次歷史與回測快照
 function computeGain10Snapshot() {
   const top20 = Object.entries(stockData)
     .filter(([code, d]) => code !== "0050" && d && typeof d.pct10 === "number")
-    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market }))
+    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market, close5Ref: d.close5Ref, close10Ref: d.close10Ref }))
     .sort((a, b) => b.pct10 - a.pct10)
     .slice(0, 20);
 
-  if (!top20.length) return { top20: [], prevRanks: {} };
+  if (!top20.length) return { top20: [], prevRanks: {}, scored: [] };
 
   const snapshotDate = (lastUpdateTime ? new Date(lastUpdateTime) : new Date()).toISOString().slice(0, 10);
   const history = loadGain10History();
@@ -2933,15 +3187,19 @@ function computeGain10Snapshot() {
   history[snapshotDate] = currentRanks;
   saveGain10History(history);
 
-  return { top20, prevRanks };
+  const rankMaLookup = computeRankMovingAverages(top20, history, snapshotDate, mailScoreParams.rankMaDays);
+  const scored = computeWeightedScores(top20, prevRanks, mailScoreParams, 20, rankMaLookup);
+  saveMailScoreBacktestSnapshot(snapshotDate, scored);
+
+  return { top20, prevRanks, scored, rankMaLookup };
 }
 
 function buildMailInboxHtml(snapshot, currentList) {
-  const { top20, prevRanks } = snapshot;
+  const { top20, prevRanks, scored } = snapshot;
   if (!top20.length) return '';
   const timeLabel = mailTimeLabel();
-  // 排序沿用原本 10 日漲幅榜順序，完全不動；加權分數20檔都算，附加在每列後面當參考用
-  const scored = computeWeightedScores(top20, prevRanks, mailScoreParams, 20);
+  // 排序沿用原本 10 日漲幅榜順序，完全不動；加權分數20檔都算，附加在每列後面當參考用。
+  // scored 由 computeGain10Snapshot 算好傳入（同一份分數同時寫進回測快照），這裡不重算避免兩邊算出不同結果。
 
   const scoreChip = (s) => {
     if (!s.inScope) return '';
@@ -2949,7 +3207,10 @@ function buildMailInboxHtml(snapshot, currentList) {
     const color = s.total > 0 ? '#166534' : s.total < 0 ? '#b91c1c' : '#64748b';
     const bg = s.total > 0 ? '#f0fdf4' : s.total < 0 ? '#fef2f2' : '#f1f5f9';
     const tapered = s.qualifiedWeight < 1;
-    let tip = `總分＝名次分＋加速度分＋族群分\n名次分 ${s.rankScore >= 0 ? '+' : ''}${s.rankScore}　加速度分 ${s.accelNA ? '不適用' : (s.accelScore >= 0 ? '+' : '') + s.accelScore}　族群分 +${s.sectorScore}（同族群最多 ${s.sectorDensity} 檔）`;
+    const rankPart = `名次分 ${s.rankScore >= 0 ? '+' : ''}${s.rankScore.toFixed(1)}（位階${s.rankLevelScore.toFixed(1)}＋delta${s.rankDeltaScore >= 0 ? '+' : ''}${s.rankDeltaScore.toFixed(1)}，近${mailScoreParams.rankMaDays}日均名次${s.rankMa.toFixed(1)}）`;
+    const accelPart = `加速度分 ${s.accelNA ? '不適用' : (s.accelScore >= 0 ? '+' : '') + s.accelScore}${s.accelNote ? '（' + s.accelNote + '）' : ''}`;
+    const sectorPart = `族群分 +${s.sectorScore.toFixed(1)}（同族群最多 ${s.sectorDensity} 檔）`;
+    let tip = `總分＝正規化(名次分)×${mailScoreParams.weightRank}＋正規化(加速度分)×${mailScoreParams.weightAccel}＋正規化(族群分)×${mailScoreParams.weightSector}\n${rankPart}\n${accelPart}\n${sectorPart}`;
     if (tapered) tip += `\n原始總分 ${s.rawTotal} → 緩衝帶打折 ×${s.qualifiedWeight.toFixed(2)}\n${s.eliminatedReasons.join('\n')}`;
     return `<span class="score-chip" style="color:${color};background:${bg};${tapered ? 'box-shadow:inset 0 0 0 1px #fbbf24;' : ''}" title="${tip}">${s.total >= 0 ? '+' : ''}${s.total}${tapered ? '⚡' : ''}</span>`;
   };
@@ -2981,6 +3242,7 @@ function buildMailInboxHtml(snapshot, currentList) {
         <span class="mb-title">📥 收件匣</span>
         <span class="score-gear" title="說明／調整加權分數參數" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">ⓘ</span>
         <span class="score-gear" title="匯出當日分數 JSON" onclick="event.preventDefault();event.stopPropagation();downloadMailScoreJson();">⬇</span>
+        <span class="score-gear" title="回測：加權總分排序 vs 近5日報酬排序 vs 有沒有上前20" onclick="event.preventDefault();event.stopPropagation();downloadBacktestJson();">🧪</span>
         <span class="mb-chev">▸</span><span class="mb-count">${top20.length}</span>
       </summary>
       ${panelHtml}
