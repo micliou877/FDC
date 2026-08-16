@@ -2757,7 +2757,13 @@ function saveMailScoreParams(params) {
 
 let mailScoreParams = loadMailScoreParams();
 let mailScorePanelOpen = false;
-let mailUiState = { inboxOpen: false };
+let mailUiState = { inboxOpen: false, scoreSort: "default" };
+
+// 分數排序三段循環：default（原始10日漲幅榜順序）→ desc（分數高→低）→ asc（分數低→高）→ default
+function toggleMailScoreSort() {
+  mailUiState.scoreSort = mailUiState.scoreSort === "default" ? "desc" : mailUiState.scoreSort === "desc" ? "asc" : "default";
+  renderStrategy();
+}
 
 function updateMailScoreParam(path, rawVal) {
   const val = parseFloat(rawVal);
@@ -3215,7 +3221,13 @@ function buildMailInboxHtml(snapshot, currentList) {
     return `<span class="score-chip" style="color:${color};background:${bg};${tapered ? 'box-shadow:inset 0 0 0 1px #fbbf24;' : ''}" title="${tip}">${s.total >= 0 ? '+' : ''}${s.total}${tapered ? '⚡' : ''}</span>`;
   };
 
-  const rows = scored.map(s => {
+  // 分數排序：預設不動（沿用10日漲幅榜順序），點 ⇅ 可切換成分數高→低或低→高；
+  // 排序只改變顯示順序，每列左側的名次圓圈仍顯示原始10日漲幅榜名次，不會跟著重新編號。
+  let displayList = scored;
+  if (mailUiState.scoreSort === 'desc') displayList = [...scored].sort((a, b) => b.total - a.total);
+  else if (mailUiState.scoreSort === 'asc') displayList = [...scored].sort((a, b) => a.total - b.total);
+
+  const rows = displayList.map(s => {
     const isHot = s.isNew || (s.rankChange != null && s.rankChange >= 100);
     const isUnread = s.isNew || (s.rankChange != null && s.rankChange > 0);
     const sectors = s.sectors.slice(0, 2).join('、');
@@ -3235,12 +3247,17 @@ function buildMailInboxHtml(snapshot, currentList) {
   }).join('');
 
   const panelHtml = mailScorePanelOpen ? buildMailScorePanelHtml(mailScoreParams) : '';
+  const sortIcon = mailUiState.scoreSort === 'desc' ? '🔽' : mailUiState.scoreSort === 'asc' ? '🔼' : '⇅';
+  const sortTitle = mailUiState.scoreSort === 'desc' ? '目前：分數高→低排序（點擊切換成低→高）'
+    : mailUiState.scoreSort === 'asc' ? '目前：分數低→高排序（點擊切換回原始順序）'
+    : '目前：原始10日漲幅榜順序（點擊依分數高→低排序）';
 
   return `
     <details class="mailbox" ${mailUiState.inboxOpen ? 'open' : ''} ontoggle="mailUiState.inboxOpen=this.open">
       <summary class="mailbox-head">
         <span class="mb-title">📥 收件匣</span>
         <span class="score-gear" title="說明／調整加權分數參數" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">ⓘ</span>
+        <span class="score-gear" title="${sortTitle}" onclick="event.preventDefault();event.stopPropagation();toggleMailScoreSort();">${sortIcon}</span>
         <span class="score-gear" title="匯出當日分數 JSON" onclick="event.preventDefault();event.stopPropagation();downloadMailScoreJson();">⬇</span>
         <span class="score-gear" title="回測：加權總分排序 vs 近5日報酬排序 vs 有沒有上前20" onclick="event.preventDefault();event.stopPropagation();downloadBacktestJson();">🧪</span>
         <span class="mb-chev">▸</span><span class="mb-count">${top20.length}</span>
