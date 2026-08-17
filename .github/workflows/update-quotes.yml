@@ -29,7 +29,15 @@ jobs:
           if ! git diff --quiet -- quotes.json; then
             git add quotes.json
             git commit -m "更新台股報價快照 $(date -u +'%Y-%m-%d %H:%M UTC')"
-            git push
+            for i in 1 2 3 4 5; do
+              if git push; then
+                break
+              fi
+              echo "push rejected, rebasing onto latest main (attempt $i)"
+              git fetch origin main
+              git rebase origin/main
+              sleep $((RANDOM % 5 + 1))
+            done
           else
             echo "no change"
           fi
