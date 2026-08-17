@@ -3238,7 +3238,7 @@ function buildMailInboxHtml(snapshot, currentList) {
     return `
       <div class="mail-row">
         <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
-        <a class="mail-avatar" href="${tvLink}" target="_blank" title="${sortLabel}第${displayRank}名">${displayRank}</a>
+        <a class="mail-avatar" href="${tvLink}" target="_blank" title="${sortLabel}第${displayRank}名" style="background:${mailAvatarColor(s.code)}">${displayRank}</a>
         <a class="mail-sender-link" href="${tvLink}" target="_blank">
           <span class="mail-sender ${isUnread ? 'unread' : ''}">${s.name}<span class="mail-code">${s.code}</span></span>
         </a>
