@@ -3222,15 +3222,12 @@ function buildMailInboxHtml(snapshot, currentList) {
   };
 
   // 分數排序：預設不動（沿用10日漲幅榜順序），點 ⇅ 可切換成分數高→低或低→高；
-  // 每列左側圓圈標的是「目前排序方式下的第幾名」，會隨排序切換同步更新
-  // （預設順序時剛好等於原始10日漲幅榜名次；切成分數排序後就是分數名次）。
+  // 排序只改變顯示順序，每列左側的名次圓圈固定顯示原始10日漲幅榜名次，方便對比「原始名次」跟「分數排序後的位置」。
   let displayList = scored;
   if (mailUiState.scoreSort === 'desc') displayList = [...scored].sort((a, b) => b.total - a.total);
   else if (mailUiState.scoreSort === 'asc') displayList = [...scored].sort((a, b) => a.total - b.total);
-  const sortLabel = mailUiState.scoreSort === 'desc' ? '分數高→低' : mailUiState.scoreSort === 'asc' ? '分數低→高' : '10日漲幅榜';
 
   const rows = displayList.map((s, i) => {
-    const displayRank = i + 1;
     const isHot = s.isNew || (s.rankChange != null && s.rankChange >= 100);
     const isUnread = s.isNew || (s.rankChange != null && s.rankChange > 0);
     const sectors = s.sectors.slice(0, 2).join('、');
@@ -3238,7 +3235,7 @@ function buildMailInboxHtml(snapshot, currentList) {
     return `
       <div class="mail-row">
         <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
-        <a class="mail-avatar" href="${tvLink}" target="_blank" title="${sortLabel}第${displayRank}名" style="background:transparent;color:#111827">${displayRank}</a>
+        <a class="mail-avatar" href="${tvLink}" target="_blank" title="10日漲幅榜第${s.rank}名" style="background:transparent;color:#111827">${s.rank}</a>
         <a class="mail-sender-link" href="${tvLink}" target="_blank">
           <span class="mail-sender ${isUnread ? 'unread' : ''}">${s.name}<span class="mail-code">${s.code}</span></span>
         </a>
