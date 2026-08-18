@@ -17,6 +17,9 @@
     body { overscroll-behavior-y: none; margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f1f5f9; color: #334155; padding: 16px; min-height: 100vh; }
     h1 { font-size: 18px; margin-bottom: 4px; color: #1e293b; font-weight: 600; }
     .subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .header-note { width: 100%; box-sizing: border-box; min-height: 32px; margin: -8px 0 16px; padding: 6px 10px; font-size: 12px; font-family: inherit; color: #713f12; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; resize: vertical; }
+    .header-note::placeholder { color: #ca8a04; }
+    .header-note:focus { outline: none; border-color: #eab308; background: #fffbeb; }
 
     .tabs { display: flex; gap: 2px; border-bottom: 1px solid #e2e8f0; overflow-x: auto; position: sticky; top: 0; z-index: 999; background: rgba(241,245,249,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 10px 16px; margin: -16px -16px 16px -16px; }
     .tabs::-webkit-scrollbar { display: none; }
@@ -209,6 +212,8 @@
 
 <h1>業績追蹤</h1>
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
+
+<textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
 
 <div class="tabs">
   <button class="tab active" data-tab="strategy">今日精選</button>
@@ -4659,6 +4664,12 @@ async function triggerQuoteUpdate() {
 document.getElementById("triggerQuoteBtn").onclick = triggerQuoteUpdate;
 
 loadData();
+
+const HEADER_NOTE_KEY = "fdc_header_note_v1";
+const headerNoteEl = document.getElementById("headerNote");
+headerNoteEl.value = localStorage.getItem(HEADER_NOTE_KEY) || "";
+headerNoteEl.addEventListener("input", () => localStorage.setItem(HEADER_NOTE_KEY, headerNoteEl.value));
+
 window._t4_data = JSON.parse(localStorage.getItem("fdc_holdings") || "null") || [];
 fetchLiveQuotes();
 setInterval(fetchLiveQuotes, 5 * 60 * 1000);
