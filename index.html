@@ -3046,17 +3046,22 @@ function buildBacktestPanelHtml(report, p) {
       <td>${fmtPct(d.avgFwdReturnPct5TopK)}</td>
       <td>${fmtPct(d.avgFwdReturnAllTop20)}</td>
       <td>${fmtPct(d.avgFwdReturnRestOfMarket)}</td>
+      <td>${fmtPct(d.avgFwdReturnBenchmark)}</td>
     </tr>`).join('');
+  const benchmarkNote = s.avgFwdReturnBenchmark == null
+    ? '<div>大盤(0050)比較：目前累積的快照都還沒有存到大盤價格，等新快照存進來才會有資料（不影響其他欄位）。</div>'
+    : `<div>大盤(0050)同期平均 ${fmtPct(s.avgFwdReturnBenchmark)}（加權前K贏大盤的天數佔比 ${s.weightedVsBenchmarkWinRate ?? '-'}% ／ 前20整體贏大盤的天數佔比 ${s.top20VsBenchmarkWinRate ?? '-'}%）</div>`;
   return `
     <div class="mail-score-panel backtest-panel" onclick="event.stopPropagation()">
       <div class="msp-note">
         <strong>回測結果（樣本 ${report.sampleDays} 天，未來第${p.backtestForwardMinOffset}~${p.backtestForwardMaxOffset}筆快照＝約未來3~5個交易日，前K名=${p.backtestTopK}）</strong>
         <div>加權總分前K名平均 ${fmtPct(s.avgFwdReturnWeightedTopK)}（贏近5日報酬排序基準的天數佔比 ${s.weightedVsPct5WinRate ?? '-'}%） ／ 近5日報酬前K名基準 ${fmtPct(s.avgFwdReturnPct5TopK)}</div>
         <div>前20整體平均 ${fmtPct(s.avgFwdReturnAllTop20)}（贏過前20以外個股的天數佔比 ${s.top20VsRestWinRate ?? '-'}%） ／ 前20以外其餘個股平均 ${fmtPct(s.avgFwdReturnRestOfMarket)}</div>
+        ${benchmarkNote}
       </div>
       <div style="overflow-x:auto;">
         <table>
-          <thead><tr><th>日期→未來</th><th>加權前K</th><th>近5日前K</th><th>前20整體</th><th>前20以外</th></tr></thead>
+          <thead><tr><th>日期→未來</th><th>加權前K</th><th>近5日前K</th><th>前20整體</th><th>前20以外</th><th>大盤(0050)</th></tr></thead>
           <tbody>${dayRows}</tbody>
         </table>
       </div>
@@ -3088,15 +3093,19 @@ function importBacktestHistoryFile(input) {
       saveGain10History(rankHistory);
 
       const backtestHistory = loadMailScoreBacktestHistory();
-      let backtestAdded = 0;
+      let backtestAdded = 0, benchmarkPatched = 0;
       Object.entries(importedBacktest).forEach(([date, snap]) => {
         if (!(date in backtestHistory)) { backtestHistory[date] = snap; backtestAdded++; }
+        else if (backtestHistory[date].benchmark == null && snap.benchmark != null) {
+          // 這天已經有真實快照（top20/universe 保留不動），只補上當初還沒存的大盤價格欄位
+          backtestHistory[date].benchmark = snap.benchmark; benchmarkPatched++;
+        }
       });
       const dates = Object.keys(backtestHistory).sort();
       while (dates.length > MAIL_SCORE_BACKTEST_MAX_DAYS) { delete backtestHistory[dates.shift()]; }
       localStorage.setItem(MAIL_SCORE_BACKTEST_KEY, JSON.stringify(backtestHistory));
 
-      alert(`匯入完成：名次歷史新增 ${rankAdded} 天，回測快照新增 ${backtestAdded} 天（同一天若已有真實快照則保留真實資料，不覆蓋）。`);
+      alert(`匯入完成：名次歷史新增 ${rankAdded} 天，回測快照新增 ${backtestAdded} 天，補上大盤價格欄位 ${benchmarkPatched} 天（同一天若已有真實快照則保留真實資料，不覆蓋）。`);
       renderStrategy();
     } catch (e) {
       alert('匯入失敗：檔案格式不正確（需要是 backfilled_history.json 那種 {rankHistory, backtestHistory} 格式）');
@@ -3161,7 +3170,8 @@ function saveMailScoreBacktestSnapshot(date, scored) {
     if (code === "0050" || !d || typeof d.price !== "number") return;
     universe[code] = d.price;
   });
-  history[date] = { top20: top20Entry, universe };
+  const benchmark = (stockData["0050"] && typeof stockData["0050"].price === "number") ? stockData["0050"].price : null;
+  history[date] = { top20: top20Entry, universe, benchmark };
   const dates = Object.keys(history).sort();
   while (dates.length > MAIL_SCORE_BACKTEST_MAX_DAYS) { delete history[dates.shift()]; }
   try { localStorage.setItem(MAIL_SCORE_BACKTEST_KEY, JSON.stringify(history)); } catch (e) {}
@@ -3212,14 +3222,24 @@ function computeBacktestReport(params) {
     const avgAllTop20 = mailScoreAvg(top20Rows.map(r => r.fwdReturn));
     const avgRest = restReturns.length ? mailScoreAvg(restReturns) : null;
 
+    // 大盤基準（0050）：同一段期間大盤本身漲跌多少，沒有這個基準就看不出分數的表現
+    // 是真的比大盤強，還是只是跟著大盤一起漲跌。舊快照沒存 benchmark 時這天就跳過大盤比較。
+    let benchmarkFwd = null;
+    if (typeof today.benchmark === "number" && today.benchmark > 0 && typeof future.benchmark === "number") {
+      benchmarkFwd = ((future.benchmark - today.benchmark) / today.benchmark) * 100;
+    }
+
     days.push({
       date, futureDate: dates[futureIdx], top20Sample: top20Rows.length, restSample: restReturns.length,
       avgFwdReturnWeightedTopK: +avgWeighted.toFixed(2),
       avgFwdReturnPct5TopK: +avgPct5.toFixed(2),
       avgFwdReturnAllTop20: +avgAllTop20.toFixed(2),
       avgFwdReturnRestOfMarket: avgRest != null ? +avgRest.toFixed(2) : null,
+      avgFwdReturnBenchmark: benchmarkFwd != null ? +benchmarkFwd.toFixed(2) : null,
       weightedBeatsPct5: avgWeighted > avgPct5,
       top20BeatsRest: avgRest != null ? avgAllTop20 > avgRest : null,
+      weightedBeatsBenchmark: benchmarkFwd != null ? avgWeighted > benchmarkFwd : null,
+      top20BeatsBenchmark: benchmarkFwd != null ? avgAllTop20 > benchmarkFwd : null,
     });
   });
 
@@ -3248,10 +3268,13 @@ function computeBacktestReport(params) {
       avgFwdReturnPct5TopK: meanOf('avgFwdReturnPct5TopK'),
       avgFwdReturnAllTop20: meanOf('avgFwdReturnAllTop20'),
       avgFwdReturnRestOfMarket: meanOf('avgFwdReturnRestOfMarket'),
+      avgFwdReturnBenchmark: meanOf('avgFwdReturnBenchmark'),
       weightedVsPct5WinRate: rateOf('weightedBeatsPct5'),
       top20VsRestWinRate: rateOf('top20BeatsRest'),
+      weightedVsBenchmarkWinRate: rateOf('weightedBeatsBenchmark'),
+      top20VsBenchmarkWinRate: rateOf('top20BeatsBenchmark'),
     },
-    note: '基準1＝單純依近5日報酬排序取前K名；基準2＝單純看「有沒有在前20」（前20整體平均 vs 前20以外其餘個股平均）。加權總分前K名平均若持續高於這兩個基準，才算是這套加權排名真的比基準更有效。',
+    note: '基準1＝單純依近5日報酬排序取前K名；基準2＝單純看「有沒有在前20」（前20整體平均 vs 前20以外其餘個股平均）；大盤基準＝同期0050漲跌（有些舊快照沒存大盤價格，這幾天大盤欄位會是"-"）。加權總分前K名平均要持續高於這三個基準，才算是這套加權排名真的比隨便挑、比大盤更有效。',
     days,
   };
 }
