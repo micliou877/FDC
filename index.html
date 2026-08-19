@@ -117,6 +117,12 @@
     .mail-score-panel input[type=number] { width:48px; font-size:11px; padding:2px 4px; border:1px solid #e2e8f0; border-radius:4px; color:#334155; }
     .mail-score-panel .msp-reset { cursor:pointer; font-size:11px; color:#64748b; background:#fff; border:1px solid #e2e8f0; border-radius:4px; padding:2px 8px; margin-left:auto; }
     .mail-score-panel .msp-reset:hover { background:#f1f5f9; }
+    .backtest-panel table { border-collapse:collapse; font-size:11px; width:100%; background:#fff; }
+    .backtest-panel th, .backtest-panel td { border:1px solid #e2e8f0; padding:3px 6px; text-align:right; white-space:nowrap; }
+    .backtest-panel th:first-child, .backtest-panel td:first-child { text-align:left; }
+    .backtest-panel th { background:#f1f5f9; color:#334155; font-weight:600; }
+    .backtest-panel .bt-pos { color:#a84848; }
+    .backtest-panel .bt-neg { color:#4a7a60; }
 
     .tag { display: inline-block; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #3b82f6; margin-top: 3px; margin-right: 3px; white-space: nowrap; border: 1px solid #bfdbfe; cursor: pointer; }
     .tag:hover { background: #dbeafe; border-color: #93c5fd; }
@@ -2762,6 +2768,7 @@ function saveMailScoreParams(params) {
 
 let mailScoreParams = loadMailScoreParams();
 let mailScorePanelOpen = false;
+let backtestPanelOpen = false;
 let mailUiState = { inboxOpen: false, scoreSort: "default" };
 
 // 分數排序三段循環：default（原始10日漲幅榜順序）→ desc（分數高→低）→ asc（分數低→高）→ default
@@ -2796,6 +2803,12 @@ function resetMailScoreParams() {
 function toggleMailScorePanel() {
   mailScorePanelOpen = !mailScorePanelOpen;
   if (mailScorePanelOpen) mailUiState.inboxOpen = true;
+  renderStrategy();
+}
+// 點🧪只在畫面上開合顯示回測結果，不觸發下載；下載改成面板裡的按鈕，要看才存檔
+function toggleBacktestPanel() {
+  backtestPanelOpen = !backtestPanelOpen;
+  if (backtestPanelOpen) mailUiState.inboxOpen = true;
   renderStrategy();
 }
 
@@ -2968,7 +2981,7 @@ function buildMailScorePanelHtml(p) {
         <div>② <strong>加速度分</strong>：比較「近5日報酬」與不重疊的「前一個5日報酬（第−10~−5日）」，比值越高代表漲勢正在加速。前一個5日報酬太小或為負時分母不可靠，原則上標記「不適用」；但若前段只是盤整（沒有明顯破底）且近5日噴出，會改給一個中性基本分，不再一律歸零。</div>
         <div>③ <strong>族群分</strong>：在「合格股票」池子裡看同族群有幾檔一起上榜，用平滑函數隨檔數增加緩步趨近上限（不是 +10 的懸崖式跳分）；「同族群」的判定粒度可切換：計算個股所有族群標籤，或只計算第一個（較細）。</div>
         <div>④ <strong>淘汰門檻（緩衝帶漸進打折，不是非黑即白）</strong>：5日漲幅太低、或名次退步太多，會先進入緩衝帶依比例打折，完全跌破門檻才會整檔歸零（見下方分數旁 ⚡ 標記）。</div>
-        <div>⑥ <strong>回測</strong>：點收件匣列上的 🧪 會用累積的每日快照，比較「加權總分前K名」「近5日報酬前K名」「前20整體平均」「前20外其餘個股平均」的未來3~5日報酬，驗證這套加權排名有沒有真的贏過單純看報酬或單純看有沒有上榜。快照從今天開始累積，需要等幾天資料夠了才有結果。</div>
+        <div>⑥ <strong>回測</strong>：點收件匣列上的 🧪 會直接在畫面上顯示結果（不會自動下載），用累積的每日快照比較「加權總分前K名」「近5日報酬前K名」「前20整體平均」「前20外其餘個股平均」的未來3~5日報酬，驗證這套加權排名有沒有真的贏過單純看報酬或單純看有沒有上榜；需要時再點面板裡的「⬇ 下載完整 JSON」另存檔案，累積的快照本身不受這個顯示動作影響，仍會照原本的天數上限保留。</div>
       </div>
       <div class="msp-row">
         <strong>淘汰門檻</strong>
@@ -3010,6 +3023,87 @@ function buildMailScorePanelHtml(p) {
         <span class="msp-reset" onclick="resetMailScoreParams()">↺ 還原預設值</span>
       </div>
     </div>`;
+}
+
+const btImportInputHtml = `
+    <input type="file" id="btImportInput" accept=".json,application/json" style="display:none" onchange="importBacktestHistoryFile(this)">
+    <span class="msp-reset" onclick="document.getElementById('btImportInput').click()">📥 匯入歷史快照 JSON</span>`;
+
+function buildBacktestPanelHtml(report, p) {
+  if (!report.ready) {
+    return `
+    <div class="mail-score-panel backtest-panel" onclick="event.stopPropagation()">
+      <div class="msp-note"><strong>回測結果</strong><div>${report.note}</div></div>
+      <div class="msp-row">${btImportInputHtml}</div>
+    </div>`;
+  }
+  const fmtPct = v => v == null ? '-' : `<span class="${v >= 0 ? 'bt-pos' : 'bt-neg'}">${v >= 0 ? '+' : ''}${v.toFixed(2)}%</span>`;
+  const s = report.summary;
+  const dayRows = report.days.slice(-15).reverse().map(d => `
+    <tr>
+      <td>${d.date}→${d.futureDate}</td>
+      <td>${fmtPct(d.avgFwdReturnWeightedTopK)}</td>
+      <td>${fmtPct(d.avgFwdReturnPct5TopK)}</td>
+      <td>${fmtPct(d.avgFwdReturnAllTop20)}</td>
+      <td>${fmtPct(d.avgFwdReturnRestOfMarket)}</td>
+    </tr>`).join('');
+  return `
+    <div class="mail-score-panel backtest-panel" onclick="event.stopPropagation()">
+      <div class="msp-note">
+        <strong>回測結果（樣本 ${report.sampleDays} 天，未來第${p.backtestForwardMinOffset}~${p.backtestForwardMaxOffset}筆快照＝約未來3~5個交易日，前K名=${p.backtestTopK}）</strong>
+        <div>加權總分前K名平均 ${fmtPct(s.avgFwdReturnWeightedTopK)}（贏近5日報酬排序基準的天數佔比 ${s.weightedVsPct5WinRate ?? '-'}%） ／ 近5日報酬前K名基準 ${fmtPct(s.avgFwdReturnPct5TopK)}</div>
+        <div>前20整體平均 ${fmtPct(s.avgFwdReturnAllTop20)}（贏過前20以外個股的天數佔比 ${s.top20VsRestWinRate ?? '-'}%） ／ 前20以外其餘個股平均 ${fmtPct(s.avgFwdReturnRestOfMarket)}</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>日期→未來</th><th>加權前K</th><th>近5日前K</th><th>前20整體</th><th>前20以外</th></tr></thead>
+          <tbody>${dayRows}</tbody>
+        </table>
+      </div>
+      <div class="msp-row">
+        <span class="msp-reset" onclick="downloadBacktestJson()">⬇ 下載完整 JSON</span>
+        ${btImportInputHtml}
+      </div>
+    </div>`;
+}
+
+// 匯入外部重建的歷史快照（例如用 quotes.json 的 git 歷史回推補齊的資料），
+// 跟目前 localStorage 已累積的真實快照合併──同一天以真實快照優先，回推資料只補缺口，
+// 避免補進去的資料反而蓋掉比較準確的真實記錄。
+function importBacktestHistoryFile(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+      const importedRank = imported.rankHistory || {};
+      const importedBacktest = imported.backtestHistory || {};
+
+      const rankHistory = loadGain10History();
+      let rankAdded = 0;
+      Object.entries(importedRank).forEach(([date, ranks]) => {
+        if (!(date in rankHistory)) { rankHistory[date] = ranks; rankAdded++; }
+      });
+      saveGain10History(rankHistory);
+
+      const backtestHistory = loadMailScoreBacktestHistory();
+      let backtestAdded = 0;
+      Object.entries(importedBacktest).forEach(([date, snap]) => {
+        if (!(date in backtestHistory)) { backtestHistory[date] = snap; backtestAdded++; }
+      });
+      const dates = Object.keys(backtestHistory).sort();
+      while (dates.length > MAIL_SCORE_BACKTEST_MAX_DAYS) { delete backtestHistory[dates.shift()]; }
+      localStorage.setItem(MAIL_SCORE_BACKTEST_KEY, JSON.stringify(backtestHistory));
+
+      alert(`匯入完成：名次歷史新增 ${rankAdded} 天，回測快照新增 ${backtestAdded} 天（同一天若已有真實快照則保留真實資料，不覆蓋）。`);
+      renderStrategy();
+    } catch (e) {
+      alert('匯入失敗：檔案格式不正確（需要是 backfilled_history.json 那種 {rankHistory, backtestHistory} 格式）');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 function downloadMailScoreJson() {
@@ -3252,6 +3346,7 @@ function buildMailInboxHtml(snapshot, currentList) {
   }).join('');
 
   const panelHtml = mailScorePanelOpen ? buildMailScorePanelHtml(mailScoreParams) : '';
+  const backtestHtml = backtestPanelOpen ? buildBacktestPanelHtml(computeBacktestReport(mailScoreParams), mailScoreParams) : '';
   const sortIcon = mailUiState.scoreSort === 'desc' ? '🔽' : mailUiState.scoreSort === 'asc' ? '🔼' : '⇅';
   const sortTitle = mailUiState.scoreSort === 'desc' ? '目前：分數高→低排序（點擊切換成低→高）'
     : mailUiState.scoreSort === 'asc' ? '目前：分數低→高排序（點擊切換回原始順序）'
@@ -3264,10 +3359,11 @@ function buildMailInboxHtml(snapshot, currentList) {
         <span class="score-gear" title="說明／調整加權分數參數" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">ⓘ</span>
         <span class="score-gear" title="${sortTitle}" onclick="event.preventDefault();event.stopPropagation();toggleMailScoreSort();">${sortIcon}</span>
         <span class="score-gear" title="匯出當日分數 JSON" onclick="event.preventDefault();event.stopPropagation();downloadMailScoreJson();">⬇</span>
-        <span class="score-gear" title="回測：加權總分排序 vs 近5日報酬排序 vs 有沒有上前20" onclick="event.preventDefault();event.stopPropagation();downloadBacktestJson();">🧪</span>
+        <span class="score-gear" title="回測：加權總分排序 vs 近5日報酬排序 vs 有沒有上前20" onclick="event.preventDefault();event.stopPropagation();toggleBacktestPanel();">🧪</span>
         <span class="mb-chev">▸</span><span class="mb-count">${top20.length}</span>
       </summary>
       ${panelHtml}
+      ${backtestHtml}
       ${rows}
     </details>`;
 }
