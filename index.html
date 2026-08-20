@@ -3084,6 +3084,7 @@ function importBacktestHistoryFile(input) {
       const imported = JSON.parse(reader.result);
       const importedRank = imported.rankHistory || {};
       const importedBacktest = imported.backtestHistory || {};
+      const importedAdvice = imported.adviceHistory || {};
 
       const rankHistory = loadGain10History();
       let rankAdded = 0;
@@ -3105,7 +3106,16 @@ function importBacktestHistoryFile(input) {
       while (dates.length > MAIL_SCORE_BACKTEST_MAX_DAYS) { delete backtestHistory[dates.shift()]; }
       localStorage.setItem(MAIL_SCORE_BACKTEST_KEY, JSON.stringify(backtestHistory));
 
-      alert(`匯入完成：名次歷史新增 ${rankAdded} 天，回測快照新增 ${backtestAdded} 天，補上大盤價格欄位 ${benchmarkPatched} 天（同一天若已有真實快照則保留真實資料，不覆蓋）。`);
+      const adviceHistory = loadAdviceBacktestHistory();
+      let adviceAdded = 0;
+      Object.entries(importedAdvice).forEach(([date, snap]) => {
+        if (!(date in adviceHistory)) { adviceHistory[date] = snap; adviceAdded++; }
+      });
+      const adviceDates = Object.keys(adviceHistory).sort();
+      while (adviceDates.length > ADVICE_BACKTEST_MAX_DAYS) { delete adviceHistory[adviceDates.shift()]; }
+      localStorage.setItem(ADVICE_BACKTEST_KEY, JSON.stringify(adviceHistory));
+
+      alert(`匯入完成：名次歷史新增 ${rankAdded} 天，回測快照新增 ${backtestAdded} 天，補上大盤價格欄位 ${benchmarkPatched} 天，今日建議訊號歷史新增 ${adviceAdded} 天（同一天若已有真實快照則保留真實資料，不覆蓋）。`);
       renderStrategy();
     } catch (e) {
       alert('匯入失敗：檔案格式不正確（需要是 backfilled_history.json 那種 {rankHistory, backtestHistory} 格式）');
@@ -3318,6 +3328,7 @@ function computeGain10Snapshot() {
   const rankMaLookup = computeRankMovingAverages(top20, history, snapshotDate, mailScoreParams.rankMaDays);
   const scored = computeWeightedScores(top20, prevRanks, mailScoreParams, 20, rankMaLookup);
   saveMailScoreBacktestSnapshot(snapshotDate, scored);
+  saveAdviceBacktestSnapshot(snapshotDate);
 
   return { top20, prevRanks, scored, rankMaLookup };
 }
@@ -3825,6 +3836,47 @@ function getActionAdvice(s, hdRet) {
     return { label: "觀察", cls: "watch", reason: "5日動能轉負但10日趨勢仍在，等待回穩" };
   }
   return { label: "觀察", cls: "watch", reason: "動能不足或漲幅未達加碼門檻，持續觀察" };
+}
+
+// ==================== 今日建議訊號的回測資料留存（先存資料，樣本夠了再評估）====================
+// 只留「加碼／減碼／觀察」這個純訊號判斷，不含 getActionAdvice 裡「持有停損／獲利了結」那兩條
+// 分支──那兩條要有真實進場成本（hdRet）才會觸發，逐日存快照時沒有「當時的庫存成本」可以回填，
+// 所以一律用「還沒持有、純粹看訊號」的角度存，之後才能跟大盤/全市場公平比較。
+const ADVICE_BACKTEST_KEY = "fdc_advice_backtest_history_v1";
+const ADVICE_BACKTEST_MAX_DAYS = 150;
+
+function loadAdviceBacktestHistory() {
+  try { return JSON.parse(localStorage.getItem(ADVICE_BACKTEST_KEY) || "{}"); } catch (e) { return {}; }
+}
+
+function getPureAdviceLabel(s) {
+  if (s.pct5 == null || s.pct10 == null) return null;
+  const crashToday = s.pct1 != null && s.pct1 <= -5;
+  const momentumReversed = s.pct5 < 0 && s.pct10 < 0;
+  if (crashToday || momentumReversed) return "減碼";
+  if (s.pct10 >= 3 && s.pct5 > 0 && (s.pct1 ?? 0) > -2 && (s.volTrend ?? 1) >= 1.0) return "加碼";
+  return "觀察";
+}
+
+// entries 存全市場（不只目前關注清單）以累積最大樣本；watched 旗標記錄「存快照當下是否在關注清單」，
+// 之後想只評估關注清單也能篩選，但清單成員會隨時間變動，這旗標只反映存檔當天的狀態。
+function saveAdviceBacktestSnapshot(date) {
+  if (!Object.keys(stockData).length) return;
+  const history = loadAdviceBacktestHistory();
+  const watchedCodes = new Set(Object.values(watchlists).flat());
+  const entries = {};
+  Object.entries(stockData).forEach(([code, d]) => {
+    if (code === "0050" || !d || typeof d.price !== "number") return;
+    const label = getPureAdviceLabel(d);
+    if (!label) return;
+    entries[code] = { price: d.price, label, watched: watchedCodes.has(code) };
+  });
+  if (!Object.keys(entries).length) return;
+  const benchmark = (stockData["0050"] && typeof stockData["0050"].price === "number") ? stockData["0050"].price : null;
+  history[date] = { entries, benchmark };
+  const dates = Object.keys(history).sort();
+  while (dates.length > ADVICE_BACKTEST_MAX_DAYS) { delete history[dates.shift()]; }
+  try { localStorage.setItem(ADVICE_BACKTEST_KEY, JSON.stringify(history)); } catch (e) {}
 }
 
 // 今日建議排序等級：加碼=3 > 獲利了結=2 > 觀察=1 > 減碼=0
