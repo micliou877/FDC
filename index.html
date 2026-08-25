@@ -384,8 +384,10 @@
     <p>多台裝置輸入同一組代碼，即可同步自選股、分類、備註、頁首備註、今日作業清單、交易日記與報價。</p>
     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
       <input type="text" id="cloudRoomInput" placeholder="自訂代碼，例如 mycode2026" style="flex:1; padding:10px;">
-      <button class="btn primary" onclick="connectCloud()">連線</button>
+      <button class="btn primary" onclick="forcePushCloud()" title="用這台裝置目前的資料覆蓋雲端">⬆️ 上傳</button>
+      <button class="btn primary" onclick="forcePullCloud()" title="用雲端的資料覆蓋這台裝置">⬇️ 下載</button>
     </div>
+    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊），之後每 5 秒仍會自動雙向同步。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。</p>
     <div id="cloudStatus" style="font-size: 12px; color: #92400e; font-weight: 600;">目前為本機模式</div>
     <div style="margin-top:10px;">
       <button class="btn" onclick="forceHardRefresh()">🔄 強制重新整理（清除快取）</button>
@@ -791,7 +793,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-26.1";
+const APP_VERSION = "2026-08-26.2";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -1410,6 +1412,85 @@ async function connectCloud() {
     updateUI();
   } catch (e) {
     statusEl.textContent = `連線失敗，請確認 Firebase 設定與網路。`;
+  }
+}
+
+// 上傳：不比對新舊，直接把本機目前的資料整包蓋掉雲端（把所有時間戳都蓋成現在，確保之後一定贏）
+async function forcePushCloud() {
+  const inputId = document.getElementById("cloudRoomInput").value.trim();
+  const statusEl = document.getElementById("cloudStatus");
+  if (!inputId) { alert("請輸入同步代碼！"); return; }
+  if (FIREBASE_URL.includes("請把")) { alert("錯誤：你還沒有在網頁原始碼最下方修改填入你的 FIREBASE_URL 網址！"); return; }
+
+  cloudRoomId = inputId;
+  statusEl.textContent = `上傳中：${cloudRoomId}...`;
+
+  watchlistsTs = Date.now();
+  stockNotesTs = Date.now();
+  stockMetaTs  = Date.now();
+  saveDailyPlan();
+  saveDiary();
+  saveHeaderNote();
+  saveLocalOnly();
+
+  try {
+    await pushToCloud();
+    statusEl.textContent = `已上傳，本機資料已覆蓋雲端`;
+    localStorage.setItem("cloud_room_id", cloudRoomId);
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(syncPull, 5000);
+  } catch (e) {
+    statusEl.textContent = `上傳失敗，請確認網路。`;
+  }
+}
+
+// 下載：不比對新舊，直接用雲端目前的資料整包蓋掉本機
+async function forcePullCloud() {
+  const inputId = document.getElementById("cloudRoomInput").value.trim();
+  const statusEl = document.getElementById("cloudStatus");
+  if (!inputId) { alert("請輸入同步代碼！"); return; }
+  if (FIREBASE_URL.includes("請把")) { alert("錯誤：你還沒有在網頁原始碼最下方修改填入你的 FIREBASE_URL 網址！"); return; }
+
+  cloudRoomId = inputId;
+  statusEl.textContent = `下載中：${cloudRoomId}...`;
+
+  try {
+    const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
+    const cloudData = await res.json();
+    if (!cloudData) {
+      statusEl.textContent = `這組代碼在雲端還沒有資料，請改用「上傳」建立。`;
+      return;
+    }
+
+    if (cloudData.watchlists) { watchlists = cloudData.watchlists; watchlistsTs = cloudData.watchlistsTs || Date.now(); }
+    if (cloudData.stockNotes) { stockNotes = cloudData.stockNotes; stockNotesTs = cloudData.stockNotesTs || Date.now(); }
+    if (cloudData.stockMeta) { stockMeta = cloudData.stockMeta; stockMetaTs = cloudData.stockMetaTs || Date.now(); }
+    if (cloudData.headerNote != null) {
+      headerNote = cloudData.headerNote;
+      headerNoteTs = cloudData.headerNoteTs || Date.now();
+      localStorage.setItem(HEADER_NOTE_KEY, headerNote);
+      localStorage.setItem("fdc_header_note_ts", headerNoteTs);
+      headerNoteEl.value = headerNote;
+    }
+    if (cloudData.stockData) { stockData = cloudData.stockData; lastUpdateTime = cloudData.lastUpdateTime; }
+    if (cloudData.finmindToken) {
+      localStorage.setItem("finmind_token", cloudData.finmindToken);
+      document.getElementById("apiToken").value = cloudData.finmindToken;
+    }
+    if (cloudData.dailyPlan) { dailyPlan = cloudData.dailyPlan; saveDailyPlan(); }
+    if (Array.isArray(cloudData.diaryEntries)) { diaryEntries = cloudData.diaryEntries; saveDiary(); }
+    if (cloudData.rankHistory) saveGain10History(cloudData.rankHistory);
+    if (cloudData.mailScoreBacktestHistory) saveMailScoreBacktestHistory(cloudData.mailScoreBacktestHistory);
+    if (cloudData.adviceBacktestHistory) saveAdviceBacktestHistory(cloudData.adviceBacktestHistory);
+
+    saveLocalOnly();
+    statusEl.textContent = `已下載，雲端資料已覆蓋本機`;
+    localStorage.setItem("cloud_room_id", cloudRoomId);
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(syncPull, 5000);
+    updateUI();
+  } catch (e) {
+    statusEl.textContent = `下載失敗，請確認網路。`;
   }
 }
 
