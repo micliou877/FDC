@@ -793,7 +793,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-26.2";
+const APP_VERSION = "2026-08-26.3";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -1380,13 +1380,13 @@ async function connectCloud() {
       if (cloudData.dailyPlan && (cloudData.dailyPlanTs || 0) > dailyPlanTs) {
         dailyPlan = cloudData.dailyPlan;
         dailyPlanTs = cloudData.dailyPlanTs || 0;
-        saveDailyPlan();
+        persistDailyPlan();
       }
       // 交易日記：跟自選股/作業清單一樣，整包用時間戳記比新舊（新增/編輯/刪除都算，時間戳較新者整包覆蓋）
       if (Array.isArray(cloudData.diaryEntries) && (cloudData.diaryTs || 0) > diaryTs) {
         diaryEntries = cloudData.diaryEntries;
         diaryTs = cloudData.diaryTs || 0;
-        saveDiary();
+        persistDiary();
       }
       // 回測相關的三份日期歷史：名次歷史／收件匣回測快照／今日建議訊號回測快照，跨裝置採聯集合併
       if (cloudData.rankHistory) {
@@ -1477,8 +1477,8 @@ async function forcePullCloud() {
       localStorage.setItem("finmind_token", cloudData.finmindToken);
       document.getElementById("apiToken").value = cloudData.finmindToken;
     }
-    if (cloudData.dailyPlan) { dailyPlan = cloudData.dailyPlan; saveDailyPlan(); }
-    if (Array.isArray(cloudData.diaryEntries)) { diaryEntries = cloudData.diaryEntries; saveDiary(); }
+    if (cloudData.dailyPlan) { dailyPlan = cloudData.dailyPlan; dailyPlanTs = cloudData.dailyPlanTs || Date.now(); persistDailyPlan(); }
+    if (Array.isArray(cloudData.diaryEntries)) { diaryEntries = cloudData.diaryEntries; diaryTs = cloudData.diaryTs || Date.now(); persistDiary(); }
     if (cloudData.rankHistory) saveGain10History(cloudData.rankHistory);
     if (cloudData.mailScoreBacktestHistory) saveMailScoreBacktestHistory(cloudData.mailScoreBacktestHistory);
     if (cloudData.adviceBacktestHistory) saveAdviceBacktestHistory(cloudData.adviceBacktestHistory);
@@ -1542,14 +1542,14 @@ async function syncPull() {
       if (cloudData.dailyPlan && (cloudData.dailyPlanTs || 0) > dailyPlanTs) {
         dailyPlan = cloudData.dailyPlan;
         dailyPlanTs = cloudData.dailyPlanTs || 0;
-        saveDailyPlan();
+        persistDailyPlan();
         changed = true;
       }
       // 交易日記：整包用時間戳記比新舊
       if (Array.isArray(cloudData.diaryEntries) && (cloudData.diaryTs || 0) > diaryTs) {
         diaryEntries = cloudData.diaryEntries;
         diaryTs = cloudData.diaryTs || 0;
-        saveDiary();
+        persistDiary();
         changed = true;
       }
       if (cloudData.rankHistory) {
@@ -1709,6 +1709,10 @@ function renderHeatSparkline(sectorName) {
 
 function saveDailyPlan() {
   dailyPlanTs = Date.now();
+  persistDailyPlan();
+}
+// 只負責寫入 localStorage，不動 dailyPlanTs——雲端拉取時要用這個，避免把剛收到的雲端時間戳蓋掉
+function persistDailyPlan() {
   try {
     localStorage.setItem("fdc_daily_plan", JSON.stringify(dailyPlan));
     localStorage.setItem("fdc_daily_plan_ts", dailyPlanTs);
@@ -2459,6 +2463,10 @@ function loadDiary() {
 }
 function saveDiary() {
   diaryTs = Date.now();
+  persistDiary();
+}
+// 只負責寫入 localStorage，不動 diaryTs——雲端拉取時要用這個，避免把剛收到的雲端時間戳蓋掉
+function persistDiary() {
   try {
     localStorage.setItem('fdc_diary', JSON.stringify(diaryEntries));
     localStorage.setItem('fdc_diary_ts', diaryTs);
