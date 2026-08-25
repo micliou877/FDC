@@ -387,7 +387,7 @@
       <button class="btn primary" onclick="forcePushCloud()" title="用這台裝置目前的資料覆蓋雲端">⬆️ 上傳</button>
       <button class="btn primary" onclick="forcePullCloud()" title="用雲端的資料覆蓋這台裝置">⬇️ 下載</button>
     </div>
-    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊），之後每 5 秒仍會自動雙向同步。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。</p>
+    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊），之後每 5 秒仍會自動雙向同步。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。「上傳」按下去前會先顯示雲端目前的資料筆數讓你確認，避免誤蓋。</p>
     <div id="cloudStatus" style="font-size: 12px; color: #92400e; font-weight: 600;">目前為本機模式</div>
     <div style="margin-top:10px;">
       <button class="btn" onclick="forceHardRefresh()">🔄 強制重新整理（清除快取）</button>
@@ -793,7 +793,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-26.3";
+const APP_VERSION = "2026-08-26.4";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -1419,8 +1419,40 @@ async function connectCloud() {
 async function forcePushCloud() {
   const inputId = document.getElementById("cloudRoomInput").value.trim();
   const statusEl = document.getElementById("cloudStatus");
+  const previousRoomId = cloudRoomId;
   if (!inputId) { alert("請輸入同步代碼！"); return; }
   if (FIREBASE_URL.includes("請把")) { alert("錯誤：你還沒有在網頁原始碼最下方修改填入你的 FIREBASE_URL 網址！"); return; }
+
+  // 上傳前先查一次雲端現況，讓使用者看清楚要蓋掉的是什麼資料再決定，避免測試用的資料誤蓋掉正式資料
+  statusEl.textContent = `檢查雲端現況中：${inputId}...`;
+  let cloudPeek = null;
+  try {
+    const peekRes = await fetch(`${FIREBASE_URL}rooms/${inputId}.json`);
+    cloudPeek = await peekRes.json();
+  } catch (e) {
+    statusEl.textContent = previousRoomId ? `已連線：${previousRoomId}` : `目前為本機模式`;
+    alert("檢查雲端現況失敗，請確認網路後再試一次。");
+    return;
+  }
+
+  let confirmMsg;
+  if (!cloudPeek) {
+    confirmMsg = `代碼「${inputId}」在雲端目前是空的，尚無資料。\n上傳後會用這台裝置目前的資料建立雲端內容，確定要繼續嗎？`;
+  } else {
+    const stockCount = Object.values(cloudPeek.watchlists || {}).reduce((n, arr) => n + (arr?.length || 0), 0);
+    const planCount = (cloudPeek.dailyPlan || []).length;
+    const diaryCount = (cloudPeek.diaryEntries || []).length;
+    const cloudUpdated = cloudPeek.lastUpdateTime ? new Date(cloudPeek.lastUpdateTime).toLocaleString("zh-TW") : "未知";
+    confirmMsg = `⚠️ 即將用這台裝置的資料「整包覆蓋」代碼「${inputId}」雲端現有資料：\n\n`
+      + `自選股 ${stockCount} 檔／作業清單 ${planCount} 筆／交易日記 ${diaryCount} 筆\n`
+      + `雲端報價最後更新：${cloudUpdated}\n\n`
+      + `覆蓋後無法復原，確定是這組代碼、確定要上傳嗎？`;
+  }
+  if (!confirm(confirmMsg)) {
+    cloudRoomId = previousRoomId;
+    statusEl.textContent = previousRoomId ? `已連線：${previousRoomId}` : `目前為本機模式`;
+    return;
+  }
 
   cloudRoomId = inputId;
   statusEl.textContent = `上傳中：${cloudRoomId}...`;
