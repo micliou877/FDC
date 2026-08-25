@@ -387,7 +387,7 @@
       <button class="btn primary" onclick="forcePushCloud()" title="用這台裝置目前的資料覆蓋雲端">⬆️ 上傳</button>
       <button class="btn primary" onclick="forcePullCloud()" title="用雲端的資料覆蓋這台裝置">⬇️ 下載</button>
     </div>
-    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊），之後每 5 秒仍會自動雙向同步。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。「上傳」按下去前會先顯示雲端目前的資料筆數讓你確認，避免誤蓋。</p>
+    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊）。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。「上傳」按下去前會先顯示雲端目前的資料筆數讓你確認，避免誤蓋。連線後，只要其他裝置對自選股／備註／頁首備註／作業清單／交易日記做了變更，這台裝置偵測到時也會先跳出確認視窗才套用；市場報價則維持背景自動更新不用確認。</p>
     <div id="cloudStatus" style="font-size: 12px; color: #92400e; font-weight: 600;">目前為本機模式</div>
     <div style="margin-top:10px;">
       <button class="btn" onclick="forceHardRefresh()">🔄 強制重新整理（清除快取）</button>
@@ -793,7 +793,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-26.4";
+const APP_VERSION = "2026-08-26.5";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -1526,6 +1526,10 @@ async function forcePullCloud() {
   }
 }
 
+// 記錄使用者「已拒絕套用」的雲端時間戳，同一個版本的變更不會每 5 秒重複追問；
+// 等雲端那個欄位又有更新的變更（時間戳比拒絕當時更新）才會再問一次。
+let _declinedTs = { watchlists: 0, stockNotes: 0, stockMeta: 0, headerNote: 0, dailyPlan: 0, diary: 0 };
+
 async function syncPull() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
   if (_pushInFlight) return;
@@ -1536,30 +1540,75 @@ async function syncPull() {
     const cloudData = await res.json();
     if (cloudData) {
       let changed = false;
-      if (cloudData.watchlists && (cloudData.watchlistsTs || 0) > watchlistsTs &&
+
+      // 使用者實際輸入的資料（自選股/備註/頁首備註/作業清單/交易日記）：其他裝置有變更時，先問過再套用
+      const pending = [];
+      if (cloudData.watchlists && (cloudData.watchlistsTs || 0) > watchlistsTs && (cloudData.watchlistsTs || 0) > _declinedTs.watchlists &&
           JSON.stringify(watchlists) !== JSON.stringify(cloudData.watchlists)) {
-        watchlists = cloudData.watchlists;
-        watchlistsTs = cloudData.watchlistsTs || 0;
-        changed = true;
+        const oldCount = Object.values(watchlists).reduce((n, a) => n + (a?.length || 0), 0);
+        const newCount = Object.values(cloudData.watchlists).reduce((n, a) => n + (a?.length || 0), 0);
+        pending.push({ key: "watchlists", label: `自選股／分類（目前 ${oldCount} 檔 → 雲端 ${newCount} 檔）` });
       }
-      if (cloudData.stockNotes && (cloudData.stockNotesTs || 0) > stockNotesTs) {
-        stockNotes = cloudData.stockNotes;
-        stockNotesTs = cloudData.stockNotesTs || 0;
-        changed = true;
+      if (cloudData.stockNotes && (cloudData.stockNotesTs || 0) > stockNotesTs && (cloudData.stockNotesTs || 0) > _declinedTs.stockNotes &&
+          JSON.stringify(stockNotes) !== JSON.stringify(cloudData.stockNotes)) {
+        pending.push({ key: "stockNotes", label: "個股備註" });
       }
-      if (cloudData.stockMeta && (cloudData.stockMetaTs || 0) > stockMetaTs) {
-        stockMeta = cloudData.stockMeta;
-        stockMetaTs = cloudData.stockMetaTs || 0;
-        changed = true;
+      if (cloudData.stockMeta && (cloudData.stockMetaTs || 0) > stockMetaTs && (cloudData.stockMetaTs || 0) > _declinedTs.stockMeta &&
+          JSON.stringify(stockMeta) !== JSON.stringify(cloudData.stockMeta)) {
+        pending.push({ key: "stockMeta", label: "自訂標的市場／名稱" });
       }
-      if (cloudData.headerNote != null && (cloudData.headerNoteTs || 0) > headerNoteTs) {
-        headerNote = cloudData.headerNote;
-        headerNoteTs = cloudData.headerNoteTs || 0;
-        localStorage.setItem(HEADER_NOTE_KEY, headerNote);
-        localStorage.setItem("fdc_header_note_ts", headerNoteTs);
-        headerNoteEl.value = headerNote;
-        changed = true;
+      if (cloudData.headerNote != null && (cloudData.headerNoteTs || 0) > headerNoteTs && (cloudData.headerNoteTs || 0) > _declinedTs.headerNote &&
+          cloudData.headerNote !== headerNote) {
+        pending.push({ key: "headerNote", label: "頁首注意事項備註" });
       }
+      if (cloudData.dailyPlan && (cloudData.dailyPlanTs || 0) > dailyPlanTs && (cloudData.dailyPlanTs || 0) > _declinedTs.dailyPlan &&
+          JSON.stringify(dailyPlan) !== JSON.stringify(cloudData.dailyPlan)) {
+        pending.push({ key: "dailyPlan", label: `今日作業清單（目前 ${dailyPlan.length} 筆 → 雲端 ${cloudData.dailyPlan.length} 筆）` });
+      }
+      if (Array.isArray(cloudData.diaryEntries) && (cloudData.diaryTs || 0) > diaryTs && (cloudData.diaryTs || 0) > _declinedTs.diary &&
+          JSON.stringify(diaryEntries) !== JSON.stringify(cloudData.diaryEntries)) {
+        pending.push({ key: "diary", label: `交易日記（目前 ${diaryEntries.length} 筆 → 雲端 ${cloudData.diaryEntries.length} 筆）` });
+      }
+
+      let apply = true;
+      if (pending.length > 0) {
+        apply = confirm(`📥 偵測到其他裝置的新變更：\n\n${pending.map(p => "・" + p.label).join("\n")}\n\n要套用到這台裝置嗎？`);
+        if (!apply) {
+          if (pending.some(p => p.key === "watchlists")) _declinedTs.watchlists = cloudData.watchlistsTs || 0;
+          if (pending.some(p => p.key === "stockNotes")) _declinedTs.stockNotes = cloudData.stockNotesTs || 0;
+          if (pending.some(p => p.key === "stockMeta")) _declinedTs.stockMeta = cloudData.stockMetaTs || 0;
+          if (pending.some(p => p.key === "headerNote")) _declinedTs.headerNote = cloudData.headerNoteTs || 0;
+          if (pending.some(p => p.key === "dailyPlan")) _declinedTs.dailyPlan = cloudData.dailyPlanTs || 0;
+          if (pending.some(p => p.key === "diary")) _declinedTs.diary = cloudData.diaryTs || 0;
+        }
+      }
+
+      if (apply) {
+        if (pending.some(p => p.key === "watchlists")) {
+          watchlists = cloudData.watchlists; watchlistsTs = cloudData.watchlistsTs || 0; changed = true;
+        }
+        if (pending.some(p => p.key === "stockNotes")) {
+          stockNotes = cloudData.stockNotes; stockNotesTs = cloudData.stockNotesTs || 0; changed = true;
+        }
+        if (pending.some(p => p.key === "stockMeta")) {
+          stockMeta = cloudData.stockMeta; stockMetaTs = cloudData.stockMetaTs || 0; changed = true;
+        }
+        if (pending.some(p => p.key === "headerNote")) {
+          headerNote = cloudData.headerNote; headerNoteTs = cloudData.headerNoteTs || 0;
+          localStorage.setItem(HEADER_NOTE_KEY, headerNote);
+          localStorage.setItem("fdc_header_note_ts", headerNoteTs);
+          headerNoteEl.value = headerNote;
+          changed = true;
+        }
+        if (pending.some(p => p.key === "dailyPlan")) {
+          dailyPlan = cloudData.dailyPlan; dailyPlanTs = cloudData.dailyPlanTs || 0; persistDailyPlan(); changed = true;
+        }
+        if (pending.some(p => p.key === "diary")) {
+          diaryEntries = cloudData.diaryEntries; diaryTs = cloudData.diaryTs || 0; persistDiary(); changed = true;
+        }
+      }
+
+      // 市場報價／回測歷史快照：背景資料，不需要使用者確認，維持自動同步
       if (cloudData.stockData && cloudData.lastUpdateTime &&
           (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
         stockData = cloudData.stockData;
@@ -1569,20 +1618,6 @@ async function syncPull() {
       if (cloudData.finmindToken && !localStorage.getItem("finmind_token")) {
         localStorage.setItem("finmind_token", cloudData.finmindToken);
         document.getElementById("apiToken").value = cloudData.finmindToken;
-      }
-      // 今日作業清單
-      if (cloudData.dailyPlan && (cloudData.dailyPlanTs || 0) > dailyPlanTs) {
-        dailyPlan = cloudData.dailyPlan;
-        dailyPlanTs = cloudData.dailyPlanTs || 0;
-        persistDailyPlan();
-        changed = true;
-      }
-      // 交易日記：整包用時間戳記比新舊
-      if (Array.isArray(cloudData.diaryEntries) && (cloudData.diaryTs || 0) > diaryTs) {
-        diaryEntries = cloudData.diaryEntries;
-        diaryTs = cloudData.diaryTs || 0;
-        persistDiary();
-        changed = true;
       }
       if (cloudData.rankHistory) {
         const { merged, added } = mergeHistoryUnion(loadGain10History(), cloudData.rankHistory);
