@@ -380,7 +380,7 @@
 <div class="panel" id="data">
   <div class="data-panel" style="border-left: 4px solid #d97706;">
     <h3>雲端同步</h3>
-    <p>多台裝置輸入同一組代碼，即可同步自選股、分類與備註。</p>
+    <p>多台裝置輸入同一組代碼，即可同步自選股、分類、備註、頁首備註、今日作業清單、交易日記與報價。</p>
     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
       <input type="text" id="cloudRoomInput" placeholder="自訂代碼，例如 mycode2026" style="flex:1; padding:10px;">
       <button class="btn primary" onclick="connectCloud()">連線</button>
@@ -1308,6 +1308,10 @@ let _pendingPush = false;
 let watchlistsTs = 0;  // 本地 watchlists 最後修改時間戳
 let dailyPlanTs  = 0;  // 本地 dailyPlan 最後修改時間戳
 let diaryTs      = 0;  // 本地 diaryEntries 最後修改時間戳
+let stockNotesTs = 0;  // 本地 stockNotes（個股備註）最後修改時間戳
+let stockMetaTs  = 0;  // 本地 stockMeta（自訂標的市場/名稱）最後修改時間戳
+let headerNote   = ""; // 頁首注意事項備註
+let headerNoteTs = 0;  // 本地 headerNote 最後修改時間戳
 
 async function pushToCloud() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
@@ -1316,7 +1320,7 @@ async function pushToCloud() {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockMeta, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "", dailyPlan, dailyPlanTs, diaryEntries, diaryTs })
+      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockNotesTs, stockMeta, stockMetaTs, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "", dailyPlan, dailyPlanTs, diaryEntries, diaryTs, headerNote, headerNoteTs, rankHistory: loadGain10History(), mailScoreBacktestHistory: loadMailScoreBacktestHistory(), adviceBacktestHistory: loadAdviceBacktestHistory() })
     });
     _pendingPush = false;
   } catch (e) { console.error("雲端同步失敗", e); _pendingPush = true; }
@@ -1341,8 +1345,21 @@ async function connectCloud() {
         watchlists = cloudData.watchlists;
         watchlistsTs = cloudData.watchlistsTs || 0;
       }
-      if (cloudData.stockNotes) stockNotes = cloudData.stockNotes;
-      if (cloudData.stockMeta) stockMeta = cloudData.stockMeta;
+      if (cloudData.stockNotes && (cloudData.stockNotesTs || 0) >= stockNotesTs) {
+        stockNotes = cloudData.stockNotes;
+        stockNotesTs = cloudData.stockNotesTs || 0;
+      }
+      if (cloudData.stockMeta && (cloudData.stockMetaTs || 0) >= stockMetaTs) {
+        stockMeta = cloudData.stockMeta;
+        stockMetaTs = cloudData.stockMetaTs || 0;
+      }
+      if (cloudData.headerNote != null && (cloudData.headerNoteTs || 0) >= headerNoteTs) {
+        headerNote = cloudData.headerNote;
+        headerNoteTs = cloudData.headerNoteTs || 0;
+        localStorage.setItem(HEADER_NOTE_KEY, headerNote);
+        localStorage.setItem("fdc_header_note_ts", headerNoteTs);
+        headerNoteEl.value = headerNote;
+      }
       if (cloudData.stockData && cloudData.lastUpdateTime &&
           (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
         stockData = cloudData.stockData;
@@ -1358,16 +1375,24 @@ async function connectCloud() {
         dailyPlanTs = cloudData.dailyPlanTs || 0;
         saveDailyPlan();
       }
-      // 交易日記：union by id（本機版優先，雲端獨有的補入）
-      if (Array.isArray(cloudData.diaryEntries) && cloudData.diaryEntries.length > 0) {
-        const localIds = new Set(diaryEntries.map(e => e.id));
-        let added = 0;
-        cloudData.diaryEntries.forEach(e => { if (!localIds.has(e.id)) { diaryEntries.push(e); added++; } });
-        if (added > 0 || (cloudData.diaryTs || 0) > diaryTs) {
-          diaryEntries.sort((a, b) => b.date.localeCompare(a.date));
-          diaryTs = Math.max(cloudData.diaryTs || 0, diaryTs);
-          saveDiary();
-        }
+      // 交易日記：跟自選股/作業清單一樣，整包用時間戳記比新舊（新增/編輯/刪除都算，時間戳較新者整包覆蓋）
+      if (Array.isArray(cloudData.diaryEntries) && (cloudData.diaryTs || 0) > diaryTs) {
+        diaryEntries = cloudData.diaryEntries;
+        diaryTs = cloudData.diaryTs || 0;
+        saveDiary();
+      }
+      // 回測相關的三份日期歷史：名次歷史／收件匣回測快照／今日建議訊號回測快照，跨裝置採聯集合併
+      if (cloudData.rankHistory) {
+        const { merged, added } = mergeHistoryUnion(loadGain10History(), cloudData.rankHistory);
+        if (added > 0) saveGain10History(merged);
+      }
+      if (cloudData.mailScoreBacktestHistory) {
+        const { merged, added } = mergeHistoryUnion(loadMailScoreBacktestHistory(), cloudData.mailScoreBacktestHistory);
+        if (added > 0) saveMailScoreBacktestHistory(merged);
+      }
+      if (cloudData.adviceBacktestHistory) {
+        const { merged, added } = mergeHistoryUnion(loadAdviceBacktestHistory(), cloudData.adviceBacktestHistory);
+        if (added > 0) saveAdviceBacktestHistory(merged);
       }
     }
     // 連線後一律推送目前狀態，確保雲端一定有最新資料
@@ -1399,12 +1424,22 @@ async function syncPull() {
         watchlistsTs = cloudData.watchlistsTs || 0;
         changed = true;
       }
-      if (JSON.stringify(stockNotes) !== JSON.stringify(cloudData.stockNotes)) {
-        stockNotes = cloudData.stockNotes || {};
+      if (cloudData.stockNotes && (cloudData.stockNotesTs || 0) > stockNotesTs) {
+        stockNotes = cloudData.stockNotes;
+        stockNotesTs = cloudData.stockNotesTs || 0;
         changed = true;
       }
-      if (cloudData.stockMeta && JSON.stringify(stockMeta) !== JSON.stringify(cloudData.stockMeta)) {
-        stockMeta = cloudData.stockMeta || {};
+      if (cloudData.stockMeta && (cloudData.stockMetaTs || 0) > stockMetaTs) {
+        stockMeta = cloudData.stockMeta;
+        stockMetaTs = cloudData.stockMetaTs || 0;
+        changed = true;
+      }
+      if (cloudData.headerNote != null && (cloudData.headerNoteTs || 0) > headerNoteTs) {
+        headerNote = cloudData.headerNote;
+        headerNoteTs = cloudData.headerNoteTs || 0;
+        localStorage.setItem(HEADER_NOTE_KEY, headerNote);
+        localStorage.setItem("fdc_header_note_ts", headerNoteTs);
+        headerNoteEl.value = headerNote;
         changed = true;
       }
       if (cloudData.stockData && cloudData.lastUpdateTime &&
@@ -1424,17 +1459,24 @@ async function syncPull() {
         saveDailyPlan();
         changed = true;
       }
-      // 交易日記：union by id
-      if (Array.isArray(cloudData.diaryEntries) && cloudData.diaryEntries.length > 0) {
-        const localIds = new Set(diaryEntries.map(e => e.id));
-        let added = 0;
-        cloudData.diaryEntries.forEach(e => { if (!localIds.has(e.id)) { diaryEntries.push(e); added++; } });
-        if (added > 0 || (cloudData.diaryTs || 0) > diaryTs) {
-          diaryEntries.sort((a, b) => b.date.localeCompare(a.date));
-          diaryTs = Math.max(cloudData.diaryTs || 0, diaryTs);
-          saveDiary();
-          changed = true;
-        }
+      // 交易日記：整包用時間戳記比新舊
+      if (Array.isArray(cloudData.diaryEntries) && (cloudData.diaryTs || 0) > diaryTs) {
+        diaryEntries = cloudData.diaryEntries;
+        diaryTs = cloudData.diaryTs || 0;
+        saveDiary();
+        changed = true;
+      }
+      if (cloudData.rankHistory) {
+        const { merged, added } = mergeHistoryUnion(loadGain10History(), cloudData.rankHistory);
+        if (added > 0) saveGain10History(merged);
+      }
+      if (cloudData.mailScoreBacktestHistory) {
+        const { merged, added } = mergeHistoryUnion(loadMailScoreBacktestHistory(), cloudData.mailScoreBacktestHistory);
+        if (added > 0) saveMailScoreBacktestHistory(merged);
+      }
+      if (cloudData.adviceBacktestHistory) {
+        const { merged, added } = mergeHistoryUnion(loadAdviceBacktestHistory(), cloudData.adviceBacktestHistory);
+        if (added > 0) saveAdviceBacktestHistory(merged);
       }
       if (changed) { saveLocalOnly(); renderWatchlist(); updateUI(); }
     }
@@ -1464,7 +1506,9 @@ function saveLocalOnly() {
       watchlists: watchlists,
       watchlistsTs: watchlistsTs,
       stockNotes: stockNotes,
+      stockNotesTs: stockNotesTs,
       stockMeta: stockMeta,
+      stockMetaTs: stockMetaTs,
       vixtwn: vixtwn,
       liveQuoteTime: liveQuoteTime
     }));
@@ -1487,6 +1531,8 @@ function loadData() {
       lastUpdateTime = obj.time;
       stockNotes = obj.stockNotes || {};
       stockMeta = obj.stockMeta || {};
+      if (obj.stockNotesTs) stockNotesTs = obj.stockNotesTs;
+      if (obj.stockMetaTs) stockMetaTs = obj.stockMetaTs;
       if (obj.watchlists && Object.keys(obj.watchlists).length > 0) watchlists = obj.watchlists;
       if (obj.watchlistsTs) watchlistsTs = obj.watchlistsTs;
       if (obj.vixtwn) vixtwn = obj.vixtwn;
@@ -1520,6 +1566,7 @@ function loadData() {
     loadDiary();
     updateUI();
     loadDailyPlan();
+    loadHeaderNote();
   } catch(e) {}
 }
 
@@ -1587,14 +1634,29 @@ function loadDailyPlan() {
     const ts = localStorage.getItem("fdc_daily_plan_ts"); if (ts) dailyPlanTs = Number(ts);
   } catch(e) {}
 }
+
+const HEADER_NOTE_KEY = "fdc_header_note_v1";
+function saveHeaderNote() {
+  headerNoteTs = Date.now();
+  try {
+    localStorage.setItem(HEADER_NOTE_KEY, headerNote);
+    localStorage.setItem("fdc_header_note_ts", headerNoteTs);
+  } catch(e) {}
+}
+function loadHeaderNote() {
+  try {
+    const r = localStorage.getItem(HEADER_NOTE_KEY); if (r != null) headerNote = r;
+    const ts = localStorage.getItem("fdc_header_note_ts"); if (ts) headerNoteTs = Number(ts);
+  } catch(e) {}
+}
 window.addToDailyPlan = function(code, name) {
   if (dailyPlan.find(p => p.code === code)) { alert(`${code} 已在作業清單中`); return; }
   dailyPlan.push({ code, name });
-  saveDailyPlan(); renderStrategy();
+  saveDailyPlan(); _pendingPush = true; pushToCloud(); renderStrategy();
 };
 window.removePlan = function(code) {
   if (selectedPlanCode === code) selectedPlanCode = null;
-  dailyPlan = dailyPlan.filter(p => p.code !== code); saveDailyPlan(); renderStrategy();
+  dailyPlan = dailyPlan.filter(p => p.code !== code); saveDailyPlan(); _pendingPush = true; pushToCloud(); renderStrategy();
 };
 window.togglePlanSelect = function(code, event) {
   if (event.target.closest('span[onclick], select, a')) return;
@@ -1752,6 +1814,7 @@ window.editNote = function(tdElement, code) {
   const saveAction = () => {
     const nextText = input.value.trim();
     if(nextText) stockNotes[code] = nextText; else delete stockNotes[code];
+    stockNotesTs = Date.now();
     saveData();
     tdElement.innerHTML = `<span class="note-display">${stockNotes[code] || ""}</span>`;
     tdElement.onclick = () => editNote(tdElement, code);
@@ -2439,6 +2502,7 @@ function diaryDelete(id) {
   if (!confirm('確定刪除這筆記錄？')) return;
   diaryEntries = diaryEntries.filter(e => e.id !== id);
   saveDiary();
+  _pendingPush = true; pushToCloud();
   renderDiary();
 }
 function _diaryAllStocks() {
@@ -2533,6 +2597,7 @@ function diarySave() {
   }
   diaryFormState = null;
   saveDiary();
+  _pendingPush = true; pushToCloud();
   renderDiary();
 }
 function diaryCancel() {
@@ -2654,6 +2719,18 @@ const STOCK_GAIN10_HISTORY_KEY = "fdc_stock_gain10_rank_history_v1";
 
 function loadGain10History() {
   try { return JSON.parse(localStorage.getItem(STOCK_GAIN10_HISTORY_KEY) || "{}"); } catch (e) { return {}; }
+}
+
+// 日期為 key 的歷史資料（名次歷史／回測快照）跨裝置合併：本機已有的那天保留本機版本，
+// 只把雲端獨有、本機還沒有的日期補進來──兩台裝置各自記錄不同天的快照時，資料會越合越齊全。
+function mergeHistoryUnion(local, cloud) {
+  if (!cloud) return { merged: local, added: 0 };
+  const merged = { ...local };
+  let added = 0;
+  Object.keys(cloud).forEach(date => {
+    if (!(date in merged)) { merged[date] = cloud[date]; added++; }
+  });
+  return { merged, added };
 }
 
 function saveGain10History(history) {
@@ -3182,6 +3259,10 @@ function saveMailScoreBacktestSnapshot(date, scored) {
   });
   const benchmark = (stockData["0050"] && typeof stockData["0050"].price === "number") ? stockData["0050"].price : null;
   history[date] = { top20: top20Entry, universe, benchmark };
+  saveMailScoreBacktestHistory(history);
+}
+
+function saveMailScoreBacktestHistory(history) {
   const dates = Object.keys(history).sort();
   while (dates.length > MAIL_SCORE_BACKTEST_MAX_DAYS) { delete history[dates.shift()]; }
   try { localStorage.setItem(MAIL_SCORE_BACKTEST_KEY, JSON.stringify(history)); } catch (e) {}
@@ -3317,6 +3398,7 @@ function computeGain10Snapshot() {
 
   const snapshotDate = (lastUpdateTime ? new Date(lastUpdateTime) : new Date()).toISOString().slice(0, 10);
   const history = loadGain10History();
+  const isNewSnapshotDay = !(snapshotDate in history);
   const priorDates = Object.keys(history).filter(d => d < snapshotDate).sort();
   const prevRanks = priorDates.length ? history[priorDates[priorDates.length - 1]] : {};
 
@@ -3329,6 +3411,9 @@ function computeGain10Snapshot() {
   const scored = computeWeightedScores(top20, prevRanks, mailScoreParams, 20, rankMaLookup);
   saveMailScoreBacktestSnapshot(snapshotDate, scored);
   saveAdviceBacktestSnapshot(snapshotDate);
+
+  // 當天第一次存快照時才推一次雲端，避免面板每次重繪都打 Firebase
+  if (isNewSnapshotDay) { _pendingPush = true; pushToCloud(); }
 
   return { top20, prevRanks, scored, rankMaLookup };
 }
@@ -3699,6 +3784,7 @@ window.addToWatchGroup = function(sel, code, market) {
   if (market && market !== 'TWSE' && market !== 'TPEX') {
     const globalEntry = (GLOBAL_LIST[market]||[]).find(g => g.code === code);
     stockMeta[code] = { market, name: globalEntry?.name || `自訂標的（${code}）` };
+    stockMetaTs = Date.now();
   }
   watchlistsTs = Date.now();
   saveData();
@@ -3804,6 +3890,7 @@ window.manualAddGlobalStock = function() {
   const name = prompt("標的名稱（選填，方便辨識）：", code) || code;
   watchlists[currentWatchGroup].push(code);
   stockMeta[code] = { market: 'US', name };
+  stockMetaTs = Date.now();
   watchlistsTs = Date.now();
   saveData();
   renderWatchlist();
@@ -3874,6 +3961,10 @@ function saveAdviceBacktestSnapshot(date) {
   if (!Object.keys(entries).length) return;
   const benchmark = (stockData["0050"] && typeof stockData["0050"].price === "number") ? stockData["0050"].price : null;
   history[date] = { entries, benchmark };
+  saveAdviceBacktestHistory(history);
+}
+
+function saveAdviceBacktestHistory(history) {
   const dates = Object.keys(history).sort();
   while (dates.length > ADVICE_BACKTEST_MAX_DAYS) { delete history[dates.shift()]; }
   try { localStorage.setItem(ADVICE_BACKTEST_KEY, JSON.stringify(history)); } catch (e) {}
@@ -4836,10 +4927,15 @@ document.getElementById("triggerQuoteBtn").onclick = triggerQuoteUpdate;
 
 loadData();
 
-const HEADER_NOTE_KEY = "fdc_header_note_v1";
 const headerNoteEl = document.getElementById("headerNote");
-headerNoteEl.value = localStorage.getItem(HEADER_NOTE_KEY) || "";
-headerNoteEl.addEventListener("input", () => localStorage.setItem(HEADER_NOTE_KEY, headerNoteEl.value));
+headerNoteEl.value = headerNote;
+let _headerNoteDebounce = null;
+headerNoteEl.addEventListener("input", () => {
+  headerNote = headerNoteEl.value;
+  saveHeaderNote();
+  clearTimeout(_headerNoteDebounce);
+  _headerNoteDebounce = setTimeout(() => { _pendingPush = true; pushToCloud(); }, 800);
+});
 
 window._t4_data = JSON.parse(localStorage.getItem("fdc_holdings") || "null") || [];
 fetchLiveQuotes();
