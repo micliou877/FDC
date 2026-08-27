@@ -1723,6 +1723,158 @@ function loadData() {
   } catch(e) {}
 }
 
+// ==================== 大盤曝險檢查表（凱利公式＋手動估值點位，參考PTT作者onekoni的正二動態槓桿框架）====================
+// 跟收件匣/今日建議是不同層次的工具：那兩個是「選哪些個股」，這個是「大盤整體要拿多少曝險/槓桿」。
+// 凱利公式(全凱利=(長期年化報酬−資金成本)/波動度²)本身透明可算；但「目前大盤點位該對應哪個槓桿檔位」
+// onekoni是用本益比＋法人評價＋布朗幾何模型換算，那套黑盒子細節沒公開、無法複製，所以這裡誠實地
+// 讓使用者自己維護一張「點位→槓桿」檢查表（比照他的季度更新習慣），不假裝能自動算出精確點位。
+// FDC本身沒有大盤(加權指數)報價來源（只有個股quotes.json跟0050 ETF價格，兩者刻度完全不同，
+// 0050價格~100多元、加權指數點位是好幾萬點，不能互相替代），所以目前大盤點位需要手動輸入。
+const LEVERAGE_CHECKLIST_KEY = "fdc_leverage_checklist_v1";
+const LEVERAGE_CHECKLIST_DEFAULTS = {
+  expectedAnnualReturn: 10,   // %，長期年化報酬預期（含息）
+  volatility: 20,             // %，年化波動度
+  costOfCapital: 2.5,         // %，資金成本（例如 TAIBOR 1M + ETF管理費）
+  goldenPointRatio: 0.625,    // 黃金點＝全凱利 × 此比例（範例：onekoni的2倍/3.2倍＝0.625）
+  currentIndexPoint: null,    // 手動輸入的目前大盤(加權指數)點位
+  note: "",                   // 自己記錄這組點位是依什麼EPS/本益比/哪一季設定的，方便之後回頭檢查有沒有過期
+  checklist: [
+    { label: "去槓桿／再平衡", point: 54000, leverage: 1.6 },
+    { label: "半凱利區",       point: 49000, leverage: 1.6 },
+    { label: "黃金點區",       point: 45500, leverage: 2 },
+    { label: "全凱利區",       point: 36500, leverage: 3 },
+  ],
+};
+
+function loadLeverageChecklist() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LEVERAGE_CHECKLIST_KEY) || "{}");
+    return {
+      ...JSON.parse(JSON.stringify(LEVERAGE_CHECKLIST_DEFAULTS)),
+      ...saved,
+      checklist: Array.isArray(saved.checklist) && saved.checklist.length ? saved.checklist : JSON.parse(JSON.stringify(LEVERAGE_CHECKLIST_DEFAULTS.checklist)),
+    };
+  } catch (e) { return JSON.parse(JSON.stringify(LEVERAGE_CHECKLIST_DEFAULTS)); }
+}
+function saveLeverageChecklist() { try { localStorage.setItem(LEVERAGE_CHECKLIST_KEY, JSON.stringify(leverageChecklist)); } catch (e) {} }
+
+let leverageChecklist = loadLeverageChecklist();
+let leverageChecklistOpen = false;
+
+// 連續複利下的凱利公式：f* = (長期年化報酬 − 資金成本) / 波動度²
+function computeKellyTiers(cfg) {
+  const mu = cfg.expectedAnnualReturn / 100, cost = cfg.costOfCapital / 100, sigma = cfg.volatility / 100;
+  const full = sigma > 0 ? (mu - cost) / (sigma * sigma) : 0;
+  return { full, half: full / 2, golden: full * cfg.goldenPointRatio };
+}
+
+// 檢查表按點位由低到高排序，找「目前點位 ≤ 該列點位」的第一列（點位越低代表越便宜，對應槓桿通常越高）；
+// 如果目前點位比表上所有門檻都高，代表這張表可能已經過期（估值基礎變了卻沒更新），落在最高檔那列並提示。
+function resolveLeverageZone(cfg) {
+  if (cfg.currentIndexPoint == null || !cfg.checklist.length) return { row: null, outOfRange: false };
+  const sorted = [...cfg.checklist].sort((a, b) => a.point - b.point);
+  const hit = sorted.find(row => cfg.currentIndexPoint <= row.point);
+  if (hit) return { row: hit, outOfRange: false };
+  return { row: sorted[sorted.length - 1], outOfRange: true };
+}
+
+function updateLeverageParam(field, rawVal) {
+  const val = parseFloat(rawVal);
+  if (isNaN(val)) return;
+  leverageChecklist[field] = val;
+  saveLeverageChecklist();
+  renderStrategy();
+}
+function updateLeverageNote(rawVal) {
+  leverageChecklist.note = rawVal;
+  saveLeverageChecklist();
+}
+function updateLeverageRow(idx, field, rawVal) {
+  const row = leverageChecklist.checklist[idx];
+  if (!row) return;
+  if (field === "label") { row.label = rawVal; }
+  else { const val = parseFloat(rawVal); if (isNaN(val)) return; row[field] = val; }
+  saveLeverageChecklist();
+  renderStrategy();
+}
+function addLeverageRow() {
+  leverageChecklist.checklist.push({ label: "新檔位", point: 0, leverage: 1 });
+  saveLeverageChecklist();
+  renderStrategy();
+}
+function removeLeverageRow(idx) {
+  leverageChecklist.checklist.splice(idx, 1);
+  saveLeverageChecklist();
+  renderStrategy();
+}
+function resetLeverageChecklist() {
+  leverageChecklist = JSON.parse(JSON.stringify(LEVERAGE_CHECKLIST_DEFAULTS));
+  saveLeverageChecklist();
+  renderStrategy();
+}
+
+function buildLeverageChecklistHtml() {
+  const cfg = leverageChecklist;
+  const kelly = computeKellyTiers(cfg);
+  const { row: activeRow, outOfRange } = resolveLeverageZone(cfg);
+  const inp = (field, val, step = 0.1) => `<input type="number" step="${step}" value="${val}" onchange="updateLeverageParam('${field}', this.value)" style="width:64px;font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;color:#334155;">`;
+  const fmtX = v => (isFinite(v) ? v.toFixed(2) : '-') + 'x';
+
+  const rowsHtml = cfg.checklist.map((row, idx) => `
+    <tr style="${activeRow === row ? 'background:#fef3c7;font-weight:700;' : ''}">
+      <td><input type="text" value="${row.label}" onchange="updateLeverageRow(${idx},'label',this.value)" style="width:96px;font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;"></td>
+      <td><input type="number" step="100" value="${row.point}" onchange="updateLeverageRow(${idx},'point',this.value)" style="width:76px;font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;text-align:right;"></td>
+      <td><input type="number" step="0.1" value="${row.leverage}" onchange="updateLeverageRow(${idx},'leverage',this.value)" style="width:56px;font-size:11px;padding:2px 4px;border:1px solid #e2e8f0;border-radius:4px;text-align:right;">x</td>
+      <td style="text-align:center;"><span class="msp-reset" style="padding:1px 6px;" onclick="removeLeverageRow(${idx})">✕</span></td>
+    </tr>`).join('');
+
+  const statusHtml = cfg.currentIndexPoint == null
+    ? `<div style="color:#9ca3af;">尚未輸入目前大盤點位，先在下面填入才會顯示目前該落在哪個檔位。</div>`
+    : activeRow
+      ? `<div>目前 ${cfg.currentIndexPoint} 點 → <strong style="color:#b45309;">${activeRow.label}（${activeRow.leverage}x）</strong>${outOfRange ? '　⚠️ 已超出檢查表最高門檻，這張表可能該依最新財報/估值重算了' : ''}</div>`
+      : '';
+
+  return `
+    <details class="mailbox" ${leverageChecklistOpen ? 'open' : ''} ontoggle="leverageChecklistOpen=this.open" style="margin-bottom:10px;">
+      <summary class="mailbox-head">
+        <span class="mb-title">🎯 大盤曝險檢查表</span>
+        <span class="mb-chev">▸</span>
+      </summary>
+      <div class="mail-score-panel backtest-panel" onclick="event.stopPropagation()">
+        <div class="msp-note">
+          <strong>這是什麼</strong>
+          <div>參考PTT作者 onekoni 的「正二動態槓桿檢查表」邏輯，用凱利公式算出槓桿參考檔位，但「目前點位對應哪個檔位」由你自己手動維護（跟他一樣每季依本益比/EPS更新一次），FDC沒有大盤指數報價來源，無法自動抓點位或自動算出精確門檻。</div>
+        </div>
+        <div class="msp-row">
+          <strong>凱利參數</strong>
+          <label>長期年化報酬 ${inp('expectedAnnualReturn', cfg.expectedAnnualReturn, 0.5)}%</label>
+          <label>年化波動度 ${inp('volatility', cfg.volatility, 0.5)}%</label>
+          <label>資金成本 ${inp('costOfCapital', cfg.costOfCapital, 0.1)}%</label>
+          <label>黃金點比例 ${inp('goldenPointRatio', cfg.goldenPointRatio, 0.025)}</label>
+        </div>
+        <div class="msp-note">算出來的參考槓桿：全凱利 <strong>${fmtX(kelly.full)}</strong>／黃金點 <strong>${fmtX(kelly.golden)}</strong>／半凱利 <strong>${fmtX(kelly.half)}</strong>（可以拿這幾個數字填到下面表格的槓桿倍數欄位）</div>
+        <div class="msp-row">
+          <strong>目前點位</strong>
+          <label>大盤(加權指數)目前點位 ${inp('currentIndexPoint', cfg.currentIndexPoint ?? '', 10)}</label>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>檔位名稱</th><th>點位門檻</th><th>槓桿倍數</th><th></th></tr></thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+        <div class="msp-row">
+          <span class="msp-reset" onclick="addLeverageRow()">＋新增檔位</span>
+          <span class="msp-reset" onclick="resetLeverageChecklist()">↺ 還原預設值</span>
+        </div>
+        <div class="msp-note">${statusHtml}</div>
+        <div class="msp-row">
+          <input type="text" placeholder="備註：這組點位依什麼EPS/本益比/哪一季設定的" value="${cfg.note || ''}" onchange="updateLeverageNote(this.value)" style="flex:1;font-size:11px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;">
+        </div>
+      </div>
+    </details>`;
+}
+
 // ==================== 族群熱度歷史走勢 ====================
 function loadHeatHistory() {
   try { const r = localStorage.getItem("fdc_heat_history"); if (r) heatHistory = JSON.parse(r); } catch(e) {}
@@ -4603,6 +4755,8 @@ function renderStrategy() {
   panel.innerHTML = `
     <!-- 台灣 VIX -->
     ${vixHtml}
+    <!-- 大盤曝險檢查表 -->
+    ${buildLeverageChecklistHtml()}
     <!-- 今日作業清單 -->
     ${planHtml}
     <!-- 市場體溫 -->
