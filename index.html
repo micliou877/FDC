@@ -793,7 +793,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-28.2";
+const APP_VERSION = "2026-08-28.3";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -1445,7 +1445,7 @@ async function forcePushCloud() {
     const cloudUpdated = cloudPeek.lastUpdateTime ? new Date(cloudPeek.lastUpdateTime).toLocaleString("zh-TW") : "未知";
     confirmMsg = `⚠️ 即將用這台裝置的資料「整包覆蓋」代碼「${inputId}」雲端現有資料：\n\n`
       + `自選股 ${stockCount} 檔／作業清單 ${planCount} 筆／交易日記 ${diaryCount} 筆\n`
-      + `雲端報價最後更新：${cloudUpdated}\n\n`
+      + `雲端盤後更新：${cloudUpdated}\n\n`
       + `覆蓋後無法復原，確定是這組代碼、確定要上傳嗎？`;
   }
   if (!confirm(confirmMsg)) {
@@ -2998,8 +2998,8 @@ async function refreshVIX() {
 
 function updateUI() {
   invalidateSectorCache();
-  let updateTxt = lastUpdateTime ? ("最後更新：" + new Date(lastUpdateTime).toLocaleString("zh-TW")) : "尚未匯入資料";
-  if (liveQuoteTime) updateTxt += `｜台股報價：${liveQuoteTime}`;
+  let updateTxt = lastUpdateTime ? ("盤後更新：" + new Date(lastUpdateTime).toLocaleString("zh-TW")) : "尚未匯入資料";
+  if (liveQuoteTime) updateTxt += `｜盤中更新：${liveQuoteTime}`;
   if (vixtwn) {
     const vSign = vixtwn.pct1 >= 0 ? "+" : "";
     const vColor = vixtwn.pct1 > 0 ? "#dc2626" : vixtwn.pct1 < 0 ? "#16a34a" : "#6b7280";
@@ -5227,7 +5227,7 @@ async function triggerQuoteUpdate() {
           const bar = document.getElementById('ghProgBar');
           const txt = document.getElementById('ghProgTxt');
           if (bar) { bar.style.background = '#16a34a'; bar.style.width = '100%'; bar.style.transition = 'width 0.3s'; }
-          if (txt) txt.textContent = `🎉 完成！共花 ${elapsed} 秒。台股報價：${liveQuoteTime}`;
+          if (txt) txt.textContent = `🎉 完成！共花 ${elapsed} 秒。盤中更新：${liveQuoteTime}`;
           btn.disabled = false;
           return;
         }
