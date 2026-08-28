@@ -793,7 +793,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-28.1";
+const APP_VERSION = "2026-08-28.2";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -1960,12 +1960,29 @@ function loadHeaderNote() {
 }
 window.addToDailyPlan = function(code, name) {
   if (dailyPlan.find(p => p.code === code)) { alert(`${code} 已在作業清單中`); return; }
-  dailyPlan.push({ code, name });
+  dailyPlan.push({ code, name, note: "" });
   saveDailyPlan(); _pendingPush = true; pushToCloud(); renderStrategy();
 };
 window.removePlan = function(code) {
   if (selectedPlanCode === code) selectedPlanCode = null;
   dailyPlan = dailyPlan.filter(p => p.code !== code); saveDailyPlan(); _pendingPush = true; pushToCloud(); renderStrategy();
+};
+window.editPlanNote = function(tdElement, code) {
+  const item = dailyPlan.find(p => p.code === code);
+  const currentText = item?.note || "";
+  tdElement.innerHTML = `<input type="text" class="note-input" value="${_dEsc(currentText)}" placeholder="打字後點外面儲存..." onclick="event.stopPropagation();">`;
+  const input = tdElement.querySelector('.note-input');
+  input.focus();
+
+  const saveAction = () => {
+    const nextText = input.value.trim();
+    const it = dailyPlan.find(p => p.code === code);
+    if (it) it.note = nextText;
+    saveDailyPlan(); _pendingPush = true; pushToCloud();
+    renderStrategy();
+  };
+  input.onblur = saveAction;
+  input.onkeypress = (e) => { if (e.key === 'Enter') saveAction(); };
 };
 window.togglePlanSelect = function(code, event) {
   if (event.target.closest('span[onclick], select, a')) return;
@@ -4686,6 +4703,7 @@ function renderStrategy() {
               ${th('p','pct10','10日%')}
               ${th('p','pct5','5日%')}
               ${th('p','pct1','今日%')}
+              <th style="text-align:left;padding:3px 6px;">備註</th>
               <th style="text-align:center;padding:3px 6px;">關注</th>
               <th style="width:20px;"></th>
             </tr></thead><tbody>
@@ -4695,6 +4713,7 @@ function renderStrategy() {
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct10)}">${fmtPct(p.pct10)}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct5)}">${fmtPct(p.pct5)}</td>
                 <td style="padding:5px 6px;text-align:right;" class="${pctClass(p.pct1)}">${fmtPct(p.pct1)}</td>
+                <td style="padding:5px 6px;max-width:160px;"><span class="note-display" onclick="event.stopPropagation();editPlanNote(this.parentElement,'${p.code}')">${p.note ? _dEsc(p.note) : ""}</span></td>
                 <td style="padding:3px 4px;text-align:center;"><select id="cpy_${p.code}" onchange="copyToGroup('${p.code}',this.value)" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:76px;"><option value="">＋關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
                 <td style="padding:5px 2px;text-align:center;"><span style="cursor:pointer;color:#9ca3af;font-size:14px;" onclick="removePlan('${p.code}')">✕</span></td>
               </tr>`).join('')}
