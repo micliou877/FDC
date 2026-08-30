@@ -793,7 +793,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-28.3";
+const APP_VERSION = "2026-08-30.1";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -3947,15 +3947,18 @@ function renderRanking() {
     }
   }
 
-  sorted.forEach(([sector, s]) => {
+  sorted.forEach(([sector, s], idx) => {
+    const rank = idx + 1;
     const val = s[sortKey] || 0;
     const isExpanded = expandedSectors.has(sector);
     const fillLabel = isPct ? fmtPct(val) : isVol ? val.toFixed(2) + "x" : val.toFixed(0) + "億";
     const row = document.createElement("div"); row.className = "bar-row";
-    row.style.background = isExpanded ? "#e8f0fe" : "";
+    // 名次分層底色：1-5 最濃、6-10 次濃、11-15 最淺，15 名之後不特別上色
+    const tierBg = rank <= 5 ? "#fde68a" : rank <= 10 ? "#fef3c7" : rank <= 15 ? "#fffbeb" : "";
+    row.style.background = isExpanded ? "#e8f0fe" : tierBg;
     const hs = heatMap[sector];
     const hsBadge = hs!=null ? `<span style="font-size:10px;color:#d97706;font-weight:700;white-space:nowrap">🔥${hs.toFixed(1)}</span>` : '';
-    row.innerHTML = `<div class="bar-name" style="display:flex;align-items:center;gap:4px;">${sector}<span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${isExpanded ? "▲" : "▼"}</span></div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${fillLabel}</div></div><div class="bar-pct">${s.count}/${s.total}</div><div style="text-align:center;">${volTrendBadge(s.volTrend)}</div><div style="text-align:right;min-width:36px;">${hsBadge}</div><div class="bar-sparkline" style="display:flex;align-items:center;justify-content:center;">${renderHeatSparkline(sector)}</div>`;
+    row.innerHTML = `<div class="bar-name" style="display:flex;align-items:center;gap:4px;"><span style="font-size:10px;color:#92400e;font-weight:700;flex-shrink:0;min-width:16px;">${rank}</span>${sector}<span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${isExpanded ? "▲" : "▼"}</span></div><div class="bar-track"><div class="bar-fill ${isPct ? (val >= 0 ? "pos" : "neg") : "pos"}" style="width:${(Math.abs(val) / maxAbs * 100).toFixed(1)}%">${fillLabel}</div></div><div class="bar-pct">${s.count}/${s.total}</div><div style="text-align:center;">${volTrendBadge(s.volTrend)}</div><div style="text-align:right;min-width:36px;">${hsBadge}</div><div class="bar-sparkline" style="display:flex;align-items:center;justify-content:center;">${renderHeatSparkline(sector)}</div>`;
     row.onclick = () => {
       if (expandedSectors.has(sector)) expandedSectors.delete(sector);
       else expandedSectors.add(sector);
