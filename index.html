@@ -6,7 +6,9 @@
   <meta name="apple-mobile-web-app-title" content="業績追蹤">
 
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f1f5f9">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -14,7 +16,9 @@
   
   <style>
 
-    body { overscroll-behavior-y: none; margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f1f5f9; color: #334155; padding: 16px; min-height: 100vh; }
+    html { overscroll-behavior-y: none; background: #f1f5f9; }
+    body { overscroll-behavior-y: none; margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; background: #f1f5f9; color: #334155; padding: 16px; min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+    button, .tab, .tag, select { -webkit-tap-highlight-color: transparent; }
     h1 { font-size: 18px; margin-bottom: 4px; color: #1e293b; font-weight: 600; }
     .app-version { font-size: 11px; font-weight: 400; color: #94a3b8; margin-left: 6px; vertical-align: middle; }
     .subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
@@ -143,12 +147,28 @@
     .button-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 
     @media (max-width: 600px) {
-      /* 縮小整體邊距 */
-      body { padding: 8px; }
+      /* 縮小整體邊距，底部留給固定分頁列的高度 */
+      body { padding: 8px; padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
 
-      /* Tab 列：更大的點擊區 */
-      .tabs { padding: 8px 8px; margin: -8px -8px 12px -8px; }
-      .tab { padding: 8px 10px; font-size: 12px; }
+      /* Tab 列改成底部固定導覽列，仿原生 App 的分頁列 */
+      .tabs {
+        position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+        margin: 0; padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+        background: rgba(255,255,255,0.92);
+        border-bottom: none; border-top: 1px solid #e5e7eb;
+        box-shadow: 0 -2px 12px rgba(15,23,42,0.06);
+        justify-content: flex-start;
+      }
+      .tab {
+        padding: 11px 12px; font-size: 12px; border-radius: 16px;
+        transition: background .12s, color .12s, transform .08s;
+      }
+      .tab.active { background: #eff6ff; border-bottom-color: transparent; }
+      .tab:active { transform: scale(0.94); }
+      button.btn:active, .tag:active { transform: scale(0.96); }
+
+      /* 回頂部按鈕移到底部導覽列上方，避免重疊 */
+      #backToTop { bottom: calc(78px + env(safe-area-inset-bottom)); }
 
       /* 排行面板：族群名欄縮窄，展開子表可橫向捲動 */
       .bar-row { grid-template-columns: 100px 1fr 38px 22px 28px; gap: 4px; padding: 5px 4px; }
@@ -223,14 +243,14 @@
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
 
 <div class="tabs">
-  <button class="tab active" data-tab="strategy">今日精選</button>
-  <button class="tab" data-tab="ranking">排行</button>
-  <button class="tab" data-tab="stocks">明細</button>
-  <button class="tab" data-tab="watchlist">關注</button>
-  <button class="tab" data-tab="global">國際</button>
-  <button class="tab" data-tab="data">設定</button>
-  <button class="tab" data-tab="sop">操作 SOP</button>
-  <button class="tab" data-tab="diary">交易日記</button>
+  <button class="tab active" data-tab="strategy">📬 今日精選</button>
+  <button class="tab" data-tab="ranking">🏆 排行</button>
+  <button class="tab" data-tab="stocks">📋 明細</button>
+  <button class="tab" data-tab="watchlist">⭐ 關注</button>
+  <button class="tab" data-tab="global">🌐 國際</button>
+  <button class="tab" data-tab="data">⚙️ 設定</button>
+  <button class="tab" data-tab="sop">📖 操作 SOP</button>
+  <button class="tab" data-tab="diary">📓 交易日記</button>
 </div>
 
 <div class="panel" id="ranking">
