@@ -387,7 +387,7 @@
       <button class="btn primary" onclick="forcePushCloud()" title="用這台裝置目前的資料覆蓋雲端">⬆️ 上傳</button>
       <button class="btn primary" onclick="forcePullCloud()" title="用雲端的資料覆蓋這台裝置">⬇️ 下載</button>
     </div>
-    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊）。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。「上傳」按下去前會先顯示雲端目前的資料筆數讓你確認，避免誤蓋。連線後，只要其他裝置對自選股／備註／頁首備註／作業清單／交易日記做了變更，這台裝置偵測到時也會先跳出確認視窗才套用；市場報價則維持背景自動更新不用確認。</p>
+    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊）。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。「上傳」按下去前會先顯示雲端目前的資料筆數讓你確認，避免誤蓋。連線後，只要其他裝置對自選股／備註／頁首備註／作業清單／交易日記／持有記錄做了變更，這台裝置偵測到時也會先跳出確認視窗才套用；市場報價則維持背景自動更新不用確認。</p>
     <div id="cloudStatus" style="font-size: 12px; color: #92400e; font-weight: 600;">目前為本機模式</div>
     <div style="margin-top:10px;">
       <button class="btn" onclick="forceHardRefresh()">🔄 強制重新整理（清除快取）</button>
@@ -1319,6 +1319,7 @@ let stockNotesTs = 0;  // 本地 stockNotes（個股備註）最後修改時間�
 let stockMetaTs  = 0;  // 本地 stockMeta（自訂標的市場/名稱）最後修改時間戳
 let headerNote   = ""; // 頁首注意事項備註
 let headerNoteTs = 0;  // 本地 headerNote 最後修改時間戳
+let holdingsTs   = 0;  // 本地持有記錄(_t4_data)最後修改時間戳
 
 async function pushToCloud() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
@@ -1327,7 +1328,7 @@ async function pushToCloud() {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockNotesTs, stockMeta, stockMetaTs, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "", dailyPlan, dailyPlanTs, diaryEntries, diaryTs, headerNote, headerNoteTs, rankHistory: loadGain10History(), mailScoreBacktestHistory: loadMailScoreBacktestHistory(), adviceBacktestHistory: loadAdviceBacktestHistory() })
+      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockNotesTs, stockMeta, stockMetaTs, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "", dailyPlan, dailyPlanTs, diaryEntries, diaryTs, headerNote, headerNoteTs, holdings: window._t4_data || [], holdingsTs, rankHistory: loadGain10History(), mailScoreBacktestHistory: loadMailScoreBacktestHistory(), adviceBacktestHistory: loadAdviceBacktestHistory() })
     });
     _pendingPush = false;
   } catch (e) { console.error("雲端同步失敗", e); _pendingPush = true; }
@@ -1388,6 +1389,13 @@ async function connectCloud() {
         diaryTs = cloudData.diaryTs || 0;
         persistDiary();
       }
+      // 持有記錄（成本/股數/備註）：跟作業清單/日記一樣，整包用時間戳記比新舊
+      if (Array.isArray(cloudData.holdings) && (cloudData.holdingsTs || 0) > holdingsTs) {
+        window._t4_data = cloudData.holdings;
+        holdingsTs = cloudData.holdingsTs || 0;
+        try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); localStorage.setItem("fdc_holdings_ts", holdingsTs); } catch(e) {}
+        if (window._t4_render) window._t4_render();
+      }
       // 回測相關的三份日期歷史：名次歷史／收件匣回測快照／今日建議訊號回測快照，跨裝置採聯集合併
       if (cloudData.rankHistory) {
         const { merged, added } = mergeHistoryUnion(loadGain10History(), cloudData.rankHistory);
@@ -1442,9 +1450,10 @@ async function forcePushCloud() {
     const stockCount = Object.values(cloudPeek.watchlists || {}).reduce((n, arr) => n + (arr?.length || 0), 0);
     const planCount = (cloudPeek.dailyPlan || []).length;
     const diaryCount = (cloudPeek.diaryEntries || []).length;
+    const holdingsCount = (cloudPeek.holdings || []).length;
     const cloudUpdated = cloudPeek.lastUpdateTime ? new Date(cloudPeek.lastUpdateTime).toLocaleString("zh-TW") : "未知";
     confirmMsg = `⚠️ 即將用這台裝置的資料「整包覆蓋」代碼「${inputId}」雲端現有資料：\n\n`
-      + `自選股 ${stockCount} 檔／作業清單 ${planCount} 筆／交易日記 ${diaryCount} 筆\n`
+      + `自選股 ${stockCount} 檔／作業清單 ${planCount} 筆／交易日記 ${diaryCount} 筆／持有記錄 ${holdingsCount} 筆\n`
       + `雲端盤後更新：${cloudUpdated}\n\n`
       + `覆蓋後無法復原，確定是這組代碼、確定要上傳嗎？`;
   }
@@ -1460,6 +1469,8 @@ async function forcePushCloud() {
   watchlistsTs = Date.now();
   stockNotesTs = Date.now();
   stockMetaTs  = Date.now();
+  holdingsTs   = Date.now();
+  try { localStorage.setItem("fdc_holdings_ts", holdingsTs); } catch(e) {}
   saveDailyPlan();
   saveDiary();
   saveHeaderNote();
@@ -1511,6 +1522,12 @@ async function forcePullCloud() {
     }
     if (cloudData.dailyPlan) { dailyPlan = cloudData.dailyPlan; dailyPlanTs = cloudData.dailyPlanTs || Date.now(); persistDailyPlan(); }
     if (Array.isArray(cloudData.diaryEntries)) { diaryEntries = cloudData.diaryEntries; diaryTs = cloudData.diaryTs || Date.now(); persistDiary(); }
+    if (Array.isArray(cloudData.holdings)) {
+      window._t4_data = cloudData.holdings;
+      holdingsTs = cloudData.holdingsTs || Date.now();
+      try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); localStorage.setItem("fdc_holdings_ts", holdingsTs); } catch(e) {}
+      if (window._t4_render) window._t4_render();
+    }
     if (cloudData.rankHistory) saveGain10History(cloudData.rankHistory);
     if (cloudData.mailScoreBacktestHistory) saveMailScoreBacktestHistory(cloudData.mailScoreBacktestHistory);
     if (cloudData.adviceBacktestHistory) saveAdviceBacktestHistory(cloudData.adviceBacktestHistory);
@@ -1528,12 +1545,17 @@ async function forcePullCloud() {
 
 // 記錄使用者「已拒絕套用」的雲端時間戳，同一個版本的變更不會每 5 秒重複追問；
 // 等雲端那個欄位又有更新的變更（時間戳比拒絕當時更新）才會再問一次。
-let _declinedTs = { watchlists: 0, stockNotes: 0, stockMeta: 0, headerNote: 0, dailyPlan: 0, diary: 0 };
+let _declinedTs = { watchlists: 0, stockNotes: 0, stockMeta: 0, headerNote: 0, dailyPlan: 0, diary: 0, holdings: 0 };
 
 async function syncPull() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
   if (_pushInFlight) return;
-  if (_pendingPush) { pushToCloud(); return; }
+  // 注意：以前這裡若 _pendingPush 為真會直接 pushToCloud() 後 return，完全跳過下方的
+  // 拉取比對／確認視窗；若推送持續失敗（網路不穩、Firebase額度等），_pendingPush會被
+  // pushToCloud()的catch重新設回true，導致往後每5秒都卡在這裡重試推送，
+  // 永遠走不到下面的比對邏輯 → 偵測其他裝置變更的確認視窗會「整個消失」。
+  // 改成：本次仍照常拉取雲端資料比對（自己還沒推送成功的欄位，本機時間戳本來就比雲端新，
+  // 比對時天然不會被判定為衝突），比對完後才視情況重推，兩者不互相卡住。
   try {
     const res = await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`);
     if (_pushInFlight) return;
@@ -1569,6 +1591,10 @@ async function syncPull() {
           JSON.stringify(diaryEntries) !== JSON.stringify(cloudData.diaryEntries)) {
         pending.push({ key: "diary", label: `交易日記（目前 ${diaryEntries.length} 筆 → 雲端 ${cloudData.diaryEntries.length} 筆）` });
       }
+      if (Array.isArray(cloudData.holdings) && (cloudData.holdingsTs || 0) > holdingsTs && (cloudData.holdingsTs || 0) > _declinedTs.holdings &&
+          JSON.stringify(window._t4_data || []) !== JSON.stringify(cloudData.holdings)) {
+        pending.push({ key: "holdings", label: `持有記錄（目前 ${(window._t4_data||[]).length} 筆 → 雲端 ${cloudData.holdings.length} 筆）` });
+      }
 
       let apply = true;
       if (pending.length > 0) {
@@ -1580,6 +1606,7 @@ async function syncPull() {
           if (pending.some(p => p.key === "headerNote")) _declinedTs.headerNote = cloudData.headerNoteTs || 0;
           if (pending.some(p => p.key === "dailyPlan")) _declinedTs.dailyPlan = cloudData.dailyPlanTs || 0;
           if (pending.some(p => p.key === "diary")) _declinedTs.diary = cloudData.diaryTs || 0;
+          if (pending.some(p => p.key === "holdings")) _declinedTs.holdings = cloudData.holdingsTs || 0;
         }
       }
 
@@ -1605,6 +1632,12 @@ async function syncPull() {
         }
         if (pending.some(p => p.key === "diary")) {
           diaryEntries = cloudData.diaryEntries; diaryTs = cloudData.diaryTs || 0; persistDiary(); changed = true;
+        }
+        if (pending.some(p => p.key === "holdings")) {
+          window._t4_data = cloudData.holdings; holdingsTs = cloudData.holdingsTs || 0;
+          try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); localStorage.setItem("fdc_holdings_ts", holdingsTs); } catch(e) {}
+          if (window._t4_render) window._t4_render();
+          changed = true;
         }
       }
 
@@ -1633,6 +1666,7 @@ async function syncPull() {
       }
       if (changed) { saveLocalOnly(); renderWatchlist(); updateUI(); }
     }
+    if (_pendingPush) pushToCloud();
   } catch (e) {}
 }
 
@@ -4131,7 +4165,9 @@ window.removeHolding = function(code) {
   if (!window._t4_data) return;
   if (!confirm('移除持有記錄？')) return;
   window._t4_data = window._t4_data.filter(h => h.code !== code);
-  try{localStorage.setItem("fdc_holdings",JSON.stringify(window._t4_data));}catch(e){}
+  holdingsTs = Date.now();
+  try{localStorage.setItem("fdc_holdings",JSON.stringify(window._t4_data));localStorage.setItem("fdc_holdings_ts",holdingsTs);}catch(e){}
+  _pendingPush = true; pushToCloud();
   if (window._t4_render) window._t4_render();
   if (typeof renderWatchlist === 'function') renderWatchlist();
 };
@@ -4144,7 +4180,9 @@ function upsertHolding(code, name, date, entry, shares) {
   const rec = { code, name, date, entry, shares: shares !== undefined ? shares : existingShares };
   if (idx !== -1) window._t4_data[idx] = rec;
   else window._t4_data.push(rec);
-  try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); } catch(e) {}
+  holdingsTs = Date.now();
+  try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); localStorage.setItem("fdc_holdings_ts", holdingsTs); } catch(e) {}
+  _pendingPush = true; pushToCloud();
   if (window._t4_render) window._t4_render();
   return true;
 }
@@ -5275,6 +5313,7 @@ headerNoteEl.addEventListener("input", () => {
 });
 
 window._t4_data = JSON.parse(localStorage.getItem("fdc_holdings") || "null") || [];
+holdingsTs = parseInt(localStorage.getItem("fdc_holdings_ts") || "0", 10) || 0;
 fetchLiveQuotes();
 setInterval(fetchLiveQuotes, 5 * 60 * 1000);
 
