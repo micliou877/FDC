@@ -813,7 +813,7 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-30.3";
+const APP_VERSION = "2026-08-30.4";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
@@ -4054,6 +4054,7 @@ function renderRanking() {
         const sortTh = (key, label, align='right') => `<th style="text-align:${align};padding:3px 6px;cursor:pointer;user-select:none;white-space:nowrap;" onclick="event.stopPropagation();rankingExpandSort={key:'${key}',dir:rankingExpandSort.key==='${key}'?-rankingExpandSort.dir:-1};renderRanking()">${label}${rk.key===key?(rk.dir===-1?' ▼':' ▲'):''}</th>`;
         const usLine = SECTOR_US[sector] ? `<div style="font-size:11px;color:#1d6fa4;background:#eff8ff;border-radius:4px;padding:5px 8px;margin-bottom:8px;"><strong>核心美股：</strong>${SECTOR_US[sector]}<span style="color:#9ca3af;margin-left:6px;font-size:10px;">★=NVIDIA點名</span></div>` : '';
         panel.innerHTML = usLine + `
+          <div style="overflow-x:auto;">
           <table class="stocks-table" style="font-size:12px;">
             <thead><tr style="color:#64748b;font-size:11px;">
               <th style="width:28px;padding:2px;"></th>
@@ -4071,6 +4072,7 @@ function renderRanking() {
             </tr></thead>
             <tbody>${tableRows}</tbody>
           </table>
+          </div>
           <div style="text-align:right;margin-top:6px;">
             <button class="btn" style="font-size:11px;padding:3px 10px;" onclick="event.stopPropagation();currentSector='${sector}';switchTab('stocks')">全部明細 →</button>
           </div>`;
@@ -4757,7 +4759,7 @@ function renderStrategy() {
       </div>
       ${dailyPlan.length === 0
         ? `<div style="font-size:12px;color:#9ca3af;">從下方精選個股或 TV 觀察清單點「＋」新增</div>`
-        : `<table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
+        : `<div style="overflow-x:auto;"><table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
             <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
               ${th('p','code','標的','left')}
               ${th('p','price','股價')}
@@ -4778,7 +4780,7 @@ function renderStrategy() {
                 <td style="padding:3px 4px;text-align:center;"><select id="cpy_${p.code}" onchange="copyToGroup('${p.code}',this.value)" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:76px;"><option value="">＋關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
                 <td style="padding:5px 2px;text-align:center;"><span style="cursor:pointer;color:#9ca3af;font-size:14px;" onclick="removePlan('${p.code}')">✕</span></td>
               </tr>`).join('')}
-            </tbody></table>`}
+            </tbody></table></div>`}
     </div>`;
 
   // VIX 卡片：偽裝成收件匣裡的一封「系統通知」，點一下＝重新整理
