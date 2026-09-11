@@ -240,6 +240,11 @@
 <h1>業績追蹤<span id="appVersion" class="app-version"></span></h1>
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
 
+<div style="display:flex;gap:8px;margin-bottom:10px;">
+  <button class="btn primary" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">更新股價</button>
+  <button class="btn primary" onclick="triggerQuoteUpdate()" title="快捷鍵 Ctrl+Alt+Q">立即更新台股報價</button>
+</div>
+
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
 
 <div class="tabs">
