@@ -241,8 +241,8 @@
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
 
 <div style="display:flex;gap:8px;margin-bottom:10px;">
-  <button class="btn primary" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">更新股價</button>
-  <button class="btn primary" onclick="triggerQuoteUpdate()" title="快捷鍵 Ctrl+Alt+Q">立即更新台股報價</button>
+  <button class="btn primary" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">盤後更新</button>
+  <button class="btn primary" onclick="triggerQuoteUpdate()" title="快捷鍵 Ctrl+Alt+Q">盤中更新</button>
 </div>
 
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
@@ -429,7 +429,7 @@
       </label>
     </div>
     <div class="button-row">
-      <button class="btn primary" id="fetchFinMindBtn">更新股價</button>
+      <button class="btn primary" id="fetchFinMindBtn">盤後更新</button>
       <button class="btn" id="fetchLiveQuotesBtn" title="TWSE/TPEX 全市場收盤價 + PER + 品質標籤，不需 Token">🆓 刷新報價</button>
       <button class="btn" id="fetchFundamentalsBtn">更新基本面</button>
       <button class="btn" id="fetchFundamentalsFreeBtn" title="從 TWSE/TPEX 批次取得本益比，不需 FinMind Token">🆓 免費更新基本面</button>
@@ -450,7 +450,7 @@
       <input type="password" id="ghTriggerToken" placeholder="GitHub Token（fine-grained，僅需此 repo 的 Actions 讀寫權限）" style="width: 320px;">
     </div>
     <div class="button-row">
-      <button class="btn primary" id="triggerQuoteBtn">立即更新台股報價</button>
+      <button class="btn primary" id="triggerQuoteBtn">盤中更新</button>
     </div>
     <div id="triggerQuoteStatus" style="font-size: 12px; margin-top: 6px;"></div>
   </div>
@@ -3016,7 +3016,7 @@ async function refreshVIX() {
   if (!ghToken) {
     await fetchLiveQuotes();
     saveLocalOnly();
-    const vixMsg = vixtwn ? `VIX ${vixtwn.price}（${vixtwn.date} ${vixtwn.time}）｜盤後需 GitHub Token 才能觸發更新，請到設定區「立即更新台股報價」` : '無 VIX 資料，請到設定區設定 GitHub Token';
+    const vixMsg = vixtwn ? `VIX ${vixtwn.price}（${vixtwn.date} ${vixtwn.time}）｜盤後需 GitHub Token 才能觸發更新，請到設定區「盤中更新」` : '無 VIX 資料，請到設定區設定 GitHub Token';
     done(vixMsg, '#b91c1c');
     return;
   }
@@ -4036,7 +4036,7 @@ function renderRanking() {
       panel.style.cssText = "background:#f8fafc;border:1px solid #c7d2fe;border-radius:0 0 6px 6px;margin:-2px 0 4px;padding:6px 10px 10px;";
 
       if (noData) {
-        panel.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:8px 0;">尚未載入資料，請先至「設定」更新股價</div>`;
+        panel.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:8px 0;">尚未載入資料，請先至「設定」盤後更新</div>`;
       } else {
         const tableRows = sectorStocks.map(st => {
           const inWl = currentList.includes(st.code);
@@ -5327,7 +5327,7 @@ async function triggerQuoteUpdate() {
 }
 document.getElementById("triggerQuoteBtn").onclick = triggerQuoteUpdate;
 
-// 快捷鍵：Ctrl+Alt+U＝更新股價（FinMind）／Ctrl+Alt+Q＝立即更新台股報價，輸入框打字時不觸發
+// 快捷鍵：Ctrl+Alt+U＝盤後更新（FinMind）／Ctrl+Alt+Q＝盤中更新，輸入框打字時不觸發
 document.addEventListener("keydown", (e) => {
   if (!e.ctrlKey || !e.altKey) return;
   const tag = document.activeElement?.tagName;
