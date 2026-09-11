@@ -5322,6 +5322,16 @@ async function triggerQuoteUpdate() {
 }
 document.getElementById("triggerQuoteBtn").onclick = triggerQuoteUpdate;
 
+// 快捷鍵：Ctrl+Alt+U＝更新股價（FinMind）／Ctrl+Alt+Q＝立即更新台股報價，輸入框打字時不觸發
+document.addEventListener("keydown", (e) => {
+  if (!e.ctrlKey || !e.altKey) return;
+  const tag = document.activeElement?.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || document.activeElement?.isContentEditable) return;
+  const key = e.key.toLowerCase();
+  if (key === "u") { e.preventDefault(); document.getElementById("fetchFinMindBtn")?.click(); }
+  else if (key === "q") { e.preventDefault(); document.getElementById("triggerQuoteBtn")?.click(); }
+});
+
 loadData();
 
 const headerNoteEl = document.getElementById("headerNote");
