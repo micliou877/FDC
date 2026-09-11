@@ -2,8 +2,10 @@ name: Update TW stock quotes
 
 on:
   schedule:
-    # 每 15 分鐘跑一次，限定在台股盤中時段（UTC 01:00-05:59 = 台北 09:00-13:59），週一到週五
-    - cron: "*/15 1-5 * * 1-5"
+    # 高頻率cron(*/15)在GitHub Actions上不可靠，實測過去兩週多每天只真的觸發1~2次，不是每15分鐘。
+    # 改成在開盤前後多留幾個嘗試機會（半小時一次），只要其中一次真的被觸發，
+    # 工作內部就會自己迴圈跑到收盤，不再依賴GitHub準時觸發每一次。
+    - cron: "0,30 0-5 * * 1-5"
   workflow_dispatch: {}
 
 permissions:
@@ -12,6 +14,7 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    timeout-minutes: 400
     steps:
       - uses: actions/checkout@v4
 
@@ -19,25 +22,42 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Fetch quotes
-        run: python scripts/fetch_quotes.py
-
-      - name: Commit and push if changed
+      - name: Fetch quotes（排程觸發：內部迴圈跑到收盤；手動觸發：只抓一次）
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- quotes.json; then
-            git add quotes.json
-            git commit -m "更新台股報價快照 $(date -u +'%Y-%m-%d %H:%M UTC')"
-            for i in 1 2 3 4 5; do
-              if git push; then
-                break
-              fi
-              echo "push rejected, rebasing onto latest main (attempt $i)"
-              git fetch origin main
-              git rebase origin/main
-              sleep $((RANDOM % 5 + 1))
-            done
+
+          commit_and_push() {
+            if ! git diff --quiet -- quotes.json; then
+              git add quotes.json
+              git commit -m "更新台股報價快照 $(date -u +'%Y-%m-%d %H:%M UTC')"
+              for i in 1 2 3 4 5; do
+                if git push; then
+                  return 0
+                fi
+                echo "push rejected, retrying (attempt $i)"
+                git fetch origin main
+                # quotes.json每次都整份重新產生，不需要真的merge，直接拿自己這份最新內容
+                # 蓋在最新的origin/main上即可，避免rebase衝突讓整個工作直接失敗。
+                git reset --soft origin/main
+                git add quotes.json
+                git commit -m "更新台股報價快照 $(date -u +'%Y-%m-%d %H:%M UTC')" --allow-empty
+                sleep $((RANDOM % 5 + 1))
+              done
+            else
+              echo "no change"
+            fi
+          }
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python scripts/fetch_quotes.py
+            commit_and_push
           else
-            echo "no change"
+            # 排程觸發：從現在跑到台北時間13:59（UTC 05:59），每15分鐘抓一次
+            END_EPOCH=$(date -u -d "$(date -u +%Y-%m-%d) 05:59:00" +%s)
+            while [ "$(date -u +%s)" -lt "$END_EPOCH" ]; do
+              python scripts/fetch_quotes.py
+              commit_and_push
+              sleep 900
+            done
           fi
