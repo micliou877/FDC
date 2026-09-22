@@ -1,64 +1,64 @@
 {
- "updated": "2026-09-22 12:56:30",
+ "updated": "2026-09-22 13:13:04",
  "quotes": {
   "0050": {
    "market": "TWSE",
-   "price": 112.25,
-   "pct1": 0.81,
-   "amount": 81.22
+   "price": 112.15,
+   "pct1": 0.72,
+   "amount": 84.04
   },
   "1216": {
    "market": "TWSE",
    "price": 74.6,
    "pct1": -0.13,
-   "amount": 3.45
+   "amount": 3.56
   },
   "1229": {
    "market": "TWSE",
-   "price": 40.0,
-   "pct1": -0.62,
-   "amount": 1.13
+   "price": 39.95,
+   "pct1": -0.75,
+   "amount": 1.19
   },
   "1301": {
    "market": "TWSE",
-   "price": 64.9,
-   "pct1": -0.46,
-   "amount": 9.88
+   "price": 64.8,
+   "pct1": -0.61,
+   "amount": 10.31
   },
   "1303": {
    "market": "TWSE",
-   "price": 234.0,
-   "pct1": -2.3,
-   "amount": 140.39
+   "price": 233.0,
+   "pct1": -2.71,
+   "amount": 142.36
   },
   "1304": {
    "market": "TWSE",
-   "price": 12.25,
-   "pct1": -0.81,
-   "amount": 0.16
+   "price": 12.3,
+   "pct1": -0.4,
+   "amount": 0.17
   },
   "1402": {
    "market": "TWSE",
-   "price": 27.85,
-   "pct1": 0.0,
-   "amount": 0.68
+   "price": 27.8,
+   "pct1": -0.18,
+   "amount": 0.71
   },
   "1409": {
    "market": "TWSE",
    "price": 24.2,
    "pct1": -1.02,
-   "amount": 1.81
+   "amount": 1.87
   },
   "1416": {
    "market": "TWSE",
-   "price": 11.4,
-   "pct1": 0.44,
+   "price": 11.35,
+   "pct1": 0.0,
    "amount": 0.01
   },
   "1417": {
    "market": "TWSE",
-   "price": 7.98,
-   "pct1": -0.5,
+   "price": 8.0,
+   "pct1": -0.25,
    "amount": 0.01
   },
   "1437": {
@@ -71,7 +71,7 @@
    "market": "TWSE",
    "price": 14.9,
    "pct1": -1.32,
-   "amount": 0.02
+   "amount": 0.03
   },
   "1472": {
    "market": "TWSE",
@@ -89,61 +89,61 @@
    "market": "TWSE",
    "price": 275.0,
    "pct1": -1.43,
-   "amount": 4.62
+   "amount": 4.73
   },
   "1503": {
    "market": "TWSE",
    "price": 197.5,
    "pct1": -0.5,
-   "amount": 1.07
+   "amount": 1.12
   },
   "1504": {
    "market": "TWSE",
-   "price": 69.0,
-   "pct1": -0.14,
-   "amount": 2.34
+   "price": 68.8,
+   "pct1": -0.43,
+   "amount": 2.43
   },
   "1513": {
    "market": "TWSE",
    "price": 166.0,
    "pct1": -0.3,
-   "amount": 2.57
+   "amount": 2.66
   },
   "1514": {
    "market": "TWSE",
    "price": 102.0,
    "pct1": -0.49,
-   "amount": 0.48
+   "amount": 0.49
   },
   "1519": {
    "market": "TWSE",
-   "price": 717.0,
-   "pct1": -0.14,
-   "amount": 2.78
+   "price": 715.0,
+   "pct1": -0.42,
+   "amount": 2.95
   },
   "1536": {
    "market": "TWSE",
-   "price": 46.3,
-   "pct1": -0.96,
-   "amount": 0.32
+   "price": 46.25,
+   "pct1": -1.07,
+   "amount": 0.35
   },
   "1560": {
    "market": "TWSE",
-   "price": 952.0,
-   "pct1": 4.16,
-   "amount": 30.56
+   "price": 951.0,
+   "pct1": 4.05,
+   "amount": 31.53
   },
   "1590": {
    "market": "TWSE",
-   "price": 1265.0,
-   "pct1": 2.02,
-   "amount": 8.83
+   "price": 1270.0,
+   "pct1": 2.42,
+   "amount": 9.63
   },
   "1597": {
    "market": "TWSE",
    "price": 136.0,
    "pct1": -1.45,
-   "amount": 0.99
+   "amount": 1.04
   },
   "1603": {
    "market": "TWSE",
@@ -153,21 +153,21 @@
   },
   "1604": {
    "market": "TWSE",
-   "price": 23.6,
-   "pct1": 0.21,
+   "price": 23.55,
+   "pct1": 0.0,
    "amount": 0.02
   },
   "1605": {
    "market": "TWSE",
-   "price": 37.3,
-   "pct1": 0.54,
-   "amount": 5.75
+   "price": 37.15,
+   "pct1": 0.13,
+   "amount": 5.95
   },
   "1609": {
    "market": "TWSE",
    "price": 38.1,
    "pct1": 0.4,
-   "amount": 1.15
+   "amount": 1.17
   },
   "1611": {
    "market": "TWSE",
@@ -179,13 +179,13 @@
    "market": "TWSE",
    "price": 35.0,
    "pct1": 0.0,
-   "amount": 0.06
+   "amount": 0.07
   },
   "1615": {
    "market": "TWSE",
    "price": 43.2,
    "pct1": 0.47,
-   "amount": 0.02
+   "amount": 0.04
   },
   "1626": {
    "market": "TWSE",
@@ -195,447 +195,447 @@
   },
   "1784": {
    "market": "TPEX",
-   "price": 59.9,
-   "pct1": 2.57,
+   "price": 60.3,
+   "pct1": 3.25,
    "amount": 0.08
   },
   "1815": {
    "market": "TPEX",
    "price": 121.0,
    "pct1": 0.0,
-   "amount": 74.52
+   "amount": 76.19
   },
   "1903": {
    "market": "TWSE",
-   "price": 46.8,
-   "pct1": -0.64,
+   "price": 47.1,
+   "pct1": 0.0,
    "amount": 0.03
   },
   "2002": {
    "market": "TWSE",
    "price": 18.65,
    "pct1": 0.0,
-   "amount": 4.31
+   "amount": 4.46
   },
   "2049": {
    "market": "TWSE",
-   "price": 333.5,
-   "pct1": -0.15,
-   "amount": 4.51
+   "price": 332.0,
+   "pct1": -0.6,
+   "amount": 4.58
   },
   "2059": {
    "market": "TWSE",
-   "price": 12870.0,
-   "pct1": 0.55,
-   "amount": 41.69
+   "price": 12840.0,
+   "pct1": 0.31,
+   "amount": 44.76
   },
   "2204": {
    "market": "TWSE",
-   "price": 52.5,
-   "pct1": -0.38,
-   "amount": 0.14
+   "price": 52.9,
+   "pct1": 0.38,
+   "amount": 0.18
   },
   "2207": {
    "market": "TWSE",
    "price": 522.0,
    "pct1": -0.19,
-   "amount": 0.45
+   "amount": 0.46
   },
   "2208": {
    "market": "TWSE",
-   "price": 19.35,
-   "pct1": 0.78,
-   "amount": 0.38
+   "price": 19.3,
+   "pct1": 0.52,
+   "amount": 0.39
   },
   "2231": {
    "market": "TWSE",
-   "price": 92.0,
-   "pct1": -1.39,
+   "price": 91.8,
+   "pct1": -1.61,
    "amount": 0.11
   },
   "2233": {
    "market": "TWSE",
    "price": 164.5,
    "pct1": 2.49,
-   "amount": 0.76
+   "amount": 0.8
   },
   "2236": {
    "market": "TWSE",
-   "price": 113.5,
-   "pct1": 4.13,
+   "price": 112.5,
+   "pct1": 3.21,
    "amount": 0.38
   },
   "2301": {
    "market": "TWSE",
-   "price": 285.0,
-   "pct1": -1.21,
-   "amount": 47.32
+   "price": 284.0,
+   "pct1": -1.56,
+   "amount": 49.12
   },
   "2303": {
    "market": "TWSE",
-   "price": 162.0,
-   "pct1": 3.18,
-   "amount": 411.35
+   "price": 161.0,
+   "pct1": 2.55,
+   "amount": 414.83
   },
   "2308": {
    "market": "TWSE",
-   "price": 1920.0,
-   "pct1": 2.4,
-   "amount": 263.64
+   "price": 1910.0,
+   "pct1": 1.87,
+   "amount": 277.32
   },
   "2313": {
    "market": "TWSE",
    "price": 224.0,
    "pct1": 0.9,
-   "amount": 26.98
+   "amount": 28.04
   },
   "2316": {
    "market": "TWSE",
-   "price": 162.0,
-   "pct1": 3.85,
-   "amount": 4.02
+   "price": 160.5,
+   "pct1": 2.88,
+   "amount": 4.1
   },
   "2317": {
    "market": "TWSE",
-   "price": 253.0,
-   "pct1": 1.2,
-   "amount": 74.24
+   "price": 253.5,
+   "pct1": 1.4,
+   "amount": 79.94
   },
   "2324": {
    "market": "TWSE",
    "price": 37.15,
    "pct1": -1.2,
-   "amount": 11.04
+   "amount": 11.29
   },
   "2327": {
    "market": "TWSE",
    "price": 577.0,
    "pct1": 3.59,
-   "amount": 216.77
+   "amount": 220.01
   },
   "2329": {
    "market": "TWSE",
-   "price": 43.5,
-   "pct1": -1.14,
-   "amount": 0.63
+   "price": 43.4,
+   "pct1": -1.36,
+   "amount": 0.64
   },
   "2330": {
    "market": "TWSE",
    "price": 2470.0,
    "pct1": -0.4,
-   "amount": 386.9
+   "amount": 400.81
   },
   "2337": {
    "market": "TWSE",
    "price": 118.5,
    "pct1": -1.25,
-   "amount": 21.97
+   "amount": 22.41
   },
   "2344": {
    "market": "TWSE",
    "price": 172.0,
    "pct1": -1.15,
-   "amount": 136.26
+   "amount": 140.92
   },
   "2345": {
    "market": "TWSE",
-   "price": 1925.0,
-   "pct1": 4.62,
-   "amount": 62.66
+   "price": 1910.0,
+   "pct1": 3.8,
+   "amount": 64.87
   },
   "2353": {
    "market": "TWSE",
    "price": 31.55,
    "pct1": -1.87,
-   "amount": 4.33
+   "amount": 4.42
   },
   "2355": {
    "market": "TWSE",
    "price": 41.9,
    "pct1": 1.45,
-   "amount": 0.59
+   "amount": 0.62
   },
   "2356": {
    "market": "TWSE",
-   "price": 61.6,
-   "pct1": -0.32,
-   "amount": 3.63
+   "price": 61.4,
+   "pct1": -0.65,
+   "amount": 4.0
   },
   "2357": {
    "market": "TWSE",
-   "price": 950.0,
-   "pct1": 0.42,
-   "amount": 7.7
+   "price": 948.0,
+   "pct1": 0.21,
+   "amount": 8.65
   },
   "2359": {
    "market": "TWSE",
    "price": 129.5,
    "pct1": -1.89,
-   "amount": 1.97
+   "amount": 2.16
   },
   "2360": {
    "market": "TWSE",
-   "price": 2470.0,
-   "pct1": 4.0,
-   "amount": 62.12
+   "price": 2440.0,
+   "pct1": 2.74,
+   "amount": 63.37
   },
   "2367": {
    "market": "TWSE",
-   "price": 42.45,
-   "pct1": 1.56,
-   "amount": 1.46
+   "price": 42.3,
+   "pct1": 1.2,
+   "amount": 1.5
   },
   "2368": {
    "market": "TWSE",
-   "price": 1050.0,
-   "pct1": 0.48,
-   "amount": 70.68
+   "price": 1045.0,
+   "pct1": 0.0,
+   "amount": 72.8
   },
   "2371": {
    "market": "TWSE",
-   "price": 29.55,
-   "pct1": -1.5,
-   "amount": 2.57
+   "price": 29.5,
+   "pct1": -1.67,
+   "amount": 2.65
   },
   "2375": {
    "market": "TWSE",
    "price": 119.0,
    "pct1": 0.42,
-   "amount": 1.85
+   "amount": 1.97
   },
   "2376": {
    "market": "TWSE",
    "price": 367.5,
    "pct1": -0.14,
-   "amount": 20.37
+   "amount": 21.57
   },
   "2377": {
    "market": "TWSE",
-   "price": 153.5,
-   "pct1": 0.33,
-   "amount": 5.52
+   "price": 154.0,
+   "pct1": 0.65,
+   "amount": 5.87
   },
   "2379": {
    "market": "TWSE",
    "price": 755.0,
    "pct1": 2.03,
-   "amount": 23.66
+   "amount": 24.63
   },
   "2382": {
    "market": "TWSE",
-   "price": 341.0,
-   "pct1": -1.02,
-   "amount": 24.63
+   "price": 340.5,
+   "pct1": -1.16,
+   "amount": 26.84
   },
   "2383": {
    "market": "TWSE",
-   "price": 4865.0,
-   "pct1": -0.61,
-   "amount": 73.15
+   "price": 4855.0,
+   "pct1": -0.82,
+   "amount": 77.25
   },
   "2395": {
    "market": "TWSE",
-   "price": 707.0,
-   "pct1": 0.14,
-   "amount": 8.6
+   "price": 704.0,
+   "pct1": -0.28,
+   "amount": 9.17
   },
   "2397": {
    "market": "TWSE",
-   "price": 62.7,
-   "pct1": 1.46,
-   "amount": 0.16
+   "price": 62.8,
+   "pct1": 1.62,
+   "amount": 0.17
   },
   "2401": {
    "market": "TWSE",
-   "price": 25.8,
-   "pct1": -1.71,
-   "amount": 0.63
+   "price": 25.7,
+   "pct1": -2.1,
+   "amount": 0.65
   },
   "2404": {
    "market": "TWSE",
-   "price": 1155.0,
-   "pct1": 2.21,
-   "amount": 16.31
+   "price": 1145.0,
+   "pct1": 1.33,
+   "amount": 16.55
   },
   "2408": {
    "market": "TWSE",
    "price": 501.0,
    "pct1": -2.91,
-   "amount": 250.33
+   "amount": 255.98
   },
   "2409": {
    "market": "TWSE",
    "price": 36.65,
    "pct1": 9.9,
-   "amount": 384.89
+   "amount": 410.08
   },
   "2412": {
    "market": "TWSE",
    "price": 144.5,
    "pct1": 0.0,
-   "amount": 4.94
+   "amount": 5.16
   },
   "2413": {
    "market": "TWSE",
-   "price": 52.2,
-   "pct1": -3.33,
-   "amount": 3.77
+   "price": 52.9,
+   "pct1": -2.04,
+   "amount": 4.04
   },
   "2419": {
    "market": "TWSE",
-   "price": 29.75,
-   "pct1": -2.94,
-   "amount": 2.21
+   "price": 29.65,
+   "pct1": -3.26,
+   "amount": 2.24
   },
   "2421": {
    "market": "TWSE",
    "price": 168.0,
    "pct1": 0.9,
-   "amount": 2.43
+   "amount": 2.53
   },
   "2428": {
    "market": "TWSE",
-   "price": 257.5,
-   "pct1": -0.39,
-   "amount": 2.95
+   "price": 256.5,
+   "pct1": -0.77,
+   "amount": 3.02
   },
   "2429": {
    "market": "TWSE",
-   "price": 31.2,
-   "pct1": -2.65,
+   "price": 31.1,
+   "pct1": -2.96,
    "amount": 0.05
   },
   "2436": {
    "market": "TWSE",
-   "price": 71.0,
-   "pct1": 1.43,
-   "amount": 4.88
+   "price": 70.8,
+   "pct1": 1.14,
+   "amount": 5.23
   },
   "2449": {
    "market": "TWSE",
    "price": 318.0,
    "pct1": 5.47,
-   "amount": 206.49
+   "amount": 211.52
   },
   "2451": {
    "market": "TWSE",
-   "price": 283.5,
-   "pct1": -0.87,
-   "amount": 3.7
+   "price": 284.5,
+   "pct1": -0.52,
+   "amount": 3.93
   },
   "2453": {
    "market": "TWSE",
-   "price": 54.3,
-   "pct1": -0.91,
-   "amount": 0.1
+   "price": 54.2,
+   "pct1": -1.09,
+   "amount": 0.14
   },
   "2454": {
    "market": "TWSE",
    "price": 5165.0,
    "pct1": 3.09,
-   "amount": 543.87
+   "amount": 554.58
   },
   "2455": {
    "market": "TWSE",
-   "price": 548.0,
-   "pct1": -4.2,
-   "amount": 83.81
+   "price": 549.0,
+   "pct1": -4.02,
+   "amount": 88.86
   },
   "2458": {
    "market": "TWSE",
-   "price": 130.0,
-   "pct1": -0.38,
-   "amount": 1.81
+   "price": 130.5,
+   "pct1": 0.0,
+   "amount": 1.93
   },
   "2464": {
    "market": "TWSE",
-   "price": 192.0,
-   "pct1": -0.26,
-   "amount": 17.96
+   "price": 191.0,
+   "pct1": -0.78,
+   "amount": 18.15
   },
   "2467": {
    "market": "TWSE",
-   "price": 529.0,
-   "pct1": 0.57,
-   "amount": 2.68
+   "price": 526.0,
+   "pct1": 0.0,
+   "amount": 2.91
   },
   "2471": {
    "market": "TWSE",
-   "price": 52.3,
-   "pct1": -1.69,
-   "amount": 0.17
+   "price": 52.6,
+   "pct1": -1.13,
+   "amount": 0.18
   },
   "2472": {
    "market": "TWSE",
-   "price": 219.5,
-   "pct1": 3.05,
-   "amount": 5.41
+   "price": 217.5,
+   "pct1": 2.11,
+   "amount": 5.63
   },
   "2474": {
    "market": "TWSE",
-   "price": 209.5,
-   "pct1": -0.71,
-   "amount": 2.44
+   "price": 210.0,
+   "pct1": -0.47,
+   "amount": 2.49
   },
   "2478": {
    "market": "TWSE",
    "price": 120.5,
    "pct1": 0.42,
-   "amount": 1.71
+   "amount": 1.74
   },
   "2480": {
    "market": "TWSE",
    "price": 162.0,
    "pct1": -1.52,
-   "amount": 0.26
+   "amount": 0.27
   },
   "2481": {
    "market": "TWSE",
-   "price": 172.0,
-   "pct1": 2.38,
-   "amount": 44.58
+   "price": 172.5,
+   "pct1": 2.68,
+   "amount": 48.08
   },
   "2489": {
    "market": "TWSE",
-   "price": 42.4,
-   "pct1": -1.4,
-   "amount": 9.59
+   "price": 42.15,
+   "pct1": -1.98,
+   "amount": 9.85
   },
   "2492": {
    "market": "TWSE",
-   "price": 313.0,
-   "pct1": 1.46,
-   "amount": 57.18
+   "price": 312.5,
+   "pct1": 1.3,
+   "amount": 58.02
   },
   "2603": {
    "market": "TWSE",
-   "price": 242.5,
-   "pct1": 0.21,
-   "amount": 10.38
+   "price": 242.0,
+   "pct1": 0.0,
+   "amount": 11.12
   },
   "2609": {
    "market": "TWSE",
    "price": 60.8,
    "pct1": -0.49,
-   "amount": 7.45
+   "amount": 8.07
   },
   "2610": {
    "market": "TWSE",
-   "price": 20.4,
-   "pct1": 0.74,
-   "amount": 1.68
+   "price": 20.45,
+   "pct1": 0.99,
+   "amount": 2.84
   },
   "2615": {
    "market": "TWSE",
-   "price": 117.5,
-   "pct1": 0.43,
-   "amount": 7.13
+   "price": 117.0,
+   "pct1": 0.0,
+   "amount": 7.55
   },
   "2618": {
    "market": "TWSE",
-   "price": 42.3,
-   "pct1": 0.83,
-   "amount": 3.69
+   "price": 42.5,
+   "pct1": 1.31,
+   "amount": 5.23
   },
   "2630": {
    "market": "TWSE",
@@ -645,15 +645,15 @@
   },
   "2634": {
    "market": "TWSE",
-   "price": 63.3,
-   "pct1": -0.63,
-   "amount": 2.69
+   "price": 63.1,
+   "pct1": -0.94,
+   "amount": 2.86
   },
   "2637": {
    "market": "TWSE",
    "price": 101.0,
    "pct1": -1.46,
-   "amount": 1.29
+   "amount": 1.35
   },
   "2644": {
    "market": "TPEX",
@@ -665,67 +665,67 @@
    "market": "TWSE",
    "price": 173.0,
    "pct1": -1.14,
-   "amount": 1.37
+   "amount": 1.39
   },
   "2706": {
    "market": "TWSE",
-   "price": 12.15,
-   "pct1": 0.41,
+   "price": 12.1,
+   "pct1": 0.0,
    "amount": 0.0
   },
   "2723": {
    "market": "TWSE",
    "price": 79.1,
    "pct1": 0.0,
-   "amount": 0.11
+   "amount": 0.12
   },
   "2727": {
    "market": "TWSE",
-   "price": 228.5,
-   "pct1": 0.66,
-   "amount": 0.21
+   "price": 227.5,
+   "pct1": 0.22,
+   "amount": 0.26
   },
   "2731": {
    "market": "TWSE",
    "price": 144.5,
    "pct1": 0.7,
-   "amount": 0.24
+   "amount": 0.25
   },
   "2881": {
    "market": "TWSE",
    "price": 155.5,
    "pct1": 0.65,
-   "amount": 17.07
+   "amount": 18.19
   },
   "2882": {
    "market": "TWSE",
-   "price": 111.5,
-   "pct1": -1.33,
-   "amount": 13.33
+   "price": 112.0,
+   "pct1": -0.88,
+   "amount": 13.7
   },
   "2884": {
    "market": "TWSE",
-   "price": 46.2,
-   "pct1": 0.0,
-   "amount": 5.31
+   "price": 46.05,
+   "pct1": -0.32,
+   "amount": 5.6
   },
   "2886": {
    "market": "TWSE",
-   "price": 50.5,
-   "pct1": -1.17,
-   "amount": 7.71
+   "price": 50.4,
+   "pct1": -1.37,
+   "amount": 8.19
   },
   "2891": {
    "market": "TWSE",
-   "price": 69.7,
-   "pct1": -0.99,
-   "amount": 7.03
+   "price": 69.5,
+   "pct1": -1.28,
+   "amount": 7.48
   },
   "2912": {
    "market": "TWSE",
    "price": 215.0,
    "pct1": 0.0,
-   "amount": 1.37
+   "amount": 1.43
   },
   "2913": {
    "market": "TWSE",
@@ -735,9 +735,9 @@
   },
   "2915": {
    "market": "TWSE",
-   "price": 59.5,
-   "pct1": 0.34,
-   "amount": 0.71
+   "price": 59.6,
+   "pct1": 0.51,
+   "amount": 0.75
   },
   "2929": {
    "market": "TWSE",
@@ -753,117 +753,117 @@
   },
   "3005": {
    "market": "TWSE",
-   "price": 117.0,
-   "pct1": -1.68,
-   "amount": 1.25
+   "price": 118.5,
+   "pct1": -0.42,
+   "amount": 1.49
   },
   "3006": {
    "market": "TWSE",
-   "price": 280.5,
-   "pct1": -1.58,
-   "amount": 20.63
+   "price": 280.0,
+   "pct1": -1.75,
+   "amount": 20.97
   },
   "3008": {
    "market": "TWSE",
-   "price": 6475.0,
-   "pct1": 1.17,
-   "amount": 136.15
+   "price": 6480.0,
+   "pct1": 1.25,
+   "amount": 139.32
   },
   "3013": {
    "market": "TWSE",
-   "price": 83.5,
-   "pct1": 0.48,
-   "amount": 0.52
+   "price": 83.3,
+   "pct1": 0.24,
+   "amount": 0.53
   },
   "3014": {
    "market": "TWSE",
-   "price": 138.5,
-   "pct1": -0.72,
-   "amount": 4.38
+   "price": 139.0,
+   "pct1": -0.36,
+   "amount": 4.53
   },
   "3016": {
    "market": "TWSE",
    "price": 132.5,
    "pct1": 9.96,
-   "amount": 39.55
+   "amount": 39.82
   },
   "3017": {
    "market": "TWSE",
-   "price": 3430.0,
-   "pct1": 0.44,
-   "amount": 59.55
+   "price": 3420.0,
+   "pct1": 0.15,
+   "amount": 61.24
   },
   "3022": {
    "market": "TWSE",
    "price": 92.0,
    "pct1": -0.86,
-   "amount": 0.71
+   "amount": 0.77
   },
   "3024": {
    "market": "TWSE",
    "price": 14.6,
    "pct1": -2.01,
-   "amount": 0.14
+   "amount": 0.15
   },
   "3026": {
    "market": "TWSE",
-   "price": 790.0,
-   "pct1": -0.13,
-   "amount": 80.72
+   "price": 785.0,
+   "pct1": -0.76,
+   "amount": 82.27
   },
   "3027": {
    "market": "TWSE",
-   "price": 18.6,
-   "pct1": -2.62,
+   "price": 18.55,
+   "pct1": -2.88,
    "amount": 0.17
   },
   "3029": {
    "market": "TWSE",
-   "price": 121.0,
-   "pct1": 0.0,
-   "amount": 2.29
+   "price": 122.0,
+   "pct1": 0.83,
+   "amount": 2.41
   },
   "3030": {
    "market": "TWSE",
-   "price": 268.0,
-   "pct1": -0.19,
-   "amount": 1.31
+   "price": 267.5,
+   "pct1": -0.37,
+   "amount": 1.32
   },
   "3032": {
    "market": "TWSE",
-   "price": 78.2,
-   "pct1": 0.0,
-   "amount": 0.41
+   "price": 78.1,
+   "pct1": -0.13,
+   "amount": 0.43
   },
   "3034": {
    "market": "TWSE",
-   "price": 555.0,
-   "pct1": 1.28,
-   "amount": 16.74
+   "price": 554.0,
+   "pct1": 1.09,
+   "amount": 17.5
   },
   "3035": {
    "market": "TWSE",
-   "price": 203.5,
-   "pct1": 6.54,
-   "amount": 28.89
+   "price": 203.0,
+   "pct1": 6.28,
+   "amount": 29.07
   },
   "3036": {
    "market": "TWSE",
    "price": 205.5,
    "pct1": -0.48,
-   "amount": 11.97
+   "amount": 12.23
   },
   "3037": {
    "market": "TWSE",
    "price": 1120.0,
    "pct1": 9.8,
-   "amount": 115.96
+   "amount": 116.93
   },
   "3044": {
    "market": "TWSE",
-   "price": 539.0,
-   "pct1": 2.86,
-   "amount": 18.18
+   "price": 537.0,
+   "pct1": 2.48,
+   "amount": 18.46
   },
   "3060": {
    "market": "TWSE",
@@ -873,171 +873,171 @@
   },
   "3081": {
    "market": "TPEX",
-   "price": 2850.0,
-   "pct1": -0.87,
-   "amount": 51.65
+   "price": 2855.0,
+   "pct1": -0.7,
+   "amount": 52.91
   },
   "3088": {
    "market": "TPEX",
-   "price": 128.5,
-   "pct1": -0.39,
-   "amount": 0.65
+   "price": 128.0,
+   "pct1": -0.78,
+   "amount": 0.66
   },
   "3105": {
    "market": "TPEX",
-   "price": 501.0,
-   "pct1": 2.14,
-   "amount": 149.02
+   "price": 503.0,
+   "pct1": 2.55,
+   "amount": 154.29
   },
   "3122": {
    "market": "TPEX",
-   "price": 24.0,
-   "pct1": -1.03,
+   "price": 23.9,
+   "pct1": -1.44,
    "amount": 0.01
   },
   "3131": {
    "market": "TPEX",
    "price": 2430.0,
    "pct1": -1.42,
-   "amount": 5.62
+   "amount": 5.76
   },
   "3163": {
    "market": "TPEX",
    "price": 667.0,
    "pct1": 0.0,
-   "amount": 7.68
+   "amount": 8.19
   },
   "3167": {
    "market": "TWSE",
-   "price": 841.0,
-   "pct1": 4.34,
-   "amount": 33.52
+   "price": 853.0,
+   "pct1": 5.83,
+   "amount": 37.23
   },
   "3189": {
    "market": "TWSE",
    "price": 909.0,
    "pct1": 9.92,
-   "amount": 243.34
+   "amount": 246.36
   },
   "3231": {
    "market": "TWSE",
    "price": 181.0,
    "pct1": -2.95,
-   "amount": 107.78
+   "amount": 110.36
   },
   "3260": {
    "market": "TPEX",
    "price": 385.0,
    "pct1": -1.03,
-   "amount": 14.7
+   "amount": 15.5
   },
   "3324": {
    "market": "TPEX",
-   "price": 1595.0,
-   "pct1": 4.93,
-   "amount": 71.97
+   "price": 1590.0,
+   "pct1": 4.61,
+   "amount": 73.47
   },
   "3357": {
    "market": "TPEX",
    "price": 208.5,
    "pct1": -0.24,
-   "amount": 2.33
+   "amount": 2.38
   },
   "3363": {
    "market": "TPEX",
    "price": 660.0,
    "pct1": -0.15,
-   "amount": 14.87
+   "amount": 15.36
   },
   "3376": {
    "market": "TWSE",
-   "price": 180.0,
-   "pct1": 1.69,
-   "amount": 4.76
+   "price": 180.5,
+   "pct1": 1.98,
+   "amount": 4.87
   },
   "3402": {
    "market": "TPEX",
    "price": 127.5,
    "pct1": 0.39,
-   "amount": 0.15
+   "amount": 0.16
   },
   "3413": {
    "market": "TWSE",
-   "price": 284.5,
-   "pct1": 0.35,
-   "amount": 1.46
+   "price": 284.0,
+   "pct1": 0.18,
+   "amount": 1.53
   },
   "3416": {
    "market": "TWSE",
-   "price": 162.5,
-   "pct1": -0.61,
+   "price": 163.0,
+   "pct1": -0.31,
    "amount": 0.24
   },
   "3443": {
    "market": "TWSE",
    "price": 8375.0,
    "pct1": 9.98,
-   "amount": 50.34
+   "amount": 53.0
   },
   "3450": {
    "market": "TWSE",
-   "price": 529.0,
-   "pct1": -2.94,
-   "amount": 37.32
+   "price": 528.0,
+   "pct1": -3.12,
+   "amount": 38.14
   },
   "3479": {
    "market": "TPEX",
    "price": 130.0,
    "pct1": -1.14,
-   "amount": 0.68
+   "amount": 0.7
   },
   "3481": {
    "market": "TWSE",
-   "price": 50.9,
-   "pct1": 0.99,
-   "amount": 224.87
+   "price": 50.7,
+   "pct1": 0.6,
+   "amount": 227.93
   },
   "3483": {
    "market": "TPEX",
-   "price": 77.2,
-   "pct1": 4.04,
-   "amount": 0.3
+   "price": 77.5,
+   "pct1": 4.45,
+   "amount": 0.33
   },
   "3491": {
    "market": "TPEX",
-   "price": 1535.0,
-   "pct1": 0.99,
-   "amount": 14.93
+   "price": 1525.0,
+   "pct1": 0.33,
+   "amount": 15.32
   },
   "3515": {
    "market": "TWSE",
    "price": 214.0,
    "pct1": 0.47,
-   "amount": 0.56
+   "amount": 0.57
   },
   "3530": {
    "market": "TWSE",
-   "price": 58.2,
-   "pct1": -1.69,
+   "price": 58.4,
+   "pct1": -1.35,
    "amount": 0.11
   },
   "3551": {
    "market": "TPEX",
-   "price": 182.0,
-   "pct1": -2.41,
-   "amount": 1.2
+   "price": 181.5,
+   "pct1": -2.68,
+   "amount": 1.21
   },
   "3556": {
    "market": "TPEX",
-   "price": 57.2,
-   "pct1": -0.87,
+   "price": 57.1,
+   "pct1": -1.04,
    "amount": 0.08
   },
   "3558": {
    "market": "TPEX",
    "price": 123.5,
    "pct1": -0.4,
-   "amount": 0.06
+   "amount": 0.07
   },
   "3564": {
    "market": "TPEX",
@@ -1049,49 +1049,49 @@
    "market": "TWSE",
    "price": 707.0,
    "pct1": 0.71,
-   "amount": 3.29
+   "amount": 3.37
   },
   "3594": {
    "market": "TPEX",
-   "price": 47.0,
-   "pct1": 0.0,
+   "price": 46.95,
+   "pct1": -0.11,
    "amount": 0.08
   },
   "3596": {
    "market": "TWSE",
    "price": 154.5,
    "pct1": -0.32,
-   "amount": 0.86
+   "amount": 0.89
   },
   "3653": {
    "market": "TWSE",
-   "price": 5885.0,
-   "pct1": 1.64,
-   "amount": 44.12
+   "price": 5845.0,
+   "pct1": 0.95,
+   "amount": 45.2
   },
   "3661": {
    "market": "TWSE",
-   "price": 3695.0,
-   "pct1": 0.82,
-   "amount": 107.14
+   "price": 3675.0,
+   "pct1": 0.27,
+   "amount": 110.34
   },
   "3665": {
    "market": "TWSE",
-   "price": 2255.0,
-   "pct1": -1.96,
-   "amount": 115.36
+   "price": 2250.0,
+   "pct1": -2.17,
+   "amount": 117.68
   },
   "3673": {
    "market": "TWSE",
-   "price": 66.1,
-   "pct1": 0.61,
-   "amount": 2.81
+   "price": 65.9,
+   "pct1": 0.3,
+   "amount": 2.87
   },
   "3680": {
    "market": "TPEX",
-   "price": 542.0,
-   "pct1": -1.09,
-   "amount": 7.67
+   "price": 540.0,
+   "pct1": -1.46,
+   "amount": 7.83
   },
   "3686": {
    "market": "TWSE",
@@ -1101,105 +1101,105 @@
   },
   "3693": {
    "market": "TPEX",
-   "price": 712.0,
-   "pct1": 1.42,
-   "amount": 11.26
+   "price": 711.0,
+   "pct1": 1.28,
+   "amount": 11.47
   },
   "3702": {
    "market": "TWSE",
-   "price": 113.0,
-   "pct1": -0.88,
-   "amount": 6.19
+   "price": 112.5,
+   "pct1": -1.32,
+   "amount": 7.63
   },
   "3704": {
    "market": "TWSE",
-   "price": 41.0,
-   "pct1": -2.73,
-   "amount": 1.96
+   "price": 41.2,
+   "pct1": -2.25,
+   "amount": 2.01
   },
   "3706": {
    "market": "TWSE",
-   "price": 79.7,
-   "pct1": -0.13,
-   "amount": 2.54
+   "price": 79.5,
+   "pct1": -0.38,
+   "amount": 3.08
   },
   "3707": {
    "market": "TPEX",
-   "price": 68.1,
-   "pct1": 7.41,
-   "amount": 9.54
+   "price": 68.3,
+   "pct1": 7.73,
+   "amount": 10.33
   },
   "3711": {
    "market": "TWSE",
-   "price": 693.0,
-   "pct1": 4.52,
-   "amount": 147.86
+   "price": 694.0,
+   "pct1": 4.68,
+   "amount": 151.03
   },
   "4540": {
    "market": "TWSE",
-   "price": 59.4,
-   "pct1": -1.66,
-   "amount": 0.73
+   "price": 59.6,
+   "pct1": -1.32,
+   "amount": 0.77
   },
   "4541": {
    "market": "TPEX",
-   "price": 59.9,
-   "pct1": -1.32,
-   "amount": 0.4
+   "price": 60.0,
+   "pct1": -1.15,
+   "amount": 0.43
   },
   "4576": {
    "market": "TWSE",
    "price": 233.5,
    "pct1": 0.0,
-   "amount": 1.96
+   "amount": 2.03
   },
   "4585": {
    "market": "TWSE",
    "price": 297.5,
    "pct1": -0.5,
-   "amount": 0.26
+   "amount": 0.28
   },
   "4749": {
    "market": "TPEX",
-   "price": 731.0,
-   "pct1": -0.54,
-   "amount": 3.72
+   "price": 729.0,
+   "pct1": -0.82,
+   "amount": 3.79
   },
   "4763": {
    "market": "TWSE",
-   "price": 48.1,
-   "pct1": -3.12,
-   "amount": 6.46
+   "price": 48.05,
+   "pct1": -3.22,
+   "amount": 6.6
   },
   "4772": {
    "market": "TPEX",
-   "price": 246.0,
-   "pct1": 0.61,
-   "amount": 0.51
+   "price": 245.0,
+   "pct1": 0.2,
+   "amount": 0.54
   },
   "4906": {
    "market": "TWSE",
-   "price": 39.25,
-   "pct1": 1.95,
-   "amount": 5.82
+   "price": 39.1,
+   "pct1": 1.56,
+   "amount": 6.02
   },
   "4916": {
    "market": "TWSE",
-   "price": 103.5,
-   "pct1": -1.43,
-   "amount": 2.07
+   "price": 104.0,
+   "pct1": -0.95,
+   "amount": 2.24
   },
   "4919": {
    "market": "TWSE",
-   "price": 130.5,
-   "pct1": 3.98,
-   "amount": 33.83
+   "price": 133.5,
+   "pct1": 6.37,
+   "amount": 36.43
   },
   "4938": {
    "market": "TWSE",
-   "price": 90.5,
-   "pct1": -0.33,
-   "amount": 5.62
+   "price": 90.3,
+   "pct1": -0.55,
+   "amount": 5.89
   },
   "4943": {
    "market": "TWSE",
@@ -1209,9 +1209,9 @@
   },
   "4952": {
    "market": "TWSE",
-   "price": 49.15,
-   "pct1": 1.13,
-   "amount": 0.15
+   "price": 49.0,
+   "pct1": 0.82,
+   "amount": 0.16
   },
   "4953": {
    "market": "TPEX",
@@ -1223,84 +1223,84 @@
    "market": "TWSE",
    "price": 493.0,
    "pct1": 4.89,
-   "amount": 194.21
+   "amount": 198.2
   },
   "4961": {
    "market": "TWSE",
    "price": 181.0,
    "pct1": -0.28,
-   "amount": 1.36
+   "amount": 1.41
   },
   "4966": {
    "market": "TPEX",
-   "price": 582.0,
-   "pct1": 2.65,
-   "amount": 5.01
+   "price": 584.0,
+   "pct1": 3.0,
+   "amount": 5.56
   },
   "4967": {
    "market": "TWSE",
    "price": 273.0,
    "pct1": -1.27,
-   "amount": 4.0
+   "amount": 4.12
   },
   "4971": {
    "market": "TPEX",
-   "price": 574.0,
-   "pct1": -1.2,
-   "amount": 5.66
+   "price": 570.0,
+   "pct1": -1.89,
+   "amount": 5.8
   },
   "4977": {
    "market": "TWSE",
    "price": 170.5,
    "pct1": -2.01,
-   "amount": 3.51
+   "amount": 3.57
   },
   "4979": {
    "market": "TPEX",
-   "price": 615.0,
-   "pct1": -0.49,
-   "amount": 61.25
+   "price": 611.0,
+   "pct1": -1.13,
+   "amount": 61.8
   },
   "5222": {
    "market": "TWSE",
-   "price": 105.5,
-   "pct1": -0.94,
+   "price": 106.5,
+   "pct1": 0.0,
    "amount": 0.16
   },
   "5258": {
    "market": "TWSE",
-   "price": 42.4,
-   "pct1": -1.85,
+   "price": 42.35,
+   "pct1": -1.97,
    "amount": 0.11
   },
   "5269": {
    "market": "TWSE",
    "price": 1475.0,
    "pct1": 0.0,
-   "amount": 5.4
+   "amount": 5.55
   },
   "5274": {
    "market": "TPEX",
-   "price": 21200.0,
-   "pct1": 6.96,
-   "amount": 62.86
+   "price": 21235.0,
+   "pct1": 7.14,
+   "amount": 63.99
   },
   "5285": {
    "market": "TWSE",
-   "price": 93.9,
-   "pct1": 2.4,
-   "amount": 1.62
+   "price": 93.7,
+   "pct1": 2.18,
+   "amount": 1.7
   },
   "5289": {
    "market": "TPEX",
-   "price": 1305.0,
-   "pct1": 0.77,
-   "amount": 10.01
+   "price": 1300.0,
+   "pct1": 0.39,
+   "amount": 10.1
   },
   "5299": {
    "market": "TPEX",
-   "price": 96.4,
-   "pct1": 0.21,
+   "price": 96.5,
+   "pct1": 0.31,
    "amount": 0.11
   },
   "5302": {
@@ -1311,21 +1311,21 @@
   },
   "5328": {
    "market": "TPEX",
-   "price": 52.3,
-   "pct1": 0.0,
-   "amount": 1.19
+   "price": 52.1,
+   "pct1": -0.38,
+   "amount": 1.22
   },
   "5340": {
    "market": "TPEX",
-   "price": 83.6,
-   "pct1": 1.95,
-   "amount": 3.34
+   "price": 83.3,
+   "pct1": 1.59,
+   "amount": 3.37
   },
   "5347": {
    "market": "TPEX",
-   "price": 172.5,
-   "pct1": 0.29,
-   "amount": 51.18
+   "price": 173.5,
+   "pct1": 0.87,
+   "amount": 52.22
   },
   "5371": {
    "market": "TPEX",
@@ -1337,85 +1337,85 @@
    "market": "TWSE",
    "price": 72.7,
    "pct1": -0.27,
-   "amount": 0.73
+   "amount": 0.76
   },
   "5439": {
    "market": "TPEX",
-   "price": 252.5,
-   "pct1": 3.06,
-   "amount": 2.78
+   "price": 254.0,
+   "pct1": 3.67,
+   "amount": 3.15
   },
   "5443": {
    "market": "TPEX",
-   "price": 107.5,
-   "pct1": -1.38,
-   "amount": 1.14
+   "price": 107.0,
+   "pct1": -1.83,
+   "amount": 1.17
   },
   "5471": {
    "market": "TWSE",
    "price": 52.5,
    "pct1": 0.57,
-   "amount": 0.31
+   "amount": 0.33
   },
   "5474": {
    "market": "TPEX",
-   "price": 166.5,
-   "pct1": -1.19,
+   "price": 166.0,
+   "pct1": -1.48,
    "amount": 0.5
   },
   "5536": {
    "market": "TPEX",
-   "price": 892.0,
-   "pct1": 3.12,
-   "amount": 18.13
+   "price": 890.0,
+   "pct1": 2.89,
+   "amount": 18.32
   },
   "5706": {
    "market": "TWSE",
-   "price": 44.5,
-   "pct1": 0.34,
+   "price": 44.6,
+   "pct1": 0.56,
    "amount": 0.02
   },
   "5871": {
    "market": "TWSE",
-   "price": 109.5,
-   "pct1": -0.9,
-   "amount": 9.79
+   "price": 109.0,
+   "pct1": -1.36,
+   "amount": 10.09
   },
   "5903": {
    "market": "TPEX",
    "price": 185.0,
    "pct1": 0.0,
-   "amount": 0.03
+   "amount": 0.04
   },
   "6112": {
    "market": "TWSE",
-   "price": 49.15,
-   "pct1": 0.31,
-   "amount": 1.02
+   "price": 48.95,
+   "pct1": -0.1,
+   "amount": 1.05
   },
   "6116": {
    "market": "TWSE",
-   "price": 15.85,
-   "pct1": 7.09,
-   "amount": 32.92
+   "price": 15.6,
+   "pct1": 5.41,
+   "amount": 34.11
   },
   "6117": {
    "market": "TWSE",
-   "price": 62.2,
-   "pct1": 1.47,
-   "amount": 0.13
+   "price": 62.3,
+   "pct1": 1.63,
+   "amount": 0.14
   },
   "6121": {
    "market": "TPEX",
-   "price": 375.5,
-   "pct1": 0.54,
-   "amount": 1.06
+   "price": 378.5,
+   "pct1": 1.34,
+   "amount": 1.39
   },
   "6125": {
    "market": "TPEX",
-   "price": 49.3,
-   "pct1": -0.8,
-   "amount": 0.16
+   "price": 49.2,
+   "pct1": -1.01,
+   "amount": 0.17
   },
   "6128": {
    "market": "TWSE",
@@ -1425,135 +1425,135 @@
   },
   "6129": {
    "market": "TPEX",
-   "price": 14.95,
-   "pct1": -3.24,
-   "amount": 0.05
+   "price": 15.0,
+   "pct1": -2.91,
+   "amount": 0.06
   },
   "6138": {
    "market": "TPEX",
-   "price": 275.0,
-   "pct1": 0.92,
-   "amount": 0.98
+   "price": 277.0,
+   "pct1": 1.65,
+   "amount": 1.03
   },
   "6139": {
    "market": "TWSE",
    "price": 721.0,
    "pct1": 0.42,
-   "amount": 8.44
+   "amount": 8.67
   },
   "6146": {
    "market": "TPEX",
-   "price": 180.5,
-   "pct1": 0.28,
-   "amount": 0.19
+   "price": 181.0,
+   "pct1": 0.56,
+   "amount": 0.23
   },
   "6147": {
    "market": "TPEX",
-   "price": 220.0,
-   "pct1": -1.79,
-   "amount": 103.65
+   "price": 218.5,
+   "pct1": -2.46,
+   "amount": 104.95
   },
   "6155": {
    "market": "TWSE",
-   "price": 56.8,
-   "pct1": -0.35,
-   "amount": 0.35
+   "price": 56.4,
+   "pct1": -1.05,
+   "amount": 0.37
   },
   "6163": {
    "market": "TPEX",
-   "price": 41.85,
-   "pct1": -0.95,
+   "price": 41.8,
+   "pct1": -1.07,
    "amount": 0.15
   },
   "6166": {
    "market": "TWSE",
-   "price": 130.0,
-   "pct1": 3.59,
-   "amount": 8.23
+   "price": 129.5,
+   "pct1": 3.19,
+   "amount": 8.3
   },
   "6168": {
    "market": "TWSE",
-   "price": 44.05,
-   "pct1": 3.16,
-   "amount": 26.95
+   "price": 43.75,
+   "pct1": 2.46,
+   "amount": 27.29
   },
   "6173": {
    "market": "TPEX",
-   "price": 307.0,
-   "pct1": -0.32,
-   "amount": 38.05
+   "price": 305.0,
+   "pct1": -0.97,
+   "amount": 39.27
   },
   "6182": {
    "market": "TPEX",
-   "price": 120.0,
-   "pct1": 4.35,
-   "amount": 110.83
+   "price": 119.5,
+   "pct1": 3.91,
+   "amount": 112.24
   },
   "6187": {
    "market": "TPEX",
-   "price": 1230.0,
-   "pct1": -0.4,
-   "amount": 12.96
+   "price": 1220.0,
+   "pct1": -1.21,
+   "amount": 13.98
   },
   "6188": {
    "market": "TPEX",
-   "price": 62.6,
-   "pct1": -0.16,
+   "price": 62.5,
+   "pct1": -0.32,
    "amount": 0.26
   },
   "6196": {
    "market": "TWSE",
-   "price": 538.0,
-   "pct1": 0.56,
-   "amount": 5.44
+   "price": 539.0,
+   "pct1": 0.75,
+   "amount": 5.52
   },
   "6202": {
    "market": "TWSE",
-   "price": 58.2,
-   "pct1": 1.22,
-   "amount": 0.94
+   "price": 58.1,
+   "pct1": 1.04,
+   "amount": 1.01
   },
   "6206": {
    "market": "TWSE",
-   "price": 141.0,
-   "pct1": -0.7,
-   "amount": 0.54
+   "price": 140.0,
+   "pct1": -1.41,
+   "amount": 0.59
   },
   "6213": {
    "market": "TWSE",
-   "price": 542.0,
-   "pct1": 0.0,
-   "amount": 100.45
+   "price": 540.0,
+   "pct1": -0.37,
+   "amount": 102.73
   },
   "6214": {
    "market": "TWSE",
    "price": 191.0,
    "pct1": -0.26,
-   "amount": 3.47
+   "amount": 3.56
   },
   "6223": {
    "market": "TPEX",
-   "price": 5315.0,
-   "pct1": -3.28,
-   "amount": 108.05
+   "price": 5300.0,
+   "pct1": -3.55,
+   "amount": 109.14
   },
   "6239": {
    "market": "TWSE",
    "price": 292.5,
    "pct1": 0.0,
-   "amount": 48.72
+   "amount": 50.02
   },
   "6244": {
    "market": "TPEX",
-   "price": 23.8,
-   "pct1": -0.83,
-   "amount": 0.94
+   "price": 23.75,
+   "pct1": -1.04,
+   "amount": 0.97
   },
   "6245": {
    "market": "TPEX",
-   "price": 86.1,
-   "pct1": -2.6,
-   "amount": 0.78
+   "price": 85.8,
+   "pct1": -2.94,
+   "amount": 0.82
   },
   "6263": {
    "market": "TPEX",
@@ -1563,75 +1563,75 @@
   },
   "6271": {
    "market": "TWSE",
-   "price": 231.0,
-   "pct1": 0.43,
-   "amount": 4.92
+   "price": 230.0,
+   "pct1": 0.0,
+   "amount": 5.0
   },
   "6274": {
    "market": "TPEX",
-   "price": 1415.0,
-   "pct1": -1.39,
-   "amount": 141.88
+   "price": 1425.0,
+   "pct1": -0.7,
+   "amount": 146.34
   },
   "6278": {
    "market": "TWSE",
    "price": 213.5,
    "pct1": 9.77,
-   "amount": 29.32
+   "amount": 29.51
   },
   "6282": {
    "market": "TWSE",
-   "price": 43.05,
-   "pct1": -0.69,
-   "amount": 1.15
+   "price": 43.1,
+   "pct1": -0.58,
+   "amount": 1.19
   },
   "6285": {
    "market": "TWSE",
-   "price": 235.0,
-   "pct1": 0.43,
-   "amount": 5.26
+   "price": 234.5,
+   "pct1": 0.21,
+   "amount": 5.59
   },
   "6414": {
    "market": "TWSE",
    "price": 377.0,
    "pct1": 0.53,
-   "amount": 2.07
+   "amount": 2.28
   },
   "6415": {
    "market": "TWSE",
    "price": 432.5,
    "pct1": 1.17,
-   "amount": 5.63
+   "amount": 5.73
   },
   "6416": {
    "market": "TWSE",
-   "price": 116.5,
-   "pct1": -3.72,
-   "amount": 0.8
+   "price": 116.0,
+   "pct1": -4.13,
+   "amount": 0.82
   },
   "6435": {
    "market": "TPEX",
-   "price": 247.0,
-   "pct1": 1.02,
-   "amount": 0.74
+   "price": 246.5,
+   "pct1": 0.82,
+   "amount": 0.77
   },
   "6442": {
    "market": "TWSE",
-   "price": 1515.0,
-   "pct1": -0.66,
-   "amount": 14.3
+   "price": 1520.0,
+   "pct1": -0.33,
+   "amount": 14.64
   },
   "6443": {
    "market": "TWSE",
-   "price": 28.6,
-   "pct1": 1.96,
-   "amount": 10.99
+   "price": 28.55,
+   "pct1": 1.78,
+   "amount": 11.17
   },
   "6451": {
    "market": "TWSE",
-   "price": 431.5,
-   "pct1": -0.58,
-   "amount": 7.51
+   "price": 430.0,
+   "pct1": -0.92,
+   "amount": 7.61
   },
   "6485": {
    "market": "TPEX",
@@ -1641,81 +1641,81 @@
   },
   "6488": {
    "market": "TPEX",
-   "price": 989.0,
-   "pct1": 6.23,
-   "amount": 161.26
+   "price": 988.0,
+   "pct1": 6.12,
+   "amount": 164.51
   },
   "6494": {
    "market": "TPEX",
    "price": 51.5,
    "pct1": 0.78,
-   "amount": 0.07
+   "amount": 0.08
   },
   "6510": {
    "market": "TPEX",
-   "price": 3730.0,
-   "pct1": 7.03,
-   "amount": 48.12
+   "price": 3745.0,
+   "pct1": 7.46,
+   "amount": 51.11
   },
   "6515": {
    "market": "TWSE",
-   "price": 5755.0,
-   "pct1": -0.69,
-   "amount": 71.04
+   "price": 5735.0,
+   "pct1": -1.04,
+   "amount": 72.8
   },
   "6531": {
    "market": "TWSE",
    "price": 941.0,
    "pct1": -0.74,
-   "amount": 14.31
+   "amount": 14.68
   },
   "6561": {
    "market": "TPEX",
-   "price": 312.0,
-   "pct1": -1.11,
+   "price": 313.0,
+   "pct1": -0.79,
    "amount": 0.1
   },
   "6569": {
    "market": "TPEX",
-   "price": 91.5,
-   "pct1": -0.54,
+   "price": 91.6,
+   "pct1": -0.43,
    "amount": 0.01
   },
   "6570": {
    "market": "TPEX",
-   "price": 47.25,
-   "pct1": -0.21,
+   "price": 47.1,
+   "pct1": -0.53,
    "amount": 0.03
   },
   "6573": {
    "market": "TWSE",
-   "price": 16.3,
-   "pct1": -1.21,
+   "price": 16.2,
+   "pct1": -1.82,
    "amount": 0.02
   },
   "6640": {
    "market": "TPEX",
-   "price": 1060.0,
-   "pct1": -4.5,
-   "amount": 4.57
+   "price": 1050.0,
+   "pct1": -5.41,
+   "amount": 5.09
   },
   "6643": {
    "market": "TPEX",
-   "price": 495.5,
-   "pct1": 3.66,
-   "amount": 8.44
+   "price": 495.0,
+   "pct1": 3.56,
+   "amount": 8.62
   },
   "6667": {
    "market": "TPEX",
    "price": 265.0,
    "pct1": 2.12,
-   "amount": 2.01
+   "amount": 2.05
   },
   "6669": {
    "market": "TWSE",
-   "price": 2100.0,
-   "pct1": -2.33,
-   "amount": 104.56
+   "price": 2110.0,
+   "pct1": -1.86,
+   "amount": 112.09
   },
   "6680": {
    "market": "TPEX",
@@ -1725,33 +1725,33 @@
   },
   "6689": {
    "market": "TWSE",
-   "price": 64.2,
-   "pct1": -1.83,
-   "amount": 0.25
+   "price": 64.0,
+   "pct1": -2.14,
+   "amount": 0.27
   },
   "6690": {
    "market": "TPEX",
    "price": 179.0,
    "pct1": -0.83,
-   "amount": 0.25
+   "amount": 0.26
   },
   "6691": {
    "market": "TWSE",
-   "price": 638.0,
-   "pct1": 0.95,
-   "amount": 2.73
+   "price": 637.0,
+   "pct1": 0.79,
+   "amount": 2.86
   },
   "6716": {
    "market": "TPEX",
    "price": 119.0,
    "pct1": 2.59,
-   "amount": 0.42
+   "amount": 0.43
   },
   "6739": {
    "market": "TPEX",
    "price": 1095.0,
    "pct1": -0.45,
-   "amount": 1.94
+   "amount": 1.99
   },
   "6753": {
    "market": "TWSE",
@@ -1761,39 +1761,39 @@
   },
   "6770": {
    "market": "TWSE",
-   "price": 72.5,
-   "pct1": -0.28,
-   "amount": 55.43
+   "price": 72.4,
+   "pct1": -0.41,
+   "amount": 56.96
   },
   "6788": {
    "market": "TPEX",
-   "price": 336.0,
-   "pct1": -1.61,
-   "amount": 0.51
+   "price": 335.5,
+   "pct1": -1.76,
+   "amount": 0.53
   },
   "6789": {
    "market": "TWSE",
-   "price": 470.5,
-   "pct1": 2.62,
-   "amount": 9.25
+   "price": 470.0,
+   "pct1": 2.51,
+   "amount": 9.44
   },
   "6805": {
    "market": "TWSE",
    "price": 2510.0,
    "pct1": 3.93,
-   "amount": 40.58
+   "amount": 41.19
   },
   "6811": {
    "market": "TPEX",
-   "price": 251.0,
-   "pct1": -2.14,
-   "amount": 0.85
+   "price": 251.5,
+   "pct1": -1.95,
+   "amount": 0.88
   },
   "6829": {
    "market": "TPEX",
    "price": 209.5,
    "pct1": -3.68,
-   "amount": 2.26
+   "amount": 2.31
   },
   "6857": {
    "market": "TPEX",
@@ -1809,9 +1809,9 @@
   },
   "6907": {
    "market": "TPEX",
-   "price": 190.0,
-   "pct1": 3.83,
-   "amount": 2.43
+   "price": 188.5,
+   "pct1": 3.01,
+   "amount": 2.88
   },
   "7703": {
    "market": "TPEX",
@@ -1821,9 +1821,9 @@
   },
   "7717": {
    "market": "TPEX",
-   "price": 596.0,
-   "pct1": 0.68,
-   "amount": 6.08
+   "price": 592.0,
+   "pct1": 0.0,
+   "amount": 6.25
   },
   "7719": {
    "market": "TPEX",
@@ -1835,91 +1835,91 @@
    "market": "TWSE",
    "price": 1960.0,
    "pct1": 0.0,
-   "amount": 2.79
+   "amount": 2.86
   },
   "7769": {
    "market": "TWSE",
-   "price": 6180.0,
-   "pct1": 3.0,
-   "amount": 65.06
+   "price": 6170.0,
+   "pct1": 2.83,
+   "amount": 66.39
   },
   "8016": {
    "market": "TWSE",
-   "price": 283.5,
-   "pct1": 0.71,
-   "amount": 0.77
+   "price": 282.5,
+   "pct1": 0.36,
+   "amount": 0.79
   },
   "8021": {
    "market": "TWSE",
-   "price": 476.5,
-   "pct1": 2.25,
-   "amount": 51.19
+   "price": 475.5,
+   "pct1": 2.04,
+   "amount": 54.93
   },
   "8028": {
    "market": "TWSE",
-   "price": 261.5,
-   "pct1": 1.55,
-   "amount": 31.23
+   "price": 262.5,
+   "pct1": 1.94,
+   "amount": 31.94
   },
   "8033": {
    "market": "TWSE",
    "price": 170.5,
    "pct1": -0.29,
-   "amount": 1.9
+   "amount": 2.03
   },
   "8038": {
    "market": "TPEX",
-   "price": 32.2,
-   "pct1": -0.77,
+   "price": 32.3,
+   "pct1": -0.46,
    "amount": 0.07
   },
   "8043": {
    "market": "TPEX",
    "price": 132.0,
    "pct1": -0.38,
-   "amount": 1.05
+   "amount": 1.08
   },
   "8044": {
    "market": "TPEX",
-   "price": 23.8,
-   "pct1": -1.04,
+   "price": 23.7,
+   "pct1": -1.46,
    "amount": 0.09
   },
   "8046": {
    "market": "TWSE",
    "price": 1165.0,
    "pct1": 9.91,
-   "amount": 196.05
+   "amount": 196.6
   },
   "8048": {
    "market": "TPEX",
-   "price": 49.15,
-   "pct1": -0.71,
+   "price": 49.2,
+   "pct1": -0.61,
    "amount": 0.04
   },
   "8050": {
    "market": "TPEX",
-   "price": 59.2,
-   "pct1": 0.17,
+   "price": 59.3,
+   "pct1": 0.34,
    "amount": 0.49
   },
   "8069": {
    "market": "TPEX",
    "price": 146.5,
    "pct1": 1.38,
-   "amount": 5.73
+   "amount": 6.08
   },
   "8081": {
    "market": "TWSE",
    "price": 251.5,
    "pct1": 0.4,
-   "amount": 0.56
+   "amount": 0.57
   },
   "8086": {
    "market": "TPEX",
    "price": 110.5,
    "pct1": 0.91,
-   "amount": 1.62
+   "amount": 1.76
   },
   "8099": {
    "market": "TPEX",
@@ -1935,68 +1935,68 @@
   },
   "8114": {
    "market": "TWSE",
-   "price": 177.0,
-   "pct1": -0.28,
-   "amount": 0.37
+   "price": 177.5,
+   "pct1": 0.0,
+   "amount": 0.38
   },
   "8121": {
    "market": "TPEX",
-   "price": 27.95,
-   "pct1": 0.9,
+   "price": 28.0,
+   "pct1": 1.08,
    "amount": 0.15
   },
   "8131": {
    "market": "TWSE",
-   "price": 61.4,
-   "pct1": -0.49,
-   "amount": 1.35
+   "price": 61.5,
+   "pct1": -0.32,
+   "amount": 1.38
   },
   "8210": {
    "market": "TWSE",
-   "price": 901.0,
-   "pct1": 0.11,
-   "amount": 7.99
+   "price": 903.0,
+   "pct1": 0.33,
+   "amount": 8.27
   },
   "8222": {
    "market": "TWSE",
-   "price": 35.3,
-   "pct1": -1.26,
+   "price": 35.35,
+   "pct1": -1.12,
    "amount": 0.05
   },
   "8234": {
    "market": "TPEX",
-   "price": 61.4,
-   "pct1": -1.76,
-   "amount": 0.23
+   "price": 61.6,
+   "pct1": -1.44,
+   "amount": 0.25
   },
   "8255": {
    "market": "TPEX",
-   "price": 140.0,
-   "pct1": 1.82,
-   "amount": 0.41
+   "price": 140.5,
+   "pct1": 2.18,
+   "amount": 0.43
   },
   "8261": {
    "market": "TWSE",
-   "price": 177.0,
-   "pct1": 2.02,
-   "amount": 4.15
+   "price": 177.5,
+   "pct1": 2.31,
+   "amount": 4.34
   },
   "8299": {
    "market": "TPEX",
-   "price": 2185.0,
-   "pct1": 1.63,
-   "amount": 99.38
+   "price": 2170.0,
+   "pct1": 0.93,
+   "amount": 101.43
   },
   "8358": {
    "market": "TPEX",
-   "price": 494.0,
-   "pct1": 0.51,
-   "amount": 8.87
+   "price": 493.5,
+   "pct1": 0.41,
+   "amount": 9.14
   },
   "8374": {
    "market": "TWSE",
-   "price": 76.9,
-   "pct1": -0.65,
+   "price": 76.7,
+   "pct1": -0.9,
    "amount": 0.08
   },
   "8473": {
@@ -2009,55 +2009,55 @@
    "market": "TWSE",
    "price": 1655.0,
    "pct1": 9.97,
-   "amount": 93.67
+   "amount": 94.05
   },
   "9802": {
    "market": "TWSE",
-   "price": 63.3,
-   "pct1": -0.47,
-   "amount": 0.25
+   "price": 63.6,
+   "pct1": 0.0,
+   "amount": 0.26
   },
   "9904": {
    "market": "TWSE",
-   "price": 24.65,
-   "pct1": -0.8,
-   "amount": 1.13
+   "price": 24.7,
+   "pct1": -0.6,
+   "amount": 1.14
   },
   "9910": {
    "market": "TWSE",
    "price": 68.7,
    "pct1": 0.44,
-   "amount": 0.35
+   "amount": 0.39
   },
   "9914": {
    "market": "TWSE",
-   "price": 66.8,
-   "pct1": -1.04,
-   "amount": 0.67
+   "price": 66.9,
+   "pct1": -0.89,
+   "amount": 0.71
   },
   "9919": {
    "market": "TWSE",
-   "price": 14.0,
-   "pct1": 0.36,
-   "amount": 0.01
+   "price": 14.05,
+   "pct1": 0.72,
+   "amount": 0.02
   },
   "9921": {
    "market": "TWSE",
    "price": 90.1,
    "pct1": -0.44,
-   "amount": 0.5
+   "amount": 0.52
   },
   "9941": {
    "market": "TWSE",
-   "price": 79.9,
-   "pct1": -0.37,
-   "amount": 0.28
+   "price": 79.8,
+   "pct1": -0.5,
+   "amount": 0.41
   },
   "9945": {
    "market": "TWSE",
-   "price": 29.0,
-   "pct1": -0.85,
-   "amount": 1.16
+   "price": 29.05,
+   "pct1": -0.68,
+   "amount": 1.18
   }
  },
  "vixtwn": {
