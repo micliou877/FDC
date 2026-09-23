@@ -1,7 +1,8 @@
 """
 從 yfinance 抓取美股 FDC 股池的報價、5日/10日漲跌幅與基本面資料，
 是台股 FDC（FinMind/quotes.json）的美股姊妹版，對應同一套 31 大族群分類。
-股池與分類依據見 美股FDC股池_對應31族群龍頭版.md。
+股池與分類依據見 美股FDC股池_完整整合版.md（整合原本對應台股族群的38檔＋Mic實際持有的
+23檔＋各題材補充股，約63檔），held欄位標記是否為Mic目前實際持有。
 
 品質標記邏輯沿用台股版精神，但美股高成長股 PER 天生偏高（PLTR 這類），
 額外用 revenueGrowth 當救援閥門，避免被整批誤判成純題材股。
@@ -17,19 +18,44 @@ import yfinance as yf
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "us_stocks.json"
 
-# 38 檔美股池，對應台股 FDC 的 31 大族群（見美股FDC股池_對應31族群龍頭版.md 第二節）
+# ~63 檔美股池：對應台股31大族群的原38檔 + Mic實際持有23檔 + 各題材補充股（見美股FDC股池_完整整合版.md）
+# 值為 (sector, held)；held=True 是Mic目前實際持有的部位（見文件第〇節「先對帳」）。
+# 注意：文件「先對帳」清單裡的INTC從未出現在後續任何股池表格中（文件本身的遺漏），
+# 這裡補上，歸類到跟AMD/GOOGL同一個「AI晶片設計與IP」大分類（CPU/晶圓代工）。
 US_STOCKS = {
-    "NVDA": "1 AI晶片設計與IP", "AMD": "1 AI晶片設計與IP", "AVGO": "1 AI晶片設計與IP", "MRVL": "1 AI晶片設計與IP",
-    "MU": "5 記憶體循環", "WDC": "5 記憶體循環", "SNDK": "5 記憶體循環",
-    "AMKR": "2 先進封裝與封測", "KLAC": "13 半導體設備", "LRCX": "13 半導體設備", "AMAT": "13 半導體設備", "KEYS": "13 半導體設備",
-    "COHR": "9 CPO與光通訊", "LITE": "9 CPO與光通訊", "GLW": "9 CPO與光通訊", "ANET": "9 CPO與光通訊",
-    "DELL": "3 AI伺服器ODM", "SMCI": "3 AI伺服器ODM",
-    "VRT": "4 散熱與液冷", "ETN": "24 重電電網", "GEV": "24 重電電網",
-    "STM": "27 功率半導體", "ON": "27 功率半導體", "MPWR": "27 功率半導體", "WOLF": "27 功率半導體",
-    "MCHP": "31 MCU", "TXN": "27 功率半導體", "ADI": "29 類比IDM",
-    "AMBA": "28 邊緣AI", "MBLY": "22 車用自駕", "TSLA": "19 機器人", "NXPI": "22 車用自駕", "QCOM": "20 AI手機",
-    "PLTR": "16 AI軟體", "PANW": "15 資安", "CRWD": "15 資安", "MSFT": "16 AI軟體",
-    "AVAV": "18 軍工無人機", "LMT": "18 軍工無人機",
+    # ── 對應台股族群（原38檔骨架）──
+    "NVDA": ("1 AI晶片設計與IP", True), "AMD": ("1 AI晶片設計與IP", True),
+    "AVGO": ("1 AI晶片設計與IP", True), "MRVL": ("1 AI晶片設計與IP", False),
+    "INTC": ("1 AI晶片設計與IP", True),  # 文件「先對帳」清單裡有但股池表格漏列，這裡補上
+    "GOOGL": ("1 AI晶片設計與IP", True),  # TPU鏈
+    "MU": ("5 記憶體循環", True), "WDC": ("5 記憶體循環", False), "SNDK": ("5 記憶體循環", False),
+    "AMKR": ("2 先進封裝與封測", False),
+    "KLAC": ("13 半導體設備", False), "LRCX": ("13 半導體設備", False),
+    "AMAT": ("13 半導體設備", False), "KEYS": ("13 半導體設備", False),
+    "COHR": ("9 CPO與光通訊", True), "LITE": ("9 CPO與光通訊", True),
+    "GLW": ("9 CPO與光通訊", False), "ANET": ("9 CPO與光通訊", False),
+    "DELL": ("3 AI伺服器ODM", False), "SMCI": ("3 AI伺服器ODM", False),
+    "FLEX": ("3 AI伺服器ODM", True),  # EMS，對應鴻海/廣達
+    "VRT": ("4 散熱與液冷", False), "ETN": ("24 重電電網", False), "GEV": ("24 重電電網", False),
+    "STM": ("27 功率半導體", True), "ON": ("27 功率半導體", True),
+    "MPWR": ("27 功率半導體", False), "WOLF": ("27 功率半導體", False),
+    "MCHP": ("31 MCU", False), "TXN": ("27 功率半導體", False), "ADI": ("29 類比IDM", False),
+    "AMBA": ("28 邊緣AI", False), "MBLY": ("22 車用自駕", False),
+    "TSLA": ("19 機器人", True), "NXPI": ("22 車用自駕", False), "QCOM": ("20 AI手機", False),
+    "AAPL": ("20 AI手機", True),  # 果鏈
+    "PLTR": ("16 AI軟體", True), "PANW": ("15 資安", False), "CRWD": ("15 資安", False),
+    "MSFT": ("16 AI軟體", True), "NOW": ("16 AI軟體", True), "NET": ("15 資安", True),
+    "AVAV": ("18 軍工無人機", False), "LMT": ("18 軍工無人機", False),
+
+    # ── 純美股獨立題材（台股沒有對應）──
+    "ASTS": ("🚀太空衛星", True), "RKLB": ("🚀太空衛星", True), "SPCX": ("🚀太空衛星", True),
+    "PL": ("🚀太空衛星", False), "LUNR": ("🚀太空衛星", False),
+    "RDW": ("🚀太空衛星", False), "KTOS": ("🚀太空衛星", False),
+    "LILMF": ("✈️eVTOL飛行載具", True), "JOBY": ("✈️eVTOL飛行載具", False),
+    "ACHR": ("✈️eVTOL飛行載具", False), "EH": ("✈️eVTOL飛行載具", False),
+    "PLUG": ("⚡氫能燃料電池", True), "BE": ("⚡氫能燃料電池", False), "BLDP": ("⚡氫能燃料電池", False),
+    "SE": ("🌏東南亞電商", True), "GRAB": ("🌏東南亞電商", False), "MELI": ("🌏東南亞電商", False),
+    "SNOW": ("☁️SaaS軟體", False), "DDOG": ("☁️SaaS軟體", False),
 }
 
 # 盤前觀察用「10大領先指標」：看這幾檔美股盤後表現，預判台股隔天早盤族群輪動（見文件第三節）
@@ -122,10 +148,10 @@ def fetch_one(symbol):
 
 def main():
     stocks = {}
-    for symbol, sector in US_STOCKS.items():
+    for symbol, (sector, held) in US_STOCKS.items():
         data = fetch_one(symbol)
         if data:
-            stocks[symbol] = {"sector": sector, **data}
+            stocks[symbol] = {"sector": sector, "held": held, **data}
         time.sleep(0.8)  # 避免觸發 Yahoo 限流
 
     leading = {}

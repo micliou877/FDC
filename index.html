@@ -410,7 +410,8 @@
       <h3 style="margin:0;">🇺🇸 美股 FDC 股池</h3>
       <button class="btn" onclick="loadUsStocks(true)">🔄 重新整理</button>
     </div>
-    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">39檔美股龍頭，對應台股FDC同一套31大族群分類，資料源yfinance，每個美股交易日收盤後自動更新一次。<span id="usStocksUpdated"></span></p>
+    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">整合台股FDC對應族群龍頭＋Mic實際持有部位＋各題材補充股，約63檔，資料源yfinance，每個美股交易日收盤後自動更新一次。<span id="usStocksUpdated"></span></p>
+    <div id="usFilterButtons" style="margin-top:8px;"></div>
   </div>
   <div id="usStocksLeading"></div>
   <div id="usRankingTable"></div>
@@ -3127,9 +3128,29 @@ const US_STOCK_NAMES = {
   AMBA: "Ambarella", MBLY: "Mobileye", TSLA: "Tesla", NXPI: "NXP", QCOM: "Qualcomm 高通",
   PLTR: "Palantir", PANW: "Palo Alto", CRWD: "CrowdStrike", MSFT: "Microsoft",
   AVAV: "AeroVironment", LMT: "Lockheed Martin",
+  INTC: "Intel", GOOGL: "Alphabet 谷歌", AAPL: "Apple", FLEX: "Flex 偉創力",
+  NOW: "ServiceNow", NET: "Cloudflare",
+  ASTS: "AST SpaceMobile", RKLB: "Rocket Lab", SPCX: "SpaceX",
+  PL: "Planet Labs", LUNR: "Intuitive Machines", RDW: "Redwire", KTOS: "Kratos",
+  LILMF: "Lilium", JOBY: "Joby Aviation", ACHR: "Archer Aviation", EH: "EHang",
+  PLUG: "Plug Power", BE: "Bloom Energy", BLDP: "Ballard Power",
+  SE: "Sea Limited 冬海", GRAB: "Grab Holdings", MELI: "MercadoLibre",
+  SNOW: "Snowflake", DDOG: "Datadog",
 };
 
 let usStocksData = null;
+let usFilterMode = "all"; // "all" | "held"（只看Mic實際持有）| "dream"（只看⚫虧損/🚀高成長(未獲利)這類沒有獲利安全網的部位）
+
+function setUsFilter(mode) {
+  usFilterMode = usFilterMode === mode ? "all" : mode;
+  renderUsStocks();
+}
+
+function filterUsStockEntries(entries) {
+  if (usFilterMode === "held") return entries.filter(([, s]) => s.held);
+  if (usFilterMode === "dream") return entries.filter(([, s]) => s.quality === "⚫虧損" || s.quality === "🚀高成長(未獲利)");
+  return entries;
+}
 
 async function loadUsStocks(forceRefresh) {
   const tableEl = document.getElementById("usStocksTable");
@@ -3157,6 +3178,14 @@ function renderUsStocks() {
 
   if (updatedEl) updatedEl.textContent = usStocksData.updated ? `（最後更新：${usStocksData.updated}）` : "";
 
+  const filterEl = document.getElementById("usFilterButtons");
+  if (filterEl) {
+    const btnStyle = (active) => `font-size:11px;padding:3px 10px;border-radius:4px;border:1px solid ${active ? '#2563eb' : '#e2e8f0'};background:${active ? '#2563eb' : '#fff'};color:${active ? '#fff' : '#374151'};cursor:pointer;margin-right:6px;`;
+    filterEl.innerHTML = `
+      <span style="${btnStyle(usFilterMode === 'held')}" onclick="setUsFilter('held')">⭐ 只看持有</span>
+      <span style="${btnStyle(usFilterMode === 'dream')}" onclick="setUsFilter('dream')">🌙 只看夢想股（⚫虧損／🚀高成長未獲利）</span>`;
+  }
+
   // 盤前領先指標：早上看這幾檔美股盤後表現，預判台股早盤族群輪動
   const leading = usStocksData.leadingIndicators || {};
   if (leadingEl) {
@@ -3175,10 +3204,12 @@ function renderUsStocks() {
 
   renderUsRanking();
 
-  const stocks = Object.entries(usStocksData.stocks || {}).map(([code, s]) => ({ code, name: US_STOCK_NAMES[code] || code, ...s }));
+  const stocks = filterUsStockEntries(Object.entries(usStocksData.stocks || {})).map(([code, s]) => ({ code, name: US_STOCK_NAMES[code] || code, ...s }));
   const bySector = {};
   stocks.forEach(s => { (bySector[s.sector] = bySector[s.sector] || []).push(s); });
   const sectors = Object.keys(bySector).sort();
+
+  if (!sectors.length) { tableEl.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:12px 0;">目前篩選條件下沒有符合的股票。</div>`; return; }
 
   tableEl.innerHTML = sectors.map(sector => `
     <div class="data-panel" style="margin-bottom:10px;">
@@ -3196,7 +3227,7 @@ function renderUsStocks() {
           <tbody>
             ${bySector[sector].sort((a,b)=>(b.pct10??-999)-(a.pct10??-999)).map(s => `
               <tr>
-                <td style="padding:4px 6px;font-weight:700;"><a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
+                <td style="padding:4px 6px;font-weight:700;">${s.held ? '⭐' : ''}<a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
                 <td style="padding:4px 6px;">${s.name}</td>
                 <td style="padding:4px 6px;text-align:right;">${s.price ?? "-"}</td>
                 <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct1)}">${usFmtPct(s.pct1)}</td>
@@ -3243,7 +3274,7 @@ function saveUsGainHistory(history) {
 function computeUsRanking() {
   if (!usStocksData || !usStocksData.stocks) return { ranked: [] };
   const p = US_SCORE_PARAMS;
-  const list = Object.entries(usStocksData.stocks)
+  const list = filterUsStockEntries(Object.entries(usStocksData.stocks))
     .filter(([, s]) => typeof s.pct10 === "number")
     .map(([code, s]) => ({ code, name: US_STOCK_NAMES[code] || code, ...s }))
     .sort((a, b) => b.pct10 - a.pct10);
@@ -3365,7 +3396,7 @@ function renderUsRanking() {
             ${sorted.map(s => `
               <tr>
                 <td style="padding:4px 6px;">${s.rank}</td>
-                <td style="padding:4px 6px;font-weight:700;"><a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
+                <td style="padding:4px 6px;font-weight:700;">${s.held ? '⭐' : ''}<a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
                 <td style="padding:4px 6px;">${s.name}</td>
                 <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct1)}">${usFmtPct(s.pct1)}</td>
                 <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct5)}">${usFmtPct(s.pct5)}</td>
