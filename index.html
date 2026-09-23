@@ -3304,23 +3304,62 @@ function computeUsRanking() {
   return { ranked };
 }
 
+let usRankSortKey = "total";
+let usRankSortDir = 1; // 1=遞減(大→小，預設) ／ -1=遞增(小→大)
+
+function sortUsRanking(key) {
+  if (usRankSortKey === key) usRankSortDir *= -1;
+  else { usRankSortKey = key; usRankSortDir = (key === 'code' || key === 'name') ? -1 : 1; }
+  renderUsRanking();
+}
+
+// 加到現有的關注分類；沿用台股共用的addToWatchGroup（負責push進watchlists+存檔+重繪關注頁），
+// 這裡多做一步：addToWatchGroup內建的GLOBAL_LIST名稱查詢可能查不到（39檔不是每檔都在GLOBAL_LIST裡），
+// 加完後直接拿美股FDC自己的US_STOCK_NAMES覆蓋回正確名稱。
+window.addUsStockToWatch = function(sel, code) {
+  const targetGroup = sel.value;
+  addToWatchGroup(sel, code, 'US');
+  if (targetGroup && stockMeta[code]) {
+    stockMeta[code].name = US_STOCK_NAMES[code] || stockMeta[code].name;
+    stockMetaTs = Date.now();
+    saveData();
+  }
+};
+
 function renderUsRanking() {
   const el = document.getElementById("usRankingTable");
   if (!el) return;
   const { ranked } = computeUsRanking();
   if (!ranked.length) { el.innerHTML = ""; return; }
-  const sorted = [...ranked].sort((a, b) => b.total - a.total);
+
+  const k = usRankSortKey, d = usRankSortDir;
+  const sorted = [...ranked].sort((a, b) => {
+    if (k === 'code' || k === 'name') {
+      return d === 1 ? String(b[k] || '').localeCompare(String(a[k] || '')) : String(a[k] || '').localeCompare(String(b[k] || ''));
+    }
+    const av = a[k] ?? -Infinity, bv = b[k] ?? -Infinity;
+    return d === 1 ? bv - av : av - bv;
+  });
+
+  const th = (key, label, align = 'right') => {
+    const active = usRankSortKey === key;
+    const arrow = active ? (usRankSortDir === 1 ? ' ▼' : ' ▲') : '';
+    return `<th onclick="sortUsRanking('${key}')" style="text-align:${align};padding:4px 6px;cursor:pointer;user-select:none;${active ? 'color:#1e293b;font-weight:700;' : ''}">${label}${arrow}</th>`;
+  };
+
+  const watchOptions = Object.keys(watchlists).map(g => `<option value="${g}">${g}</option>`).join('');
+
   el.innerHTML = `
     <div class="data-panel" style="margin-bottom:12px;">
       <h3 style="margin:0 0 6px;font-size:14px;">📊 漲幅排行＋評分</h3>
-      <p style="font-size:11px;color:#94a3b8;margin:0 0 6px;">簡化版：名次分(位階分+移動平均)＋加速度分，邏輯跟台股收件匣一致；樣本只有39檔，不做族群分/淘汰/回測。</p>
+      <p style="font-size:11px;color:#94a3b8;margin:0 0 6px;">簡化版：名次分(位階分+移動平均)＋加速度分，邏輯跟台股收件匣一致；樣本只有39檔，不做族群分/淘汰/回測。點欄位標題可切換排序。</p>
       <div style="overflow-x:auto;">
         <table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
           <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
-            <th style="text-align:left;padding:4px 6px;">排名</th><th style="text-align:left;padding:4px 6px;">代號</th><th style="text-align:left;padding:4px 6px;">名稱</th>
-            <th style="text-align:right;padding:4px 6px;">今日%</th><th style="text-align:right;padding:4px 6px;">5日%</th><th style="text-align:right;padding:4px 6px;">10日%</th>
-            <th style="text-align:right;padding:4px 6px;" title="近N日名次移動平均">名次(MA)</th>
-            <th style="text-align:right;padding:4px 6px;">加速度分</th><th style="text-align:right;padding:4px 6px;">總分</th>
+            ${th('rank', '排名', 'left')}${th('code', '代號', 'left')}${th('name', '名稱', 'left')}
+            ${th('pct1', '今日%')}${th('pct5', '5日%')}${th('pct10', '10日%')}
+            ${th('rankMa', '名次(MA)')}${th('accelScore', '加速度分')}${th('total', '總分')}
+            <th style="text-align:center;padding:4px 6px;">加入自選</th>
           </tr></thead>
           <tbody>
             ${sorted.map(s => `
@@ -3334,6 +3373,11 @@ function renderUsRanking() {
                 <td style="padding:4px 6px;text-align:right;">${s.rankMa != null ? s.rankMa.toFixed(1) : '-'}</td>
                 <td style="padding:4px 6px;text-align:right;">${s.accelScore.toFixed(1)}</td>
                 <td style="padding:4px 6px;text-align:right;font-weight:700;">${s.total.toFixed(1)}</td>
+                <td style="padding:3px 4px;text-align:center;">
+                  <select onchange="addUsStockToWatch(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:90px;">
+                    <option value="">＋關注</option>${watchOptions}
+                  </select>
+                </td>
               </tr>`).join('')}
           </tbody>
         </table>
