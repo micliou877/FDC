@@ -3152,6 +3152,24 @@ function filterUsStockEntries(entries) {
   return entries;
 }
 
+// 把美股FDC(yfinance)抓到的資料同步進stockData，讓「關注」「明細」這些原本只吃FinMind/quotes.json
+// 的頁面，對美股標的也能顯示股價/漲跌幅/品質標籤——不然美股股票只有加進關注清單時記的名稱/市場，
+// 沒有報價（FinMind的美股資料不穩定/常抓不到，這正是當初另外做一條yfinance管線的原因，
+// 但也代表原本吃stockData的舊頁面完全不知道yfinance這邊抓到的東西，兩邊資料是分開的，要手動接起來）。
+function applyUsDataToStockData() {
+  if (!usStocksData || !usStocksData.stocks) return;
+  Object.entries(usStocksData.stocks).forEach(([code, s]) => {
+    stockData[code] = {
+      ...(stockData[code] || {}),
+      market: "US",
+      price: s.price, pct1: s.pct1, pct5: s.pct5, pct10: s.pct10,
+      close5Ref: s.close5Ref, close10Ref: s.close10Ref,
+      per: s.per, eps: s.eps,
+      qualityTag: s.quality, quality_status: s.quality,
+    };
+  });
+}
+
 async function loadUsStocks(forceRefresh) {
   const tableEl = document.getElementById("usStocksTable");
   if (tableEl) tableEl.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:12px 0;">載入中...</div>`;
@@ -3163,7 +3181,10 @@ async function loadUsStocks(forceRefresh) {
     if (tableEl) tableEl.innerHTML = `<div style="font-size:12px;color:#b91c1c;padding:12px 0;">載入失敗：${e.message}</div>`;
     return;
   }
-  renderUsStocks();
+  applyUsDataToStockData();
+  if (document.getElementById("usstocks")?.classList.contains("active")) renderUsStocks();
+  if (document.getElementById("watchlist")?.classList.contains("active")) renderWatchlist();
+  if (document.getElementById("stocks")?.classList.contains("active")) renderStocks();
 }
 
 function usPctClass(v) { return v == null ? "flat-text" : v > 0 ? "pos-text" : v < 0 ? "neg-text" : "flat-text"; }
@@ -5733,6 +5754,7 @@ window._t4_data = JSON.parse(localStorage.getItem("fdc_holdings") || "null") || 
 holdingsTs = parseInt(localStorage.getItem("fdc_holdings_ts") || "0", 10) || 0;
 fetchLiveQuotes();
 setInterval(fetchLiveQuotes, 5 * 60 * 1000);
+loadUsStocks(false); // 頁面一開就先載入美股資料並同步進stockData，不用特地切到「美股FDC」分頁才有報價
 
 document.addEventListener('click', function(e) {
   const tr = e.target.closest('.stocks-table tbody tr');
