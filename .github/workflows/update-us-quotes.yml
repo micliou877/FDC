@@ -30,22 +30,27 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet -- us_stocks.json; then
-            git add us_stocks.json
-            git commit -m "更新美股股池快照 $(date -u +'%Y-%m-%d %H:%M UTC')"
-            for i in 1 2 3 4 5; do
-              if git push; then
-                break
-              fi
-              echo "push rejected, retrying (attempt $i)"
-              git fetch origin main
-              # us_stocks.json每次都整份重新產生，不需要真的merge，直接拿自己這份最新內容
-              # 蓋在最新的origin/main上即可，避免rebase衝突讓整個工作直接失敗。
-              git reset --soft origin/main
-              git add us_stocks.json
-              git commit -m "更新美股股池快照 $(date -u +'%Y-%m-%d %H:%M UTC')" --allow-empty
-              sleep $((RANDOM % 5 + 1))
-            done
-          else
+          if git diff --quiet -- us_stocks.json; then
             echo "no change"
+            exit 0
           fi
+          # 先把新抓到的us_stocks.json內容存到別處，因為衝突重試時會整個硬重置工作目錄。
+          cp us_stocks.json /tmp/us_stocks_new.json
+          for i in 1 2 3 4 5; do
+            if ! git diff --quiet -- us_stocks.json; then
+              git add us_stocks.json
+              git commit -m "更新美股股池快照 $(date -u +'%Y-%m-%d %H:%M UTC')"
+            fi
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected, retrying (attempt $i)"
+            git fetch origin main
+            # 用 reset --hard 完全同步到最新的origin/main（連同index.html等其他檔案），
+            # 不能用 reset --soft：那個只移動HEAD、不會更新工作目錄跟索引，如果這個checkout
+            # 一開始就落後於其他同時在跑的工作，soft reset完再commit會把它自己checkout時
+            # 那份舊版的其他檔案（例如index.html）一起夾帶進新commit，等於把後來的修改蓋掉。
+            git reset --hard origin/main
+            cp /tmp/us_stocks_new.json us_stocks.json
+            sleep $((RANDOM % 5 + 1))
+          done
