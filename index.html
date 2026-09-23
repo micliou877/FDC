@@ -833,16 +833,16 @@
 
 <script>
 // 每次修改 index.html 後手動更新，用來在畫面左上角確認目前裝置載入的是哪個版本（避免瀏覽器快取/未重新整理造成誤判）
-const APP_VERSION = "2026-08-30.4";
+const APP_VERSION = "2026-08-31.1";
 document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
 const SECTORS = {
   "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"5471",name:"松翰"},{code:"5388",name:"中磊"},{code:"8081",name:"致新"}],
-  "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"8038",name:"長園科"},{code:"3530",name:"晶相光"},{code:"3014",name:"聯陽"}],
+  "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"8038",name:"長園科"},{code:"3530",name:"晶相光"},{code:"3014",name:"聯陽"},{code:"6168",name:"宏齊"}],
   "3. AI伺服器ODM": [{code:"2317",name:"鴻海"},{code:"2382",name:"廣達"},{code:"3231",name:"緯創"},{code:"6669",name:"緯穎"},{code:"2356",name:"英業達"},{code:"2376",name:"技嘉"},{code:"3706",name:"神達"},{code:"2324",name:"仁寶"},{code:"4938",name:"和碩"},{code:"2377",name:"微星"},{code:"2353",name:"宏碁"},{code:"2357",name:"華碩"}],
   "4. 散熱與液冷": [{code:"3017",name:"奇鋐"},{code:"3324",name:"雙鴻"},{code:"3653",name:"健策"},{code:"2308",name:"台達電"},{code:"6805",name:"富世達"},{code:"3013",name:"晟銘電"},{code:"8996",name:"高力"},{code:"2421",name:"建準"},{code:"6788",name:"尼得科超眾"},{code:"6125",name:"廣運"},{code:"2059",name:"川湖"},{code:"3483",name:"力致"},{code:"4943",name:"康控-KY"}],
-  "5. 記憶體循環": [{code:"2408",name:"南亞科"},{code:"2344",name:"華邦電"},{code:"6770",name:"力積電"},{code:"2337",name:"旺宏"},{code:"3006",name:"晶豪科"},{code:"8299",name:"群聯"},{code:"3260",name:"威剛"},{code:"4967",name:"十銓"},{code:"2451",name:"創見"},{code:"5289",name:"宜鼎"},{code:"8044",name:"宇瞻"},{code:"6168",name:"宏齊"},{code:"8131",name:"福懋科"},{code:"1474",name:"華東"}],
+  "5. 記憶體循環": [{code:"2408",name:"南亞科"},{code:"2344",name:"華邦電"},{code:"6770",name:"力積電"},{code:"2337",name:"旺宏"},{code:"3006",name:"晶豪科"},{code:"8299",name:"群聯"},{code:"3260",name:"威剛"},{code:"4967",name:"十銓"},{code:"2451",name:"創見"},{code:"5289",name:"宜鼎"},{code:"8044",name:"宇瞻"},{code:"8131",name:"福懋科"},{code:"1474",name:"華東"}],
   "6. 伺服器機殼": [{code:"8210",name:"勤誠"},{code:"3013",name:"晟銘電"},{code:"3693",name:"營邦"},{code:"6117",name:"迎廣"},{code:"3032",name:"偉訓"}],
   "7. 被動元件": [{code:"2327",name:"國巨*"},{code:"2492",name:"華新科"},{code:"3026",name:"禾伸堂"},{code:"3357",name:"臺慶科"},{code:"2375",name:"凱美"},{code:"2428",name:"興勤"},{code:"2472",name:"立隆電"},{code:"2478",name:"大毅"},{code:"5328",name:"華容"},{code:"6155",name:"鈞寶"},{code:"6173",name:"信昌電"},{code:"9802",name:"鈺邦"},{code:"3686",name:"達能"},{code:"8043",name:"蜜望實"}],
   "8. PCB與CCL載板": [{code:"8046",name:"南電"},{code:"3037",name:"欣興"},{code:"2368",name:"金像電"},{code:"4958",name:"臻鼎-KY"},{code:"3044",name:"健鼎"},{code:"6213",name:"聯茂"},{code:"2383",name:"台光電"},{code:"6274",name:"台燿"},{code:"2313",name:"華通"},{code:"2367",name:"燿華"},{code:"2355",name:"敬鵬"},{code:"5439",name:"高技"},{code:"8101",name:"華冠"},{code:"2436",name:"偉詮電"},{code:"6263",name:"精成科"},{code:"8021",name:"尖點"},{code:"8358",name:"金居"}],
@@ -3207,43 +3207,100 @@ function renderUsStocks() {
   const stocks = filterUsStockEntries(Object.entries(usStocksData.stocks || {})).map(([code, s]) => ({ code, name: US_STOCK_NAMES[code] || code, ...s }));
   const bySector = {};
   stocks.forEach(s => { (bySector[s.sector] = bySector[s.sector] || []).push(s); });
-  const sectors = Object.keys(bySector).sort();
 
-  if (!sectors.length) { tableEl.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:12px 0;">目前篩選條件下沒有符合的股票。</div>`; return; }
+  if (!Object.keys(bySector).length) { tableEl.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:12px 0;">目前篩選條件下沒有符合的股票。</div>`; return; }
 
-  tableEl.innerHTML = sectors.map(sector => `
-    <div class="data-panel" style="margin-bottom:10px;">
-      <h3 style="margin:0 0 6px;font-size:13px;color:#334155;">${sector}</h3>
-      <div style="overflow-x:auto;">
-        <table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
-          <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
-            <th style="text-align:left;padding:4px 6px;">代號</th><th style="text-align:left;padding:4px 6px;">名稱</th>
-            <th style="text-align:right;padding:4px 6px;">收盤</th><th style="text-align:right;padding:4px 6px;">今日%</th>
-            <th style="text-align:right;padding:4px 6px;">5日%</th><th style="text-align:right;padding:4px 6px;">10日%</th>
-            <th style="text-align:right;padding:4px 6px;">PER</th><th style="text-align:right;padding:4px 6px;">EPS</th>
-            <th style="text-align:right;padding:4px 6px;">營益率</th><th style="text-align:right;padding:4px 6px;">營收年增</th>
-            <th style="text-align:center;padding:4px 6px;">品質</th><th style="text-align:center;padding:4px 6px;">本業體質</th>
-          </tr></thead>
-          <tbody>
-            ${bySector[sector].sort((a,b)=>(b.pct10??-999)-(a.pct10??-999)).map(s => `
-              <tr>
-                <td style="padding:4px 6px;font-weight:700;">${s.held ? '⭐' : ''}<a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
-                <td style="padding:4px 6px;">${s.name}</td>
-                <td style="padding:4px 6px;text-align:right;">${s.price ?? "-"}</td>
-                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct1)}">${usFmtPct(s.pct1)}</td>
-                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct5)}">${usFmtPct(s.pct5)}</td>
-                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct10)}">${usFmtPct(s.pct10)}</td>
-                <td style="padding:4px 6px;text-align:right;">${s.per ?? "-"}</td>
-                <td style="padding:4px 6px;text-align:right;">${s.eps ?? "-"}</td>
-                <td style="padding:4px 6px;text-align:right;">${usFmtRatio(s.opMargin)}</td>
-                <td style="padding:4px 6px;text-align:right;">${usFmtRatio(s.revenueGrowth)}</td>
-                <td style="padding:4px 6px;text-align:center;">${s.quality ?? "-"}</td>
-                <td style="padding:4px 6px;text-align:center;">${s.earningsSource ?? "-"}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
+  const usAvg = (arr, key) => {
+    const vals = arr.map(s => s[key]).filter(v => typeof v === "number");
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  };
+  const sectorStats = Object.entries(bySector).map(([sector, arr]) => ({
+    sector, stocks: arr, count: arr.length,
+    pct1: usAvg(arr, "pct1"), pct5: usAvg(arr, "pct5"), pct10: usAvg(arr, "pct10"),
+  }));
+
+  const key = usSectorSortKey;
+  const sortedSectors = [...sectorStats].sort((a, b) => (b[key] ?? -999) - (a[key] ?? -999));
+  const maxAbs = Math.max(...sortedSectors.map(s => Math.abs(s[key] ?? 0)), 1);
+  const watchOptionsHtml = Object.keys(watchlists).map(g => `<option value="${g}">${g}</option>`).join('');
+
+  const rowsHtml = sortedSectors.map((s, idx) => {
+    const rank = idx + 1;
+    const val = s[key] ?? 0;
+    const expanded = usExpandedSectors.has(s.sector);
+    const tierBg = rank <= 3 ? '#fde68a' : rank <= 6 ? '#fef3c7' : rank <= 10 ? '#fffbeb' : '#fff';
+    const barPct = (Math.abs(val) / maxAbs * 100).toFixed(1);
+
+    let rowHtml = `
+      <div onclick="toggleUsSectorExpand('${s.sector.replace(/'/g, "\\'")}')" style="display:grid;grid-template-columns:170px 1fr 50px;gap:8px;align-items:center;padding:6px 8px;cursor:pointer;border-radius:6px;background:${expanded ? '#e8f0fe' : tierBg};">
+        <div style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          <span style="font-size:10px;color:#92400e;font-weight:700;flex-shrink:0;min-width:16px;">${rank}</span>${s.sector}
+          <span style="font-size:9px;color:#9ca3af;flex-shrink:0;">${expanded ? '▲' : '▼'}</span>
+        </div>
+        <div style="position:relative;height:22px;background:#e2e8f0;border-radius:4px;overflow:hidden;display:flex;${val >= 0 ? 'justify-content:flex-start;' : 'justify-content:flex-end;'}">
+          <div style="height:100%;display:flex;align-items:center;padding:0 8px;font-size:11px;color:#fff;font-weight:600;white-space:nowrap;background:${val >= 0 ? '#9b5252' : '#4a7a60'};width:${barPct}%;">${usFmtPct(val)}</div>
+        </div>
+        <div style="text-align:right;font-size:12px;color:#64748b;">${s.count}檔</div>
+      </div>`;
+
+    if (expanded) {
+      const memberRows = [...s.stocks].sort((a, b) => (b[key] ?? -999) - (a[key] ?? -999)).map(st => `
+        <tr>
+          <td style="padding:4px 6px;font-weight:700;">${st.held ? '⭐' : ''}<a href="https://tw.tradingview.com/chart/?symbol=${st.code}" target="_blank" style="color:#4a9eff;text-decoration:none;" onclick="event.stopPropagation()">${st.code}</a></td>
+          <td style="padding:4px 6px;">${st.name}</td>
+          <td style="padding:4px 6px;text-align:right;">${st.price ?? "-"}</td>
+          <td style="padding:4px 6px;text-align:right;" class="${usPctClass(st.pct1)}">${usFmtPct(st.pct1)}</td>
+          <td style="padding:4px 6px;text-align:right;" class="${usPctClass(st.pct5)}">${usFmtPct(st.pct5)}</td>
+          <td style="padding:4px 6px;text-align:right;" class="${usPctClass(st.pct10)}">${usFmtPct(st.pct10)}</td>
+          <td style="padding:4px 6px;text-align:center;">${st.quality ?? "-"}</td>
+          <td style="padding:4px 6px;text-align:center;">${st.earningsSource ?? "-"}</td>
+          <td style="padding:3px 4px;text-align:center;" onclick="event.stopPropagation()">
+            <select onchange="addUsStockToWatch(this,'${st.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:90px;">
+              <option value="">＋關注</option>${watchOptionsHtml}
+            </select>
+          </td>
+        </tr>`).join('');
+      rowHtml += `
+        <div style="background:#f8fafc;border:1px solid #c7d2fe;border-radius:0 0 6px 6px;margin:-2px 0 4px;padding:6px 10px 10px;">
+          <div style="overflow-x:auto;">
+            <table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
+              <thead><tr style="color:#9ca3af;font-size:11px;">
+                <th style="text-align:left;padding:3px 6px;">代號</th><th style="text-align:left;padding:3px 6px;">名稱</th>
+                <th style="text-align:right;padding:3px 6px;">收盤</th><th style="text-align:right;padding:3px 6px;">今日%</th>
+                <th style="text-align:right;padding:3px 6px;">5日%</th><th style="text-align:right;padding:3px 6px;">10日%</th>
+                <th style="text-align:center;padding:3px 6px;">品質</th><th style="text-align:center;padding:3px 6px;">本業體質</th>
+                <th style="text-align:center;padding:3px 6px;">加入自選</th>
+              </tr></thead>
+              <tbody>${memberRows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }
+    return rowHtml;
+  }).join('');
+
+  tableEl.innerHTML = `
+    <div class="data-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <h3 style="margin:0;font-size:14px;">🏆 族群排行榜</h3>
+        <select onchange="setUsSectorSort(this.value)" style="font-size:12px;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;">
+          <option value="pct1" ${key === 'pct1' ? 'selected' : ''}>今日漲跌幅</option>
+          <option value="pct5" ${key === 'pct5' ? 'selected' : ''}>近5日漲跌幅</option>
+          <option value="pct10" ${key === 'pct10' ? 'selected' : ''}>近10日漲跌幅</option>
+        </select>
       </div>
-    </div>`).join('');
+      ${rowsHtml}
+    </div>`;
+}
+
+let usExpandedSectors = new Set();
+let usSectorSortKey = "pct10";
+
+function setUsSectorSort(key) { usSectorSortKey = key; renderUsStocks(); }
+function toggleUsSectorExpand(sector) {
+  if (usExpandedSectors.has(sector)) usExpandedSectors.delete(sector);
+  else usExpandedSectors.add(sector);
+  renderUsStocks();
 }
 
 // ==================== 美股漲幅排名＋評分（簡化版）====================
