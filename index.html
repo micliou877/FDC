@@ -3388,7 +3388,7 @@ function renderUsRanking() {
         <table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
           <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
             ${th('rank', '排名', 'left')}${th('code', '代號', 'left')}${th('name', '名稱', 'left')}
-            ${th('pct1', '今日%')}${th('pct5', '5日%')}${th('pct10', '10日%')}
+            ${th('price', '收盤')}${th('pct1', '今日%')}${th('pct5', '5日%')}${th('pct10', '10日%')}
             ${th('rankMa', '名次(MA)')}${th('accelScore', '加速度分')}${th('total', '總分')}
             <th style="text-align:center;padding:4px 6px;">加入自選</th>
           </tr></thead>
@@ -3398,6 +3398,7 @@ function renderUsRanking() {
                 <td style="padding:4px 6px;">${s.rank}</td>
                 <td style="padding:4px 6px;font-weight:700;">${s.held ? '⭐' : ''}<a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
                 <td style="padding:4px 6px;">${s.name}</td>
+                <td style="padding:4px 6px;text-align:right;">${s.price ?? "-"}</td>
                 <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct1)}">${usFmtPct(s.pct1)}</td>
                 <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct5)}">${usFmtPct(s.pct5)}</td>
                 <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct10)}">${usFmtPct(s.pct10)}</td>
