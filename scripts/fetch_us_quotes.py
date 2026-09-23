@@ -92,6 +92,10 @@ def fetch_one(symbol):
         pct1 = round((price - float(closes.iloc[-2])) / float(closes.iloc[-2]) * 100, 2)
         pct5 = round((price - float(closes.iloc[-6])) / float(closes.iloc[-6]) * 100, 2) if len(closes) >= 6 else None
         pct10 = round((price - float(closes.iloc[-11])) / float(closes.iloc[-11]) * 100, 2) if len(closes) >= 11 else None
+        # close5Ref/close10Ref：5日/10日前的收盤價，前端拿來算「加速度分」(近5日 vs 前一個5日報酬)，
+        # 跟台股FDC同一套公式，欄位命名也刻意一致方便前端共用邏輯。
+        close5_ref = float(closes.iloc[-6]) if len(closes) >= 6 else None
+        close10_ref = float(closes.iloc[-11]) if len(closes) >= 11 else None
 
         info = t.info or {}
         per = info.get("trailingPE")
@@ -101,6 +105,7 @@ def fetch_one(symbol):
 
         return {
             "price": r2(price), "pct1": pct1, "pct5": pct5, "pct10": pct10,
+            "close5Ref": r2(close5_ref), "close10Ref": r2(close10_ref),
             "per": r2(per), "eps": r2(eps),
             "grossMargin": r2(info.get("grossMargins"), 4),
             "opMargin": r2(op_margin, 4),

@@ -413,6 +413,7 @@
     <p style="font-size:12px;color:#64748b;margin:4px 0 0;">39檔美股龍頭，對應台股FDC同一套31大族群分類，資料源yfinance，每個美股交易日收盤後自動更新一次。<span id="usStocksUpdated"></span></p>
   </div>
   <div id="usStocksLeading"></div>
+  <div id="usRankingTable"></div>
   <div id="usStocksTable"></div>
 </div>
 
@@ -3172,6 +3173,8 @@ function renderUsStocks() {
       </div>`;
   }
 
+  renderUsRanking();
+
   const stocks = Object.entries(usStocksData.stocks || {}).map(([code, s]) => ({ code, name: US_STOCK_NAMES[code] || code, ...s }));
   const bySector = {};
   stocks.forEach(s => { (bySector[s.sector] = bySector[s.sector] || []).push(s); });
@@ -3210,6 +3213,132 @@ function renderUsStocks() {
         </table>
       </div>
     </div>`).join('');
+}
+
+// ==================== 美股漲幅排名＋評分（簡化版）====================
+// 邏輯沿用台股收件匣加權分數（名次分：位階分+移動平均微調／加速度分：近5日vs前一個5日），
+// 但美股股池只有39檔、31族群大多只有1-2檔，「族群分」在這麼小的樣本裡幾乎派不上用場
+// （density>1才有效果，多數族群連density=2都湊不到），所以簡化版刻意不做族群分、也不做
+// 淘汰門檻/回測，只留名次分+加速度分，直接復用computeRankMovingAverages／makeMailScoreNormalizer
+// 這兩個台股已經寫好的通用函式，不重複造輪子。
+const US_GAIN_HISTORY_KEY = "fdc_us_gain10_rank_history_v1";
+const US_GAIN_HISTORY_MAX_DAYS = 60;
+const US_SCORE_PARAMS = {
+  rankMaDays: 3, rankLevelBase: 22, rankLevelMult: 2, rankLevelCutoffRank: 10, rankLevelFloorScore: 1,
+  rankDeltaWeight: 0.4, rankDeltaCapUp: 4, rankDeltaCapDown: 4,
+  accelPriorMinReturn: 5, accelBreaks: [0.45, 0.35, 0.25, 0.15], accelScores: [20, 14, 8, 3, -5],
+  accelFreshBreakoutFloor: -3, accelFreshBreakoutMinReturn5d: 8, accelFreshBreakoutScore: 8,
+  weightRank: 60, weightAccel: 40, // 沒有族群分，把台股版原本給族群分的權重併給名次分/加速度分
+};
+
+function loadUsGainHistory() {
+  try { return JSON.parse(localStorage.getItem(US_GAIN_HISTORY_KEY) || "{}"); } catch (e) { return {}; }
+}
+function saveUsGainHistory(history) {
+  const dates = Object.keys(history).sort();
+  while (dates.length > US_GAIN_HISTORY_MAX_DAYS) { delete history[dates.shift()]; }
+  try { localStorage.setItem(US_GAIN_HISTORY_KEY, JSON.stringify(history)); } catch (e) {}
+}
+
+function computeUsRanking() {
+  if (!usStocksData || !usStocksData.stocks) return { ranked: [] };
+  const p = US_SCORE_PARAMS;
+  const list = Object.entries(usStocksData.stocks)
+    .filter(([, s]) => typeof s.pct10 === "number")
+    .map(([code, s]) => ({ code, name: US_STOCK_NAMES[code] || code, ...s }))
+    .sort((a, b) => b.pct10 - a.pct10);
+  if (!list.length) return { ranked: [] };
+
+  const snapshotDate = (usStocksData.updated || "").slice(0, 10) || new Date().toISOString().slice(0, 10);
+  const history = loadUsGainHistory();
+  const priorDates = Object.keys(history).filter(d => d < snapshotDate).sort();
+  const prevRanks = priorDates.length ? history[priorDates[priorDates.length - 1]] : {};
+
+  const currentRanks = {};
+  list.forEach((s, i) => { currentRanks[s.code] = i + 1; });
+  history[snapshotDate] = currentRanks;
+  saveUsGainHistory(history);
+
+  const rankMaLookup = computeRankMovingAverages(list, history, snapshotDate, p.rankMaDays);
+
+  const raw = list.map((s, i) => {
+    const rank = i + 1;
+    const isNew = !(s.code in prevRanks);
+    const rankChange = isNew ? null : (prevRanks[s.code] - rank);
+    const rankMa = rankMaLookup[s.code] != null ? rankMaLookup[s.code] : rank;
+
+    const rankLevelScore = rankMa <= p.rankLevelCutoffRank ? (p.rankLevelBase - p.rankLevelMult * rankMa) : p.rankLevelFloorScore;
+    let rankDeltaScore = 0;
+    if (!isNew && rankChange) {
+      rankDeltaScore = rankChange > 0
+        ? Math.min(p.rankDeltaWeight * rankChange, p.rankDeltaCapUp)
+        : -Math.min(p.rankDeltaWeight * Math.abs(rankChange), p.rankDeltaCapDown);
+    }
+    const rankScore = rankLevelScore + rankDeltaScore;
+
+    let accelScore = 0;
+    if (s.close5Ref != null && s.close10Ref) {
+      const prior5 = ((s.close5Ref - s.close10Ref) / s.close10Ref) * 100;
+      const recent5 = s.pct5;
+      if (prior5 <= p.accelPriorMinReturn) {
+        const isConsolidation = prior5 > p.accelFreshBreakoutFloor;
+        const isBreakoutStrong = recent5 != null && recent5 >= p.accelFreshBreakoutMinReturn5d;
+        if (isConsolidation && isBreakoutStrong) accelScore = p.accelFreshBreakoutScore;
+      } else {
+        const ratio = recent5 / prior5;
+        const [b1, b2, b3, b4] = p.accelBreaks;
+        const [v1, v2, v3, v4, v5] = p.accelScores;
+        accelScore = ratio >= b1 ? v1 : ratio >= b2 ? v2 : ratio >= b3 ? v3 : ratio >= b4 ? v4 : v5;
+      }
+    }
+    return { ...s, rank, isNew, rankChange, rankMa, rankScore, accelScore };
+  });
+
+  const normRank = makeMailScoreNormalizer(raw.map(r => r.rankScore), "minmax");
+  const normAccel = makeMailScoreNormalizer(raw.map(r => r.accelScore), "minmax");
+  const ranked = raw.map(r => ({
+    ...r,
+    total: Math.round((normRank(r.rankScore) * p.weightRank + normAccel(r.accelScore) * p.weightAccel) * 10) / 10,
+  }));
+
+  return { ranked };
+}
+
+function renderUsRanking() {
+  const el = document.getElementById("usRankingTable");
+  if (!el) return;
+  const { ranked } = computeUsRanking();
+  if (!ranked.length) { el.innerHTML = ""; return; }
+  const sorted = [...ranked].sort((a, b) => b.total - a.total);
+  el.innerHTML = `
+    <div class="data-panel" style="margin-bottom:12px;">
+      <h3 style="margin:0 0 6px;font-size:14px;">📊 漲幅排行＋評分</h3>
+      <p style="font-size:11px;color:#94a3b8;margin:0 0 6px;">簡化版：名次分(位階分+移動平均)＋加速度分，邏輯跟台股收件匣一致；樣本只有39檔，不做族群分/淘汰/回測。</p>
+      <div style="overflow-x:auto;">
+        <table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
+          <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
+            <th style="text-align:left;padding:4px 6px;">排名</th><th style="text-align:left;padding:4px 6px;">代號</th><th style="text-align:left;padding:4px 6px;">名稱</th>
+            <th style="text-align:right;padding:4px 6px;">今日%</th><th style="text-align:right;padding:4px 6px;">5日%</th><th style="text-align:right;padding:4px 6px;">10日%</th>
+            <th style="text-align:right;padding:4px 6px;" title="近N日名次移動平均">名次(MA)</th>
+            <th style="text-align:right;padding:4px 6px;">加速度分</th><th style="text-align:right;padding:4px 6px;">總分</th>
+          </tr></thead>
+          <tbody>
+            ${sorted.map(s => `
+              <tr>
+                <td style="padding:4px 6px;">${s.rank}</td>
+                <td style="padding:4px 6px;font-weight:700;"><a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
+                <td style="padding:4px 6px;">${s.name}</td>
+                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct1)}">${usFmtPct(s.pct1)}</td>
+                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct5)}">${usFmtPct(s.pct5)}</td>
+                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct10)}">${usFmtPct(s.pct10)}</td>
+                <td style="padding:4px 6px;text-align:right;">${s.rankMa != null ? s.rankMa.toFixed(1) : '-'}</td>
+                <td style="padding:4px 6px;text-align:right;">${s.accelScore.toFixed(1)}</td>
+                <td style="padding:4px 6px;text-align:right;font-weight:700;">${s.total.toFixed(1)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 // ==================== 面板渲染邏輯 ====================
