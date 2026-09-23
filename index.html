@@ -253,6 +253,7 @@
   <button class="tab" data-tab="stocks">📋 明細</button>
   <button class="tab" data-tab="watchlist">⭐ 關注</button>
   <button class="tab" data-tab="global">🌐 國際</button>
+  <button class="tab" data-tab="usstocks">🇺🇸 美股FDC</button>
   <button class="tab" data-tab="data">⚙️ 設定</button>
   <button class="tab" data-tab="sop">📖 操作 SOP</button>
   <button class="tab" data-tab="diary">📓 交易日記</button>
@@ -401,6 +402,18 @@
     <button class="btn primary" id="openTvAppBtn" style="padding: 10px 14px;">開啟圖表</button>
   </div>
   <div id="tvChartContainer" style="height: 75vh; width: 100%; border-radius: 8px; overflow: hidden; background: #0f1419;"></div>
+</div>
+
+<div class="panel" id="usstocks">
+  <div class="data-panel" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <h3 style="margin:0;">🇺🇸 美股 FDC 股池</h3>
+      <button class="btn" onclick="loadUsStocks(true)">🔄 重新整理</button>
+    </div>
+    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">39檔美股龍頭，對應台股FDC同一套31大族群分類，資料源yfinance，每個美股交易日收盤後自動更新一次。<span id="usStocksUpdated"></span></p>
+  </div>
+  <div id="usStocksLeading"></div>
+  <div id="usStocksTable"></div>
 </div>
 
 <div class="panel" id="data">
@@ -1319,6 +1332,7 @@ let liveQuoteTime = null;
 let vixtwn = null;
 let vixRefreshing = false;
 const QUOTES_URL = "https://raw.githubusercontent.com/micliou877/FDC/main/quotes.json";
+const US_QUOTES_URL = "https://raw.githubusercontent.com/micliou877/FDC/main/us_stocks.json";
 let currentSector = null;
 let syncInterval = null;
 let stockSortKey = "pct10";
@@ -3090,8 +3104,112 @@ function switchTab(tab) {
   if(tab === "global") {
     if(document.getElementById("globalStockSelect").options.length === 0) initGlobalPanel();
   }
+  if(tab === "usstocks") { if (!usStocksData) loadUsStocks(false); else renderUsStocks(); }
   if(tab === "strategy") renderStrategy();
   if(tab === "diary") renderDiary();
+}
+
+// ==================== 美股 FDC（yfinance，見 美股FDC股池_對應31族群龍頭版.md）====================
+// 台股FDC用FinMind/quotes.json，美股沒有FinMind資料，改用yfinance，由獨立的GitHub Actions
+// (update-us-quotes.yml)每個美股交易日收盤後跑一次scripts/fetch_us_quotes.py產生us_stocks.json。
+// 品質標記邏輯跟台股版精神一致，但美股高成長股PER天生偏高，用revenueGrowth當救援閥門，
+// 避免PLTR這類「貴但有成長撐」的股票被整批誤判成純題材股（詳見文件第四節）。
+const US_STOCK_NAMES = {
+  NVDA: "NVIDIA", AMD: "AMD", AVGO: "Broadcom 博通", MRVL: "Marvell",
+  MU: "Micron 美光", WDC: "Western Digital", SNDK: "SanDisk",
+  AMKR: "Amkor", KLAC: "KLA", LRCX: "Lam Research", AMAT: "Applied Materials", KEYS: "Keysight",
+  COHR: "Coherent", LITE: "Lumentum", GLW: "Corning 康寧", ANET: "Arista Networks",
+  DELL: "Dell 戴爾", SMCI: "Super Micro",
+  VRT: "Vertiv", ETN: "Eaton", GEV: "GE Vernova",
+  STM: "STMicroelectronics", ON: "ON Semiconductor 安森美", MPWR: "Monolithic Power", WOLF: "Wolfspeed",
+  MCHP: "Microchip", TXN: "Texas Instruments 德州儀器", ADI: "Analog Devices",
+  AMBA: "Ambarella", MBLY: "Mobileye", TSLA: "Tesla", NXPI: "NXP", QCOM: "Qualcomm 高通",
+  PLTR: "Palantir", PANW: "Palo Alto", CRWD: "CrowdStrike", MSFT: "Microsoft",
+  AVAV: "AeroVironment", LMT: "Lockheed Martin",
+};
+
+let usStocksData = null;
+
+async function loadUsStocks(forceRefresh) {
+  const tableEl = document.getElementById("usStocksTable");
+  if (tableEl) tableEl.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:12px 0;">載入中...</div>`;
+  try {
+    const res = await fetch(`${US_QUOTES_URL}?t=${forceRefresh ? Date.now() : Math.floor(Date.now()/600000)}`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    usStocksData = await res.json();
+  } catch (e) {
+    if (tableEl) tableEl.innerHTML = `<div style="font-size:12px;color:#b91c1c;padding:12px 0;">載入失敗：${e.message}</div>`;
+    return;
+  }
+  renderUsStocks();
+}
+
+function usPctClass(v) { return v == null ? "flat-text" : v > 0 ? "pos-text" : v < 0 ? "neg-text" : "flat-text"; }
+function usFmtPct(v) { return v == null ? "-" : (v > 0 ? "+" : "") + v.toFixed(2) + "%"; }
+function usFmtRatio(v) { return v == null ? "-" : (v * 100).toFixed(1) + "%"; }
+
+function renderUsStocks() {
+  const tableEl = document.getElementById("usStocksTable");
+  const leadingEl = document.getElementById("usStocksLeading");
+  const updatedEl = document.getElementById("usStocksUpdated");
+  if (!usStocksData || !tableEl) return;
+
+  if (updatedEl) updatedEl.textContent = usStocksData.updated ? `（最後更新：${usStocksData.updated}）` : "";
+
+  // 盤前領先指標：早上看這幾檔美股盤後表現，預判台股早盤族群輪動
+  const leading = usStocksData.leadingIndicators || {};
+  if (leadingEl) {
+    leadingEl.innerHTML = `
+      <div class="data-panel" style="margin-bottom:12px;">
+        <h3 style="margin:0 0 6px;font-size:14px;">🌅 盤前領先指標</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${Object.entries(leading).map(([code, v]) => `
+            <div style="flex:1;min-width:150px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;">
+              <div style="font-size:12px;font-weight:700;">${code} <span class="${usPctClass(v.pct1)}">${usFmtPct(v.pct1)}</span></div>
+              <div style="font-size:11px;color:#64748b;">${v.note}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  const stocks = Object.entries(usStocksData.stocks || {}).map(([code, s]) => ({ code, name: US_STOCK_NAMES[code] || code, ...s }));
+  const bySector = {};
+  stocks.forEach(s => { (bySector[s.sector] = bySector[s.sector] || []).push(s); });
+  const sectors = Object.keys(bySector).sort();
+
+  tableEl.innerHTML = sectors.map(sector => `
+    <div class="data-panel" style="margin-bottom:10px;">
+      <h3 style="margin:0 0 6px;font-size:13px;color:#334155;">${sector}</h3>
+      <div style="overflow-x:auto;">
+        <table class="stocks-table" style="width:100%;font-size:12px;border-collapse:collapse;">
+          <thead><tr style="color:#9ca3af;font-size:11px;border-bottom:1px solid #f1f5f9;">
+            <th style="text-align:left;padding:4px 6px;">代號</th><th style="text-align:left;padding:4px 6px;">名稱</th>
+            <th style="text-align:right;padding:4px 6px;">收盤</th><th style="text-align:right;padding:4px 6px;">今日%</th>
+            <th style="text-align:right;padding:4px 6px;">5日%</th><th style="text-align:right;padding:4px 6px;">10日%</th>
+            <th style="text-align:right;padding:4px 6px;">PER</th><th style="text-align:right;padding:4px 6px;">EPS</th>
+            <th style="text-align:right;padding:4px 6px;">營益率</th><th style="text-align:right;padding:4px 6px;">營收年增</th>
+            <th style="text-align:center;padding:4px 6px;">品質</th><th style="text-align:center;padding:4px 6px;">本業體質</th>
+          </tr></thead>
+          <tbody>
+            ${bySector[sector].sort((a,b)=>(b.pct10??-999)-(a.pct10??-999)).map(s => `
+              <tr>
+                <td style="padding:4px 6px;font-weight:700;"><a href="https://tw.tradingview.com/chart/?symbol=${s.code}" target="_blank" style="color:#4a9eff;text-decoration:none;">${s.code}</a></td>
+                <td style="padding:4px 6px;">${s.name}</td>
+                <td style="padding:4px 6px;text-align:right;">${s.price ?? "-"}</td>
+                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct1)}">${usFmtPct(s.pct1)}</td>
+                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct5)}">${usFmtPct(s.pct5)}</td>
+                <td style="padding:4px 6px;text-align:right;" class="${usPctClass(s.pct10)}">${usFmtPct(s.pct10)}</td>
+                <td style="padding:4px 6px;text-align:right;">${s.per ?? "-"}</td>
+                <td style="padding:4px 6px;text-align:right;">${s.eps ?? "-"}</td>
+                <td style="padding:4px 6px;text-align:right;">${usFmtRatio(s.opMargin)}</td>
+                <td style="padding:4px 6px;text-align:right;">${usFmtRatio(s.revenueGrowth)}</td>
+                <td style="padding:4px 6px;text-align:center;">${s.quality ?? "-"}</td>
+                <td style="padding:4px 6px;text-align:center;">${s.earningsSource ?? "-"}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`).join('');
 }
 
 // ==================== 面板渲染邏輯 ====================

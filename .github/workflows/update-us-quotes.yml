@@ -1,0 +1,51 @@
+name: Update US stock quotes
+
+on:
+  schedule:
+    # 每個美股交易日收盤後跑一次(UTC 22:00 = 台北隔天06:00，美股收盤約UTC 20:00-21:00後留緩衝)。
+    # 只有一天一次，不像台股報價每15分鐘那種高頻排程，GitHub對低頻排程的準時性可靠得多。
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install --upgrade yfinance
+
+      - name: Fetch US quotes
+        run: python scripts/fetch_us_quotes.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- us_stocks.json; then
+            git add us_stocks.json
+            git commit -m "更新美股股池快照 $(date -u +'%Y-%m-%d %H:%M UTC')"
+            for i in 1 2 3 4 5; do
+              if git push; then
+                break
+              fi
+              echo "push rejected, retrying (attempt $i)"
+              git fetch origin main
+              # us_stocks.json每次都整份重新產生，不需要真的merge，直接拿自己這份最新內容
+              # 蓋在最新的origin/main上即可，避免rebase衝突讓整個工作直接失敗。
+              git reset --soft origin/main
+              git add us_stocks.json
+              git commit -m "更新美股股池快照 $(date -u +'%Y-%m-%d %H:%M UTC')" --allow-empty
+              sleep $((RANDOM % 5 + 1))
+            done
+          else
+            echo "no change"
+          fi
