@@ -408,9 +408,13 @@
   <div class="data-panel" style="margin-bottom:12px;">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <h3 style="margin:0;">🇺🇸 美股 FDC 股池</h3>
-      <button class="btn" onclick="loadUsStocks(true)">🔄 重新整理</button>
+      <div style="display:flex;gap:6px;">
+        <button class="btn" onclick="loadUsStocks(true)" title="只是重抓 us_stocks.json 這份檔案，不會有更新的股價，除非GitHub Actions已經跑過">🔄 重新整理</button>
+        <button class="btn primary" id="triggerUsQuoteBtn" onclick="triggerUsQuoteUpdate()" title="立即觸發GitHub Actions重新用yfinance抓64檔美股最新股價，約需2-5分鐘">🚀 立即抓最新報價</button>
+      </div>
     </div>
-    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">整合台股FDC對應族群龍頭＋Mic實際持有部位＋各題材補充股，約63檔，資料源yfinance，每個美股交易日收盤後自動更新一次。<span id="usStocksUpdated"></span></p>
+    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">整合台股FDC對應族群龍頭＋Mic實際持有部位＋各題材補充股，約63檔，資料源yfinance，每個美股交易日收盤後自動更新一次（平常盤中看到的是「昨天收盤價」，不是即時報價）。<span id="usStocksUpdated"></span></p>
+    <div id="triggerUsQuoteStatus" style="font-size:12px;margin-top:4px;"></div>
     <div id="usFilterButtons" style="margin-top:8px;"></div>
   </div>
   <div id="usStocksLeading"></div>
@@ -3185,6 +3189,62 @@ async function loadUsStocks(forceRefresh) {
   if (document.getElementById("usstocks")?.classList.contains("active")) renderUsStocks();
   if (document.getElementById("watchlist")?.classList.contains("active")) renderWatchlist();
   if (document.getElementById("stocks")?.classList.contains("active")) renderStocks();
+}
+
+// 「立即抓最新報價」：跟台股「盤中更新」邏輯一樣，用同一組gh_dispatch_token觸發workflow_dispatch，
+// 差別是美股一次要跑64檔yfinance（逐檔.history()+.info()），比台股單一quotes.json慢很多，
+// 抓取本身約需1-2分鐘，抓完還要等commit+push+Pages部署，抓完就poll等us_stocks.json的updated時間變動。
+async function triggerUsQuoteUpdate() {
+  const token = localStorage.getItem("gh_dispatch_token");
+  const statusEl = document.getElementById("triggerUsQuoteStatus");
+  const btn = document.getElementById("triggerUsQuoteBtn");
+  const showMsg = (msg, color) => { if (statusEl) { statusEl.style.color = color || ""; statusEl.textContent = msg; } };
+  if (!token) {
+    showMsg("請先到「設定」分頁的「盤中更新」區塊輸入 GitHub Token（跟台股共用同一組即可）。", "#b91c1c");
+    return;
+  }
+  btn.disabled = true;
+  showMsg("觸發 GitHub Actions 中...", "#64748b");
+  try {
+    const res = await fetch("https://api.github.com/repos/micliou877/FDC/actions/workflows/update-us-quotes.yml/dispatches", {
+      method: "POST",
+      headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+      body: JSON.stringify({ ref: "main" })
+    });
+    if (res.status !== 204) {
+      const body = await res.text();
+      showMsg(`觸發失敗（HTTP ${res.status}）：${body.slice(0, 200)}`, "#b91c1c");
+      btn.disabled = false;
+      return;
+    }
+  } catch (e) {
+    showMsg("觸發失敗（網路錯誤）", "#b91c1c");
+    btn.disabled = false;
+    return;
+  }
+  const beforeUpdated = usStocksData?.updated;
+  const startTime = Date.now();
+  showMsg("✅ 已觸發！64檔美股抓取中，約需2-5分鐘，請耐心等候（可以先切到別的分頁）...", "#15803d");
+  let attempts = 0;
+  const maxAttempts = 12;
+  const poll = async () => {
+    attempts++;
+    await loadUsStocks(true);
+    if (usStocksData?.updated && usStocksData.updated !== beforeUpdated) {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      showMsg(`🎉 完成！共花 ${elapsed} 秒，最後更新：${usStocksData.updated}`, "#15803d");
+      btn.disabled = false;
+      return;
+    }
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    showMsg(`等候中，已 ${elapsed} 秒（第 ${attempts} 次確認）...`, "#64748b");
+    if (attempts < maxAttempts) setTimeout(poll, 20000);
+    else {
+      showMsg("等待逾時，請稍後手動按「重新整理」，或到 GitHub Actions 頁面查看執行狀態。", "#b91c1c");
+      btn.disabled = false;
+    }
+  };
+  setTimeout(poll, 90000);
 }
 
 function usPctClass(v) { return v == null ? "flat-text" : v > 0 ? "pos-text" : v < 0 ? "neg-text" : "flat-text"; }
