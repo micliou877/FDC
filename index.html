@@ -250,12 +250,18 @@
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
 
 <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-  <button class="btn primary" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">盤後更新</button>
-  <button class="btn primary" onclick="triggerQuoteUpdate()" title="快捷鍵 Ctrl+Alt+Q">盤中更新</button>
+  <button class="btn primary" id="fetchFinMindBtnTop" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">盤後更新</button>
+  <button class="btn primary" id="triggerQuoteBtnTop" onclick="triggerQuoteUpdate()" title="快捷鍵 Ctrl+Alt+Q">盤中更新</button>
   <button class="btn" id="darkModeBtn" onclick="toggleDarkMode()">🌙 黑暗模式</button>
   <button class="btn primary" onclick="forcePushCloud()" title="用這台裝置目前的資料覆蓋雲端（同步代碼在「設定」分頁的「雲端同步」設定）">⬆️ 上傳</button>
   <button class="btn primary" onclick="forcePullCloud()" title="用雲端的資料覆蓋這台裝置（同步代碼在「設定」分頁的「雲端同步」設定）">⬇️ 下載</button>
 </div>
+<!-- 盤後更新/盤中更新的進度：原本各自的進度條/文字都埋在「設定」分頁裡，分頁沒開著就完全看不到，
+     搬來這裡讓頁首按鈕點下去不管目前在哪個分頁都看得到進度。設定分頁裡原本的按鈕還是共用同一組id，
+     兩邊按鈕點哪個都會更新到這裡。 -->
+<div class="progress-bar-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
+<div id="fetchStatus" style="font-size:12px;margin-bottom:4px;"></div>
+<div id="triggerQuoteStatus" style="font-size:12px;margin-bottom:4px;"></div>
 
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
 
@@ -469,21 +475,19 @@
       <button class="btn" id="loadDemoBtn">載入範例</button>
       <button class="btn" id="clearDataBtn">清空</button>
     </div>
-    <div class="progress-bar-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
-    <div id="fetchStatus"></div>
+    <p style="font-size:11px;color:#9ca3af;margin:2px 0 0;">進度顯示在頁面最上方。</p>
     <div id="fundStats" style="font-size:12px;color:#475569;margin-top:6px;line-height:1.8;"></div>
   </div>
 
   <div class="data-panel">
     <h3>台股即時報價</h3>
-    <p style="font-size:12px;color:#64748b;margin-top:-4px;">GitHub Actions 每 15 分鐘自動更新，若想立即刷新可在此手動觸發。</p>
+    <p style="font-size:12px;color:#64748b;margin-top:-4px;">GitHub Actions 每 15 分鐘自動更新，若想立即刷新可在此手動觸發。進度顯示在頁面最上方。</p>
     <div style="margin-bottom: 8px;">
       <input type="password" id="ghTriggerToken" placeholder="GitHub Token（fine-grained，僅需此 repo 的 Actions 讀寫權限）" style="width: 320px;">
     </div>
     <div class="button-row">
       <button class="btn primary" id="triggerQuoteBtn">盤中更新</button>
     </div>
-    <div id="triggerQuoteStatus" style="font-size: 12px; margin-top: 6px;"></div>
   </div>
 
   <div class="data-panel">
@@ -2282,6 +2286,7 @@ function getTVLink(code, market) {
 async function fetchFinMindData() {
   const token = document.getElementById("apiToken").value.trim();
   const btn = document.getElementById("fetchFinMindBtn");
+  const btnTop = document.getElementById("fetchFinMindBtnTop");
   const statusEl = document.getElementById("fetchStatus");
   const progContainer = document.getElementById("progressContainer");
   const progBar = document.getElementById("progressBar");
@@ -2299,6 +2304,7 @@ async function fetchFinMindData() {
   const start_date = pastDate.toISOString().split('T')[0];
 
   btn.disabled = true;
+  if (btnTop) btnTop.disabled = true;
   progContainer.style.display = "block";
   // 不清空 stockData，改為逐一更新：API 失敗時保留舊資料，成功時覆蓋
 
@@ -2362,6 +2368,7 @@ async function fetchFinMindData() {
     statusEl.textContent = `更新完成，共 ${successCount} 檔`;
   }
   btn.disabled = false;
+  if (btnTop) btnTop.disabled = false;
   setTimeout(() => { progContainer.style.display = "none"; statusEl.textContent = ""; }, 5000);
 }
 
@@ -5707,12 +5714,14 @@ async function triggerQuoteUpdate() {
   const token = document.getElementById("ghTriggerToken").value.trim();
   const statusEl = document.getElementById("triggerQuoteStatus");
   const btn = document.getElementById("triggerQuoteBtn");
+  const btnTop = document.getElementById("triggerQuoteBtnTop");
   if (!token) {
     statusEl.style.color = "#b91c1c";
-    statusEl.textContent = "請先輸入 GitHub Token（在 GitHub Settings → Developer settings → Fine-grained tokens 建立，repo 選 micliou877/FDC，Permissions 只要勾 Actions: Read and write）";
+    statusEl.textContent = "請先輸入 GitHub Token（在「設定」分頁的「台股即時報價」區塊建立並輸入，GitHub Settings → Developer settings → Fine-grained tokens，repo 選 micliou877/FDC，Permissions 只要勾 Actions: Read and write）";
     return;
   }
   btn.disabled = true;
+  if (btnTop) btnTop.disabled = true;
   statusEl.style.color = "#64748b";
   statusEl.textContent = "觸發中...";
   try {
@@ -5757,6 +5766,7 @@ async function triggerQuoteUpdate() {
           if (bar) { bar.style.background = '#16a34a'; bar.style.width = '100%'; bar.style.transition = 'width 0.3s'; }
           if (txt) txt.textContent = `🎉 完成！共花 ${elapsed} 秒。盤中更新：${liveQuoteTime}`;
           btn.disabled = false;
+          if (btnTop) btnTop.disabled = false;
           return;
         }
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -5770,6 +5780,7 @@ async function triggerQuoteUpdate() {
           statusEl.style.color = "#b91c1c";
           statusEl.textContent = "等待逾時，請稍後手動重新整理頁面，或到 GitHub Actions 頁面查看執行狀態。";
           btn.disabled = false;
+          if (btnTop) btnTop.disabled = false;
         }
       };
       setTimeout(poll, 80000);
@@ -5784,6 +5795,7 @@ async function triggerQuoteUpdate() {
     statusEl.textContent = "觸發失敗，請檢查網路或 Token 是否正確。";
   }
   btn.disabled = false;
+  if (btnTop) btnTop.disabled = false;
 }
 document.getElementById("triggerQuoteBtn").onclick = triggerQuoteUpdate;
 
