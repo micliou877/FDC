@@ -5286,40 +5286,6 @@ function renderStrategy() {
             </tbody></table></div>`}
     </div>`;
 
-  // VIX 卡片：偽裝成收件匣裡的一封「系統通知」，點一下＝重新整理
-  let vixHtml = '';
-  if (vixtwn) {
-    const vSign = vixtwn.pct1 >= 0 ? '+' : '';
-    const vLvl = vixtwn.price >= 40 ? { label:'高恐慌', c:'#b91c1c' }
-               : vixtwn.price >= 30 ? { label:'謹慎',   c:'#b45309' }
-               : vixtwn.price >= 20 ? { label:'中性',   c:'#6b7280' }
-               :                      { label:'低恐慌',  c:'#475569' };
-    const todayTW = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
-    const isPrevDay = vixtwn.date !== todayTW;
-    const isHot = vixtwn.price >= 30;
-    vixHtml = `
-      <div class="mailbox" style="margin-bottom:10px;">
-        <div class="mail-row" style="cursor:pointer;" onclick="refreshVIX()" title="點一下重新抓取">
-          <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
-          <span class="mail-avatar" style="background:${vLvl.c};">V</span>
-          <span class="mail-sender ${isHot ? 'unread' : ''}">系統通知</span>
-          <span class="mail-subject ${isHot ? 'unread' : ''}">波動率指標更新 ${vixtwn.price}（${vSign}${vixtwn.pct1 ?? '-'}%） <span class="mail-snippet">— ${vLvl.label}${isPrevDay ? '・前日收盤' : ''}</span></span>
-          <span class="mail-time">${vixRefreshing ? '⏳' : (vixtwn.time || '')}</span>
-        </div>
-      </div>`;
-  } else {
-    vixHtml = `
-      <div class="mailbox" style="margin-bottom:10px;">
-        <div class="mail-row" style="cursor:pointer;" onclick="refreshVIX()" title="點一下載入">
-          <span class="mail-star">☆</span>
-          <span class="mail-avatar" style="background:#94a3b8;">V</span>
-          <span class="mail-sender">系統通知</span>
-          <span class="mail-subject">尚無資料 <span class="mail-snippet">— 點此載入</span></span>
-          <span class="mail-time">${vixRefreshing ? '⏳' : ''}</span>
-        </div>
-      </div>`;
-  }
-
   // 區塊快速導覽：只列出會渲染的區塊，數字為該清單目前筆數
   const secNavHtml = `<div class="sec-nav">${[
     ['sec-longs','🚀 推薦族群', longs.length, false],
@@ -5338,10 +5304,6 @@ function renderStrategy() {
   const mailThreadsHtml = buildMailThreadsHtml(gain10Snapshot, currentList);
 
   panel.innerHTML = `
-    <!-- 台灣 VIX -->
-    ${vixHtml}
-    <!-- 大盤曝險檢查表 -->
-    ${buildLeverageChecklistHtml()}
     <!-- 今日作業清單 -->
     ${planHtml}
     <!-- 市場體溫 -->
