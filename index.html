@@ -232,7 +232,16 @@
     .stocks-table tbody tr:nth-child(even):not(:hover):not(.row-selected) { background:#fafbfd; }
     #backToTop { position:fixed; right:16px; bottom:20px; width:42px; height:42px; border-radius:50%; background:rgba(37,99,235,0.88); color:#fff; border:none; font-size:18px; cursor:pointer; display:none; z-index:998; box-shadow:0 2px 8px rgba(0,0,0,0.25); }
     #backToTop:hover { background:#1d4ed8; }
+
+    /* 黑暗模式：整頁用 invert+hue-rotate 換色（這個app幾百個顏色都是寫死的hex，散落在CSS跟JS產生的inline style裡，
+       沒辦法逐一定義成CSS變數重寫），iframe(TradingView圖表)/圖片/影片/canvas要疊加同樣的filter抵銷掉一次反轉，
+       不然圖表本身的顏色會跟著被反轉。 */
+    html.dark-mode { filter: invert(1) hue-rotate(180deg); background: #fff; }
+    html.dark-mode iframe, html.dark-mode img, html.dark-mode video, html.dark-mode canvas { filter: invert(1) hue-rotate(180deg); }
   </style>
+  <script>
+    try { if (localStorage.getItem("fdc_dark_mode") === "1") document.documentElement.classList.add("dark-mode"); } catch (e) {}
+  </script>
 </head>
 <body>
 
@@ -243,6 +252,7 @@
 <div style="display:flex;gap:8px;margin-bottom:10px;">
   <button class="btn primary" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">盤後更新</button>
   <button class="btn primary" onclick="triggerQuoteUpdate()" title="快捷鍵 Ctrl+Alt+Q">盤中更新</button>
+  <button class="btn" id="darkModeBtn" onclick="toggleDarkMode()">🌙 黑暗模式</button>
 </div>
 
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
@@ -5823,6 +5833,16 @@ document.addEventListener("keydown", (e) => {
   else if (key === "q") { e.preventDefault(); document.getElementById("triggerQuoteBtn")?.click(); }
 });
 
+function toggleDarkMode() {
+  const isDark = document.documentElement.classList.toggle("dark-mode");
+  try { localStorage.setItem("fdc_dark_mode", isDark ? "1" : "0"); } catch (e) {}
+  updateDarkModeBtnLabel();
+}
+function updateDarkModeBtnLabel() {
+  const btn = document.getElementById("darkModeBtn");
+  if (btn) btn.textContent = document.documentElement.classList.contains("dark-mode") ? "☀️ 淺色模式" : "🌙 黑暗模式";
+}
+
 loadData();
 
 const headerNoteEl = document.getElementById("headerNote");
@@ -5840,6 +5860,7 @@ holdingsTs = parseInt(localStorage.getItem("fdc_holdings_ts") || "0", 10) || 0;
 fetchLiveQuotes();
 setInterval(fetchLiveQuotes, 5 * 60 * 1000);
 loadUsStocks(false); // 頁面一開就先載入美股資料並同步進stockData，不用特地切到「美股FDC」分頁才有報價
+updateDarkModeBtnLabel(); // class在<head>的inline script就先加好了(避免翻黑前先閃一下白畫面)，這裡只是把按鈕文字對齊當下狀態
 
 document.addEventListener('click', function(e) {
   const tr = e.target.closest('.stocks-table tbody tr');
