@@ -249,10 +249,12 @@
 <h1>業績追蹤<span id="appVersion" class="app-version"></span></h1>
 <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
 
-<div style="display:flex;gap:8px;margin-bottom:10px;">
+<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
   <button class="btn primary" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">盤後更新</button>
   <button class="btn primary" onclick="triggerQuoteUpdate()" title="快捷鍵 Ctrl+Alt+Q">盤中更新</button>
   <button class="btn" id="darkModeBtn" onclick="toggleDarkMode()">🌙 黑暗模式</button>
+  <button class="btn primary" onclick="forcePushCloud()" title="用這台裝置目前的資料覆蓋雲端（同步代碼在「設定」分頁的「雲端同步」設定）">⬆️ 上傳</button>
+  <button class="btn primary" onclick="forcePullCloud()" title="用雲端的資料覆蓋這台裝置（同步代碼在「設定」分頁的「雲端同步」設定）">⬇️ 下載</button>
 </div>
 
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
