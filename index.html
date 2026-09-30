@@ -842,9 +842,9 @@ document.getElementById("appVersion").textContent = `v${APP_VERSION}`;
 
 // ==================== 台股 31 大族群分類 ====================
 const SECTORS = {
-  "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"5471",name:"松翰"},{code:"5388",name:"中磊"},{code:"8081",name:"致新"}],
+  "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"5471",name:"松翰"},{code:"5388",name:"中磊"},{code:"8081",name:"致新"},{code:"3529",name:"力旺"}],
   "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"8038",name:"長園科"},{code:"3530",name:"晶相光"},{code:"3014",name:"聯陽"},{code:"6168",name:"宏齊"}],
-  "3. AI伺服器ODM": [{code:"2317",name:"鴻海"},{code:"2382",name:"廣達"},{code:"3231",name:"緯創"},{code:"6669",name:"緯穎"},{code:"2356",name:"英業達"},{code:"2376",name:"技嘉"},{code:"3706",name:"神達"},{code:"2324",name:"仁寶"},{code:"4938",name:"和碩"},{code:"2377",name:"微星"},{code:"2353",name:"宏碁"},{code:"2357",name:"華碩"}],
+  "3. AI伺服器ODM": [{code:"2317",name:"鴻海"},{code:"2382",name:"廣達"},{code:"3231",name:"緯創"},{code:"6669",name:"緯穎"},{code:"2356",name:"英業達"},{code:"2376",name:"技嘉"},{code:"3706",name:"神達"},{code:"2324",name:"仁寶"},{code:"4938",name:"和碩"},{code:"2377",name:"微星"},{code:"2353",name:"宏碁"},{code:"2357",name:"華碩"},{code:"3533",name:"嘉澤"}],
   "4. 散熱與液冷": [{code:"3017",name:"奇鋐"},{code:"3324",name:"雙鴻"},{code:"3653",name:"健策"},{code:"2308",name:"台達電"},{code:"6805",name:"富世達"},{code:"3013",name:"晟銘電"},{code:"8996",name:"高力"},{code:"2421",name:"建準"},{code:"6788",name:"尼得科超眾"},{code:"6125",name:"廣運"},{code:"2059",name:"川湖"},{code:"3483",name:"力致"},{code:"4943",name:"康控-KY"}],
   "5. 記憶體循環": [{code:"2408",name:"南亞科"},{code:"2344",name:"華邦電"},{code:"6770",name:"力積電"},{code:"2337",name:"旺宏"},{code:"3006",name:"晶豪科"},{code:"8299",name:"群聯"},{code:"3260",name:"威剛"},{code:"4967",name:"十銓"},{code:"2451",name:"創見"},{code:"5289",name:"宜鼎"},{code:"8044",name:"宇瞻"},{code:"8131",name:"福懋科"},{code:"1474",name:"華東"}],
   "6. 伺服器機殼": [{code:"8210",name:"勤誠"},{code:"3013",name:"晟銘電"},{code:"3693",name:"營邦"},{code:"6117",name:"迎廣"},{code:"3032",name:"偉訓"}],
@@ -853,9 +853,9 @@ const SECTORS = {
   "9. CPO與光通訊": [{code:"3081",name:"聯亞"},{code:"2455",name:"全新"},{code:"4971",name:"IET-KY"},{code:"3163",name:"波若威"},{code:"3363",name:"上詮"},{code:"6442",name:"光聖"},{code:"4979",name:"華星光"},{code:"3450",name:"聯鈞"},{code:"4977",name:"眾達-KY"},{code:"6271",name:"同欣電"},{code:"3105",name:"穩懋"},{code:"6451",name:"訊芯-KY"},{code:"4906",name:"正文"}],
   "10. AI電源與BBU": [{code:"2308",name:"台達電"},{code:"2301",name:"光寶科"},{code:"1504",name:"東元"},{code:"1519",name:"華城"},{code:"6282",name:"康舒"},{code:"6125",name:"廣運"},{code:"3027",name:"順達"},{code:"6121",name:"新普"},{code:"6415",name:"矽力-KY"},{code:"6138",name:"茂達"},{code:"6286",name:"立錡⭐"},{code:"8081",name:"致新"}],
   "11. 機構件與滑軌": [{code:"2059",name:"川湖"},{code:"3376",name:"新日興"},{code:"2474",name:"可成"}],
-  "12. 廠務工程": [{code:"2404",name:"漢唐"},{code:"6139",name:"亞翔"},{code:"6196",name:"帆宣"},{code:"6691",name:"洋基工程"},{code:"5536",name:"聖暉*"},{code:"6667",name:"信紘科"},{code:"7703",name:"銳澤"},{code:"3402",name:"漢科"},{code:"5340",name:"華景電"}],
+  "12. 廠務工程": [{code:"2404",name:"漢唐"},{code:"6139",name:"亞翔"},{code:"6196",name:"帆宣"},{code:"6691",name:"洋基工程"},{code:"5536",name:"聖暉*"},{code:"6667",name:"信紘科"},{code:"7703",name:"銳澤"},{code:"3402",name:"漢科"},{code:"5340",name:"華景電"},{code:"2221",name:"大甲"}],
   "13. 半導體設備": [{code:"3131",name:"弘塑"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2467",name:"志聖"},{code:"5443",name:"均豪"},{code:"6640",name:"均華"},{code:"3413",name:"京鼎"},{code:"7769",name:"鴻勁"},{code:"6223",name:"旺矽"},{code:"2360",name:"致茂"},{code:"3680",name:"家登"},{code:"1560",name:"中砂"},{code:"3551",name:"世禾"},{code:"3167",name:"大量"},{code:"6739",name:"竹陞科"},{code:"4749",name:"新應材"},{code:"4772",name:"台特化"},{code:"8028",name:"昇陽半"},{code:"5285",name:"界霖"}],
-  "14. 面板與螢幕": [{code:"2409",name:"友達"},{code:"3481",name:"群創"},{code:"6147",name:"頎邦"},{code:"2489",name:"瑞軒"},{code:"3673",name:"TPK-KY"},{code:"6278",name:"台表科"},{code:"8069",name:"元太"},{code:"6116",name:"彩晶"}],
+  "14. 面板與螢幕": [{code:"2409",name:"友達"},{code:"3481",name:"群創"},{code:"6147",name:"頎邦"},{code:"2489",name:"瑞軒"},{code:"3673",name:"TPK-KY"},{code:"6278",name:"台表科"},{code:"8069",name:"元太"},{code:"6116",name:"彩晶"},{code:"3527",name:"聚積"}],
   "15. 資安概念股": [{code:"6690",name:"安碁資訊"},{code:"2471",name:"資通"},{code:"4953",name:"緯軟"},{code:"3558",name:"神準"},{code:"6561",name:"是方"},{code:"6245",name:"立端"}],
   "16. AI軟體與雲端": [{code:"6214",name:"精誠"},{code:"6811",name:"宏碁資訊"},{code:"6689",name:"伊雲谷"},{code:"3029",name:"零壹"},{code:"6112",name:"邁達特"},{code:"2480",name:"敦陽科"},{code:"2453",name:"凌群"},{code:"8099",name:"大世科"},{code:"6870",name:"騰雲"},{code:"1784",name:"訊聯"}],
   "17. 工業電腦與邊緣AI": [{code:"2395",name:"研華"},{code:"6414",name:"樺漢"},{code:"6166",name:"凌華"},{code:"8234",name:"新漢"},{code:"3088",name:"艾訊"},{code:"3005",name:"神基"},{code:"6680",name:"鑫創電子"},{code:"6206",name:"飛捷"},{code:"3479",name:"安勤"},{code:"8114",name:"振樺電"},{code:"3564",name:"其陽"},{code:"6416",name:"瑞祺電通"},{code:"8050",name:"廣積"},{code:"3022",name:"威強電"},{code:"2397",name:"友通"},{code:"3416",name:"融程電"},{code:"5258",name:"虹堡"},{code:"3594",name:"磐儀"},{code:"6570",name:"維田"},{code:"5474",name:"聰泰"},{code:"6569",name:"醫揚"}],
@@ -926,7 +926,8 @@ const SECTORS = {
     {code:"3702",name:"大聯大"}, // 全球第一大、Infineon/MPWR 代理
     // 二線通路
     {code:"3060",name:"銘異"},
-    {code:"8121",name:"越峰"}
+    {code:"8121",name:"越峰"},
+    {code:"5434",name:"崇越"}
   ],
   "31. MCU微控制器": [
     // A. 第一級：題材純度高（核心持股）
@@ -1308,6 +1309,23 @@ const STOCK_POWER_LAYER = {
   "6121":"功率·下層","3027":"功率·下層","1519":"功率·下層",
   "1503":"功率·下層","1513":"功率·下層","1514":"功率·下層",
   "1504":"功率·下層","2371":"功率·下層"
+};
+
+// 「大甲型」隱形冠軍：各族群裡「利基龍頭＋有實質業績＋卡關鍵位置＋中小型＋有護城河」的那一檔，
+// 原型是大甲(2221)在廠務族群的定位。用途：跟族群熱度榜並用——「熱門族群 ∩ 大甲型」＝族群熱+利基龍頭雙重優勢。
+// 見 各族群_大甲型隱形冠軍對照表.md，value是該股卡的關鍵位置（顯示在tag的title提示裡）。
+const STOCK_DAJIA = {
+  "3529":"記憶體矽智財(IP)授權隱形冠軍","6515":"測試座/測試介面隱形冠軍","3533":"CPU/GPU插槽connector龍頭",
+  "6805":"QDC水冷快接頭，液冷系統關鍵接點","5289":"工業級記憶體模組隱形冠軍","2059":"伺服器滑軌世界級隱形冠軍",
+  "3357":"TLVR電感技術領先，AI電源專用被動件","8021":"PCB鑽孔針隱形冠軍","3081":"InP磊晶隱形冠軍，1.6T光模組上游關鍵材料",
+  "3027":"BBU備援電池模組，AI機櫃斷電保護關鍵","1597":"線性滑軌利基廠","2221":"本尊：超潔淨管件閥件",
+  "3680":"EUV Pod(光罩傳送盒)近乎獨佔","3527":"Mini/Micro LED驅動IC隱形冠軍","6245":"網安硬體全球ODM市占40-50%",
+  "6870":"AIoT as a Service純度最高(注意流動性差)","6166":"邊緣AI+AMR利基","5222":"軍規GaAs功率放大器隱形冠軍",
+  "2049":"滾珠螺桿/線性滑軌，機器人關節繞不過","4966":"高速介面IC隱形冠軍，AI PC傳輸關鍵",
+  "3491":"毫米波元件隱形冠軍，衛星營收占比80%","2231":"TPMS胎壓偵測隱形冠軍","2455":"GaAs磊晶利基廠，光通訊上游材料",
+  "1513":"GIS氣體絕緣開關85%市占隱形冠軍","2949":"電商代營運利基","8255":"車用整流二極體全球前三隱形冠軍",
+  "3530":"影像感測SoC小型黑馬，邊緣視覺關鍵","2481":"MOSFET+二極體混合型功率IDM，自有產能",
+  "5434":"半導體材料利基通路(信越代理)","6907":"純32位元中高階MCU，避開低階價格戰",
 };
 
 const STOCK_NAMES = {};
@@ -4504,10 +4522,11 @@ function renderRanking() {
       } else {
         const tableRows = sectorStocks.map(st => {
           const inWl = currentList.includes(st.code);
+          const dajiaBadge = STOCK_DAJIA[st.code] ? `<span class="tag" title="${STOCK_DAJIA[st.code]}" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa;">🏆大甲型</span>` : '';
           return `<tr>
             <td style="padding:3px 2px;text-align:center;"><select onchange="addToWatchGroup(this,'${st.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;" onclick="event.stopPropagation()"><option value="">${inWl?"⭐":"☆"} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
             <td style="padding:4px 6px;"><a href="${getTVLink(st.code, st.market)}" target="_blank" style="color:#4a9eff;font-weight:600;text-decoration:none;" onclick="event.stopPropagation()">${st.code}</a></td>
-            <td style="padding:4px 6px;color:#374151;">${st.name}</td>
+            <td style="padding:4px 6px;color:#374151;">${st.name}${dajiaBadge}</td>
             <td style="padding:4px 6px;text-align:right;">${st.price?.toFixed(2) ?? "-"}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct10)}">${fmtPct(st.pct10)}</td>
             <td style="padding:4px 6px;text-align:right;" class="${pctClass(st.pct5)}">${fmtPct(st.pct5)}</td>
@@ -4603,11 +4622,12 @@ function renderStocks() {
   tbody.innerHTML = rows.map(s => {
     const usTags = STOCK_US[s.code] ? `<span class="tag" style="background:#eff8ff;color:#1d6fa4;border-color:#bae8ff;">🇺🇸 ${STOCK_US[s.code]}</span>` : '';
     const pwrTag = STOCK_POWER_LAYER[s.code] ? `<span class="tag" style="background:#fdf4ff;color:#7c3aed;border-color:#e9d5ff;">${STOCK_POWER_LAYER[s.code]}</span>` : '';
+    const dajiaTag = STOCK_DAJIA[s.code] ? `<span class="tag" title="${STOCK_DAJIA[s.code]}" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa;">🏆大甲型</span>` : '';
     return `
     <tr>
       <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag" onclick="goToSector('${t}',event)">${t}</span>`).join("")}${usTags}${pwrTag}</td>
+      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag" onclick="goToSector('${t}',event)">${t}</span>`).join("")}${usTags}${pwrTag}${dajiaTag}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
