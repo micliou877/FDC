@@ -4125,7 +4125,7 @@ function saveMailScoreBacktestSnapshot(date, scored) {
   });
   const universe = {};
   Object.entries(stockData).forEach(([code, d]) => {
-    if (code === "0050" || !d || typeof d.price !== "number") return;
+    if (code === "0050" || !d || d.market === "US" || typeof d.price !== "number") return;
     universe[code] = d.price;
   });
   const benchmark = (stockData["0050"] && typeof stockData["0050"].price === "number") ? stockData["0050"].price : null;
@@ -4259,8 +4259,10 @@ function downloadBacktestJson() {
 
 // 算一次 Top20＋跟上次記錄比較的名次，兩個信箱區塊共用，並在這裡順便寫入名次歷史與回測快照
 function computeGain10Snapshot() {
+  // 排除market==="US"：stockData是台股/美股共用同一份物件(美股靠applyUsDataToStockData()橋接進來)，
+  // 收件匣只做台股排名，美股有自己的美股FDC頁面排行榜，混進來會讓台股10日漲幅榜被美股個股卡位。
   const top20 = Object.entries(stockData)
-    .filter(([code, d]) => code !== "0050" && d && typeof d.pct10 === "number")
+    .filter(([code, d]) => code !== "0050" && d && d.market !== "US" && typeof d.pct10 === "number")
     .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market, close5Ref: d.close5Ref, close10Ref: d.close10Ref }))
     .sort((a, b) => b.pct10 - a.pct10)
     .slice(0, 20);
