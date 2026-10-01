@@ -206,10 +206,21 @@
       /* 按鈕觸控目標放大 */
       button.btn { min-height: 40px; }
 
-      /* 收件匣：手機版一列塞不下時改成可左右滑動查看完整內容，而不是直接裁切 */
-      .mail-row, .mail-thread > summary.mail-row { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .mail-subject { flex: 0 0 auto; min-width: 200px; max-width: none; }
-      .mail-star, .mail-avatar, .mail-avatar-stack, .mail-sender-link, .mail-sender, .score-chip, .mail-actions, .mail-time { flex-shrink: 0; }
+      /* 收件匣（及推薦族群/精選個股等共用mail-row樣式的區塊）：原本一行塞不下只能整列橫向滑動才看得到
+         分數/時間/「加入自選」，而且.mail-actions平常靠:hover才會顯示，手機沒有hover等於永遠按不到。
+         改成讓mail-row換行成多行卡片：第一行星號+名次+名稱+分數，第二行完整顯示漲跌幅文字(不再裁切)，
+         第三行時間+操作鈕固定顯示，不用滑動也不用hover就能看到跟點到。 */
+      .mail-row, .mail-thread > summary.mail-row { flex-wrap: wrap; row-gap: 4px; overflow-x: visible; }
+      .mail-star { order: 1; }
+      .mail-avatar, .mail-avatar-stack { order: 2; }
+      .mail-sender-link, .mail-sender { order: 3; flex: 0 1 auto; max-width: 60%; }
+      .score-chip { order: 4; margin-left: auto; }
+      .mail-subject {
+        order: 5; flex: 1 1 100%; white-space: normal; max-width: 100%;
+        padding-left: 38px; box-sizing: border-box;
+      }
+      .mail-time { order: 6; font-size: 10.5px; }
+      .mail-actions { order: 7; margin-left: auto; visibility: visible !important; }
     }
 
     /* ====== 今日動作建議標籤 ====== */
