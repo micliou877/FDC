@@ -205,6 +205,11 @@
 
       /* 按鈕觸控目標放大 */
       button.btn { min-height: 40px; }
+
+      /* 收件匣：手機版一列塞不下時改成可左右滑動查看完整內容，而不是直接裁切 */
+      .mail-row, .mail-thread > summary.mail-row { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .mail-subject { flex: 0 0 auto; min-width: 200px; max-width: none; }
+      .mail-star, .mail-avatar, .mail-avatar-stack, .mail-sender-link, .mail-sender, .score-chip, .mail-actions, .mail-time { flex-shrink: 0; }
     }
 
     /* ====== 今日動作建議標籤 ====== */
