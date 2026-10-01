@@ -59,11 +59,19 @@ jobs:
             python scripts/fetch_quotes.py
             commit_and_push
           else
-            # 排程觸發：從現在跑到台北時間13:59（UTC 05:59），每15分鐘抓一次
+            # 排程觸發：從現在跑到台北時間13:59（UTC 05:59），每15分鐘抓一次。
+            # GitHub的schedule觸發本身不保證準時，常常會延誤，少數情況甚至延誤好幾小時才真的觸發
+            # （已經實測過，不是本程式邏輯問題）。原本的寫法是先檢查「現在是否還沒到05:59」才抓，
+            # 如果GitHub把這次觸發延誤到05:59之後才真的執行，這個檢查從一開始就是false，
+            # 整個while迴圈一次都不會跑，等於GitHub都已經觸發了，卻完全沒有抓到任何報價就直接結束
+            # （整個job只花幾秒鐘，在Actions頁面上看起來像是「成功」，但其實什麼事都沒做）。
+            # 改成先抓一次再檢查時間，不管這次觸發多晚到，至少都能補到一次報價，不會完全空手而回。
             END_EPOCH=$(date -u -d "$(date -u +%Y-%m-%d) 05:59:00" +%s)
+            python scripts/fetch_quotes.py
+            commit_and_push
             while [ "$(date -u +%s)" -lt "$END_EPOCH" ]; do
+              sleep 900
               python scripts/fetch_quotes.py
               commit_and_push
-              sleep 900
             done
           fi
