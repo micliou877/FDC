@@ -43,7 +43,7 @@ def fetch_chart(opener, symbol):
         return None
 
 
-def fetch_one(opener, code):
+def _fetch_market_meta(opener, code):
     # 不依賴 index.html 內的交易所分類表（該表有零星錯誤），改成直接
     # 對 Yahoo 嘗試 .TW（上市）再嘗試 .TWO（上櫃），用回應結果判定市場。
     meta = fetch_chart(opener, f"{code}.TW")
@@ -52,8 +52,39 @@ def fetch_one(opener, code):
     meta = fetch_chart(opener, f"{code}.TWO")
     if meta:
         return "TPEX", meta
-    print(f"fetch failed for {code}", file=sys.stderr)
     return None, None
+
+
+def _meta_looks_stale(meta):
+    """偵測Yahoo chart API回傳的meta內部不一致：regularMarketPrice剛好等於chartPreviousClose
+    （代表這個欄位還沒跟上今天的最新成交，卡在昨收），但Yahoo自己算的regularMarketChangePercent
+    卻不是0（代表實際上已經有成交、股價真的動了）。這個現象在成交量很低的個股身上最明顯——
+    實測發現2429(銘旺科)在盤中就出現過這種情況：regularMarketPrice回傳30.75(=昨收)，
+    但regularMarketChangePercent卻是-0.65%，兩者矛盾，導致前端顯示的股價其實是昨天收盤價。"""
+    price = meta.get("regularMarketPrice")
+    prev_close = meta.get("chartPreviousClose")
+    yahoo_pct = meta.get("regularMarketChangePercent")
+    if price is None or prev_close is None or yahoo_pct is None:
+        return False
+    return abs(price - prev_close) < 1e-6 and abs(yahoo_pct) > 0.05
+
+
+def fetch_one(opener, code):
+    market, meta = _fetch_market_meta(opener, code)
+    if meta is None:
+        print(f"fetch failed for {code}", file=sys.stderr)
+        return None, None
+    for _ in range(2):
+        if not _meta_looks_stale(meta):
+            break
+        time.sleep(3)
+        retry_market, retry_meta = _fetch_market_meta(opener, code)
+        if retry_meta is None:
+            break
+        market, meta = retry_market, retry_meta
+    else:
+        print(f"warning: {code} regularMarketPrice looks stale (==prevClose but pct!=0) after retries", file=sys.stderr)
+    return market, meta
 
 
 def parse_meta(code, market, meta):
