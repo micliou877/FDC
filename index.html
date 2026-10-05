@@ -139,6 +139,7 @@
     .note-input { width: 90%; background: #fff; color: #374151; border: 1px solid #cbd5e1; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
     .note-input:focus { border-color: #2563eb; }
     .note-display { font-size: 11px; color: #64748b; cursor: pointer; min-height: 18px; min-width: 80px; display: inline-block; border-bottom: 1px dashed #cbd5e1; padding-bottom: 1px; }
+    .wrap-cell .note-display { display: block; max-width: 100%; white-space: normal; word-break: break-word; }
     .note-display:empty::before { content: "點擊新增備註..."; color: #cbd5e1; font-style: italic; }
 
     .data-panel { background: #fff; border-radius: 8px; padding: 14px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
@@ -2148,6 +2149,17 @@ window.toggleWatchlist = function(code) {
   const list = watchlists[currentWatchGroup];
   if (list.includes(code)) {
     watchlists[currentWatchGroup] = list.filter(c => c !== code);
+    // 真的從所有關注分類移除後才清掉備註跟持有記錄，不然重新加回來還會看到舊資料；
+    // 但如果同一支股票還留在別的關注分類裡，不能清，否則會誤刪那邊還在用的資料。
+    const stillWatched = Object.values(watchlists).some(l => l.includes(code));
+    if (!stillWatched) {
+      if (code in stockNotes) { delete stockNotes[code]; stockNotesTs = Date.now(); }
+      if (window._t4_data && window._t4_data.some(h => h.code === code)) {
+        window._t4_data = window._t4_data.filter(h => h.code !== code);
+        holdingsTs = Date.now();
+        try { localStorage.setItem("fdc_holdings", JSON.stringify(window._t4_data)); localStorage.setItem("fdc_holdings_ts", holdingsTs); } catch(e) {}
+      }
+    }
   } else {
     watchlists[currentWatchGroup].push(code);
   }
