@@ -71,6 +71,23 @@ def _to_float(s):
         return None
 
 
+def _parse_minguo_date(s):
+    """TWSE/TPEX回應裡的Date欄位是民國年(例如'1151002'=民國115年10月02日)，轉成西元'YYYY-MM-DD'。
+    實測發現這兩個官方彙總報表不一定同步更新——例如某次TPEX已經是10/05的資料，TWSE卻還停在
+    10/02（卡了3天沒更新，不是我們這邊抓取失敗），所以不能用系統時鐘當作「今天」的日期，
+    必須照實解析各自回應裡真正的報表日期，才不會把舊資料誤標成最新。"""
+    s = str(s).strip()
+    if len(s) < 6:
+        return None
+    try:
+        year = int(s[:-4]) + 1911
+        month = int(s[-4:-2])
+        day = int(s[-2:])
+        return f"{year:04d}-{month:02d}-{day:02d}"
+    except ValueError:
+        return None
+
+
 def _is_real_stock(code, name):
     """排除權證／ETF這類非個股標的：實測第一次跑出來的結果，1685檔「異動股」裡有1638檔(97%)
     其實是權證(名稱結尾固定是「XX購NN」/「XX售NN」這種格式，槓桿造成漲跌幅動輒上百%~上千%，
@@ -104,14 +121,17 @@ def _curl_json(url, attempts=4):
 
 
 def fetch_twse_today():
-    """TWSE盤後彙總：回傳 {code: {"name","market","close","volume","pct1"}}"""
+    """TWSE盤後彙總：回傳 ({code: {"name","market","close","volume","pct1","asOfDate"}}, 報表日期)"""
     out = {}
     try:
         rows = _curl_json(TWSE_URL)
     except Exception as e:
         print(f"TWSE STOCK_DAY_ALL 抓取失敗: {e}", file=sys.stderr)
-        return out
+        return out, None
+    report_date = None
     for row in rows:
+        if report_date is None:
+            report_date = _parse_minguo_date(row.get("Date"))
         code = str(row.get("Code", "")).strip()
         name = str(row.get("Name", "")).strip()
         if not CODE_RE.match(code) or not _is_real_stock(code, name):
@@ -129,19 +149,23 @@ def fetch_twse_today():
             "close": close,
             "volume": volume,
             "pct1": pct1,
+            "asOfDate": report_date,
         }
-    return out
+    return out, report_date
 
 
 def fetch_tpex_today():
-    """TPEX盤後彙總：同樣回傳 {code: {...}}，Change欄位TPEX本身就有正負號。"""
+    """TPEX盤後彙總：同樣回傳 ({code: {...}}, 報表日期)，Change欄位TPEX本身就有正負號。"""
     out = {}
     try:
         rows = _curl_json(TPEX_URL)
     except Exception as e:
         print(f"TPEX daily_close_quotes 抓取失敗: {e}", file=sys.stderr)
-        return out
+        return out, None
+    report_date = None
     for row in rows:
+        if report_date is None:
+            report_date = _parse_minguo_date(row.get("Date"))
         code = str(row.get("SecuritiesCompanyCode", "")).strip()
         name = str(row.get("CompanyName", "")).strip()
         if not CODE_RE.match(code) or not _is_real_stock(code, name):
@@ -159,8 +183,9 @@ def fetch_tpex_today():
             "close": close,
             "volume": volume,
             "pct1": pct1,
+            "asOfDate": report_date,
         }
-    return out
+    return out, report_date
 
 
 def load_history():
@@ -172,10 +197,18 @@ def load_history():
         return {}
 
 
-def save_history(history, today_key, today_snapshot):
-    history[today_key] = {
-        code: {"close": v["close"], "volume": v["volume"]} for code, v in today_snapshot.items()
-    }
+def save_history(history, today_snapshot):
+    """照各筆資料自己的asOfDate分別存進history，不是全部塞進同一個系統時鐘日期的key——
+    否則TWSE卡著沒更新時，每天重跑都會把同一份舊收盤資料蓋寫成一筆「新的一天」，
+    history裡會出現好幾天內容一模一樣的假交易日，污染連續上漲/均量這類N日計算。"""
+    by_date = {}
+    for code, v in today_snapshot.items():
+        d = v.get("asOfDate")
+        if not d:
+            continue
+        by_date.setdefault(d, {})[code] = {"close": v["close"], "volume": v["volume"]}
+    for d, snap in by_date.items():
+        history.setdefault(d, {}).update(snap)
     dates = sorted(history.keys())
     while len(dates) > HISTORY_KEEP_DAYS:
         del history[dates.pop(0)]
@@ -254,26 +287,27 @@ def main():
     pool_codes = extract_pool_codes()
     print(f"FDC現有股池：{len(pool_codes)} 檔")
 
-    today_snapshot = {}
-    today_snapshot.update(fetch_twse_today())
-    today_snapshot.update(fetch_tpex_today())
+    twse_snapshot, twse_date = fetch_twse_today()
+    tpex_snapshot, tpex_date = fetch_tpex_today()
+    today_snapshot = {**twse_snapshot, **tpex_snapshot}
     if not today_snapshot:
         print("今天兩個市場都抓不到資料，可能是非交易日或API異常，不產生掃描結果。", file=sys.stderr)
         sys.exit(1)
     print(f"今日全市場快照：{len(today_snapshot)} 檔（TWSE+TPEX）")
+    print(f"TWSE報表日期：{twse_date}・TPEX報表日期：{tpex_date}")
+    if twse_date and tpex_date and twse_date != tpex_date:
+        print("警告：兩個交易所的官方報表日期不一致，其中一邊還沒更新到最新交易日（不是我們抓取失敗，是對方資料本身還沒換日）。", file=sys.stderr)
 
     history = load_history()
     history_dates_all = sorted(history.keys(), reverse=True)
-    tz8 = timezone(timedelta(hours=8))
-    today_key = datetime.now(tz8).strftime("%Y-%m-%d")
-    # 萬一今天已經存過(重複執行)，排除掉避免跟自己比較
-    history_dates = [d for d in history_dates_all if d != today_key]
 
     movers = []
     for code, today in today_snapshot.items():
         if code in pool_codes:
             continue  # 只看股池「外」的標的——池內的本來就天天在追蹤，不需要另外提醒
-        signals = compute_signals(code, today, history_dates, history)
+        # 排除這支股票「自己」所屬市場的報表日期，避免跟剛抓到的今天資料重複比較
+        own_history_dates = [d for d in history_dates_all if d != today.get("asOfDate")]
+        signals = compute_signals(code, today, own_history_dates, history)
         if signals:
             movers.append({
                 "code": code, "name": today["name"], "market": today["market"],
@@ -282,13 +316,19 @@ def main():
             })
     movers.sort(key=lambda m: m.get("pct1") or 0, reverse=True)
 
-    n = len(history_dates)
+    # 兩邊報表日期不一致時(常見：其中一邊還沒換日)，誠實標出各自的日期，不要假裝兩邊都是「今天」
+    if twse_date and tpex_date and twse_date != tpex_date:
+        display_date = f"TWSE {twse_date}／TPEX {tpex_date}"
+    else:
+        display_date = twse_date or tpex_date
+
+    n = len(history_dates_all)
     output = {
-        "date": today_key,  # TWSE/TPEX官方彙總報表所屬的交易日，不代表「腳本執行時間」
+        "date": display_date,  # TWSE/TPEX官方彙總報表「本身」標示的交易日，照實解析、不是系統時鐘日期
         # 腳本實際執行完成的時間戳：TWSE/TPEX資料沒有新交易日之前，同一天內重跑date/movers
         # 內容都會是一樣的，前端靠「有沒有新資料」來判斷觸發有沒有成功的話，重跑結果沒變
         # 時會誤判成「一直沒完成」，所以另外存一個每次執行一定會變的時間戳給前端比對用。
-        "scannedAt": datetime.now(tz8).strftime("%Y-%m-%d %H:%M:%S"),
+        "scannedAt": datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S"),
         "historyDaysAvailable": n,
         "criteria": {
             "pctGainThreshold": PCT_GAIN_THRESHOLD,
@@ -319,7 +359,7 @@ def main():
     for m in movers[:15]:
         print(f"  {m['code']} {m['name']}（{m['market']}）{m['pct1']}% ・ {'、'.join(m['signals'])}")
 
-    save_history(history, today_key, today_snapshot)
+    save_history(history, today_snapshot)
 
 
 if __name__ == "__main__":
