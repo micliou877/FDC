@@ -3744,6 +3744,15 @@ window.addMarketScanStockToWatch = function(sel, code, name, market, close, pct1
   setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800);
 };
 
+let marketScanSortKey = "pct1";
+let marketScanSortDir = 1; // 1=遞減(大→小，預設跟後端scan_market.py輸出順序一致) ／ -1=遞增(小→大)
+
+function sortMarketScan(key) {
+  if (marketScanSortKey === key) marketScanSortDir *= -1;
+  else { marketScanSortKey = key; marketScanSortDir = (key === 'code' || key === 'name' || key === 'market') ? -1 : 1; }
+  renderMarketScan();
+}
+
 function renderMarketScan() {
   const tableEl = document.getElementById("marketScanTable");
   const metaEl = document.getElementById("marketScanMeta");
@@ -3768,7 +3777,22 @@ function renderMarketScan() {
     return;
   }
 
-  const rows = movers.map(m => `
+  const k = marketScanSortKey, d = marketScanSortDir;
+  const sorted = [...movers].sort((a, b) => {
+    if (k === 'code' || k === 'name' || k === 'market') {
+      return d === 1 ? String(b[k] || '').localeCompare(String(a[k] || '')) : String(a[k] || '').localeCompare(String(b[k] || ''));
+    }
+    const av = a[k] ?? -Infinity, bv = b[k] ?? -Infinity;
+    return d === 1 ? bv - av : av - bv;
+  });
+
+  const th = (key, label, align = 'left') => {
+    const active = marketScanSortKey === key;
+    const arrow = active ? (marketScanSortDir === 1 ? ' ▼' : ' ▲') : '';
+    return `<th onclick="sortMarketScan('${key}')" style="text-align:${align};cursor:pointer;user-select:none;${active ? 'color:#1e293b;font-weight:700;' : ''}">${label}${arrow}</th>`;
+  };
+
+  const rows = sorted.map(m => `
     <tr>
       <td style="text-align:center;"><select onchange="addMarketScanStockToWatch(this,'${m.code}','${_dEsc(m.name)}','${m.market}',${m.close},${m.pct1 ?? 'null'})" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">☆ 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
       <td><a href="${getTVLink(m.code, m.market)}" target="_blank" style="color:#4a9eff;text-decoration:none;font-weight:bold;">${m.code}</a></td>
@@ -3779,7 +3803,7 @@ function renderMarketScan() {
     </tr>`).join("");
 
   tableEl.innerHTML = `<table class="stocks-table">
-    <thead><tr><th></th><th>代號</th><th>名稱/市場</th><th style="text-align:right;">收盤</th><th style="text-align:right;">漲跌幅</th><th>訊號</th></tr></thead>
+    <thead><tr><th></th>${th('code','代號')}${th('name','名稱/市場')}${th('close','收盤','right')}${th('pct1','漲跌幅','right')}<th>訊號</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
