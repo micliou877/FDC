@@ -288,6 +288,7 @@
   <button class="tab" data-tab="watchlist">⭐ 關注</button>
   <button class="tab" data-tab="global">🌐 國際</button>
   <button class="tab" data-tab="usstocks">🇺🇸 美股FDC</button>
+  <button class="tab" data-tab="marketscan">🔍 黑馬掃描</button>
   <button class="tab" data-tab="data">⚙️ 設定</button>
   <button class="tab" data-tab="sop">📖 操作 SOP</button>
   <button class="tab" data-tab="diary">📓 交易日記</button>
@@ -454,6 +455,21 @@
   <div id="usStocksLeading"></div>
   <div id="usRankingTable"></div>
   <div id="usStocksTable"></div>
+</div>
+
+<div class="panel" id="marketscan">
+  <div class="data-panel" style="margin-bottom:12px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;">🔍 黑馬掃描（股池外異動股）</h3>
+      <div style="display:flex;gap:6px;">
+        <button class="btn" onclick="loadMarketScan(true)" title="只是重抓 market_scan.json 這份檔案，不會觸發新的掃描">🔄 重新整理</button>
+        <button class="btn primary" id="triggerScanBtn" onclick="triggerMarketScan()" title="立即觸發GitHub Actions重新掃描全市場，約需1分鐘">🚀 立即掃描</button>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">每天收盤後掃描TWSE/TPEX全市場，找出不在FDC族群股池裡、當天大漲(≥8%)/爆量(量能≥20日均量2倍)/創60日新高的標的，避免漏掉沒收錄的黑馬；爆量跟創新高需要本地歷史累積到一定天數才會生效，剛啟用的頭幾天只有大漲這項在運作。<span id="marketScanMeta"></span></p>
+    <div id="triggerScanStatus" style="font-size:12px;margin-top:4px;"></div>
+  </div>
+  <div id="marketScanTable"></div>
 </div>
 
 <div class="panel" id="data">
@@ -3167,6 +3183,7 @@ function switchTab(tab) {
     if(document.getElementById("globalStockSelect").options.length === 0) initGlobalPanel();
   }
   if(tab === "usstocks") { if (!usStocksData) loadUsStocks(false); else renderUsStocks(); }
+  if(tab === "marketscan") { if (!marketScanData) loadMarketScan(false); else renderMarketScan(); }
   if(tab === "strategy") renderStrategy();
   if(tab === "diary") renderDiary();
 }
@@ -3609,6 +3626,138 @@ function renderUsRanking() {
         </table>
       </div>
     </div>`;
+}
+
+// ==================== 黑馬掃描（scripts/scan_market.py 產出的 market_scan.json）====================
+// 找股池外的異動股，資料不經過stockData共用物件（這些代號本來就不在SECTORS/quotes.json的
+// 抓取清單裡，硬塞進stockData反而會汙染其他頁面的統計），獨立用marketScanData管理。
+const MARKET_SCAN_URL = "https://raw.githubusercontent.com/micliou877/FDC/main/market_scan.json";
+let marketScanData = null;
+
+async function loadMarketScan(forceRefresh) {
+  const tableEl = document.getElementById("marketScanTable");
+  if (tableEl) tableEl.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:12px 0;">載入中...</div>`;
+  try {
+    const res = await fetch(`${MARKET_SCAN_URL}?t=${forceRefresh ? Date.now() : Math.floor(Date.now()/600000)}`);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    marketScanData = await res.json();
+  } catch (e) {
+    if (tableEl) tableEl.innerHTML = `<div style="font-size:12px;color:#b91c1c;padding:12px 0;">載入失敗：${e.message}</div>`;
+    return;
+  }
+  if (document.getElementById("marketscan")?.classList.contains("active")) renderMarketScan();
+}
+
+// 跟「立即抓最新報價」(美股/台股)同一套邏輯：用gh_dispatch_token觸發workflow_dispatch後
+// 輪詢market_scan.json的date有沒有變化；掃描本身很快(實測約30秒)，不用像美股那樣等好幾分鐘。
+async function triggerMarketScan() {
+  const token = localStorage.getItem("gh_dispatch_token");
+  const statusEl = document.getElementById("triggerScanStatus");
+  const btn = document.getElementById("triggerScanBtn");
+  const showMsg = (msg, color) => { if (statusEl) { statusEl.style.color = color || ""; statusEl.textContent = msg; } };
+  if (!token) {
+    showMsg("請先到「設定」分頁的「盤中更新」區塊輸入 GitHub Token（跟台股/美股共用同一組即可）。", "#b91c1c");
+    return;
+  }
+  btn.disabled = true;
+  showMsg("觸發 GitHub Actions 中...", "#64748b");
+  try {
+    const res = await fetch("https://api.github.com/repos/micliou877/FDC/actions/workflows/scan-market.yml/dispatches", {
+      method: "POST",
+      headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+      body: JSON.stringify({ ref: "main" })
+    });
+    if (res.status !== 204) {
+      const body = await res.text();
+      showMsg(`觸發失敗（HTTP ${res.status}）：${body.slice(0, 200)}`, "#b91c1c");
+      btn.disabled = false;
+      return;
+    }
+  } catch (e) {
+    showMsg("觸發失敗（網路錯誤）", "#b91c1c");
+    btn.disabled = false;
+    return;
+  }
+  const before = marketScanData ? JSON.stringify(marketScanData.movers) : null;
+  const startTime = Date.now();
+  showMsg("✅ 已觸發！掃描中，約需1分鐘...", "#15803d");
+  let attempts = 0;
+  const maxAttempts = 10;
+  const poll = async () => {
+    attempts++;
+    await loadMarketScan(true);
+    const after = marketScanData ? JSON.stringify(marketScanData.movers) : null;
+    if (after && after !== before) {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      showMsg(`🎉 完成！共花 ${elapsed} 秒，掃描日期：${marketScanData.date}`, "#15803d");
+      btn.disabled = false;
+      return;
+    }
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    showMsg(`等候中，已 ${elapsed} 秒（第 ${attempts} 次確認）...`, "#64748b");
+    if (attempts < maxAttempts) setTimeout(poll, 10000);
+    else {
+      showMsg("等待逾時，請稍後手動按「重新整理」，或到 GitHub Actions 頁面查看執行狀態。", "#b91c1c");
+      btn.disabled = false;
+    }
+  };
+  setTimeout(poll, 20000);
+}
+
+// 掃描結果加入關注：這些代號不在SECTORS股池裡，addToWatchGroup原本的邏輯只對market!=='TWSE'/'TPEX'
+// 才會設定stockMeta，這裡改成不管市場別一律設定，並且把掃描當下的收盤價/漲跌幅直接寫進stockData，
+// 不然剛加入時watchlist會整排顯示空的——但這份快照之後不會自動更新(這些代號不在quotes.json的
+// 抓取清單裡)，要嘛手動重新整理也不會變，要嘛請我正式把它收進族群股池才會接上即時報價。
+window.addMarketScanStockToWatch = function(sel, code, name, market, close, pct1) {
+  const targetGroup = sel.value;
+  if (!targetGroup || !watchlists[targetGroup]) { sel.value = ''; return; }
+  if (watchlists[targetGroup].includes(code)) {
+    alert(`${code} 已在「${targetGroup}」中`); sel.value = ''; return;
+  }
+  watchlists[targetGroup].push(code);
+  stockMeta[code] = { market, name };
+  stockMetaTs = Date.now();
+  stockData[code] = { ...(stockData[code] || {}), market, price: close, pct1 };
+  watchlistsTs = Date.now();
+  saveData();
+  if (targetGroup === currentWatchGroup) renderWatchlist();
+  sel.style.color = '#166534';
+  setTimeout(() => { sel.value = ''; sel.style.color = ''; }, 800);
+};
+
+function renderMarketScan() {
+  const tableEl = document.getElementById("marketScanTable");
+  const metaEl = document.getElementById("marketScanMeta");
+  if (!marketScanData || !tableEl) return;
+
+  if (metaEl) {
+    const d = marketScanData;
+    const histNote = d.historyDaysAvailable < 10
+      ? `・歷史累積 ${d.historyDaysAvailable}/10 天（爆量/創新高尚未生效）`
+      : `・歷史累積 ${d.historyDaysAvailable} 天`;
+    metaEl.textContent = `（掃描日期：${d.date}・全市場 ${d.scannedCount} 檔・股池 ${d.poolSize} 檔${histNote}）`;
+  }
+
+  const movers = marketScanData.movers || [];
+  if (!movers.length) {
+    tableEl.innerHTML = `<div style="font-size:12px;color:#9ca3af;padding:12px 0;">目前沒有符合條件的股池外異動股。</div>`;
+    return;
+  }
+
+  const rows = movers.map(m => `
+    <tr>
+      <td style="text-align:center;"><select onchange="addMarketScanStockToWatch(this,'${m.code}','${_dEsc(m.name)}','${m.market}',${m.close},${m.pct1 ?? 'null'})" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">☆ 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
+      <td><a href="${getTVLink(m.code, m.market)}" target="_blank" style="color:#4a9eff;text-decoration:none;font-weight:bold;">${m.code}</a></td>
+      <td class="wrap-cell">${_dEsc(m.name)}<br><span class="tag">${m.market}</span></td>
+      <td style="text-align:right;">${m.close?.toFixed(2) ?? "-"}</td>
+      <td style="text-align:right;" class="${pctClass(m.pct1)}">${fmtPct(m.pct1)}</td>
+      <td style="font-size:12px;color:#64748b;">${m.signals.join("、")}</td>
+    </tr>`).join("");
+
+  tableEl.innerHTML = `<table class="stocks-table">
+    <thead><tr><th></th><th>代號</th><th>名稱/市場</th><th style="text-align:right;">收盤</th><th style="text-align:right;">漲跌幅</th><th>訊號</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
 }
 
 // ==================== 面板渲染邏輯 ====================
