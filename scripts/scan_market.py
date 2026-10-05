@@ -39,7 +39,13 @@ HISTORY_FILE = ROOT / "market_history.json"
 OUTPUT_FILE = ROOT / "market_scan.json"
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-TWSE_URL = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+# openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL 這個「open API」實測會卡住不動
+# （曾經連續好幾天都還是同一個舊交易日，即使重跑GitHub Actions也一樣），但同一個官方網域
+# 查「單一個股」歷史收盤價的STOCK_DAY端點、以及這裡改用的MI_INDEX（大盤+全市場每日收盤
+# 行情）都有當天即時資料，證明TWSE那邊真的有資料，只是STOCK_DAY_ALL這個特定端點的後端
+# 批次作業卡住。改用MI_INDEX不會有這個問題，代價是它要帶明確日期查，不會自動給「最新
+# 一天」，所以fetch_twse_today()裡會從今天開始往回試。
+TWSE_MI_INDEX_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
 TPEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"
 
 # 篩選門檻：集中寫在這裡，之後要調整不用翻邏輯
@@ -125,37 +131,58 @@ def _curl_json(url, attempts=4):
 
 
 def fetch_twse_today():
-    """TWSE盤後彙總：回傳 ({code: {"name","market","close","volume","pct1","asOfDate"}}, 報表日期)"""
+    """TWSE盤後彙總：回傳 ({code: {"name","market","close","volume","pct1","asOfDate"}}, 報表日期)。
+    MI_INDEX要帶明確日期查，不會自動給「最新一天」，所以從今天開始往回試，撞到假日/
+    還沒出資料的空白日就自動往前一天，最多試6天（涵蓋連假）。"""
     out = {}
-    try:
-        rows = _curl_json(TWSE_URL)
-    except Exception as e:
-        print(f"TWSE STOCK_DAY_ALL 抓取失敗: {e}", file=sys.stderr)
-        return out, None
-    report_date = None
-    for row in rows:
-        if report_date is None:
-            report_date = _parse_minguo_date(row.get("Date"))
-        code = str(row.get("Code", "")).strip()
-        name = str(row.get("Name", "")).strip()
-        if not CODE_RE.match(code) or not _is_real_stock(code, name):
+    tz = timezone(timedelta(hours=8))
+    d = datetime.now(tz).date()
+    last_err = None
+    for _ in range(6):
+        date_str = d.strftime("%Y%m%d")
+        url = f"{TWSE_MI_INDEX_URL}?date={date_str}&type=ALLBUT0999&response=json"
+        try:
+            data = _curl_json(url)
+        except Exception as e:
+            last_err = f"TWSE MI_INDEX抓取失敗({date_str}): {e}"
+            d -= timedelta(days=1)
             continue
-        close = _to_float(row.get("ClosingPrice"))
-        volume = _to_float(row.get("TradeVolume"))
-        change = _to_float(row.get("Change"))
-        if close is None or volume is None:
+        if not isinstance(data, dict) or data.get("stat") != "OK":
+            d -= timedelta(days=1)
             continue
-        prev_close = (close - change) if change is not None else None
-        pct1 = round(change / prev_close * 100, 2) if (change is not None and prev_close) else None
-        out[code] = {
-            "name": name,
-            "market": "TWSE",
-            "close": close,
-            "volume": volume,
-            "pct1": pct1,
-            "asOfDate": report_date,
-        }
-    return out, report_date
+        table = next(
+            (t for t in data.get("tables", []) if t.get("fields") and "證券代號" in t["fields"]),
+            None,
+        )
+        if not table or not table.get("data"):
+            d -= timedelta(days=1)
+            continue
+        report_date = f"{d.year:04d}-{d.month:02d}-{d.day:02d}"
+        for row in table["data"]:
+            code = str(row[0]).strip()
+            name = str(row[1]).strip()
+            if not CODE_RE.match(code) or not _is_real_stock(code, name):
+                continue
+            close = _to_float(row[8])
+            volume = _to_float(row[2])
+            diff = _to_float(row[10])
+            if diff is not None and "green" in str(row[9]):
+                diff = -diff
+            if close is None or volume is None:
+                continue
+            prev_close = (close - diff) if diff is not None else None
+            pct1 = round(diff / prev_close * 100, 2) if (diff is not None and prev_close) else None
+            out[code] = {
+                "name": name,
+                "market": "TWSE",
+                "close": close,
+                "volume": volume,
+                "pct1": pct1,
+                "asOfDate": report_date,
+            }
+        return out, report_date
+    print(last_err or "TWSE MI_INDEX近6天都查無資料", file=sys.stderr)
+    return out, None
 
 
 def fetch_tpex_today():
