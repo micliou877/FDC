@@ -108,13 +108,17 @@ def _curl_json(url, attempts=4):
     for _ in range(attempts):
         result = subprocess.run(
             ["curl", "-s", "-A", UA, "--max-time", "30", url],
-            capture_output=True, text=True, encoding="utf-8",
+            capture_output=True,
         )
         if result.returncode != 0 or not result.stdout:
-            last_err = f"curl failed (code {result.returncode}): {result.stderr.strip()[:200]}"
+            last_err = f"curl failed (code {result.returncode}): {result.stderr.decode('utf-8', errors='replace').strip()[:200]}"
             continue
+        # 截斷若剛好切在多位元組UTF-8字元中間，decode用errors="replace"容忍掉，
+        # 讓它正常落入下面json.loads的例外分支去重試，而不是讓UnicodeDecodeError
+        # 繞過重試機制直接讓整個函式失敗(之前只試1次就放棄，沒用到底下4次重試)。
+        text = result.stdout.decode("utf-8", errors="replace")
         try:
-            return json.loads(result.stdout)
+            return json.loads(text)
         except json.JSONDecodeError as e:
             last_err = f"回應JSON不完整(通常是連線被對方提早關閉): {e}"
     raise RuntimeError(last_err)
