@@ -2,9 +2,11 @@ name: Scan market for off-pool movers
 
 on:
   schedule:
-    # 收盤後跑一次就好(台股13:30收盤=UTC 05:30)，抓的是TWSE/TPEX的盤後彙總報表，
-    # 不是即時資料，沒必要像quotes.json那樣每15分鐘跑；多留一點緩衝等官方報表彙整完。
-    - cron: "0 6 * * 1-5"
+    # 原本只排06:00(UTC)一個時段，實測GitHub的schedule觸發不保證準時——跟update-quotes.yml
+    # 踩過的坑一樣，那天的06:00這個唯一時段完全沒觸發，整天就只剩手動按才有新資料。
+    # 改成06:00~08:30每半小時留一個嘗試機會，script本身是idempotent(同一天重跑只是把
+    # 當天那筆紀錄覆蓋成一樣的內容，不會重複算進歷史)，多排幾個時段成本很低。
+    - cron: "0,30 6-8 * * 1-5"
   workflow_dispatch: {}
 
 permissions:
