@@ -1,0 +1,50 @@
+name: Scan market for off-pool movers
+
+on:
+  schedule:
+    # 收盤後跑一次就好(台股13:30收盤=UTC 05:30)，抓的是TWSE/TPEX的盤後彙總報表，
+    # 不是即時資料，沒必要像quotes.json那樣每15分鐘跑；多留一點緩衝等官方報表彙整完。
+    - cron: "0 6 * * 1-5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Scan market
+        run: python scripts/scan_market.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- market_scan.json market_history.json; then
+            echo "no change"
+            exit 0
+          fi
+          cp market_scan.json /tmp/market_scan_new.json
+          cp market_history.json /tmp/market_history_new.json
+          for i in 1 2 3 4 5; do
+            if ! git diff --quiet -- market_scan.json market_history.json; then
+              git add market_scan.json market_history.json
+              git commit -m "全市場掃描：股池外異動股 $(date -u +'%Y-%m-%d')"
+            fi
+            if git push; then
+              exit 0
+            fi
+            echo "push rejected, retrying (attempt $i)"
+            git fetch origin main
+            git reset --hard origin/main
+            cp /tmp/market_scan_new.json market_scan.json
+            cp /tmp/market_history_new.json market_history.json
+            sleep $((RANDOM % 5 + 1))
+          done
