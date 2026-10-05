@@ -14,8 +14,13 @@ TWSE／TPEX 官方的免費OpenAPI全市場收盤資料，不需要token、沒�
 這兩個OpenAPI端點只給「當天」資料，沒有歷史區間可以一次查60天份，所以「20日均量」
 「60日新高」這兩個條件沒辦法用一次性查詢算出來，改成每天執行時把當天收盤資料疊進
 market_history.json 這個本地累積檔(本repo沒有的話，GitHub Actions跑的時候會自動建立並
-commit回去，道理跟其他*_history.json快照檔一樣)。剛開始啟用的頭20～60天，歷史天數不夠，
-量能倍數/新高這兩項只能先跳過，純漲跌幅的篩選條件不受影響、第一天就能用。
+commit回去，道理跟其他*_history.json快照檔一樣)。各項訊號需要的歷史天數不同，會陸續
+生效：連續上漲天數/近5日漲幅第5天就有、近10日漲幅第10天、單日爆量跟近5日/近10日持續
+放量要等滿20天(均量基準)、創新高則是用現有天數比、滿60天後才是真正嚴謹的60日新高。
+
+除了單日的「大漲/爆量/創新高」，也看「連續好幾天都有動能」：連續上漲天數、近5日/10日
+累積漲幅、近5日/10日均量相對20日均量是否持續放大（不是只看單一天爆量，而是一段期間
+平均下來量能有沒有真的墊高）。
 
 另外這兩個OpenAPI的憑證鏈缺Subject Key Identifier，新版OpenSSL(3.x)驗證會直接擋下來
 （實測在Python 3.13 urllib/ssl上重現），但curl走系統內建的憑證驗證可以正常通過，
@@ -43,7 +48,12 @@ VOLUME_RATIO_THRESHOLD = 2.0   # 當日量 ÷ 過去N日均量，達到這個倍
 VOLUME_AVG_DAYS = 20           # 均量取樣天數
 NEW_HIGH_DAYS = 60             # 新高比較的天數（不含當天）
 HISTORY_KEEP_DAYS = 70         # 本地歷史最多保留幾天（留一點緩衝給NEW_HIGH_DAYS=60用）
-MIN_HISTORY_FOR_SIGNALS = 10   # 歷史天數太少時，量能/新高這兩項先跳過，避免用不足的樣本亂判斷
+
+# 「持續動能」相關門檻：單日大漲/爆量只能看到瞬間噴出，加這幾項抓「連續好幾天都有動能」的標的
+CONSECUTIVE_UP_DAYS_THRESHOLD = 5   # 連續收高達到幾天算「連續上漲」
+PCT5_GAIN_THRESHOLD = 15.0          # 近5日累積漲幅（%）門檻
+PCT10_GAIN_THRESHOLD = 25.0         # 近10日累積漲幅（%）門檻
+VOL_RATIO_SUSTAINED_THRESHOLD = 1.5 # 近5日/10日均量 ÷ 近20日均量，達到這個倍數算「持續放量」(非單日爆量)
 
 CODE_RE = re.compile(r"^\d{4,6}$")  # 排除ETF(00開頭常帶英文字母)/債券等非一般股票代碼
 
@@ -174,24 +184,62 @@ def save_history(history, today_key, today_snapshot):
 
 def compute_signals(code, today, history_dates, history):
     """回傳這檔股票觸發了哪些訊號(signals)，空list代表沒觸發、不列入清單。
-    history_dates已經是排除「今天」、由新到舊排序好的歷史日期列表。"""
+    history_dates已經是排除「今天」、由新到舊排序好的歷史日期列表。
+
+    每天的全市場快照(不只異動股)都會存進history，所以只要這檔股票正常交易(沒停牌/下櫃)，
+    由今天往回找一定會連續有資料；一旦某天沒有這檔的紀錄就直接跳出，不把不連續的交易日
+    誤算進「連續上漲天數」或「近N日」這類需要完整序列的計算裡。"""
     signals = []
     pct1 = today.get("pct1")
     if pct1 is not None and pct1 >= PCT_GAIN_THRESHOLD:
         signals.append("大漲/接近漲停")
 
-    if len(history_dates) >= MIN_HISTORY_FOR_SIGNALS:
-        vol_window = history_dates[:VOLUME_AVG_DAYS]
-        vols = [history[d][code]["volume"] for d in vol_window if code in history[d]]
-        if vols:
-            avg_vol = sum(vols) / len(vols)
-            if avg_vol > 0 and today["volume"] > avg_vol * VOLUME_RATIO_THRESHOLD:
-                signals.append(f"爆量(今量/{len(vols)}日均量={today['volume']/avg_vol:.1f}倍)")
+    closes = [today["close"]]
+    volumes = [today["volume"]]
+    for d in history_dates:
+        if code not in history[d]:
+            break
+        closes.append(history[d][code]["close"])
+        volumes.append(history[d][code]["volume"])
 
-        high_window = history_dates[:NEW_HIGH_DAYS]
-        closes = [history[d][code]["close"] for d in high_window if code in history[d]]
-        if closes and today["close"] > max(closes):
-            signals.append(f"創{len(closes)}日新高")
+    # 連續上漲天數：由今天往回比對，收盤一路比前一天高算一天，碰到不是就停
+    up_days = 0
+    for i in range(len(closes) - 1):
+        if closes[i] > closes[i + 1]:
+            up_days += 1
+        else:
+            break
+    if up_days >= CONSECUTIVE_UP_DAYS_THRESHOLD:
+        signals.append(f"連續上漲{up_days}天")
+
+    # 近5日/近10日累積漲幅
+    if len(closes) > 5 and closes[5]:
+        pct5 = (closes[0] - closes[5]) / closes[5] * 100
+        if pct5 >= PCT5_GAIN_THRESHOLD:
+            signals.append(f"近5日漲幅+{pct5:.1f}%")
+    if len(closes) > 10 and closes[10]:
+        pct10 = (closes[0] - closes[10]) / closes[10] * 100
+        if pct10 >= PCT10_GAIN_THRESHOLD:
+            signals.append(f"近10日漲幅+{pct10:.1f}%")
+
+    # 量能相關：共用同一組近20日均量當基準，分別檢查「今天單日爆量」跟「近5/10日平均是否持續放量」
+    if len(volumes) >= VOLUME_AVG_DAYS:
+        baseline_window = volumes[:VOLUME_AVG_DAYS]
+        baseline = sum(baseline_window) / len(baseline_window)
+        if baseline > 0:
+            if today["volume"] > baseline * VOLUME_RATIO_THRESHOLD:
+                signals.append(f"爆量(今量/{VOLUME_AVG_DAYS}日均量={today['volume']/baseline:.1f}倍)")
+            for n in (5, 10):
+                if len(volumes) >= n:
+                    avg_n = sum(volumes[:n]) / n
+                    ratio = avg_n / baseline
+                    if ratio >= VOL_RATIO_SUSTAINED_THRESHOLD:
+                        signals.append(f"近{n}日持續放量{ratio:.1f}倍")
+
+    # 創N日新高(N最多到NEW_HIGH_DAYS，歷史不夠60天時先用現有天數比)
+    prior_closes = closes[1:NEW_HIGH_DAYS + 1]
+    if prior_closes and closes[0] > max(prior_closes):
+        signals.append(f"創{len(prior_closes)}日新高")
 
     return signals
 
@@ -234,24 +282,36 @@ def main():
             })
     movers.sort(key=lambda m: m.get("pct1") or 0, reverse=True)
 
+    n = len(history_dates)
     output = {
         "date": today_key,
-        "historyDaysAvailable": len(history_dates),
+        "historyDaysAvailable": n,
         "criteria": {
             "pctGainThreshold": PCT_GAIN_THRESHOLD,
             "volumeRatioThreshold": VOLUME_RATIO_THRESHOLD,
             "volumeAvgDays": VOLUME_AVG_DAYS,
             "newHighDays": NEW_HIGH_DAYS,
+            "consecutiveUpDaysThreshold": CONSECUTIVE_UP_DAYS_THRESHOLD,
+            "pct5GainThreshold": PCT5_GAIN_THRESHOLD,
+            "pct10GainThreshold": PCT10_GAIN_THRESHOLD,
+            "volRatioSustainedThreshold": VOL_RATIO_SUSTAINED_THRESHOLD,
+        },
+        # 每項訊號各自需要的最少歷史天數不同，分開列出來，前端才能分別顯示「還差幾天」
+        "signalReadiness": {
+            "近5日漲幅/連續上漲": n >= 5,
+            "近10日漲幅": n >= 10,
+            "單日爆量/近5日近10日持續放量": n >= VOLUME_AVG_DAYS,
+            "創新高(天數隨歷史增加到60天封頂)": n >= 1,
         },
         "poolSize": len(pool_codes),
         "scannedCount": len(today_snapshot),
         "movers": movers,
     }
     OUTPUT_FILE.write_text(json.dumps(output, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"股池外異動股：{len(movers)} 檔（寫入 {OUTPUT_FILE.name}）")
-    if len(history_dates) < MIN_HISTORY_FOR_SIGNALS:
-        print(f"注意：本地歷史只累積了 {len(history_dates)} 天（需要至少{MIN_HISTORY_FOR_SIGNALS}天），"
-              f"爆量/創新高這兩項訊號目前還沒生效，只有「大漲/接近漲停」在運作，歷史累積足夠後會自動補上。")
+    print(f"股池外異動股：{len(movers)} 檔（寫入 {OUTPUT_FILE.name}）・本地歷史 {n} 天")
+    for label, ready in output["signalReadiness"].items():
+        if not ready:
+            print(f"  尚未生效：{label}")
     for m in movers[:15]:
         print(f"  {m['code']} {m['name']}（{m['market']}）{m['pct1']}% ・ {'、'.join(m['signals'])}")
 

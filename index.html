@@ -466,7 +466,7 @@
         <button class="btn primary" id="triggerScanBtn" onclick="triggerMarketScan()" title="立即觸發GitHub Actions重新掃描全市場，約需1分鐘">🚀 立即掃描</button>
       </div>
     </div>
-    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">每天收盤後掃描TWSE/TPEX全市場，找出不在FDC族群股池裡、當天大漲(≥8%)/爆量(量能≥20日均量2倍)/創60日新高的標的，避免漏掉沒收錄的黑馬；爆量跟創新高需要本地歷史累積到一定天數才會生效，剛啟用的頭幾天只有大漲這項在運作。<span id="marketScanMeta"></span></p>
+    <p style="font-size:12px;color:#64748b;margin:4px 0 0;">每天收盤後掃描TWSE/TPEX全市場，找出不在FDC族群股池裡的異動股，避免漏掉沒收錄的黑馬。看兩類訊號：①單日噴出——大漲(≥8%)/單日爆量(≥20日均量2倍)/創60日新高；②持續動能——連續上漲≥5天、近5日漲幅≥15%、近10日漲幅≥25%、近5日或10日均量持續放大到20日均量1.5倍以上(不是只看單一天爆量)。各項訊號需要的歷史天數不同，會隨本地歷史累積陸續生效。<span id="marketScanMeta"></span></p>
     <div id="triggerScanStatus" style="font-size:12px;margin-top:4px;"></div>
   </div>
   <div id="marketScanTable"></div>
@@ -3732,9 +3732,8 @@ function renderMarketScan() {
 
   if (metaEl) {
     const d = marketScanData;
-    const histNote = d.historyDaysAvailable < 10
-      ? `・歷史累積 ${d.historyDaysAvailable}/10 天（爆量/創新高尚未生效）`
-      : `・歷史累積 ${d.historyDaysAvailable} 天`;
+    const pending = Object.entries(d.signalReadiness || {}).filter(([,ready]) => !ready).map(([label]) => label);
+    const histNote = pending.length ? `・歷史累積 ${d.historyDaysAvailable} 天，尚未生效：${pending.join('、')}` : `・歷史累積 ${d.historyDaysAvailable} 天（訊號全部生效）`;
     metaEl.textContent = `（掃描日期：${d.date}・全市場 ${d.scannedCount} 檔・股池 ${d.poolSize} 檔${histNote}）`;
   }
 
