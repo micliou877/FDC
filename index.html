@@ -61,6 +61,10 @@
     .stocks-table th:hover { color: #1e293b; }
     .stocks-table td { padding: 9px 6px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; vertical-align: top; }
     .stocks-table td.wrap-cell { white-space: normal; min-width: 110px; }
+    /* 關注表欄位多(20欄)，瀏覽器auto表格排版會把「公司/族群標籤」這欄擠到剩約140px寬，
+       族群標籤一多就變成一個一個往下疊；表格外層本來就有overflow-x:auto，加寬這欄沒問題，
+       頂多整張表橫向多捲一點，換來族群標籤能左右排開不用全部疊成一直行。 */
+    #watchlistTable td.wrap-cell { min-width: 220px; }
     .stocks-table tbody tr:hover { background: #dcfce7; }
     .stocks-table tbody tr.row-selected { background: #bbf7d0; }
     .stocks-table tbody tr.row-selected:hover { background: #86efac; }
@@ -181,7 +185,7 @@
 
       /* 名稱欄內的族群標籤在手機上縮小顯示 */
       .wrap-cell .tag { font-size: 9px; padding: 1px 4px; margin-top: 2px; }
-      .wrap-cell { min-width: 0; }
+      .wrap-cell, #watchlistTable td.wrap-cell { min-width: 0; }
 
       /* 明細表（#stocksTable）：手機隱藏「金額(億)」「PER」欄，保留「品質」 */
       #stocksTable th:nth-child(8),
@@ -5252,7 +5256,7 @@ function renderWatchlist() {
           ${Object.keys(watchlists).filter(k => k !== currentWatchGroup).map(k => `<option value="${k}">${k}</option>`).join('')}
         </select>
       </td>
-      <td onclick="editNote(this, '${s.code}')"><span class="note-display">${stockNotes[s.code] || ""}</span></td>
+      <td class="wrap-cell" onclick="editNote(this, '${s.code}')"><span class="note-display">${stockNotes[s.code] || ""}</span></td>
     </tr>`; }).join("");
 
   document.querySelectorAll("#watchlistTable th[data-sort]").forEach(th => {
