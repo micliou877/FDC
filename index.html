@@ -465,7 +465,7 @@
 <div class="panel" id="marketscan">
   <div class="data-panel" style="margin-bottom:12px;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-      <h3 style="margin:0;">🔍 黑馬掃描（股池外異動股）</h3>
+      <h3 style="margin:0;">🔍 黑馬掃描（股池外異動股）<span id="marketScanHeaderDate" style="font-size:12px;font-weight:400;color:#64748b;"></span></h3>
       <div style="display:flex;gap:6px;">
         <button class="btn" onclick="loadMarketScan(true)" title="只是重抓 market_scan.json 這份檔案，不會觸發新的掃描">🔄 重新整理</button>
         <button class="btn primary" id="triggerScanBtn" onclick="triggerMarketScan()" title="立即觸發GitHub Actions重新掃描全市場，約需1分鐘">🚀 立即掃描</button>
@@ -3747,7 +3747,10 @@ window.addMarketScanStockToWatch = function(sel, code, name, market, close, pct1
 function renderMarketScan() {
   const tableEl = document.getElementById("marketScanTable");
   const metaEl = document.getElementById("marketScanMeta");
+  const headerDateEl = document.getElementById("marketScanHeaderDate");
   if (!marketScanData || !tableEl) return;
+
+  if (headerDateEl) headerDateEl.textContent = ` ・股價日期：${marketScanData.date || '-'}`;
 
   if (metaEl) {
     const d = marketScanData;
