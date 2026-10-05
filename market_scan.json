@@ -1,6 +1,6 @@
 {
  "date": "2026-10-05",
- "scannedAt": "2026-10-05 17:29:05",
+ "scannedAt": "2026-10-05 17:35:14",
  "historyDaysAvailable": 0,
  "criteria": {
   "pctGainThreshold": 8.0,
@@ -19,7 +19,7 @@
   "創新高(天數隨歷史增加到60天封頂)": false
  },
  "poolSize": 356,
- "scannedCount": 1102,
+ "scannedCount": 1977,
  "movers": [
   {
    "code": "1459",
@@ -61,6 +61,39 @@
    "close": 203.5,
    "pct1": 10.0,
    "volume": 1493882.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3498",
+   "name": "陽程",
+   "market": "TPEX",
+   "close": 236.5,
+   "pct1": 10.0,
+   "volume": 4847096.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4174",
+   "name": "浩鼎",
+   "market": "TPEX",
+   "close": 46.2,
+   "pct1": 10.0,
+   "volume": 1932063.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6174",
+   "name": "安碁",
+   "market": "TPEX",
+   "close": 60.5,
+   "pct1": 10.0,
+   "volume": 1341802.0,
    "signals": [
     "大漲/接近漲停"
    ]
@@ -132,12 +165,78 @@
    ]
   },
   {
+   "code": "3114",
+   "name": "好德",
+   "market": "TPEX",
+   "close": 43.6,
+   "pct1": 9.96,
+   "volume": 1935420.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
    "code": "6994",
    "name": "富威電力",
    "market": "TWSE",
    "close": 32.05,
    "pct1": 9.95,
    "volume": 2578924.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3317",
+   "name": "尼克森",
+   "market": "TPEX",
+   "close": 71.8,
+   "pct1": 9.95,
+   "volume": 6735439.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3441",
+   "name": "聯一光",
+   "market": "TPEX",
+   "close": 232.0,
+   "pct1": 9.95,
+   "volume": 9682549.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4760",
+   "name": "勤凱",
+   "market": "TPEX",
+   "close": 348.5,
+   "pct1": 9.94,
+   "volume": 469020.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6419",
+   "name": "京晨科",
+   "market": "TPEX",
+   "close": 171.5,
+   "pct1": 9.94,
+   "volume": 1495154.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6708",
+   "name": "天擎",
+   "market": "TPEX",
+   "close": 68.6,
+   "pct1": 9.94,
+   "volume": 610503.0,
    "signals": [
     "大漲/接近漲停"
    ]
@@ -165,6 +264,28 @@
    ]
   },
   {
+   "code": "3597",
+   "name": "映興",
+   "market": "TPEX",
+   "close": 30.45,
+   "pct1": 9.93,
+   "volume": 1214738.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5013",
+   "name": "強新",
+   "market": "TPEX",
+   "close": 51.5,
+   "pct1": 9.93,
+   "volume": 222795.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
    "code": "3701",
    "name": "大眾控",
    "market": "TWSE",
@@ -182,6 +303,39 @@
    "close": 44.35,
    "pct1": 9.91,
    "volume": 10157623.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8111",
+   "name": "立碁",
+   "market": "TPEX",
+   "close": 94.3,
+   "pct1": 9.91,
+   "volume": 37743237.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "7556",
+   "name": "意德士",
+   "market": "TPEX",
+   "close": 300.0,
+   "pct1": 9.89,
+   "volume": 374598.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5205",
+   "name": "中茂",
+   "market": "TPEX",
+   "close": 25.05,
+   "pct1": 9.87,
+   "volume": 21401.0,
    "signals": [
     "大漲/接近漲停"
    ]
@@ -209,12 +363,56 @@
    ]
   },
   {
+   "code": "5011",
+   "name": "久陽",
+   "market": "TPEX",
+   "close": 22.45,
+   "pct1": 9.78,
+   "volume": 1030844.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
    "code": "2466",
    "name": "冠西電",
    "market": "TWSE",
    "close": 141.0,
    "pct1": 9.73,
    "volume": 2480183.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4556",
+   "name": "旭然",
+   "market": "TPEX",
+   "close": 125.5,
+   "pct1": 9.61,
+   "volume": 3038405.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6190",
+   "name": "萬泰科",
+   "market": "TPEX",
+   "close": 77.4,
+   "pct1": 9.32,
+   "volume": 8929960.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3362",
+   "name": "先進光",
+   "market": "TPEX",
+   "close": 191.0,
+   "pct1": 8.83,
+   "volume": 7905467.0,
    "signals": [
     "大漲/接近漲停"
    ]
@@ -248,6 +446,17 @@
    "close": 439.0,
    "pct1": 8.26,
    "volume": 16620827.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5432",
+   "name": "新門",
+   "market": "TPEX",
+   "close": 178.0,
+   "pct1": 8.21,
+   "volume": 699104.0,
    "signals": [
     "大漲/接近漲停"
    ]
