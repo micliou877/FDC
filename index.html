@@ -3682,7 +3682,10 @@ async function triggerMarketScan() {
     btn.disabled = false;
     return;
   }
-  const before = marketScanData ? JSON.stringify(marketScanData.movers) : null;
+  // 用scannedAt(腳本實際執行時間)判斷有沒有跑完，不能比movers內容有沒有變——
+  // TWSE/TPEX還沒出新交易日資料時，重新掃描算出來的movers會跟之前一模一樣，
+  // 比內容的話會誤判成「一直沒完成」，見scan_market.py裡scannedAt欄位的說明。
+  const before = marketScanData ? marketScanData.scannedAt : null;
   const startTime = Date.now();
   showMsg("✅ 已觸發！掃描中，約需1分鐘...", "#15803d");
   let attempts = 0;
@@ -3690,10 +3693,10 @@ async function triggerMarketScan() {
   const poll = async () => {
     attempts++;
     await loadMarketScan(true);
-    const after = marketScanData ? JSON.stringify(marketScanData.movers) : null;
+    const after = marketScanData ? marketScanData.scannedAt : null;
     if (after && after !== before) {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      showMsg(`🎉 完成！共花 ${elapsed} 秒，掃描日期：${marketScanData.date}`, "#15803d");
+      showMsg(`🎉 完成！共花 ${elapsed} 秒，最後執行：${marketScanData.scannedAt}（資料日期：${marketScanData.date}）`, "#15803d");
       btn.disabled = false;
       return;
     }
@@ -3738,7 +3741,10 @@ function renderMarketScan() {
     const d = marketScanData;
     const pending = Object.entries(d.signalReadiness || {}).filter(([,ready]) => !ready).map(([label]) => label);
     const histNote = pending.length ? `・歷史累積 ${d.historyDaysAvailable} 天，尚未生效：${pending.join('、')}` : `・歷史累積 ${d.historyDaysAvailable} 天（訊號全部生效）`;
-    metaEl.textContent = `（掃描日期：${d.date}・全市場 ${d.scannedCount} 檔・股池 ${d.poolSize} 檔${histNote}）`;
+    // 資料日期(TWSE/TPEX官方交易日)跟最後執行時間故意分開顯示：官方沒出新交易日資料之前，
+    // 就算手動重新掃描，資料日期也不會變，只有「最後執行」這個時間戳會跟著每次觸發更新，
+    // 不然使用者會誤以為「按了立即掃描卻沒反應」。
+    metaEl.textContent = `（資料日期：${d.date}・最後執行：${d.scannedAt || '-'}・全市場 ${d.scannedCount} 檔・股池 ${d.poolSize} 檔${histNote}）`;
   }
 
   const movers = marketScanData.movers || [];

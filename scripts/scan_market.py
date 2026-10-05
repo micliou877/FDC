@@ -284,7 +284,11 @@ def main():
 
     n = len(history_dates)
     output = {
-        "date": today_key,
+        "date": today_key,  # TWSE/TPEX官方彙總報表所屬的交易日，不代表「腳本執行時間」
+        # 腳本實際執行完成的時間戳：TWSE/TPEX資料沒有新交易日之前，同一天內重跑date/movers
+        # 內容都會是一樣的，前端靠「有沒有新資料」來判斷觸發有沒有成功的話，重跑結果沒變
+        # 時會誤判成「一直沒完成」，所以另外存一個每次執行一定會變的時間戳給前端比對用。
+        "scannedAt": datetime.now(tz8).strftime("%Y-%m-%d %H:%M:%S"),
         "historyDaysAvailable": n,
         "criteria": {
             "pctGainThreshold": PCT_GAIN_THRESHOLD,
