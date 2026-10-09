@@ -1,7 +1,7 @@
 {
  "date": "2026-10-08",
- "scannedAt": "2026-10-08 20:22:12",
- "historyDaysAvailable": 4,
+ "scannedAt": "2026-10-09 20:11:59",
+ "historyDaysAvailable": 5,
  "criteria": {
   "pctGainThreshold": 8.0,
   "volumeRatioThreshold": 2.0,
@@ -13,7 +13,7 @@
   "volRatioSustainedThreshold": 1.5
  },
  "signalReadiness": {
-  "近5日漲幅/連續上漲": false,
+  "近5日漲幅/連續上漲": true,
   "近10日漲幅": false,
   "單日爆量/近5日近10日持續放量": false,
   "創新高(天數隨歷史增加到60天封頂)": true
