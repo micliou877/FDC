@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-12 14:14:19",
+ "updated": "2026-10-12 19:46:37",
  "quotes": {
   "0050": {
    "market": "TWSE",
@@ -72,12 +72,6 @@
    "price": 88.4,
    "pct1": -1.45,
    "amount": 0.05
-  },
-  "1474": {
-   "market": "TWSE",
-   "price": 9.91,
-   "pct1": -1.39,
-   "amount": 0.01
   },
   "1476": {
    "market": "TWSE",
@@ -186,12 +180,6 @@
    "price": 50.6,
    "pct1": 9.88,
    "amount": 0.43
-  },
-  "1626": {
-   "market": "TWSE",
-   "price": 9.72,
-   "pct1": -0.21,
-   "amount": 0.0
   },
   "1815": {
    "market": "TPEX",
@@ -799,12 +787,6 @@
    "pct1": -4.22,
    "amount": 55.41
   },
-  "3027": {
-   "market": "TWSE",
-   "price": 19.2,
-   "pct1": 0.52,
-   "amount": 0.06
-  },
   "3029": {
    "market": "TWSE",
    "price": 119.5,
@@ -906,6 +888,12 @@
    "price": 1060.0,
    "pct1": -1.4,
    "amount": 69.98
+  },
+  "3211": {
+   "market": "TPEX",
+   "price": 382.5,
+   "pct1": -1.42,
+   "amount": 6.01
   },
   "3231": {
    "market": "TWSE",
@@ -1135,6 +1123,12 @@
    "pct1": 2.42,
    "amount": 121.15
   },
+  "3718": {
+   "market": "TPEX",
+   "price": 62.1,
+   "pct1": -1.58,
+   "amount": 1.01
+  },
   "4540": {
    "market": "TWSE",
    "price": 61.7,
@@ -1315,23 +1309,11 @@
    "pct1": -1.2,
    "amount": 1.34
   },
-  "5340": {
-   "market": "TPEX",
-   "price": 95.0,
-   "pct1": 0.64,
-   "amount": 11.88
-  },
   "5347": {
    "market": "TPEX",
    "price": 181.0,
    "pct1": -2.95,
    "amount": 26.58
-  },
-  "5371": {
-   "market": "TPEX",
-   "price": 83.5,
-   "pct1": 0.0,
-   "amount": 1.78
   },
   "5434": {
    "market": "TWSE",
@@ -1543,6 +1525,12 @@
    "pct1": 9.96,
    "amount": 79.15
   },
+  "6230": {
+   "market": "TWSE",
+   "price": 113.5,
+   "pct1": -1.73,
+   "amount": 0.03
+  },
   "6239": {
    "market": "TWSE",
    "price": 304.5,
@@ -1620,6 +1608,12 @@
    "price": 26.55,
    "pct1": -1.67,
    "amount": 0.84
+  },
+  "6449": {
+   "market": "TWSE",
+   "price": 265.5,
+   "pct1": -2.03,
+   "amount": 8.84
   },
   "6451": {
    "market": "TWSE",
@@ -1827,9 +1821,9 @@
   },
   "7719": {
    "market": "TPEX",
-   "price": 44.85,
-   "pct1": -2.5,
-   "amount": 0.08
+   "price": 47.0,
+   "pct1": 2.17,
+   "amount": 0.1
   },
   "7750": {
    "market": "TWSE",
@@ -1921,6 +1915,12 @@
    "pct1": 0.49,
    "amount": 0.0
   },
+  "8110": {
+   "market": "TWSE",
+   "price": 49.55,
+   "pct1": 0.61,
+   "amount": 2.24
+  },
   "8114": {
    "market": "TWSE",
    "price": 180.5,
@@ -1993,12 +1993,6 @@
    "pct1": 0.58,
    "amount": 10.36
   },
-  "9802": {
-   "market": "TWSE",
-   "price": 66.4,
-   "pct1": 0.76,
-   "amount": 0.24
-  },
   "9904": {
    "market": "TWSE",
    "price": 25.65,
@@ -2031,10 +2025,10 @@
   }
  },
  "vixtwn": {
-  "price": 24.55,
-  "pct1": 5.41,
+  "price": 25.15,
+  "pct1": 2.44,
   "prev_close": null,
-  "date": "2026-10-08",
+  "date": "2026-10-12",
   "time": "13:45"
  }
 }
