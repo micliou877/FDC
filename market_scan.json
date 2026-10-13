@@ -1,7 +1,7 @@
 {
  "date": "2026-10-13",
- "scannedAt": "2026-10-13 16:12:45",
- "historyDaysAvailable": 6,
+ "scannedAt": "2026-10-13 21:05:33",
+ "historyDaysAvailable": 7,
  "criteria": {
   "pctGainThreshold": 8.0,
   "volumeRatioThreshold": 2.0,
@@ -19,7 +19,7 @@
   "創新高(天數隨歷史增加到60天封頂)": true
  },
  "poolSize": 343,
- "scannedCount": 1969,
+ "scannedCount": 1098,
  "movers": [
   {
    "code": "6645",
@@ -60,39 +60,6 @@
    ]
   },
   {
-   "code": "6517",
-   "name": "保勝光學",
-   "market": "TPEX",
-   "close": 71.5,
-   "pct1": 10.0,
-   "volume": 894024.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "6021",
-   "name": "美好證",
-   "market": "TPEX",
-   "close": 52.3,
-   "pct1": 9.99,
-   "volume": 1583945.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "5230",
-   "name": "雷笛克光學",
-   "market": "TPEX",
-   "close": 27.55,
-   "pct1": 9.98,
-   "volume": 3907450.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
    "code": "1312",
    "name": "國喬",
    "market": "TWSE",
@@ -116,39 +83,6 @@
    "signals": [
     "大漲/接近漲停",
     "創6日新高"
-   ]
-  },
-  {
-   "code": "6221",
-   "name": "晉泰",
-   "market": "TPEX",
-   "close": 35.85,
-   "pct1": 9.97,
-   "volume": 5233816.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "3287",
-   "name": "廣寰科",
-   "market": "TPEX",
-   "close": 52.5,
-   "pct1": 9.95,
-   "volume": 4279664.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "3597",
-   "name": "映興",
-   "market": "TPEX",
-   "close": 48.6,
-   "pct1": 9.95,
-   "volume": 1126717.0,
-   "signals": [
-    "大漲/接近漲停"
    ]
   },
   {
@@ -214,28 +148,6 @@
    ]
   },
   {
-   "code": "8437",
-   "name": "大地-KY",
-   "market": "TPEX",
-   "close": 11.25,
-   "pct1": 9.76,
-   "volume": 151649.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "6217",
-   "name": "中探針",
-   "market": "TPEX",
-   "close": 197.0,
-   "pct1": 9.75,
-   "volume": 15158595.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
    "code": "1516",
    "name": "川飛",
    "market": "TWSE",
@@ -290,17 +202,6 @@
    ]
   },
   {
-   "code": "3664",
-   "name": "安瑞-KY",
-   "market": "TPEX",
-   "close": 8.9,
-   "pct1": 8.67,
-   "volume": 1209.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
    "code": "6504",
    "name": "南六",
    "market": "TWSE",
@@ -322,17 +223,6 @@
    "signals": [
     "大漲/接近漲停",
     "創6日新高"
-   ]
-  },
-  {
-   "code": "6532",
-   "name": "瑞耘",
-   "market": "TPEX",
-   "close": 114.5,
-   "pct1": 8.02,
-   "volume": 2163737.0,
-   "signals": [
-    "大漲/接近漲停"
    ]
   },
   {
@@ -530,7 +420,7 @@
    "market": "TWSE",
    "close": 125.0,
    "pct1": 2.88,
-   "volume": 7146775.0,
+   "volume": 7304775.0,
    "signals": [
     "創6日新高"
    ]
