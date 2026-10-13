@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-13 13:58:59",
+ "updated": "2026-10-13 20:53:30",
  "quotes": {
   "0050": {
    "market": "TWSE",
@@ -309,15 +309,15 @@
   },
   "2330": {
    "market": "TWSE",
-   "price": 2495.0,
-   "pct1": -1.77,
-   "amount": 862.09
+   "price": 2490.0,
+   "pct1": -1.97,
+   "amount": 1009.59
   },
   "2337": {
    "market": "TWSE",
-   "price": 107.0,
-   "pct1": -7.36,
-   "amount": 57.12
+   "price": 106.5,
+   "pct1": -7.79,
+   "amount": 59.04
   },
   "2344": {
    "market": "TWSE",
@@ -369,9 +369,9 @@
   },
   "2367": {
    "market": "TWSE",
-   "price": 45.3,
-   "pct1": -4.63,
-   "amount": 3.12
+   "price": 45.45,
+   "pct1": -4.32,
+   "amount": 3.29
   },
   "2368": {
    "market": "TWSE",
@@ -417,9 +417,9 @@
   },
   "2383": {
    "market": "TWSE",
-   "price": 5550.0,
-   "pct1": -9.76,
-   "amount": 267.05
+   "price": 5545.0,
+   "pct1": -9.84,
+   "amount": 270.19
   },
   "2395": {
    "market": "TWSE",
@@ -431,7 +431,7 @@
    "market": "TWSE",
    "price": 65.6,
    "pct1": 0.61,
-   "amount": 0.28
+   "amount": 0.3
   },
   "2401": {
    "market": "TWSE",
@@ -473,7 +473,7 @@
    "market": "TWSE",
    "price": 168.0,
    "pct1": -0.3,
-   "amount": 1.83
+   "amount": 1.96
   },
   "2428": {
    "market": "TWSE",
@@ -555,9 +555,9 @@
   },
   "2474": {
    "market": "TWSE",
-   "price": 195.0,
-   "pct1": 0.26,
-   "amount": 2.24
+   "price": 194.0,
+   "pct1": -0.26,
+   "amount": 2.56
   },
   "2478": {
    "market": "TWSE",
@@ -609,9 +609,9 @@
   },
   "2615": {
    "market": "TWSE",
-   "price": 122.0,
-   "pct1": 0.83,
-   "amount": 40.46
+   "price": 121.5,
+   "pct1": 0.41,
+   "amount": 42.17
   },
   "2618": {
    "market": "TWSE",
@@ -639,9 +639,9 @@
   },
   "2644": {
    "market": "TPEX",
-   "price": 76.7,
-   "pct1": -0.13,
-   "amount": 0.0
+   "price": 76.3,
+   "pct1": -0.65,
+   "amount": 0.01
   },
   "2645": {
    "market": "TWSE",
@@ -1821,9 +1821,9 @@
   },
   "7719": {
    "market": "TPEX",
-   "price": 44.75,
-   "pct1": -4.79,
-   "amount": 0.07
+   "price": 44.6,
+   "pct1": -5.11,
+   "amount": 0.08
   },
   "7750": {
    "market": "TWSE",
@@ -2025,10 +2025,10 @@
   }
  },
  "vixtwn": {
-  "price": 25.15,
-  "pct1": 2.44,
+  "price": 26.72,
+  "pct1": 6.24,
   "prev_close": null,
-  "date": "2026-10-12",
+  "date": "2026-10-13",
   "time": "13:45"
  }
 }
