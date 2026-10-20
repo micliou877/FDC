@@ -4510,8 +4510,15 @@ function downloadBacktestJson() {
 function computeGain10Snapshot() {
   // 排除market==="US"：stockData是台股/美股共用同一份物件(美股靠applyUsDataToStockData()橋接進來)，
   // 收件匣只做台股排名，美股有自己的美股FDC頁面排行榜，混進來會讓台股10日漲幅榜被美股個股卡位。
+  // stockData是逐步累積的，股票從關注清單移除後本身不會被清掉(避免誤刪還在股池裡的資料)，
+  // 但這樣會讓「曾經加過、後來移除」的股票舊資料一直留在這裡，之後也不會再被「盤後更新」碰到
+  // (fetchList只包含股池+目前的關注清單)，市場別/漲跌幅永遠停在移除當下那一刻，卻還是會被排進
+  // 10日漲幅榜——必須額外檢查這支股票現在是不是還在股池或關注清單裡，不在的話即使stockData裡
+  // 還有舊資料也不該拿出來用。
+  const trackedCodes = new Set(Object.keys(STOCK_NAMES));
+  Object.values(watchlists).forEach(list => list.forEach(c => trackedCodes.add(c)));
   const top20 = Object.entries(stockData)
-    .filter(([code, d]) => code !== "0050" && d && d.market !== "US" && typeof d.pct10 === "number")
+    .filter(([code, d]) => code !== "0050" && d && d.market !== "US" && typeof d.pct10 === "number" && trackedCodes.has(code))
     .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market, close5Ref: d.close5Ref, close10Ref: d.close10Ref }))
     .sort((a, b) => b.pct10 - a.pct10)
     .slice(0, 20);
