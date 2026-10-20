@@ -2363,8 +2363,24 @@ async function fetchFinMindData() {
     statusEl.textContent = `抓取中: ${code} (${i+1}/${fetchList.length})...`;
     progBar.style.width = `${((i+1) / fetchList.length) * 100}%`;
 
-    let market = isUS ? "US" : "TWSE";
-    let dataset = isUS ? "USStockPrice" : "TaiwanStockPrice";
+    // 市場別：優先用已知的權威資料(MANUAL_MARKETS/STOCK_EXCHANGE)，不要只靠「TaiwanStockPrice查得到就當TWSE」
+    // 這個猜測——實測發現FinMind的TaiwanStockPrice不是純TWSE資料集，對某些上櫃股(例如4174浩鼎)一樣能查到
+    // 完整資料，導致「查空值才換上櫃」的判斷永遠不會觸發，誤標成TWSE，連到TradingView的連結直接失效
+    // (使用者實際回報的bug：黑馬掃描/收件匣裡加進來、不在SECTORS股池裡的外部股票最容易中這個雷)。
+    // 股池外、沒有靜態市場資料可查的代碼，改問FinMind的TaiwanStockInfo（明確回傳type:"twse"/"tpex"），
+    // 不要用「查得到就當作對」的方式猜。
+    let market = isUS ? "US" : (MANUAL_MARKETS[code] || STOCK_EXCHANGE[code] || null);
+    if (!isUS && !market) {
+      try {
+        const infoUrl = `https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo&data_id=${code}${token ? '&token=' + token : ''}`;
+        const infoJson = await (await fetch(infoUrl)).json();
+        const infoType = infoJson?.data?.[0]?.type;
+        if (infoType === 'tpex') market = 'TPEX';
+        else if (infoType === 'twse') market = 'TWSE';
+      } catch (e) {}
+    }
+    if (!isUS && !market) market = 'TWSE'; // 連TaiwanStockInfo都查不到時，維持原本預設猜測
+    let dataset = isUS ? "USStockPrice" : (market === 'TPEX' ? "TaiwanOTCStockPrice" : "TaiwanStockPrice");
     let url = `https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${start_date}`;
     if (token) url += `&token=${token}`;
 
@@ -2375,8 +2391,10 @@ async function fetchFinMindData() {
           (json.msg && json.msg !== 'success' && /limit|over|too.?many|exceed/i.test(json.msg))) {
         rateLimitHit = true;
       }
+      // 萬一用已知市場別查詢卻查空(資料本身有缺)，保留原本「再試另一邊」的兜底邏輯
       if (!isUS && json.msg === "success" && (!json.data || json.data.length === 0)) {
-         market = "TPEX"; dataset = "TaiwanOTCStockPrice";
+         market = market === 'TPEX' ? 'TWSE' : 'TPEX';
+         dataset = market === 'TPEX' ? 'TaiwanOTCStockPrice' : 'TaiwanStockPrice';
          let otcUrl = `https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${start_date}`;
          if (token) otcUrl += `&token=${token}`;
          res = await fetch(otcUrl); json = await res.json();
