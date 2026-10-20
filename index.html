@@ -2377,6 +2377,15 @@ async function fetchFinMindData() {
         const infoType = infoJson?.data?.[0]?.type;
         if (infoType === 'tpex') market = 'TPEX';
         else if (infoType === 'twse') market = 'TWSE';
+        // 這些查不到market的代碼，通常也查不到STOCK_NAMES(代表不在/已不在SECTORS股池裡，
+        // 例如之前族群分類清理時移掉的誤植股，使用者自己的關注清單卻還留著)，順便把FinMind
+        // 回傳的公司名稱存進stockMeta當備援，不然畫面上就只能顯示代碼(見6278台表科案例：
+        // 移出「面板與螢幕」族群後STOCK_NAMES裡沒有它了，關注清單上就只顯示「6278 6278」)。
+        const infoName = infoJson?.data?.[0]?.stock_name;
+        if (infoName && !STOCK_NAMES[code]) {
+          stockMeta[code] = { ...(stockMeta[code] || {}), name: infoName };
+          stockMetaTs = Date.now();
+        }
       } catch (e) {}
     }
     if (!isUS && !market) market = 'TWSE'; // 連TaiwanStockInfo都查不到時，維持原本預設猜測
