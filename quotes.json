@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-29 13:59:42",
+ "updated": "2026-10-29 19:02:41",
  "quotes": {
   "0050": {
    "market": "TWSE",
@@ -1821,9 +1821,9 @@
   },
   "7719": {
    "market": "TPEX",
-   "price": 41.6,
-   "pct1": 0.0,
-   "amount": 0.03
+   "price": 41.4,
+   "pct1": -0.48,
+   "amount": 0.04
   },
   "7750": {
    "market": "TWSE",
@@ -2025,10 +2025,10 @@
   }
  },
  "vixtwn": {
-  "price": 27.41,
-  "pct1": null,
+  "price": 28.25,
+  "pct1": 3.06,
   "prev_close": null,
-  "date": "2026-10-28",
+  "date": "2026-10-29",
   "time": "13:45"
  }
 }
