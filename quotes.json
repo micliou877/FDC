@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-02 14:13:38",
+ "updated": "2026-11-02 20:13:54",
  "quotes": {
   "0050": {
    "market": "TWSE",
@@ -2024,5 +2024,11 @@
    "amount": 1.24
   }
  },
- "vixtwn": null
+ "vixtwn": {
+  "price": 31.3,
+  "pct1": null,
+  "prev_close": null,
+  "date": "2026-11-02",
+  "time": "13:45"
+ }
 }
