@@ -26,8 +26,12 @@
     .header-note::placeholder { color: #ca8a04; }
     .header-note:focus { outline: none; border-color: #eab308; background: #fffbeb; }
 
-    /* 頭部自訂限制清單：自己打的提醒事項，可勾選+可編輯文字，不受切換分頁影響(跟header-note同一層級) */
-    .header-checklist { margin: 0 0 16px; padding: 6px 10px; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; }
+    /* 頂部標題列：標題/版本/更新時間在左，自訂限制清單在右邊空白處，同一排高度，不另外佔版面 */
+    .header-top-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 10px; }
+    .header-top-row > div:first-child { flex-shrink: 0; }
+
+    /* 頭部自訂限制清單：自己打的提醒事項，可勾選+可編輯文字，不受切換分頁影響 */
+    .header-checklist { flex: 1; min-width: 240px; max-width: 480px; margin: 0; padding: 6px 10px; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; }
     .checklist-item { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
     .checklist-item input[type="checkbox"] { flex-shrink: 0; width: 15px; height: 15px; cursor: pointer; accent-color: #ca8a04; }
     .checklist-text { flex: 1; font-size: 12px; color: #713f12; cursor: pointer; word-break: break-word; }
@@ -281,8 +285,13 @@
 <body>
 
 
-<h1>業績追蹤<span id="appVersion" class="app-version"></span></h1>
-<div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
+<div class="header-top-row">
+  <div>
+    <h1>業績追蹤<span id="appVersion" class="app-version"></span></h1>
+    <div class="subtitle"><span id="lastUpdate">尚未載入資料</span></div>
+  </div>
+  <div id="headerChecklist" class="header-checklist"></div>
+</div>
 
 <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
   <button class="btn primary" id="fetchFinMindBtnTop" onclick="fetchFinMindData()" title="快捷鍵 Ctrl+Alt+U">盤後更新</button>
@@ -299,7 +308,6 @@
 <div id="triggerQuoteStatus" style="font-size:12px;margin-bottom:4px;"></div>
 
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
-<div id="headerChecklist" class="header-checklist"></div>
 
 <div class="tabs">
   <button class="tab active" data-tab="strategy">📬 今日精選</button>
