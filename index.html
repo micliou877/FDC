@@ -22,7 +22,7 @@
     h1 { font-size: 18px; margin-bottom: 4px; color: #1e293b; font-weight: 600; }
     .app-version { font-size: 11px; font-weight: 400; color: #94a3b8; margin-left: 6px; vertical-align: middle; }
     .subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .header-note { width: 100%; box-sizing: border-box; min-height: 32px; margin: -8px 0 8px; padding: 6px 10px; font-size: 12px; font-family: inherit; color: #713f12; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; resize: vertical; }
+    .header-note { width: 100%; box-sizing: border-box; min-height: 32px; margin: -8px 0 8px; padding: 6px 10px; font-size: 12px; font-family: inherit; color: #713f12; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; resize: none; overflow-y: hidden; }
     .header-note::placeholder { color: #ca8a04; }
     .header-note:focus { outline: none; border-color: #eab308; background: #fffbeb; }
 
@@ -1513,6 +1513,7 @@ async function connectCloud() {
         localStorage.setItem(HEADER_NOTE_KEY, headerNote);
         localStorage.setItem("fdc_header_note_ts", headerNoteTs);
         headerNoteEl.value = headerNote;
+        autoResizeHeaderNote();
       }
       if (Array.isArray(cloudData.headerChecklist) && (cloudData.headerChecklistTs || 0) >= headerChecklistTs) {
         headerChecklist = cloudData.headerChecklist;
@@ -1668,6 +1669,7 @@ async function forcePullCloud() {
       localStorage.setItem(HEADER_NOTE_KEY, headerNote);
       localStorage.setItem("fdc_header_note_ts", headerNoteTs);
       headerNoteEl.value = headerNote;
+      autoResizeHeaderNote();
     }
     if (Array.isArray(cloudData.headerChecklist)) {
       headerChecklist = cloudData.headerChecklist;
@@ -1791,6 +1793,7 @@ async function syncPull() {
           localStorage.setItem(HEADER_NOTE_KEY, headerNote);
           localStorage.setItem("fdc_header_note_ts", headerNoteTs);
           headerNoteEl.value = headerNote;
+          autoResizeHeaderNote();
           changed = true;
         }
         if (pending.some(p => p.key === "headerChecklist")) {
@@ -6260,10 +6263,19 @@ loadData();
 
 const headerNoteEl = document.getElementById("headerNote");
 headerNoteEl.value = headerNote;
+// 高度自動貼合內容：原本固定小高度，字一多就要內部捲動才看得到，使用者要求「有多少文字就顯示多少」。
+// 先把高度歸零量出真正需要的scrollHeight，再設回去，不然scrollHeight只會一直取「目前高度」跟「內容」
+// 兩者的最大值，內容變短的時候高度不會跟著縮小。
+function autoResizeHeaderNote() {
+  headerNoteEl.style.height = 'auto';
+  headerNoteEl.style.height = headerNoteEl.scrollHeight + 'px';
+}
+autoResizeHeaderNote();
 let _headerNoteDebounce = null;
 headerNoteEl.addEventListener("input", () => {
   headerNote = headerNoteEl.value;
   saveHeaderNote();
+  autoResizeHeaderNote();
   clearTimeout(_headerNoteDebounce);
   _headerNoteDebounce = setTimeout(() => { _pendingPush = true; pushToCloud(); }, 800);
 });
