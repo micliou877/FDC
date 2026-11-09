@@ -22,9 +22,23 @@
     h1 { font-size: 18px; margin-bottom: 4px; color: #1e293b; font-weight: 600; }
     .app-version { font-size: 11px; font-weight: 400; color: #94a3b8; margin-left: 6px; vertical-align: middle; }
     .subtitle { font-size: 12px; color: #94a3b8; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .header-note { width: 100%; box-sizing: border-box; min-height: 32px; margin: -8px 0 16px; padding: 6px 10px; font-size: 12px; font-family: inherit; color: #713f12; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; resize: vertical; }
+    .header-note { width: 100%; box-sizing: border-box; min-height: 32px; margin: -8px 0 8px; padding: 6px 10px; font-size: 12px; font-family: inherit; color: #713f12; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; resize: vertical; }
     .header-note::placeholder { color: #ca8a04; }
     .header-note:focus { outline: none; border-color: #eab308; background: #fffbeb; }
+
+    /* 頭部自訂限制清單：自己打的提醒事項，可勾選+可編輯文字，不受切換分頁影響(跟header-note同一層級) */
+    .header-checklist { margin: 0 0 16px; padding: 6px 10px; background: #fef9c3; border: 1px solid #fde68a; border-radius: 6px; }
+    .checklist-item { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+    .checklist-item input[type="checkbox"] { flex-shrink: 0; width: 15px; height: 15px; cursor: pointer; accent-color: #ca8a04; }
+    .checklist-text { flex: 1; font-size: 12px; color: #713f12; cursor: pointer; word-break: break-word; }
+    .checklist-text.done { text-decoration: line-through; color: #ca8a04; opacity: 0.7; }
+    .checklist-text-input { flex: 1; font-size: 12px; font-family: inherit; padding: 2px 4px; border: 1px solid #eab308; border-radius: 4px; background: #fffbeb; color: #713f12; }
+    .checklist-del { flex-shrink: 0; font-size: 12px; color: #ca8a04; cursor: pointer; padding: 0 4px; opacity: 0.6; }
+    .checklist-del:hover { opacity: 1; }
+    .checklist-add { display: flex; gap: 6px; margin-top: 4px; }
+    .checklist-add input { flex: 1; font-size: 12px; font-family: inherit; padding: 4px 6px; border: 1px solid #fde68a; border-radius: 4px; background: #fffbeb; color: #713f12; }
+    .checklist-add input::placeholder { color: #ca8a04; }
+    .checklist-add button { font-size: 12px; padding: 4px 10px; }
 
     .tabs { display: flex; gap: 2px; border-bottom: 1px solid #e2e8f0; overflow-x: auto; position: sticky; top: 0; z-index: 999; background: rgba(241,245,249,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 10px 16px; margin: -16px -16px 16px -16px; }
     .tabs::-webkit-scrollbar { display: none; }
@@ -285,6 +299,7 @@
 <div id="triggerQuoteStatus" style="font-size:12px;margin-bottom:4px;"></div>
 
 <textarea id="headerNote" class="header-note" placeholder="輸入注意事項備註..."></textarea>
+<div id="headerChecklist" class="header-checklist"></div>
 
 <div class="tabs">
   <button class="tab active" data-tab="strategy">📬 今日精選</button>
@@ -480,13 +495,13 @@
 <div class="panel" id="data">
   <div class="data-panel" style="border-left: 4px solid #d97706;">
     <h3>雲端同步</h3>
-    <p>多台裝置輸入同一組代碼，即可同步自選股、分類、備註、頁首備註、今日作業清單、交易日記與報價。</p>
+    <p>多台裝置輸入同一組代碼，即可同步自選股、分類、備註、頁首備註、頁首限制清單、今日作業清單、交易日記與報價。</p>
     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
       <input type="text" id="cloudRoomInput" placeholder="自訂代碼，例如 mycode2026" style="flex:1; padding:10px;">
       <button class="btn primary" onclick="forcePushCloud()" title="用這台裝置目前的資料覆蓋雲端">⬆️ 上傳</button>
       <button class="btn primary" onclick="forcePullCloud()" title="用雲端的資料覆蓋這台裝置">⬇️ 下載</button>
     </div>
-    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊）。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。「上傳」按下去前會先顯示雲端目前的資料筆數讓你確認，避免誤蓋。連線後，只要其他裝置對自選股／備註／頁首備註／作業清單／交易日記／持有記錄做了變更，這台裝置偵測到時也會先跳出確認視窗才套用；市場報價則維持背景自動更新不用確認。</p>
+    <p style="font-size:11px;color:#64748b;margin-top:-4px;margin-bottom:8px;">上傳／下載都會直接整包覆蓋（不比對新舊）。第一次設定代碼、或想強制指定哪台裝置的資料才是對的時候用這個。「上傳」按下去前會先顯示雲端目前的資料筆數讓你確認，避免誤蓋。連線後，只要其他裝置對自選股／備註／頁首備註／頁首限制清單／作業清單／交易日記／持有記錄做了變更，這台裝置偵測到時也會先跳出確認視窗才套用；市場報價則維持背景自動更新不用確認。</p>
     <div id="cloudStatus" style="font-size: 12px; color: #92400e; font-weight: 600;">目前為本機模式</div>
     <div style="margin-top:10px;">
       <button class="btn" onclick="forceHardRefresh()">🔄 強制重新整理（清除快取）</button>
@@ -1437,6 +1452,8 @@ let stockNotesTs = 0;  // 本地 stockNotes（個股備註）最後修改時間�
 let stockMetaTs  = 0;  // 本地 stockMeta（自訂標的市場/名稱）最後修改時間戳
 let headerNote   = ""; // 頁首注意事項備註
 let headerNoteTs = 0;  // 本地 headerNote 最後修改時間戳
+let headerChecklist   = []; // 頁首自訂限制清單：[{id, text, checked}]，自己打的提醒事項，可勾選
+let headerChecklistTs = 0;  // 本地 headerChecklist 最後修改時間戳
 let holdingsTs   = 0;  // 本地持有記錄(_t4_data)最後修改時間戳
 
 async function pushToCloud() {
@@ -1446,7 +1463,7 @@ async function pushToCloud() {
     await fetch(`${FIREBASE_URL}rooms/${cloudRoomId}.json`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockNotesTs, stockMeta, stockMetaTs, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "", dailyPlan, dailyPlanTs, diaryEntries, diaryTs, headerNote, headerNoteTs, holdings: window._t4_data || [], holdingsTs, rankHistory: loadGain10History(), mailScoreBacktestHistory: loadMailScoreBacktestHistory(), adviceBacktestHistory: loadAdviceBacktestHistory() })
+      body: JSON.stringify({ watchlists, watchlistsTs, stockNotes, stockNotesTs, stockMeta, stockMetaTs, stockData, lastUpdateTime, finmindToken: localStorage.getItem("finmind_token") || "", dailyPlan, dailyPlanTs, diaryEntries, diaryTs, headerNote, headerNoteTs, headerChecklist, headerChecklistTs, holdings: window._t4_data || [], holdingsTs, rankHistory: loadGain10History(), mailScoreBacktestHistory: loadMailScoreBacktestHistory(), adviceBacktestHistory: loadAdviceBacktestHistory() })
     });
     _pendingPush = false;
   } catch (e) { console.error("雲端同步失敗", e); _pendingPush = true; }
@@ -1485,6 +1502,13 @@ async function connectCloud() {
         localStorage.setItem(HEADER_NOTE_KEY, headerNote);
         localStorage.setItem("fdc_header_note_ts", headerNoteTs);
         headerNoteEl.value = headerNote;
+      }
+      if (Array.isArray(cloudData.headerChecklist) && (cloudData.headerChecklistTs || 0) >= headerChecklistTs) {
+        headerChecklist = cloudData.headerChecklist;
+        headerChecklistTs = cloudData.headerChecklistTs || 0;
+        localStorage.setItem(HEADER_CHECKLIST_KEY, JSON.stringify(headerChecklist));
+        localStorage.setItem("fdc_header_checklist_ts", headerChecklistTs);
+        renderHeaderChecklist();
       }
       if (cloudData.stockData && cloudData.lastUpdateTime &&
           (!lastUpdateTime || cloudData.lastUpdateTime > lastUpdateTime)) {
@@ -1592,6 +1616,7 @@ async function forcePushCloud() {
   saveDailyPlan();
   saveDiary();
   saveHeaderNote();
+  saveHeaderChecklist();
   saveLocalOnly();
 
   try {
@@ -1633,6 +1658,13 @@ async function forcePullCloud() {
       localStorage.setItem("fdc_header_note_ts", headerNoteTs);
       headerNoteEl.value = headerNote;
     }
+    if (Array.isArray(cloudData.headerChecklist)) {
+      headerChecklist = cloudData.headerChecklist;
+      headerChecklistTs = cloudData.headerChecklistTs || Date.now();
+      localStorage.setItem(HEADER_CHECKLIST_KEY, JSON.stringify(headerChecklist));
+      localStorage.setItem("fdc_header_checklist_ts", headerChecklistTs);
+      renderHeaderChecklist();
+    }
     if (cloudData.stockData) { stockData = cloudData.stockData; lastUpdateTime = cloudData.lastUpdateTime; }
     if (cloudData.finmindToken) {
       localStorage.setItem("finmind_token", cloudData.finmindToken);
@@ -1663,7 +1695,7 @@ async function forcePullCloud() {
 
 // 記錄使用者「已拒絕套用」的雲端時間戳，同一個版本的變更不會每 5 秒重複追問；
 // 等雲端那個欄位又有更新的變更（時間戳比拒絕當時更新）才會再問一次。
-let _declinedTs = { watchlists: 0, stockNotes: 0, stockMeta: 0, headerNote: 0, dailyPlan: 0, diary: 0, holdings: 0 };
+let _declinedTs = { watchlists: 0, stockNotes: 0, stockMeta: 0, headerNote: 0, headerChecklist: 0, dailyPlan: 0, diary: 0, holdings: 0 };
 
 async function syncPull() {
   if (!cloudRoomId || FIREBASE_URL.includes("請把")) return;
@@ -1701,6 +1733,10 @@ async function syncPull() {
           cloudData.headerNote !== headerNote) {
         pending.push({ key: "headerNote", label: "頁首注意事項備註" });
       }
+      if (Array.isArray(cloudData.headerChecklist) && (cloudData.headerChecklistTs || 0) > headerChecklistTs && (cloudData.headerChecklistTs || 0) > _declinedTs.headerChecklist &&
+          JSON.stringify(cloudData.headerChecklist) !== JSON.stringify(headerChecklist)) {
+        pending.push({ key: "headerChecklist", label: `頁首限制清單（目前 ${headerChecklist.length} 項 → 雲端 ${cloudData.headerChecklist.length} 項）` });
+      }
       if (cloudData.dailyPlan && (cloudData.dailyPlanTs || 0) > dailyPlanTs && (cloudData.dailyPlanTs || 0) > _declinedTs.dailyPlan &&
           JSON.stringify(dailyPlan) !== JSON.stringify(cloudData.dailyPlan)) {
         pending.push({ key: "dailyPlan", label: `今日作業清單（目前 ${dailyPlan.length} 筆 → 雲端 ${cloudData.dailyPlan.length} 筆）` });
@@ -1722,6 +1758,7 @@ async function syncPull() {
           if (pending.some(p => p.key === "stockNotes")) _declinedTs.stockNotes = cloudData.stockNotesTs || 0;
           if (pending.some(p => p.key === "stockMeta")) _declinedTs.stockMeta = cloudData.stockMetaTs || 0;
           if (pending.some(p => p.key === "headerNote")) _declinedTs.headerNote = cloudData.headerNoteTs || 0;
+          if (pending.some(p => p.key === "headerChecklist")) _declinedTs.headerChecklist = cloudData.headerChecklistTs || 0;
           if (pending.some(p => p.key === "dailyPlan")) _declinedTs.dailyPlan = cloudData.dailyPlanTs || 0;
           if (pending.some(p => p.key === "diary")) _declinedTs.diary = cloudData.diaryTs || 0;
           if (pending.some(p => p.key === "holdings")) _declinedTs.holdings = cloudData.holdingsTs || 0;
@@ -1743,6 +1780,13 @@ async function syncPull() {
           localStorage.setItem(HEADER_NOTE_KEY, headerNote);
           localStorage.setItem("fdc_header_note_ts", headerNoteTs);
           headerNoteEl.value = headerNote;
+          changed = true;
+        }
+        if (pending.some(p => p.key === "headerChecklist")) {
+          headerChecklist = cloudData.headerChecklist; headerChecklistTs = cloudData.headerChecklistTs || 0;
+          localStorage.setItem(HEADER_CHECKLIST_KEY, JSON.stringify(headerChecklist));
+          localStorage.setItem("fdc_header_checklist_ts", headerChecklistTs);
+          renderHeaderChecklist();
           changed = true;
         }
         if (pending.some(p => p.key === "dailyPlan")) {
@@ -1872,6 +1916,7 @@ function loadData() {
     updateUI();
     loadDailyPlan();
     loadHeaderNote();
+    loadHeaderChecklist();
   } catch(e) {}
 }
 
@@ -2110,6 +2155,69 @@ function loadHeaderNote() {
     const ts = localStorage.getItem("fdc_header_note_ts"); if (ts) headerNoteTs = Number(ts);
   } catch(e) {}
 }
+
+// ==================== 頁首自訂限制清單（可勾選+可編輯文字，項目內容自己打，不是系統固定的規則）====================
+const HEADER_CHECKLIST_KEY = "fdc_header_checklist_v1";
+function saveHeaderChecklist() {
+  headerChecklistTs = Date.now();
+  try {
+    localStorage.setItem(HEADER_CHECKLIST_KEY, JSON.stringify(headerChecklist));
+    localStorage.setItem("fdc_header_checklist_ts", headerChecklistTs);
+  } catch(e) {}
+}
+function loadHeaderChecklist() {
+  try {
+    const r = localStorage.getItem(HEADER_CHECKLIST_KEY); if (r) headerChecklist = JSON.parse(r) || [];
+    const ts = localStorage.getItem("fdc_header_checklist_ts"); if (ts) headerChecklistTs = Number(ts);
+  } catch(e) {}
+}
+function renderHeaderChecklist() {
+  const el = document.getElementById("headerChecklist");
+  if (!el) return;
+  const rows = headerChecklist.map(item => `
+    <div class="checklist-item">
+      <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleHeaderChecklistItem('${item.id}')">
+      <span class="checklist-text ${item.checked ? 'done' : ''}" onclick="editHeaderChecklistItem(this,'${item.id}')">${_dEsc(item.text)}</span>
+      <span class="checklist-del" onclick="deleteHeaderChecklistItem('${item.id}')" title="刪除">✕</span>
+    </div>`).join('');
+  el.innerHTML = `${rows}
+    <div class="checklist-add">
+      <input type="text" id="headerChecklistNewInput" placeholder="輸入自己的限制/提醒，按Enter新增..." onkeypress="if(event.key==='Enter') addHeaderChecklistItem()">
+      <button class="btn" onclick="addHeaderChecklistItem()">+ 新增</button>
+    </div>`;
+}
+window.addHeaderChecklistItem = function() {
+  const input = document.getElementById("headerChecklistNewInput");
+  const text = input.value.trim();
+  if (!text) return;
+  headerChecklist.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text, checked: false });
+  saveHeaderChecklist(); renderHeaderChecklist(); _pendingPush = true; pushToCloud();
+};
+window.toggleHeaderChecklistItem = function(id) {
+  const item = headerChecklist.find(i => i.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  saveHeaderChecklist(); renderHeaderChecklist(); _pendingPush = true; pushToCloud();
+};
+window.deleteHeaderChecklistItem = function(id) {
+  headerChecklist = headerChecklist.filter(i => i.id !== id);
+  saveHeaderChecklist(); renderHeaderChecklist(); _pendingPush = true; pushToCloud();
+};
+window.editHeaderChecklistItem = function(spanEl, id) {
+  const item = headerChecklist.find(i => i.id === id);
+  if (!item) return;
+  const input = document.createElement('input');
+  input.type = 'text'; input.value = item.text; input.className = 'checklist-text-input';
+  spanEl.replaceWith(input);
+  input.focus(); input.select();
+  const finishEdit = () => {
+    const v = input.value.trim();
+    if (v) item.text = v;
+    saveHeaderChecklist(); renderHeaderChecklist(); _pendingPush = true; pushToCloud();
+  };
+  input.onblur = finishEdit;
+  input.onkeypress = (e) => { if (e.key === 'Enter') input.blur(); };
+};
 window.addToDailyPlan = function(code, name) {
   if (dailyPlan.find(p => p.code === code)) { alert(`${code} 已在作業清單中`); return; }
   dailyPlan.push({ code, name, note: "" });
@@ -6143,6 +6251,7 @@ headerNoteEl.addEventListener("input", () => {
   clearTimeout(_headerNoteDebounce);
   _headerNoteDebounce = setTimeout(() => { _pendingPush = true; pushToCloud(); }, 800);
 });
+renderHeaderChecklist();
 
 window._t4_data = JSON.parse(localStorage.getItem("fdc_holdings") || "null") || [];
 holdingsTs = parseInt(localStorage.getItem("fdc_holdings_ts") || "0", 10) || 0;
