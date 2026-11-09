@@ -1,7 +1,7 @@
 {
- "date": "2026-11-06",
- "scannedAt": "2026-11-06 21:21:37",
- "historyDaysAvailable": 22,
+ "date": "2026-11-09",
+ "scannedAt": "2026-11-09 22:31:55",
+ "historyDaysAvailable": 23,
  "criteria": {
   "pctGainThreshold": 8.0,
   "volumeRatioThreshold": 2.0,
@@ -19,15 +19,607 @@
   "創新高(天數隨歷史增加到60天封頂)": true
  },
  "poolSize": 343,
- "scannedCount": 1983,
+ "scannedCount": 1992,
  "movers": [
   {
-   "code": "6152",
-   "name": "百一",
+   "code": "2486",
+   "name": "一詮",
    "market": "TWSE",
-   "close": 18.7,
+   "close": 159.5,
    "pct1": 10.0,
-   "volume": 7774916.0,
+   "volume": 3190268.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4770",
+   "name": "上品",
+   "market": "TWSE",
+   "close": 286.0,
+   "pct1": 10.0,
+   "volume": 644674.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6215",
+   "name": "和椿",
+   "market": "TWSE",
+   "close": 77.0,
+   "pct1": 10.0,
+   "volume": 353794.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6269",
+   "name": "台郡",
+   "market": "TWSE",
+   "close": 71.5,
+   "pct1": 10.0,
+   "volume": 12516027.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6426",
+   "name": "統新",
+   "market": "TWSE",
+   "close": 242.0,
+   "pct1": 10.0,
+   "volume": 1105817.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6862",
+   "name": "三集瑞-KY",
+   "market": "TWSE",
+   "close": 121.0,
+   "pct1": 10.0,
+   "volume": 123806.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6919",
+   "name": "康霈*",
+   "market": "TWSE",
+   "close": 70.4,
+   "pct1": 10.0,
+   "volume": 4049119.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "8131",
+   "name": "福懋科",
+   "market": "TWSE",
+   "close": 53.9,
+   "pct1": 10.0,
+   "volume": 1205887.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3317",
+   "name": "尼克森",
+   "market": "TPEX",
+   "close": 50.6,
+   "pct1": 10.0,
+   "volume": 362939.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3362",
+   "name": "先進光",
+   "market": "TPEX",
+   "close": 126.5,
+   "pct1": 10.0,
+   "volume": 769767.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3441",
+   "name": "聯一光",
+   "market": "TPEX",
+   "close": 159.5,
+   "pct1": 10.0,
+   "volume": 1929886.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3691",
+   "name": "碩禾",
+   "market": "TPEX",
+   "close": 148.5,
+   "pct1": 10.0,
+   "volume": 3589720.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近10日漲幅+36.2%",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "4147",
+   "name": "中裕",
+   "market": "TPEX",
+   "close": 60.5,
+   "pct1": 10.0,
+   "volume": 1328695.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4154",
+   "name": "樂威科-KY",
+   "market": "TPEX",
+   "close": 11.55,
+   "pct1": 10.0,
+   "volume": 7380.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5013",
+   "name": "強新",
+   "market": "TPEX",
+   "close": 68.2,
+   "pct1": 10.0,
+   "volume": 2650054.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近10日漲幅+38.1%",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "5230",
+   "name": "雷笛克光學",
+   "market": "TPEX",
+   "close": 28.05,
+   "pct1": 10.0,
+   "volume": 3350914.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5351",
+   "name": "鈺創",
+   "market": "TPEX",
+   "close": 92.4,
+   "pct1": 10.0,
+   "volume": 4299655.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6825",
+   "name": "和暢科技",
+   "market": "TPEX",
+   "close": 22.55,
+   "pct1": 10.0,
+   "volume": 157268.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6903",
+   "name": "巨漢",
+   "market": "TPEX",
+   "close": 269.5,
+   "pct1": 10.0,
+   "volume": 163830.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "7828",
+   "name": "創新服務",
+   "market": "TPEX",
+   "close": 1155.0,
+   "pct1": 10.0,
+   "volume": 25358.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8291",
+   "name": "尚茂",
+   "market": "TPEX",
+   "close": 23.65,
+   "pct1": 10.0,
+   "volume": 18684.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2328",
+   "name": "廣宇",
+   "market": "TWSE",
+   "close": 46.8,
+   "pct1": 9.99,
+   "volume": 6437291.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2426",
+   "name": "鼎元",
+   "market": "TWSE",
+   "close": 74.9,
+   "pct1": 9.99,
+   "volume": 5741087.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8150",
+   "name": "南茂",
+   "market": "TWSE",
+   "close": 77.1,
+   "pct1": 9.99,
+   "volume": 8715449.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4174",
+   "name": "浩鼎",
+   "market": "TPEX",
+   "close": 53.4,
+   "pct1": 9.99,
+   "volume": 898131.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8111",
+   "name": "立碁",
+   "market": "TPEX",
+   "close": 74.9,
+   "pct1": 9.99,
+   "volume": 3047874.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2369",
+   "name": "菱生",
+   "market": "TWSE",
+   "close": 25.35,
+   "pct1": 9.98,
+   "volume": 1800367.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3147",
+   "name": "大綜",
+   "market": "TPEX",
+   "close": 319.5,
+   "pct1": 9.98,
+   "volume": 1262781.0,
+   "signals": [
+    "大漲/接近漲停",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "4806",
+   "name": "桂田文創",
+   "market": "TPEX",
+   "close": 10.8,
+   "pct1": 9.98,
+   "volume": 49746.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8074",
+   "name": "鉅橡",
+   "market": "TPEX",
+   "close": 44.1,
+   "pct1": 9.98,
+   "volume": 293190.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2342",
+   "name": "茂矽",
+   "market": "TWSE",
+   "close": 34.75,
+   "pct1": 9.97,
+   "volume": 1391503.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2485",
+   "name": "兆赫",
+   "market": "TWSE",
+   "close": 32.0,
+   "pct1": 9.97,
+   "volume": 2512136.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3051",
+   "name": "力特",
+   "market": "TWSE",
+   "close": 19.85,
+   "pct1": 9.97,
+   "volume": 427401.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5608",
+   "name": "四維航",
+   "market": "TWSE",
+   "close": 16.0,
+   "pct1": 9.97,
+   "volume": 2804755.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6278",
+   "name": "台表科",
+   "market": "TWSE",
+   "close": 198.5,
+   "pct1": 9.97,
+   "volume": 6860644.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6715",
+   "name": "嘉基",
+   "market": "TWSE",
+   "close": 375.0,
+   "pct1": 9.97,
+   "volume": 1095987.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2230",
+   "name": "泰茂",
+   "market": "TPEX",
+   "close": 18.2,
+   "pct1": 9.97,
+   "volume": 126063.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3236",
+   "name": "千如",
+   "market": "TPEX",
+   "close": 40.25,
+   "pct1": 9.97,
+   "volume": 1308532.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3354",
+   "name": "律勝",
+   "market": "TPEX",
+   "close": 39.15,
+   "pct1": 9.97,
+   "volume": 1166630.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3587",
+   "name": "閎康",
+   "market": "TPEX",
+   "close": 193.0,
+   "pct1": 9.97,
+   "volume": 159005.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4991",
+   "name": "環宇-KY",
+   "market": "TPEX",
+   "close": 320.0,
+   "pct1": 9.97,
+   "volume": 1610274.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5425",
+   "name": "台半",
+   "market": "TPEX",
+   "close": 76.1,
+   "pct1": 9.97,
+   "volume": 1920485.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6683",
+   "name": "雍智科技",
+   "market": "TPEX",
+   "close": 860.0,
+   "pct1": 9.97,
+   "volume": 492265.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6708",
+   "name": "天擎",
+   "market": "TPEX",
+   "close": 75.0,
+   "pct1": 9.97,
+   "volume": 353138.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8040",
+   "name": "九暘",
+   "market": "TPEX",
+   "close": 68.4,
+   "pct1": 9.97,
+   "volume": 375856.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8289",
+   "name": "泰藝",
+   "market": "TPEX",
+   "close": 39.15,
+   "pct1": 9.97,
+   "volume": 376581.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2363",
+   "name": "矽統",
+   "market": "TWSE",
+   "close": 45.8,
+   "pct1": 9.96,
+   "volume": 2507045.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3047",
+   "name": "訊舟",
+   "market": "TWSE",
+   "close": 13.25,
+   "pct1": 9.96,
+   "volume": 1269004.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3285",
+   "name": "微端",
+   "market": "TPEX",
+   "close": 43.6,
+   "pct1": 9.96,
+   "volume": 64512.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3287",
+   "name": "廣寰科",
+   "market": "TPEX",
+   "close": 80.6,
+   "pct1": 9.96,
+   "volume": 939583.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日漲幅+36.4%",
+    "近10日漲幅+27.7%",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "4510",
+   "name": "高鋒",
+   "market": "TPEX",
+   "close": 38.1,
+   "pct1": 9.96,
+   "volume": 423440.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6174",
+   "name": "安碁",
+   "market": "TPEX",
+   "close": 38.65,
+   "pct1": 9.96,
+   "volume": 238126.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6588",
+   "name": "東典光電",
+   "market": "TPEX",
+   "close": 75.1,
+   "pct1": 9.96,
+   "volume": 352037.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6209",
+   "name": "今國光",
+   "market": "TWSE",
+   "close": 71.8,
+   "pct1": 9.95,
+   "volume": 6370363.0,
    "signals": [
     "大漲/接近漲停"
    ]
@@ -36,42 +628,709 @@
    "code": "4741",
    "name": "泓瀚",
    "market": "TPEX",
-   "close": 57.3,
-   "pct1": 9.98,
-   "volume": 2374051.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "6103",
-   "name": "合邦",
-   "market": "TPEX",
-   "close": 35.3,
-   "pct1": 9.97,
-   "volume": 99025.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "3219",
-   "name": "倚強科",
-   "market": "TPEX",
-   "close": 93.9,
+   "close": 63.0,
    "pct1": 9.95,
-   "volume": 2179862.0,
+   "volume": 3917759.0,
+   "signals": [
+    "大漲/接近漲停",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "6530",
+   "name": "創威",
+   "market": "TPEX",
+   "close": 72.9,
+   "pct1": 9.95,
+   "volume": 274606.0,
    "signals": [
     "大漲/接近漲停"
    ]
   },
   {
-   "code": "7584",
-   "name": "樂意",
+   "code": "2484",
+   "name": "希華",
+   "market": "TWSE",
+   "close": 58.6,
+   "pct1": 9.94,
+   "volume": 2695695.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3532",
+   "name": "台勝科",
+   "market": "TWSE",
+   "close": 282.0,
+   "pct1": 9.94,
+   "volume": 1429778.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4968",
+   "name": "立積",
+   "market": "TWSE",
+   "close": 79.6,
+   "pct1": 9.94,
+   "volume": 476735.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "6830",
+   "name": "汎銓",
+   "market": "TWSE",
+   "close": 459.0,
+   "pct1": 9.94,
+   "volume": 898063.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "3663",
+   "name": "鑫科",
    "market": "TPEX",
-   "close": 27.7,
+   "close": 48.1,
+   "pct1": 9.94,
+   "volume": 357355.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6179",
+   "name": "亞通",
+   "market": "TPEX",
+   "close": 34.85,
+   "pct1": 9.94,
+   "volume": 2796277.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6234",
+   "name": "高僑",
+   "market": "TPEX",
+   "close": 44.8,
+   "pct1": 9.94,
+   "volume": 1316264.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6751",
+   "name": "智聯服務",
+   "market": "TPEX",
+   "close": 79.6,
+   "pct1": 9.94,
+   "volume": 149448.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8088",
+   "name": "品安",
+   "market": "TPEX",
+   "close": 39.25,
+   "pct1": 9.94,
+   "volume": 387531.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8171",
+   "name": "天宇",
+   "market": "TPEX",
+   "close": 18.25,
+   "pct1": 9.94,
+   "volume": 193789.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3715",
+   "name": "定穎投控",
+   "market": "TWSE",
+   "close": 108.5,
+   "pct1": 9.93,
+   "volume": 3473435.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4960",
+   "name": "誠美材",
+   "market": "TWSE",
+   "close": 29.9,
+   "pct1": 9.93,
+   "volume": 13744179.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4976",
+   "name": "佳凌",
+   "market": "TWSE",
+   "close": 32.1,
+   "pct1": 9.93,
+   "volume": 886165.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3059",
+   "name": "華晶科",
+   "market": "TWSE",
+   "close": 35.45,
    "pct1": 9.92,
-   "volume": 83752.0,
+   "volume": 964617.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3305",
+   "name": "昇貿",
+   "market": "TWSE",
+   "close": 99.7,
+   "pct1": 9.92,
+   "volume": 930337.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4927",
+   "name": "泰鼎-KY",
+   "market": "TWSE",
+   "close": 49.3,
+   "pct1": 9.92,
+   "volume": 6500920.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6957",
+   "name": "裕慶-KY",
+   "market": "TWSE",
+   "close": 460.0,
+   "pct1": 9.92,
+   "volume": 994838.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5498",
+   "name": "凱崴",
+   "market": "TPEX",
+   "close": 43.75,
+   "pct1": 9.92,
+   "volume": 1441605.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6693",
+   "name": "廣閎科",
+   "market": "TPEX",
+   "close": 133.0,
+   "pct1": 9.92,
+   "volume": 683860.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8027",
+   "name": "鈦昇",
+   "market": "TPEX",
+   "close": 138.5,
+   "pct1": 9.92,
+   "volume": 1254389.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2483",
+   "name": "百容",
+   "market": "TWSE",
+   "close": 32.15,
+   "pct1": 9.91,
+   "volume": 514809.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4989",
+   "name": "榮科",
+   "market": "TWSE",
+   "close": 54.9,
+   "pct1": 9.91,
+   "volume": 2578395.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6869",
+   "name": "雲豹能源",
+   "market": "TWSE",
+   "close": 59.9,
+   "pct1": 9.91,
+   "volume": 295841.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6175",
+   "name": "立敦",
+   "market": "TPEX",
+   "close": 58.8,
+   "pct1": 9.91,
+   "volume": 846183.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6290",
+   "name": "良維",
+   "market": "TPEX",
+   "close": 183.0,
+   "pct1": 9.91,
+   "volume": 1832062.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6419",
+   "name": "京晨科",
+   "market": "TPEX",
+   "close": 122.0,
+   "pct1": 9.91,
+   "volume": 73580.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "7704",
+   "name": "明遠精密",
+   "market": "TPEX",
+   "close": 75.4,
+   "pct1": 9.91,
+   "volume": 268174.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2338",
+   "name": "光罩",
+   "market": "TWSE",
+   "close": 38.3,
+   "pct1": 9.9,
+   "volume": 2197869.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2417",
+   "name": "圓剛",
+   "market": "TWSE",
+   "close": 33.85,
+   "pct1": 9.9,
+   "volume": 196810.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "3543",
+   "name": "州巧",
+   "market": "TWSE",
+   "close": 46.05,
+   "pct1": 9.9,
+   "volume": 1417042.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "7795",
+   "name": "長廣",
+   "market": "TWSE",
+   "close": 377.5,
+   "pct1": 9.9,
+   "volume": 499677.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3675",
+   "name": "德微",
+   "market": "TPEX",
+   "close": 227.5,
+   "pct1": 9.9,
+   "volume": 414143.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5228",
+   "name": "鈺鎧",
+   "market": "TPEX",
+   "close": 46.05,
+   "pct1": 9.9,
+   "volume": 887351.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6465",
+   "name": "威潤",
+   "market": "TPEX",
+   "close": 34.4,
+   "pct1": 9.9,
+   "volume": 73213.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6532",
+   "name": "瑞耘",
+   "market": "TPEX",
+   "close": 96.6,
+   "pct1": 9.9,
+   "volume": 620879.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "1326",
+   "name": "台化",
+   "market": "TWSE",
+   "close": 68.9,
+   "pct1": 9.89,
+   "volume": 15672458.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3535",
+   "name": "晶彩科",
+   "market": "TWSE",
+   "close": 71.1,
+   "pct1": 9.89,
+   "volume": 459484.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "5469",
+   "name": "瀚宇博",
+   "market": "TWSE",
+   "close": 70.0,
+   "pct1": 9.89,
+   "volume": 5721200.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3141",
+   "name": "晶宏",
+   "market": "TPEX",
+   "close": 77.8,
+   "pct1": 9.89,
+   "volume": 1813633.0,
+   "signals": [
+    "大漲/接近漲停",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "4946",
+   "name": "辣椒",
+   "market": "TPEX",
+   "close": 87.8,
+   "pct1": 9.89,
+   "volume": 13625.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2457",
+   "name": "飛宏",
+   "market": "TWSE",
+   "close": 18.9,
+   "pct1": 9.88,
+   "volume": 926059.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "6438",
+   "name": "迅得",
+   "market": "TWSE",
+   "close": 139.0,
+   "pct1": 9.88,
+   "volume": 514753.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "9136",
+   "name": "巨騰-DR",
+   "market": "TWSE",
+   "close": 8.56,
+   "pct1": 9.88,
+   "volume": 154436.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3128",
+   "name": "昇銳",
+   "market": "TPEX",
+   "close": 17.8,
+   "pct1": 9.88,
+   "volume": 228402.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4903",
+   "name": "聯光通",
+   "market": "TPEX",
+   "close": 50.6,
+   "pct1": 9.88,
+   "volume": 5060813.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4924",
+   "name": "欣厚-KY",
+   "market": "TPEX",
+   "close": 18.9,
+   "pct1": 9.88,
+   "volume": 323319.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "8089",
+   "name": "康全電訊",
+   "market": "TPEX",
+   "close": 27.25,
+   "pct1": 9.88,
+   "volume": 648801.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2302",
+   "name": "麗正",
+   "market": "TWSE",
+   "close": 38.4,
+   "pct1": 9.87,
+   "volume": 1406030.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2340",
+   "name": "台亞",
+   "market": "TWSE",
+   "close": 37.3,
+   "pct1": 9.87,
+   "volume": 4801867.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2466",
+   "name": "冠西電",
+   "market": "TWSE",
+   "close": 328.5,
+   "pct1": 9.87,
+   "volume": 270148.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近10日漲幅+25.9%"
+   ]
+  },
+  {
+   "code": "3701",
+   "name": "大眾控",
+   "market": "TWSE",
+   "close": 52.3,
+   "pct1": 9.87,
+   "volume": 2447154.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "1785",
+   "name": "光洋科",
+   "market": "TPEX",
+   "close": 79.0,
+   "pct1": 9.87,
+   "volume": 5586537.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3498",
+   "name": "陽程",
+   "market": "TPEX",
+   "close": 211.5,
+   "pct1": 9.87,
+   "volume": 2024458.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6735",
+   "name": "美達科技",
+   "market": "TPEX",
+   "close": 52.3,
+   "pct1": 9.87,
+   "volume": 185608.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "1802",
+   "name": "台玻",
+   "market": "TWSE",
+   "close": 63.5,
+   "pct1": 9.86,
+   "volume": 63624622.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3617",
+   "name": "碩天",
+   "market": "TWSE",
+   "close": 234.0,
+   "pct1": 9.86,
+   "volume": 78076.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6284",
+   "name": "佳邦",
+   "market": "TPEX",
+   "close": 62.4,
+   "pct1": 9.86,
+   "volume": 363168.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6548",
+   "name": "長科*",
+   "market": "TPEX",
+   "close": 63.5,
+   "pct1": 9.86,
+   "volume": 1400408.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2312",
+   "name": "金寶",
+   "market": "TWSE",
+   "close": 28.45,
+   "pct1": 9.85,
+   "volume": 9941163.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6108",
+   "name": "競國",
+   "market": "TWSE",
+   "close": 29.55,
+   "pct1": 9.85,
+   "volume": 1277016.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "7709",
+   "name": "榮田",
+   "market": "TPEX",
+   "close": 73.6,
+   "pct1": 9.85,
+   "volume": 51864.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4768",
+   "name": "晶呈科技",
+   "market": "TPEX",
+   "close": 279.0,
+   "pct1": 9.84,
+   "volume": 353167.0,
    "signals": [
     "大漲/接近漲停"
    ]
@@ -80,4126 +1339,878 @@
    "code": "5202",
    "name": "力新",
    "market": "TPEX",
-   "close": 18.3,
-   "pct1": 9.91,
-   "volume": 8493642.0,
-   "signals": [
-    "大漲/接近漲停",
-    "近5日漲幅+28.9%",
-    "近10日漲幅+27.1%",
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "5438",
-   "name": "東友",
-   "market": "TPEX",
-   "close": 18.85,
-   "pct1": 9.91,
-   "volume": 2517055.0,
-   "signals": [
-    "大漲/接近漲停",
-    "近5日漲幅+16.0%",
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "3287",
-   "name": "廣寰科",
-   "market": "TPEX",
-   "close": 73.3,
-   "pct1": 9.9,
-   "volume": 3725164.0,
-   "signals": [
-    "大漲/接近漲停",
-    "近5日漲幅+24.7%",
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "4924",
-   "name": "欣厚-KY",
-   "market": "TPEX",
-   "close": 17.2,
-   "pct1": 9.9,
-   "volume": 363795.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "8455",
-   "name": "大拓-KY",
-   "market": "TPEX",
-   "close": 31.65,
-   "pct1": 9.9,
-   "volume": 90394.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "6720",
-   "name": "久昌",
-   "market": "TPEX",
-   "close": 100.0,
-   "pct1": 9.89,
-   "volume": 104621.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "5490",
-   "name": "同亨",
-   "market": "TPEX",
-   "close": 25.6,
-   "pct1": 9.87,
-   "volume": 2308772.0,
-   "signals": [
-    "大漲/接近漲停",
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "6751",
-   "name": "智聯服務",
-   "market": "TPEX",
-   "close": 72.4,
-   "pct1": 9.86,
-   "volume": 794425.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "4304",
-   "name": "勝昱",
-   "market": "TPEX",
-   "close": 16.75,
+   "close": 20.1,
    "pct1": 9.84,
-   "volume": 30199.0,
+   "volume": 2870832.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日漲幅+35.4%",
+    "近10日漲幅+29.3%",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "5468",
+   "name": "凱鈺",
+   "market": "TPEX",
+   "close": 20.65,
+   "pct1": 9.84,
+   "volume": 104072.0,
    "signals": [
     "大漲/接近漲停"
    ]
   },
   {
-   "code": "5205",
-   "name": "中茂",
-   "market": "TPEX",
-   "close": 23.0,
-   "pct1": 9.79,
-   "volume": 35081.0,
+   "code": "4526",
+   "name": "東台",
+   "market": "TWSE",
+   "close": 54.2,
+   "pct1": 9.83,
+   "volume": 6887078.0,
    "signals": [
     "大漲/接近漲停",
-    "近5日漲幅+22.7%"
-   ]
-  },
-  {
-   "code": "6947",
-   "name": "台鎔科技",
-   "market": "TWSE",
-   "close": 62.1,
-   "pct1": 9.72,
-   "volume": 665317.0,
-   "signals": [
-    "大漲/接近漲停",
-    "爆量(今量/20日均量=3.0倍)"
-   ]
-  },
-  {
-   "code": "4155",
-   "name": "訊映",
-   "market": "TWSE",
-   "close": 17.9,
-   "pct1": 9.48,
-   "volume": 1489084.0,
-   "signals": [
-    "大漲/接近漲停",
-    "創12日新高"
-   ]
-  },
-  {
-   "code": "1742",
-   "name": "台蠟",
-   "market": "TPEX",
-   "close": 21.55,
-   "pct1": 9.39,
-   "volume": 801212.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "1558",
-   "name": "伸興",
-   "market": "TWSE",
-   "close": 113.0,
-   "pct1": 9.18,
-   "volume": 1196149.0,
-   "signals": [
-    "大漲/接近漲停",
-    "爆量(今量/20日均量=7.4倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "3576",
-   "name": "聯合再生",
-   "market": "TWSE",
-   "close": 17.8,
-   "pct1": 8.54,
-   "volume": 48632378.0,
-   "signals": [
-    "大漲/接近漲停",
-    "爆量(今量/20日均量=3.6倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "6921",
-   "name": "嘉雨思-創",
-   "market": "TWSE",
-   "close": 64.9,
-   "pct1": 8.53,
-   "volume": 20016.0,
-   "signals": [
-    "大漲/接近漲停",
-    "創4日新高"
-   ]
-  },
-  {
-   "code": "6446",
-   "name": "藥華藥",
-   "market": "TWSE",
-   "close": 1270.0,
-   "pct1": 7.17,
-   "volume": 7197762.0,
-   "signals": [
-    "爆量(今量/20日均量=3.1倍)",
-    "近5日持續放量1.6倍",
-    "創22日新高"
-   ]
-  },
-  {
-   "code": "9928",
-   "name": "中視",
-   "market": "TWSE",
-   "close": 16.8,
-   "pct1": 5.99,
-   "volume": 495933.0,
-   "signals": [
-    "爆量(今量/20日均量=5.4倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "6246",
-   "name": "臺龍",
-   "market": "TPEX",
-   "close": 13.5,
-   "pct1": 5.47,
-   "volume": 73177.0,
-   "signals": [
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "4530",
-   "name": "天意能創",
-   "market": "TPEX",
-   "close": 24.25,
-   "pct1": 5.43,
-   "volume": 12416.0,
-   "signals": [
-    "創1日新高"
-   ]
-  },
-  {
-   "code": "6873",
-   "name": "泓德能源",
-   "market": "TWSE",
-   "close": 49.5,
-   "pct1": 4.76,
-   "volume": 4378546.0,
-   "signals": [
-    "爆量(今量/20日均量=4.1倍)",
-    "近5日持續放量2.0倍",
-    "近10日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "1789",
-   "name": "神隆",
-   "market": "TWSE",
-   "close": 20.15,
-   "pct1": 3.6,
-   "volume": 1583873.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "6541",
-   "name": "泰福-KY",
-   "market": "TWSE",
-   "close": 27.85,
-   "pct1": 3.53,
-   "volume": 926054.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "6782",
-   "name": "視陽",
-   "market": "TWSE",
-   "close": 274.5,
-   "pct1": 3.39,
-   "volume": 1356343.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)",
-    "創22日新高"
-   ]
-  },
-  {
-   "code": "3609",
-   "name": "三一東林",
-   "market": "TPEX",
-   "close": 29.1,
-   "pct1": 3.19,
-   "volume": 371397.0,
-   "signals": [
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "6890",
-   "name": "來億-KY",
-   "market": "TWSE",
-   "close": 147.0,
-   "pct1": 2.8,
-   "volume": 785406.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)"
-   ]
-  },
-  {
-   "code": "6283",
-   "name": "淳安",
-   "market": "TWSE",
-   "close": 18.75,
-   "pct1": 2.74,
-   "volume": 375584.0,
-   "signals": [
-    "爆量(今量/20日均量=5.1倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "8940",
-   "name": "新天地",
-   "market": "TWSE",
-   "close": 15.0,
-   "pct1": 2.74,
-   "volume": 243729.0,
-   "signals": [
-    "爆量(今量/20日均量=6.1倍)",
-    "近5日持續放量2.1倍"
-   ]
-  },
-  {
-   "code": "6472",
-   "name": "保瑞",
-   "market": "TWSE",
-   "close": 399.5,
-   "pct1": 2.7,
-   "volume": 2377413.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1220",
-   "name": "台榮",
-   "market": "TWSE",
-   "close": 10.45,
-   "pct1": 2.45,
-   "volume": 575713.0,
-   "signals": [
-    "爆量(今量/20日均量=5.6倍)",
-    "近5日持續放量2.5倍"
-   ]
-  },
-  {
-   "code": "2901",
-   "name": "欣欣",
-   "market": "TWSE",
-   "close": 25.1,
-   "pct1": 2.45,
-   "volume": 143893.0,
-   "signals": [
-    "爆量(今量/20日均量=3.7倍)"
-   ]
-  },
-  {
-   "code": "1512",
-   "name": "瑞利",
-   "market": "TWSE",
-   "close": 6.29,
-   "pct1": 2.28,
-   "volume": 174056.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2073",
-   "name": "雄順",
-   "market": "TPEX",
-   "close": 26.0,
-   "pct1": 2.16,
-   "volume": 2000.0,
-   "signals": [
-    "創6日新高"
-   ]
-  },
-  {
-   "code": "2430",
-   "name": "燦坤",
-   "market": "TWSE",
-   "close": 17.25,
-   "pct1": 2.07,
-   "volume": 213301.0,
-   "signals": [
-    "爆量(今量/20日均量=4.8倍)"
-   ]
-  },
-  {
-   "code": "2468",
-   "name": "華經",
-   "market": "TWSE",
-   "close": 60.2,
-   "pct1": 2.03,
-   "volume": 43693792.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)",
-    "近5日持續放量2.0倍",
+    "近10日漲幅+32.0%",
     "近10日持續放量1.5倍"
    ]
   },
   {
-   "code": "6216",
-   "name": "居易",
+   "code": "5284",
+   "name": "jpp-KY",
    "market": "TWSE",
-   "close": 18.65,
-   "pct1": 1.91,
-   "volume": 462346.0,
+   "close": 212.5,
+   "pct1": 9.82,
+   "volume": 293854.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "4557",
-   "name": "永新-KY",
-   "market": "TWSE",
-   "close": 55.0,
-   "pct1": 1.85,
-   "volume": 214566.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)"
-   ]
-  },
-  {
-   "code": "6431",
-   "name": "光麗-KY",
-   "market": "TWSE",
-   "close": 14.85,
-   "pct1": 1.71,
-   "volume": 50028.0,
-   "signals": [
+    "大漲/接近漲停",
     "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1324",
-   "name": "地球",
-   "market": "TWSE",
-   "close": 9.96,
-   "pct1": 1.63,
-   "volume": 312995.0,
-   "signals": [
-    "爆量(今量/20日均量=4.1倍)"
-   ]
-  },
-  {
-   "code": "6792",
-   "name": "詠業",
-   "market": "TWSE",
-   "close": 53.4,
-   "pct1": 1.52,
-   "volume": 115801.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "3050",
-   "name": "鈺德",
-   "market": "TWSE",
-   "close": 10.3,
-   "pct1": 1.48,
-   "volume": 1566084.0,
-   "signals": [
-    "爆量(今量/20日均量=3.3倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2247",
-   "name": "汎德永業",
-   "market": "TWSE",
-   "close": 218.0,
-   "pct1": 1.4,
-   "volume": 227805.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "910322",
-   "name": "康師傅-DR",
-   "market": "TWSE",
-   "close": 28.25,
-   "pct1": 1.25,
-   "volume": 82716.0,
-   "signals": [
-    "創5日新高"
-   ]
-  },
-  {
-   "code": "9944",
-   "name": "新麗",
-   "market": "TWSE",
-   "close": 17.65,
-   "pct1": 1.15,
-   "volume": 95452.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)",
-    "創22日新高"
-   ]
-  },
-  {
-   "code": "1418",
-   "name": "東華",
-   "market": "TWSE",
-   "close": 18.0,
-   "pct1": 1.12,
-   "volume": 236770.0,
-   "signals": [
-    "爆量(今量/20日均量=9.0倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "1626",
-   "name": "艾美特-KY",
-   "market": "TWSE",
-   "close": 9.84,
-   "pct1": 1.03,
-   "volume": 212842.0,
-   "signals": [
-    "爆量(今量/20日均量=5.1倍)",
-    "近5日持續放量1.6倍",
-    "創22日新高"
-   ]
-  },
-  {
-   "code": "1215",
-   "name": "卜蜂",
-   "market": "TWSE",
-   "close": 104.0,
-   "pct1": 0.97,
-   "volume": 1758818.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "3296",
-   "name": "勝德",
-   "market": "TWSE",
-   "close": 21.45,
-   "pct1": 0.94,
-   "volume": 192121.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2254",
-   "name": "巨鎧精密-創",
-   "market": "TWSE",
-   "close": 110.0,
-   "pct1": 0.92,
-   "volume": 3759683.0,
-   "signals": [
-    "創22日新高"
-   ]
-  },
-  {
-   "code": "6662",
-   "name": "樂斯科",
-   "market": "TPEX",
-   "close": 28.4,
-   "pct1": 0.89,
-   "volume": 38000.0,
-   "signals": [
-    "創3日新高"
-   ]
-  },
-  {
-   "code": "3306",
-   "name": "鼎天",
-   "market": "TPEX",
-   "close": 46.05,
-   "pct1": 0.88,
-   "volume": 1481606.0,
-   "signals": [
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "8342",
-   "name": "益張",
-   "market": "TPEX",
-   "close": 81.9,
-   "pct1": 0.86,
-   "volume": 1024.0,
-   "signals": [
-    "創1日新高"
-   ]
-  },
-  {
-   "code": "1443",
-   "name": "立益物流",
-   "market": "TWSE",
-   "close": 23.7,
-   "pct1": 0.85,
-   "volume": 44242.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "7765",
-   "name": "中華資安",
-   "market": "TWSE",
-   "close": 236.0,
-   "pct1": 0.85,
-   "volume": 303650.0,
-   "signals": [
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "3038",
-   "name": "全台",
-   "market": "TWSE",
-   "close": 19.3,
-   "pct1": 0.78,
-   "volume": 643142.0,
-   "signals": [
-    "爆量(今量/20日均量=3.6倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "3064",
-   "name": "泰偉",
-   "market": "TPEX",
-   "close": 13.15,
-   "pct1": 0.77,
-   "volume": 4150.0,
-   "signals": [
-    "創1日新高"
-   ]
-  },
-  {
-   "code": "9906",
-   "name": "欣巴巴",
-   "market": "TWSE",
-   "close": 34.25,
-   "pct1": 0.74,
-   "volume": 294833.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)"
-   ]
-  },
-  {
-   "code": "1233",
-   "name": "天仁",
-   "market": "TWSE",
-   "close": 28.4,
-   "pct1": 0.71,
-   "volume": 125836.0,
-   "signals": [
-    "爆量(今量/20日均量=7.4倍)",
-    "近5日持續放量2.3倍"
-   ]
-  },
-  {
-   "code": "3023",
-   "name": "信邦",
-   "market": "TWSE",
-   "close": 258.5,
-   "pct1": 0.58,
-   "volume": 2990058.0,
-   "signals": [
-    "近10日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "6916",
-   "name": "華凌",
-   "market": "TWSE",
-   "close": 18.0,
-   "pct1": 0.56,
-   "volume": 654484.0,
-   "signals": [
-    "爆量(今量/20日均量=10.8倍)",
-    "近5日持續放量2.5倍"
-   ]
-  },
-  {
-   "code": "3652",
-   "name": "精聯",
-   "market": "TWSE",
-   "close": 29.75,
-   "pct1": 0.51,
-   "volume": 188566.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "5521",
-   "name": "工信",
-   "market": "TWSE",
-   "close": 10.9,
-   "pct1": 0.46,
-   "volume": 5095494.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "8411",
-   "name": "福貞-KY",
-   "market": "TWSE",
-   "close": 11.0,
-   "pct1": 0.46,
-   "volume": 865729.0,
-   "signals": [
-    "爆量(今量/20日均量=4.9倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "5904",
-   "name": "寶雅*",
-   "market": "TPEX",
-   "close": 74.0,
-   "pct1": 0.41,
-   "volume": 11344567.0,
-   "signals": [
-    "創16日新高"
-   ]
-  },
-  {
-   "code": "2616",
-   "name": "山隆",
-   "market": "TWSE",
-   "close": 12.7,
-   "pct1": 0.4,
-   "volume": 320241.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)"
-   ]
-  },
-  {
-   "code": "1442",
-   "name": "名軒",
-   "market": "TWSE",
-   "close": 25.7,
-   "pct1": 0.39,
-   "volume": 548728.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)"
-   ]
-  },
-  {
-   "code": "1236",
-   "name": "宏亞",
-   "market": "TWSE",
-   "close": 26.7,
-   "pct1": 0.38,
-   "volume": 392884.0,
-   "signals": [
-    "爆量(今量/20日均量=4.6倍)"
-   ]
-  },
-  {
-   "code": "9902",
-   "name": "台火",
-   "market": "TWSE",
-   "close": 13.1,
-   "pct1": 0.38,
-   "volume": 339915.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)"
-   ]
-  },
-  {
-   "code": "1712",
-   "name": "興農",
-   "market": "TWSE",
-   "close": 40.4,
-   "pct1": 0.37,
-   "volume": 1470443.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "2248",
-   "name": "華勝-KY",
-   "market": "TWSE",
-   "close": 57.9,
-   "pct1": 0.35,
-   "volume": 74487.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "6641",
-   "name": "基士德-KY",
-   "market": "TWSE",
-   "close": 16.65,
-   "pct1": 0.3,
-   "volume": 84957.0,
-   "signals": [
-    "爆量(今量/20日均量=6.0倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "6796",
-   "name": "晉弘",
-   "market": "TWSE",
-   "close": 49.35,
-   "pct1": 0.3,
-   "volume": 107121.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)"
-   ]
-  },
-  {
-   "code": "1473",
-   "name": "台南",
-   "market": "TWSE",
-   "close": 17.7,
-   "pct1": 0.28,
-   "volume": 334825.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "6931",
-   "name": "青松健康",
-   "market": "TWSE",
-   "close": 36.4,
-   "pct1": 0.28,
-   "volume": 115721.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "1470",
-   "name": "大統新創",
-   "market": "TWSE",
-   "close": 23.4,
-   "pct1": 0.21,
-   "volume": 12000.0,
-   "signals": [
-    "創4日新高"
    ]
   },
   {
    "code": "6589",
    "name": "台康生技",
    "market": "TWSE",
-   "close": 46.9,
-   "pct1": 0.21,
-   "volume": 997546.0,
+   "close": 51.5,
+   "pct1": 9.81,
+   "volume": 1190858.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "大漲/接近漲停",
+    "爆量(今量/20日均量=2.5倍)",
+    "創23日新高"
    ]
   },
   {
-   "code": "6464",
-   "name": "台數科",
+   "code": "6861",
+   "name": "睿生光電",
    "market": "TWSE",
-   "close": 76.9,
-   "pct1": 0.13,
-   "volume": 98545.0,
+   "close": 190.5,
+   "pct1": 9.8,
+   "volume": 380394.0,
    "signals": [
-    "近10日持續放量1.9倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1109",
-   "name": "信大",
+   "code": "3703",
+   "name": "欣陸",
    "market": "TWSE",
-   "close": 12.85,
-   "pct1": 0.0,
-   "volume": 607107.0,
+   "close": 22.45,
+   "pct1": 9.78,
+   "volume": 5043546.0,
    "signals": [
-    "爆量(今量/20日均量=3.8倍)",
-    "近5日持續放量1.8倍"
+    "大漲/接近漲停",
+    "爆量(今量/20日均量=2.9倍)",
+    "創23日新高"
    ]
   },
   {
-   "code": "1436",
-   "name": "華友聯",
+   "code": "2493",
+   "name": "揚博",
    "market": "TWSE",
-   "close": 34.65,
-   "pct1": 0.0,
-   "volume": 432613.0,
+   "close": 146.0,
+   "pct1": 9.77,
+   "volume": 639958.0,
    "signals": [
-    "爆量(今量/20日均量=3.5倍)",
-    "近5日持續放量1.6倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1466",
-   "name": "聚隆",
-   "market": "TWSE",
-   "close": 14.25,
-   "pct1": 0.0,
-   "volume": 526413.0,
+   "code": "3522",
+   "name": "御嵿",
+   "market": "TPEX",
+   "close": 10.45,
+   "pct1": 9.77,
+   "volume": 63975.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1467",
-   "name": "南緯",
-   "market": "TWSE",
-   "close": 7.79,
-   "pct1": 0.0,
-   "volume": 426415.0,
+   "code": "6156",
+   "name": "松上",
+   "market": "TPEX",
+   "close": 21.35,
+   "pct1": 9.77,
+   "volume": 434065.0,
    "signals": [
-    "爆量(今量/20日均量=2.4倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1521",
-   "name": "大億",
+   "code": "3042",
+   "name": "晶技",
    "market": "TWSE",
-   "close": 24.2,
-   "pct1": 0.0,
-   "volume": 49060.0,
+   "close": 135.0,
+   "pct1": 9.76,
+   "volume": 3746139.0,
    "signals": [
-    "爆量(今量/20日均量=2.1倍)",
-    "近5日持續放量1.6倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1760",
-   "name": "寶齡富錦",
+   "code": "6706",
+   "name": "惠特",
    "market": "TWSE",
-   "close": 48.95,
-   "pct1": 0.0,
-   "volume": 368405.0,
+   "close": 112.5,
+   "pct1": 9.76,
+   "volume": 580622.0,
    "signals": [
-    "爆量(今量/20日均量=2.9倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2414",
-   "name": "精技",
+   "code": "8039",
+   "name": "台虹",
    "market": "TWSE",
-   "close": 47.25,
-   "pct1": 0.0,
-   "volume": 365628.0,
+   "close": 208.0,
+   "pct1": 9.76,
+   "volume": 7854574.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2431",
-   "name": "聯昌",
-   "market": "TWSE",
-   "close": 9.95,
-   "pct1": 0.0,
-   "volume": 461204.0,
+   "code": "3485",
+   "name": "敘豐",
+   "market": "TPEX",
+   "close": 180.0,
+   "pct1": 9.76,
+   "volume": 89972.0,
    "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2441",
+   "name": "超豐",
+   "market": "TWSE",
+   "close": 107.0,
+   "pct1": 9.74,
+   "volume": 3227810.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2465",
+   "name": "麗臺",
+   "market": "TWSE",
+   "close": 124.0,
+   "pct1": 9.73,
+   "volume": 2068204.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近10日漲幅+28.9%",
+    "近5日持續放量2.4倍",
     "近10日持續放量1.7倍"
    ]
   },
   {
-   "code": "2762",
-   "name": "世界健身-KY",
+   "code": "4764",
+   "name": "雙鍵",
    "market": "TWSE",
-   "close": 76.2,
-   "pct1": 0.0,
-   "volume": 145685.0,
+   "close": 124.0,
+   "pct1": 9.73,
+   "volume": 945129.0,
    "signals": [
-    "爆量(今量/20日均量=2.3倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2904",
-   "name": "匯僑",
-   "market": "TWSE",
-   "close": 12.3,
-   "pct1": 0.0,
-   "volume": 177172.0,
+   "code": "3264",
+   "name": "欣銓",
+   "market": "TPEX",
+   "close": 180.5,
+   "pct1": 9.73,
+   "volume": 5299448.0,
    "signals": [
-    "爆量(今量/20日均量=6.5倍)",
-    "近5日持續放量1.9倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "3049",
-   "name": "精金",
-   "market": "TWSE",
-   "close": 11.1,
-   "pct1": 0.0,
-   "volume": 6637989.0,
+   "code": "5475",
+   "name": "德宏",
+   "market": "TPEX",
+   "close": 186.0,
+   "pct1": 9.73,
+   "volume": 3372132.0,
    "signals": [
-    "爆量(今量/20日均量=2.3倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "3130",
-   "name": "一零四",
+   "code": "4551",
+   "name": "智伸科",
    "market": "TWSE",
-   "close": 204.0,
-   "pct1": 0.0,
-   "volume": 167570.0,
+   "close": 135.5,
+   "pct1": 9.72,
+   "volume": 399778.0,
    "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量1.6倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "3557",
-   "name": "嘉威",
-   "market": "TWSE",
-   "close": 22.3,
-   "pct1": 0.0,
-   "volume": 150997.0,
+   "code": "4908",
+   "name": "前鼎",
+   "market": "TPEX",
+   "close": 158.0,
+   "pct1": 9.72,
+   "volume": 723699.0,
    "signals": [
-    "爆量(今量/20日均量=3.6倍)",
-    "近5日持續放量1.7倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "4441",
-   "name": "振大環球",
-   "market": "TWSE",
-   "close": 166.5,
-   "pct1": 0.0,
-   "volume": 248282.0,
+   "code": "4931",
+   "name": "新盛力",
+   "market": "TPEX",
+   "close": 175.0,
+   "pct1": 9.72,
+   "volume": 624465.0,
    "signals": [
-    "爆量(今量/20日均量=2.1倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "4935",
-   "name": "茂林-KY",
+   "code": "6658",
+   "name": "聯策",
    "market": "TWSE",
-   "close": 30.9,
-   "pct1": 0.0,
-   "volume": 296490.0,
+   "close": 158.5,
+   "pct1": 9.69,
+   "volume": 184242.0,
    "signals": [
-    "爆量(今量/20日均量=3.3倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "4999",
-   "name": "鑫禾",
-   "market": "TWSE",
-   "close": 16.05,
-   "pct1": 0.0,
-   "volume": 224789.0,
+   "code": "3219",
+   "name": "倚強科",
+   "market": "TPEX",
+   "close": 103.0,
+   "pct1": 9.69,
+   "volume": 298097.0,
    "signals": [
-    "爆量(今量/20日均量=3.3倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "5215",
-   "name": "科嘉-KY",
-   "market": "TWSE",
-   "close": 34.3,
-   "pct1": 0.0,
-   "volume": 193621.0,
+   "code": "3625",
+   "name": "西勝",
+   "market": "TPEX",
+   "close": 15.3,
+   "pct1": 9.68,
+   "volume": 83502.0,
    "signals": [
-    "爆量(今量/20日均量=3.9倍)",
-    "近5日持續放量1.7倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "6674",
-   "name": "鋐寶科技",
+   "code": "6924",
+   "name": "榮惠-KY創",
    "market": "TWSE",
-   "close": 18.3,
-   "pct1": 0.0,
-   "volume": 125619.0,
+   "close": 130.5,
+   "pct1": 9.66,
+   "volume": 12226.0,
    "signals": [
-    "近5日持續放量1.6倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "9925",
-   "name": "新保",
-   "market": "TWSE",
-   "close": 39.05,
-   "pct1": 0.0,
-   "volume": 1227063.0,
+   "code": "6217",
+   "name": "中探針",
+   "market": "TPEX",
+   "close": 119.5,
+   "pct1": 9.63,
+   "volume": 2403099.0,
    "signals": [
-    "爆量(今量/20日均量=3.0倍)",
-    "近5日持續放量1.6倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "9926",
-   "name": "新海",
-   "market": "TWSE",
-   "close": 49.4,
-   "pct1": 0.0,
-   "volume": 43602.0,
+   "code": "4577",
+   "name": "達航科技",
+   "market": "TPEX",
+   "close": 114.0,
+   "pct1": 9.62,
+   "volume": 368948.0,
    "signals": [
-    "爆量(今量/20日均量=2.9倍)",
-    "近5日持續放量2.0倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "7721",
-   "name": "微程式",
-   "market": "TWSE",
-   "close": 49.5,
-   "pct1": -0.1,
-   "volume": 201805.0,
+   "code": "6651",
+   "name": "全宇昕",
+   "market": "TPEX",
+   "close": 120.0,
+   "pct1": 9.59,
+   "volume": 162708.0,
    "signals": [
-    "爆量(今量/20日均量=2.5倍)",
-    "近5日持續放量2.3倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2114",
-   "name": "鑫永銓",
+   "code": "6756",
+   "name": "威鋒電子",
    "market": "TWSE",
-   "close": 88.3,
-   "pct1": -0.11,
-   "volume": 223745.0,
+   "close": 106.5,
+   "pct1": 9.57,
+   "volume": 1339593.0,
    "signals": [
-    "爆量(今量/20日均量=7.1倍)",
-    "近5日持續放量2.1倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "4545",
-   "name": "銘鈺",
-   "market": "TWSE",
-   "close": 32.05,
-   "pct1": -0.16,
-   "volume": 188571.0,
+   "code": "3234",
+   "name": "光環",
+   "market": "TPEX",
+   "close": 126.0,
+   "pct1": 9.57,
+   "volume": 1231031.0,
    "signals": [
-    "爆量(今量/20日均量=2.0倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1733",
-   "name": "五鼎",
-   "market": "TWSE",
-   "close": 28.85,
-   "pct1": -0.17,
-   "volume": 236506.0,
+   "code": "6620",
+   "name": "漢達",
+   "market": "TPEX",
+   "close": 114.5,
+   "pct1": 9.57,
+   "volume": 2381927.0,
    "signals": [
-    "爆量(今量/20日均量=2.7倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1737",
-   "name": "臺鹽",
-   "market": "TWSE",
-   "close": 29.95,
-   "pct1": -0.17,
-   "volume": 467217.0,
+   "code": "6207",
+   "name": "雷科",
+   "market": "TPEX",
+   "close": 102.5,
+   "pct1": 9.51,
+   "volume": 1926558.0,
    "signals": [
-    "爆量(今量/20日均量=3.1倍)",
-    "近5日持續放量1.5倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "9908",
-   "name": "大台北",
-   "market": "TWSE",
-   "close": 28.75,
-   "pct1": -0.17,
-   "volume": 544491.0,
+   "code": "6276",
+   "name": "安鈦克",
+   "market": "TPEX",
+   "close": 14.5,
+   "pct1": 9.43,
+   "volume": 46357.0,
    "signals": [
-    "近5日持續放量3.3倍",
-    "近10日持續放量1.8倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "5007",
-   "name": "三星",
+   "code": "2241",
+   "name": "艾姆勒",
    "market": "TWSE",
-   "close": 56.1,
-   "pct1": -0.18,
-   "volume": 80377.0,
+   "close": 36.9,
+   "pct1": 9.33,
+   "volume": 1236403.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)",
-    "近5日持續放量1.6倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "9924",
-   "name": "福興",
+   "code": "6742",
+   "name": "澤米",
    "market": "TWSE",
-   "close": 37.45,
-   "pct1": -0.27,
-   "volume": 345125.0,
+   "close": 51.0,
+   "pct1": 9.21,
+   "volume": 402523.0,
    "signals": [
-    "爆量(今量/20日均量=3.6倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2491",
-   "name": "吉祥全",
+   "code": "4169",
+   "name": "泰宗",
    "market": "TWSE",
-   "close": 35.2,
-   "pct1": -0.28,
-   "volume": 1506471.0,
+   "close": 125.0,
+   "pct1": 9.17,
+   "volume": 272147.0,
    "signals": [
-    "近5日持續放量1.8倍",
-    "近10日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "3046",
-   "name": "建碁",
-   "market": "TWSE",
-   "close": 47.9,
-   "pct1": -0.31,
-   "volume": 320445.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "2406",
-   "name": "國碩",
-   "market": "TWSE",
-   "close": 29.2,
-   "pct1": -0.34,
-   "volume": 21179792.0,
-   "signals": [
-    "爆量(今量/20日均量=3.3倍)",
-    "近5日持續放量1.5倍",
-    "近10日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "9907",
-   "name": "統一實",
-   "market": "TWSE",
-   "close": 14.2,
-   "pct1": -0.35,
-   "volume": 4382603.0,
-   "signals": [
-    "爆量(今量/20日均量=3.1倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "2506",
-   "name": "太設",
-   "market": "TWSE",
-   "close": 8.22,
-   "pct1": -0.36,
-   "volume": 942705.0,
-   "signals": [
-    "爆量(今量/20日均量=6.2倍)",
-    "近5日持續放量2.1倍"
-   ]
-  },
-  {
-   "code": "6776",
-   "name": "展碁國際",
-   "market": "TWSE",
-   "close": 51.8,
-   "pct1": -0.38,
-   "volume": 326209.0,
-   "signals": [
-    "爆量(今量/20日均量=3.5倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "9136",
-   "name": "巨騰-DR",
-   "market": "TWSE",
-   "close": 7.79,
-   "pct1": -0.38,
-   "volume": 804000.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "6281",
-   "name": "全國電",
-   "market": "TWSE",
-   "close": 49.8,
-   "pct1": -0.4,
-   "volume": 221669.0,
-   "signals": [
-    "爆量(今量/20日均量=4.3倍)",
+    "大漲/接近漲停",
     "近5日持續放量1.8倍"
    ]
   },
   {
-   "code": "6863",
-   "name": "永道-KY",
-   "market": "TWSE",
-   "close": 88.0,
-   "pct1": -0.45,
-   "volume": 197745.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "1531",
-   "name": "高林股",
-   "market": "TWSE",
-   "close": 10.85,
-   "pct1": -0.46,
-   "volume": 500562.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)"
-   ]
-  },
-  {
-   "code": "6581",
-   "name": "鋼聯",
-   "market": "TWSE",
-   "close": 108.0,
-   "pct1": -0.46,
-   "volume": 172249.0,
-   "signals": [
-    "爆量(今量/20日均量=7.6倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "6914",
-   "name": "阜爾運通",
-   "market": "TWSE",
-   "close": 109.0,
-   "pct1": -0.46,
-   "volume": 201860.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "1108",
-   "name": "幸福",
-   "market": "TWSE",
-   "close": 10.7,
-   "pct1": -0.47,
-   "volume": 1350378.0,
-   "signals": [
-    "爆量(今量/20日均量=5.7倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "1614",
-   "name": "三洋電",
-   "market": "TWSE",
-   "close": 31.55,
-   "pct1": -0.47,
-   "volume": 97743.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "8463",
-   "name": "潤泰材",
-   "market": "TWSE",
-   "close": 20.95,
-   "pct1": -0.48,
-   "volume": 390350.0,
-   "signals": [
-    "爆量(今量/20日均量=8.1倍)",
-    "近5日持續放量2.6倍",
-    "近10日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2546",
-   "name": "根基",
-   "market": "TWSE",
-   "close": 98.0,
-   "pct1": -0.51,
-   "volume": 416774.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)"
-   ]
-  },
-  {
-   "code": "1806",
-   "name": "冠軍",
-   "market": "TWSE",
-   "close": 7.46,
-   "pct1": -0.53,
-   "volume": 411100.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "4104",
-   "name": "佳醫",
-   "market": "TWSE",
-   "close": 71.8,
-   "pct1": -0.55,
-   "volume": 616628.0,
-   "signals": [
-    "爆量(今量/20日均量=3.1倍)"
-   ]
-  },
-  {
-   "code": "2707",
-   "name": "晶華",
-   "market": "TWSE",
-   "close": 173.5,
-   "pct1": -0.57,
-   "volume": 414139.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "5203",
-   "name": "訊連",
-   "market": "TWSE",
-   "close": 51.5,
-   "pct1": -0.58,
-   "volume": 540103.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "6835",
-   "name": "圓裕",
-   "market": "TWSE",
-   "close": 30.6,
-   "pct1": -0.65,
-   "volume": 132558.0,
-   "signals": [
-    "爆量(今量/20日均量=5.6倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "2102",
-   "name": "泰豐",
-   "market": "TWSE",
-   "close": 14.9,
-   "pct1": -0.67,
-   "volume": 619763.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "6183",
-   "name": "關貿",
-   "market": "TWSE",
-   "close": 89.4,
-   "pct1": -0.67,
-   "volume": 78460.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "1438",
-   "name": "三地開發",
-   "market": "TWSE",
-   "close": 21.6,
-   "pct1": -0.69,
-   "volume": 214578.0,
-   "signals": [
-    "爆量(今量/20日均量=5.0倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "8341",
-   "name": "日友",
-   "market": "TWSE",
-   "close": 72.1,
-   "pct1": -0.69,
-   "volume": 653638.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "1477",
-   "name": "聚陽",
-   "market": "TWSE",
-   "close": 213.0,
-   "pct1": -0.7,
-   "volume": 3304484.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2427",
-   "name": "三商電",
-   "market": "TWSE",
-   "close": 20.95,
-   "pct1": -0.71,
-   "volume": 1229089.0,
-   "signals": [
-    "近5日持續放量2.1倍"
-   ]
-  },
-  {
-   "code": "1103",
-   "name": "嘉泥",
-   "market": "TWSE",
-   "close": 13.35,
-   "pct1": -0.74,
-   "volume": 1232748.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "6906",
-   "name": "現觀科",
-   "market": "TWSE",
-   "close": 66.7,
-   "pct1": -0.74,
-   "volume": 201160.0,
-   "signals": [
-    "爆量(今量/20日均量=5.1倍)",
-    "近5日持續放量2.3倍"
-   ]
-  },
-  {
-   "code": "3346",
-   "name": "麗清",
-   "market": "TWSE",
-   "close": 18.4,
-   "pct1": -0.81,
-   "volume": 807586.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)"
-   ]
-  },
-  {
-   "code": "2834",
-   "name": "臺企銀",
-   "market": "TWSE",
-   "close": 17.35,
-   "pct1": -0.86,
-   "volume": 62517103.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "1219",
-   "name": "福壽",
-   "market": "TWSE",
-   "close": 11.15,
-   "pct1": -0.89,
-   "volume": 613479.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "6592",
-   "name": "和潤企業",
-   "market": "TWSE",
-   "close": 55.8,
-   "pct1": -0.89,
-   "volume": 1243607.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)"
-   ]
-  },
-  {
-   "code": "4746",
-   "name": "台耀",
-   "market": "TWSE",
-   "close": 43.75,
-   "pct1": -0.91,
-   "volume": 1100923.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "1805",
-   "name": "寶徠",
-   "market": "TWSE",
-   "close": 9.71,
-   "pct1": -0.92,
-   "volume": 239475.0,
-   "signals": [
-    "爆量(今量/20日均量=4.5倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "7760",
-   "name": "享溫馨",
-   "market": "TWSE",
-   "close": 32.0,
-   "pct1": -0.93,
-   "volume": 196832.0,
-   "signals": [
-    "爆量(今量/20日均量=5.0倍)"
-   ]
-  },
-  {
-   "code": "1452",
-   "name": "宏益",
-   "market": "TWSE",
-   "close": 10.55,
-   "pct1": -0.94,
-   "volume": 438062.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)"
-   ]
-  },
-  {
-   "code": "3679",
-   "name": "新至陞",
-   "market": "TWSE",
-   "close": 105.0,
-   "pct1": -0.94,
-   "volume": 137419.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "9917",
-   "name": "中保科",
-   "market": "TWSE",
-   "close": 105.0,
-   "pct1": -0.94,
-   "volume": 954542.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "2496",
-   "name": "卓越",
-   "market": "TWSE",
-   "close": 52.0,
-   "pct1": -0.95,
-   "volume": 322037.0,
-   "signals": [
-    "爆量(今量/20日均量=10.0倍)",
-    "近5日持續放量2.7倍",
-    "近10日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1587",
-   "name": "吉茂",
-   "market": "TWSE",
-   "close": 20.0,
-   "pct1": -0.99,
-   "volume": 579972.0,
-   "signals": [
-    "爆量(今量/20日均量=3.5倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "1730",
-   "name": "花仙子",
-   "market": "TWSE",
-   "close": 50.1,
-   "pct1": -0.99,
-   "volume": 112339.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "2701",
-   "name": "萬企",
-   "market": "TWSE",
-   "close": 10.0,
-   "pct1": -0.99,
-   "volume": 177981.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "3669",
-   "name": "圓展",
-   "market": "TWSE",
-   "close": 29.55,
-   "pct1": -1.01,
-   "volume": 205161.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "9931",
-   "name": "欣高",
-   "market": "TWSE",
-   "close": 34.05,
-   "pct1": -1.02,
-   "volume": 87355.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "6558",
-   "name": "興能高",
-   "market": "TWSE",
-   "close": 19.2,
-   "pct1": -1.03,
-   "volume": 886474.0,
-   "signals": [
-    "爆量(今量/20日均量=4.1倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "2109",
-   "name": "華豐",
-   "market": "TWSE",
-   "close": 13.95,
-   "pct1": -1.06,
-   "volume": 456678.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "4438",
-   "name": "廣越",
-   "market": "TWSE",
-   "close": 55.8,
-   "pct1": -1.06,
-   "volume": 271264.0,
-   "signals": [
-    "爆量(今量/20日均量=4.4倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "6790",
-   "name": "永豐實",
-   "market": "TWSE",
-   "close": 37.25,
-   "pct1": -1.06,
-   "volume": 372438.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "2450",
-   "name": "神腦",
-   "market": "TWSE",
-   "close": 27.55,
-   "pct1": -1.08,
-   "volume": 219512.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "3266",
-   "name": "昇陽",
-   "market": "TWSE",
-   "close": 13.75,
-   "pct1": -1.08,
-   "volume": 150010.0,
-   "signals": [
-    "爆量(今量/20日均量=3.8倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "8072",
-   "name": "陞泰",
-   "market": "TWSE",
-   "close": 22.75,
-   "pct1": -1.09,
-   "volume": 620756.0,
-   "signals": [
-    "爆量(今量/20日均量=5.2倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "9937",
-   "name": "全國",
-   "market": "TWSE",
-   "close": 54.4,
-   "pct1": -1.09,
-   "volume": 116165.0,
-   "signals": [
-    "爆量(今量/20日均量=4.3倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "2852",
-   "name": "第一保",
-   "market": "TWSE",
-   "close": 26.95,
-   "pct1": -1.1,
-   "volume": 598840.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "2923",
-   "name": "鼎固-KY",
-   "market": "TWSE",
-   "close": 31.4,
-   "pct1": -1.1,
-   "volume": 157094.0,
-   "signals": [
-    "近5日漲幅+16.3%",
-    "近10日漲幅+31.7%",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "6936",
-   "name": "永鴻生技",
-   "market": "TWSE",
-   "close": 31.5,
-   "pct1": -1.1,
-   "volume": 70457.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "7722",
-   "name": "LINEPAY",
-   "market": "TWSE",
-   "close": 223.5,
-   "pct1": -1.11,
-   "volume": 167404.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "2459",
-   "name": "敦吉",
-   "market": "TWSE",
-   "close": 61.1,
-   "pct1": -1.13,
-   "volume": 275340.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "2753",
-   "name": "八方雲集",
-   "market": "TWSE",
-   "close": 175.5,
-   "pct1": -1.13,
-   "volume": 338642.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "3494",
-   "name": "誠研",
-   "market": "TWSE",
-   "close": 6.87,
-   "pct1": -1.15,
-   "volume": 144782.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "1734",
-   "name": "杏輝",
-   "market": "TWSE",
-   "close": 29.9,
-   "pct1": -1.16,
-   "volume": 573467.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)"
-   ]
-  },
-  {
-   "code": "1532",
-   "name": "勤美",
-   "market": "TWSE",
-   "close": 21.2,
-   "pct1": -1.17,
-   "volume": 1140340.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "5288",
-   "name": "豐祥-KY",
-   "market": "TWSE",
-   "close": 169.0,
-   "pct1": -1.17,
-   "volume": 243237.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "1795",
-   "name": "美時",
-   "market": "TWSE",
-   "close": 166.0,
-   "pct1": -1.19,
-   "volume": 4152687.0,
-   "signals": [
-    "爆量(今量/20日均量=3.3倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "9905",
-   "name": "大華",
-   "market": "TWSE",
-   "close": 20.8,
-   "pct1": -1.19,
-   "volume": 436461.0,
-   "signals": [
-    "爆量(今量/20日均量=3.9倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "9943",
-   "name": "好樂迪",
-   "market": "TWSE",
-   "close": 49.6,
-   "pct1": -1.2,
-   "volume": 660581.0,
-   "signals": [
-    "爆量(今量/20日均量=3.3倍)"
-   ]
-  },
-  {
-   "code": "2820",
-   "name": "華票",
-   "market": "TWSE",
-   "close": 16.25,
-   "pct1": -1.22,
-   "volume": 7359989.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "1232",
-   "name": "大統益",
-   "market": "TWSE",
-   "close": 160.5,
-   "pct1": -1.23,
-   "volume": 357421.0,
-   "signals": [
-    "近5日持續放量2.1倍"
-   ]
-  },
-  {
-   "code": "4771",
-   "name": "望隼",
-   "market": "TWSE",
-   "close": 200.0,
-   "pct1": -1.23,
-   "volume": 438823.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "1339",
-   "name": "昭輝",
-   "market": "TWSE",
-   "close": 39.8,
-   "pct1": -1.24,
-   "volume": 284649.0,
-   "signals": [
-    "爆量(今量/20日均量=5.1倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "1337",
-   "name": "再生-KY",
-   "market": "TWSE",
-   "close": 3.92,
-   "pct1": -1.26,
-   "volume": 772573.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "6467",
-   "name": "泰合",
-   "market": "TWSE",
-   "close": 235.0,
-   "pct1": -1.26,
-   "volume": 1112282.0,
-   "signals": [
-    "近5日漲幅+15.2%",
-    "近10日漲幅+25.7%"
-   ]
-  },
-  {
-   "code": "4106",
-   "name": "雃博",
-   "market": "TWSE",
-   "close": 23.4,
-   "pct1": -1.27,
-   "volume": 218407.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "1104",
-   "name": "環泥",
-   "market": "TWSE",
-   "close": 26.15,
-   "pct1": -1.32,
-   "volume": 979628.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "9942",
-   "name": "茂順",
-   "market": "TWSE",
-   "close": 109.5,
-   "pct1": -1.35,
-   "volume": 319133.0,
-   "signals": [
-    "爆量(今量/20日均量=4.0倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "2537",
-   "name": "聯上發",
-   "market": "TWSE",
-   "close": 10.85,
-   "pct1": -1.36,
-   "volume": 1775772.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)"
-   ]
-  },
-  {
-   "code": "1817",
-   "name": "凱撒衛",
-   "market": "TWSE",
-   "close": 39.25,
-   "pct1": -1.38,
-   "volume": 275454.0,
-   "signals": [
-    "爆量(今量/20日均量=6.3倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "5525",
-   "name": "順天",
-   "market": "TWSE",
-   "close": 20.95,
-   "pct1": -1.41,
-   "volume": 166446.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "1535",
-   "name": "中宇",
-   "market": "TWSE",
-   "close": 44.9,
-   "pct1": -1.43,
-   "volume": 175791.0,
-   "signals": [
-    "爆量(今量/20日均量=4.4倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1731",
-   "name": "美吾華",
-   "market": "TWSE",
-   "close": 20.7,
-   "pct1": -1.43,
-   "volume": 554264.0,
-   "signals": [
-    "爆量(今量/20日均量=4.4倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "9911",
-   "name": "櫻花",
-   "market": "TWSE",
-   "close": 75.8,
-   "pct1": -1.43,
-   "volume": 978817.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "1463",
-   "name": "強盛新",
-   "market": "TWSE",
-   "close": 17.15,
-   "pct1": -1.44,
-   "volume": 484148.0,
-   "signals": [
-    "爆量(今量/20日均量=5.2倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "7791",
-   "name": "皇家可口",
-   "market": "TWSE",
-   "close": 47.85,
-   "pct1": -1.44,
-   "volume": 140913.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "1906",
-   "name": "寶隆",
-   "market": "TWSE",
-   "close": 10.2,
-   "pct1": -1.45,
-   "volume": 174280.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "2008",
-   "name": "高興昌",
-   "market": "TWSE",
-   "close": 30.6,
-   "pct1": -1.45,
-   "volume": 40246.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "2013",
-   "name": "中鋼構",
-   "market": "TWSE",
-   "close": 40.4,
-   "pct1": -1.46,
-   "volume": 118477.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "5515",
-   "name": "建國",
-   "market": "TWSE",
-   "close": 46.9,
-   "pct1": -1.47,
-   "volume": 1015889.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "1217",
-   "name": "愛之味",
-   "market": "TWSE",
-   "close": 9.3,
-   "pct1": -1.48,
-   "volume": 1292723.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "6115",
-   "name": "鎰勝",
-   "market": "TWSE",
-   "close": 42.95,
-   "pct1": -1.49,
-   "volume": 400357.0,
-   "signals": [
-    "爆量(今量/20日均量=3.8倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "4942",
-   "name": "嘉彰",
-   "market": "TWSE",
-   "close": 29.15,
-   "pct1": -1.52,
-   "volume": 443848.0,
-   "signals": [
-    "爆量(今量/20日均量=3.8倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "6754",
-   "name": "匯僑設計",
-   "market": "TWSE",
-   "close": 39.0,
-   "pct1": -1.52,
-   "volume": 57170.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "1256",
-   "name": "鮮活果汁-KY",
-   "market": "TWSE",
-   "close": 160.0,
-   "pct1": -1.54,
-   "volume": 90382.0,
+   "code": "6684",
+   "name": "安格",
+   "market": "TPEX",
+   "close": 42.0,
+   "pct1": 9.09,
+   "volume": 46824.0,
    "signals": [
-    "爆量(今量/20日均量=2.3倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2845",
-   "name": "遠東銀",
-   "market": "TWSE",
-   "close": 12.65,
-   "pct1": -1.56,
-   "volume": 16164948.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "7705",
-   "name": "三商餐飲",
-   "market": "TWSE",
-   "close": 28.3,
-   "pct1": -1.57,
-   "volume": 124803.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "9934",
-   "name": "成霖",
-   "market": "TWSE",
-   "close": 9.22,
-   "pct1": -1.6,
-   "volume": 1189756.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "2903",
-   "name": "遠百",
-   "market": "TWSE",
-   "close": 21.35,
-   "pct1": -1.61,
-   "volume": 3070915.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "1227",
-   "name": "佳格",
-   "market": "TWSE",
-   "close": 27.35,
-   "pct1": -1.62,
-   "volume": 2607108.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "6477",
-   "name": "安集",
-   "market": "TWSE",
-   "close": 27.4,
-   "pct1": -1.62,
-   "volume": 1711532.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "6768",
-   "name": "志強-KY",
-   "market": "TWSE",
-   "close": 59.3,
-   "pct1": -1.66,
-   "volume": 819747.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "1454",
-   "name": "台富",
-   "market": "TWSE",
-   "close": 11.75,
-   "pct1": -1.67,
-   "volume": 159210.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "2420",
-   "name": "新巨",
-   "market": "TWSE",
-   "close": 49.25,
-   "pct1": -1.7,
-   "volume": 839260.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "2547",
-   "name": "日勝生",
-   "market": "TWSE",
-   "close": 9.25,
-   "pct1": -1.7,
-   "volume": 2363604.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "1540",
-   "name": "喬福",
-   "market": "TWSE",
-   "close": 17.2,
-   "pct1": -1.71,
-   "volume": 370738.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2702",
-   "name": "華園",
-   "market": "TWSE",
-   "close": 11.5,
-   "pct1": -1.71,
-   "volume": 368829.0,
-   "signals": [
-    "爆量(今量/20日均量=5.5倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "1432",
-   "name": "大魯閣",
-   "market": "TWSE",
-   "close": 14.25,
-   "pct1": -1.72,
-   "volume": 583690.0,
-   "signals": [
-    "爆量(今量/20日均量=5.5倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "1110",
-   "name": "東泥",
-   "market": "TWSE",
-   "close": 14.2,
-   "pct1": -1.73,
-   "volume": 441541.0,
-   "signals": [
-    "爆量(今量/20日均量=3.1倍)"
-   ]
-  },
-  {
-   "code": "9955",
-   "name": "佳龍",
-   "market": "TWSE",
-   "close": 19.75,
-   "pct1": -1.74,
-   "volume": 699489.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "2646",
-   "name": "星宇航空",
-   "market": "TWSE",
-   "close": 19.35,
-   "pct1": -1.78,
-   "volume": 7969081.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "1451",
-   "name": "年興",
-   "market": "TWSE",
-   "close": 16.5,
-   "pct1": -1.79,
-   "volume": 807552.0,
-   "signals": [
-    "爆量(今量/20日均量=5.7倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "6923",
-   "name": "中台",
-   "market": "TWSE",
-   "close": 66.0,
-   "pct1": -1.79,
-   "volume": 167389.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2642",
-   "name": "宅配通",
-   "market": "TWSE",
-   "close": 18.95,
-   "pct1": -1.81,
-   "volume": 267085.0,
-   "signals": [
-    "爆量(今量/20日均量=3.9倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "5533",
-   "name": "皇鼎",
-   "market": "TWSE",
-   "close": 13.55,
-   "pct1": -1.81,
-   "volume": 673005.0,
+   "code": "8147",
+   "name": "正淩",
+   "market": "TPEX",
+   "close": 104.5,
+   "pct1": 8.97,
+   "volume": 206145.0,
    "signals": [
-    "爆量(今量/20日均量=5.4倍)",
-    "近5日持續放量1.7倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1707",
-   "name": "葡萄王",
-   "market": "TWSE",
-   "close": 80.5,
-   "pct1": -1.83,
-   "volume": 635549.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "6192",
-   "name": "巨路",
-   "market": "TWSE",
-   "close": 107.0,
-   "pct1": -1.83,
-   "volume": 256598.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "1722",
-   "name": "台肥",
-   "market": "TWSE",
-   "close": 39.8,
-   "pct1": -1.85,
-   "volume": 6179987.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "3027",
-   "name": "盛達",
-   "market": "TWSE",
-   "close": 15.9,
-   "pct1": -1.85,
-   "volume": 656100.0,
+   "code": "4939",
+   "name": "亞電",
+   "market": "TPEX",
+   "close": 58.8,
+   "pct1": 8.89,
+   "volume": 2434528.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2897",
-   "name": "王道銀行",
-   "market": "TWSE",
-   "close": 10.5,
-   "pct1": -1.87,
-   "volume": 9893312.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2545",
-   "name": "皇翔",
-   "market": "TWSE",
-   "close": 31.25,
-   "pct1": -1.88,
-   "volume": 917321.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "3052",
-   "name": "夆典",
-   "market": "TWSE",
-   "close": 10.25,
-   "pct1": -1.91,
-   "volume": 893027.0,
-   "signals": [
-    "爆量(今量/20日均量=3.3倍)"
-   ]
-  },
-  {
-   "code": "1515",
-   "name": "力山",
-   "market": "TWSE",
-   "close": 25.45,
-   "pct1": -1.93,
-   "volume": 1326045.0,
+   "code": "7810",
+   "name": "捷創科技",
+   "market": "TPEX",
+   "close": 197.5,
+   "pct1": 8.82,
+   "volume": 37942.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2536",
-   "name": "宏普",
+   "code": "1809",
+   "name": "中釉",
    "market": "TWSE",
-   "close": 17.75,
-   "pct1": -1.93,
-   "volume": 693430.0,
+   "close": 42.1,
+   "pct1": 8.79,
+   "volume": 2178863.0,
    "signals": [
-    "爆量(今量/20日均量=2.3倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "1713",
-   "name": "國化",
+   "code": "6142",
+   "name": "友勁",
    "market": "TWSE",
-   "close": 40.3,
-   "pct1": -1.95,
-   "volume": 424238.0,
+   "close": 8.8,
+   "pct1": 8.78,
+   "volume": 723850.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2539",
-   "name": "櫻花建",
-   "market": "TWSE",
+   "code": "3466",
+   "name": "德晉",
+   "market": "TPEX",
    "close": 29.8,
-   "pct1": -1.97,
-   "volume": 2043719.0,
+   "pct1": 8.76,
+   "volume": 941692.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "大漲/接近漲停",
+    "創17日新高"
    ]
   },
   {
-   "code": "5283",
-   "name": "禾聯碩",
-   "market": "TWSE",
-   "close": 49.0,
-   "pct1": -2.0,
-   "volume": 148318.0,
+   "code": "6291",
+   "name": "沛亨",
+   "market": "TPEX",
+   "close": 300.0,
+   "pct1": 8.7,
+   "volume": 394716.0,
    "signals": [
-    "爆量(今量/20日均量=2.1倍)"
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6834",
+   "name": "天二科技",
+   "market": "TWSE",
+   "close": 96.3,
+   "pct1": 8.69,
+   "volume": 2876446.0,
+   "signals": [
+    "大漲/接近漲停"
    ]
   },
   {
    "code": "1235",
    "name": "興泰",
    "market": "TWSE",
-   "close": 31.7,
-   "pct1": -2.01,
-   "volume": 39017.0,
+   "close": 34.45,
+   "pct1": 8.68,
+   "volume": 15347.0,
    "signals": [
-    "近5日持續放量1.9倍",
-    "近10日持續放量1.6倍"
+    "大漲/接近漲停",
+    "近10日持續放量1.6倍",
+    "創23日新高"
    ]
   },
   {
-   "code": "4536",
-   "name": "拓凱",
+   "code": "6141",
+   "name": "柏承",
    "market": "TWSE",
-   "close": 146.0,
-   "pct1": -2.01,
-   "volume": 378785.0,
+   "close": 40.8,
+   "pct1": 8.66,
+   "volume": 922047.0,
    "signals": [
-    "爆量(今量/20日均量=3.3倍)"
-   ]
-  },
-  {
-   "code": "6201",
-   "name": "亞弘電",
-   "market": "TWSE",
-   "close": 46.3,
-   "pct1": -2.01,
-   "volume": 91290.0,
-   "signals": [
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "9802",
-   "name": "鈺齊-KY",
-   "market": "TWSE",
-   "close": 63.0,
-   "pct1": -2.02,
-   "volume": 1404102.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "2548",
-   "name": "華固",
-   "market": "TWSE",
-   "close": 91.5,
-   "pct1": -2.03,
-   "volume": 3111043.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "4119",
-   "name": "旭富",
-   "market": "TWSE",
-   "close": 49.55,
-   "pct1": -2.08,
-   "volume": 518203.0,
-   "signals": [
-    "爆量(今量/20日均量=4.2倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "8367",
-   "name": "建新國際",
-   "market": "TWSE",
-   "close": 39.95,
-   "pct1": -2.08,
-   "volume": 103823.0,
-   "signals": [
-    "爆量(今量/20日均量=5.7倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "2062",
-   "name": "橋椿",
-   "market": "TWSE",
-   "close": 16.4,
-   "pct1": -2.09,
-   "volume": 812257.0,
-   "signals": [
-    "爆量(今量/20日均量=5.2倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1457",
-   "name": "宜進",
-   "market": "TWSE",
-   "close": 14.0,
-   "pct1": -2.1,
-   "volume": 372209.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "6189",
-   "name": "豐藝",
-   "market": "TWSE",
-   "close": 44.35,
-   "pct1": -2.1,
-   "volume": 720774.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "2836",
-   "name": "高雄銀",
-   "market": "TWSE",
-   "close": 11.6,
-   "pct1": -2.11,
-   "volume": 5046263.0,
-   "signals": [
-    "爆量(今量/20日均量=3.5倍)"
-   ]
-  },
-  {
-   "code": "3501",
-   "name": "維熹",
-   "market": "TWSE",
-   "close": 34.85,
-   "pct1": -2.11,
-   "volume": 588289.0,
-   "signals": [
-    "爆量(今量/20日均量=3.6倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2373",
-   "name": "震旦行",
-   "market": "TWSE",
-   "close": 50.5,
-   "pct1": -2.13,
-   "volume": 253316.0,
-   "signals": [
-    "爆量(今量/20日均量=5.9倍)",
-    "近5日持續放量2.1倍"
-   ]
-  },
-  {
-   "code": "1464",
-   "name": "得力",
-   "market": "TWSE",
-   "close": 9.16,
-   "pct1": -2.14,
-   "volume": 876980.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)"
-   ]
-  },
-  {
-   "code": "2538",
-   "name": "基泰",
-   "market": "TWSE",
-   "close": 8.12,
-   "pct1": -2.17,
-   "volume": 1283261.0,
-   "signals": [
-    "爆量(今量/20日均量=4.0倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "6757",
-   "name": "台灣虎航",
-   "market": "TWSE",
-   "close": 54.2,
-   "pct1": -2.17,
-   "volume": 2032207.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)",
-    "近5日持續放量2.2倍"
-   ]
-  },
-  {
-   "code": "1616",
-   "name": "億泰",
-   "market": "TWSE",
-   "close": 15.55,
-   "pct1": -2.2,
-   "volume": 658445.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "5236",
-   "name": "凌陽創新",
-   "market": "TWSE",
-   "close": 111.0,
-   "pct1": -2.2,
-   "volume": 302982.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "1231",
-   "name": "聯華食",
-   "market": "TWSE",
-   "close": 69.9,
-   "pct1": -2.24,
-   "volume": 912807.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "5534",
-   "name": "長虹",
-   "market": "TWSE",
-   "close": 65.5,
-   "pct1": -2.24,
-   "volume": 1935990.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "2514",
-   "name": "龍邦",
-   "market": "TWSE",
-   "close": 10.8,
-   "pct1": -2.26,
-   "volume": 208389.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)"
-   ]
-  },
-  {
-   "code": "2704",
-   "name": "國賓",
-   "market": "TWSE",
-   "close": 43.15,
-   "pct1": -2.27,
-   "volume": 144620.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "7855",
-   "name": "和運租車",
-   "market": "TWSE",
-   "close": 38.8,
-   "pct1": -2.27,
-   "volume": 779658.0,
-   "signals": [
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1582",
-   "name": "信錦",
-   "market": "TWSE",
-   "close": 59.6,
-   "pct1": -2.3,
-   "volume": 1274933.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "4562",
-   "name": "穎漢",
-   "market": "TWSE",
-   "close": 29.75,
-   "pct1": -2.3,
-   "volume": 1306733.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)",
-    "近5日持續放量3.0倍",
-    "近10日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "1342",
-   "name": "八貫",
-   "market": "TWSE",
-   "close": 92.2,
-   "pct1": -2.33,
-   "volume": 367588.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "2488",
-   "name": "漢平",
-   "market": "TWSE",
-   "close": 48.25,
-   "pct1": -2.33,
-   "volume": 238984.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "8404",
-   "name": "百和興業-KY",
-   "market": "TWSE",
-   "close": 12.6,
-   "pct1": -2.33,
-   "volume": 564125.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "1201",
-   "name": "味全",
-   "market": "TWSE",
-   "close": 12.5,
-   "pct1": -2.34,
-   "volume": 2764042.0,
-   "signals": [
-    "近5日持續放量2.6倍",
-    "近10日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "2509",
-   "name": "全坤建",
-   "market": "TWSE",
-   "close": 12.5,
-   "pct1": -2.34,
-   "volume": 1008042.0,
-   "signals": [
-    "爆量(今量/20日均量=5.6倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "1446",
-   "name": "宏和",
-   "market": "TWSE",
-   "close": 12.4,
-   "pct1": -2.36,
-   "volume": 448149.0,
-   "signals": [
-    "爆量(今量/20日均量=4.1倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "7818",
-   "name": "溢泰實業",
-   "market": "TWSE",
-   "close": 53.9,
-   "pct1": -2.36,
-   "volume": 138462.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2832",
-   "name": "台產",
-   "market": "TWSE",
-   "close": 53.6,
-   "pct1": -2.37,
-   "volume": 371924.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "6958",
-   "name": "日盛台駿",
-   "market": "TWSE",
-   "close": 16.5,
-   "pct1": -2.37,
-   "volume": 83995.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "9941",
-   "name": "裕融",
-   "market": "TWSE",
-   "close": 73.9,
-   "pct1": -2.38,
-   "volume": 2156882.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2748",
-   "name": "雲品",
-   "market": "TWSE",
-   "close": 35.85,
-   "pct1": -2.45,
-   "volume": 295224.0,
-   "signals": [
-    "爆量(今量/20日均量=4.2倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "9939",
-   "name": "宏全",
-   "market": "TWSE",
-   "close": 119.5,
-   "pct1": -2.45,
-   "volume": 2145556.0,
-   "signals": [
-    "近10日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "6625",
-   "name": "必應",
-   "market": "TWSE",
-   "close": 67.5,
-   "pct1": -2.46,
-   "volume": 309608.0,
-   "signals": [
-    "爆量(今量/20日均量=4.1倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "1225",
-   "name": "福懋油",
-   "market": "TWSE",
-   "close": 25.5,
-   "pct1": -2.49,
-   "volume": 152757.0,
-   "signals": [
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "2849",
-   "name": "安泰銀",
-   "market": "TWSE",
-   "close": 15.65,
-   "pct1": -2.49,
-   "volume": 474208.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "1776",
-   "name": "展宇",
-   "market": "TWSE",
-   "close": 17.5,
-   "pct1": -2.51,
-   "volume": 418800.0,
-   "signals": [
-    "爆量(今量/20日均量=4.8倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "2905",
-   "name": "三商",
-   "market": "TWSE",
-   "close": 17.45,
-   "pct1": -2.51,
-   "volume": 2521312.0,
-   "signals": [
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "3168",
-   "name": "眾福科",
-   "market": "TWSE",
-   "close": 40.85,
-   "pct1": -2.51,
-   "volume": 36025.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "9938",
-   "name": "百和",
-   "market": "TWSE",
-   "close": 34.9,
-   "pct1": -2.51,
-   "volume": 3139122.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "3622",
-   "name": "洋華",
-   "market": "TWSE",
-   "close": 38.2,
-   "pct1": -2.55,
-   "volume": 561173.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "8462",
-   "name": "柏文",
-   "market": "TWSE",
-   "close": 150.5,
-   "pct1": -2.59,
-   "volume": 482463.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "2501",
-   "name": "國建",
-   "market": "TWSE",
-   "close": 20.5,
-   "pct1": -2.61,
-   "volume": 4549569.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "2387",
-   "name": "精元",
-   "market": "TWSE",
-   "close": 31.15,
-   "pct1": -2.66,
-   "volume": 909250.0,
-   "signals": [
-    "爆量(今量/20日均量=3.1倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "5519",
-   "name": "隆大",
-   "market": "TWSE",
-   "close": 21.95,
-   "pct1": -2.66,
-   "volume": 590001.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "4440",
-   "name": "宜新實業",
-   "market": "TWSE",
-   "close": 16.4,
-   "pct1": -2.67,
-   "volume": 196223.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "1904",
-   "name": "正隆",
-   "market": "TWSE",
-   "close": 23.5,
-   "pct1": -2.69,
-   "volume": 3029303.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "4439",
-   "name": "冠星-KY",
-   "market": "TWSE",
-   "close": 94.1,
-   "pct1": -2.69,
-   "volume": 64720.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)"
-   ]
-  },
-  {
-   "code": "6591",
-   "name": "動力-KY",
-   "market": "TWSE",
-   "close": 36.15,
-   "pct1": -2.69,
-   "volume": 443677.0,
-   "signals": [
-    "爆量(今量/20日均量=3.2倍)"
-   ]
-  },
-  {
-   "code": "7780",
-   "name": "大研生醫*",
-   "market": "TWSE",
-   "close": 14.45,
-   "pct1": -2.69,
-   "volume": 2525021.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "6582",
-   "name": "申豐",
-   "market": "TWSE",
-   "close": 30.5,
-   "pct1": -2.71,
-   "volume": 373136.0,
-   "signals": [
-    "爆量(今量/20日均量=6.5倍)",
-    "近5日持續放量2.2倍"
-   ]
-  },
-  {
-   "code": "2515",
-   "name": "中工",
-   "market": "TWSE",
-   "close": 10.7,
-   "pct1": -2.73,
-   "volume": 10839852.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "2908",
-   "name": "特力",
-   "market": "TWSE",
-   "close": 21.4,
-   "pct1": -2.73,
-   "volume": 991634.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)"
-   ]
-  },
-  {
-   "code": "2543",
-   "name": "皇昌",
-   "market": "TWSE",
-   "close": 30.05,
-   "pct1": -2.75,
-   "volume": 2578933.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1527",
-   "name": "鑽全",
-   "market": "TWSE",
-   "close": 29.8,
-   "pct1": -2.77,
-   "volume": 634804.0,
-   "signals": [
-    "爆量(今量/20日均量=4.3倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "2069",
-   "name": "運錩",
-   "market": "TWSE",
-   "close": 24.4,
-   "pct1": -2.79,
-   "volume": 2407719.0,
-   "signals": [
-    "近10日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1506",
-   "name": "正道",
-   "market": "TWSE",
-   "close": 9.03,
-   "pct1": -2.8,
-   "volume": 533078.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "2462",
-   "name": "良得電",
-   "market": "TWSE",
-   "close": 17.2,
-   "pct1": -2.82,
-   "volume": 793790.0,
-   "signals": [
-    "爆量(今量/20日均量=3.9倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "4137",
-   "name": "麗豐-KY",
-   "market": "TWSE",
-   "close": 75.7,
-   "pct1": -2.82,
-   "volume": 368531.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "6243",
-   "name": "迅杰",
-   "market": "TWSE",
-   "close": 30.9,
-   "pct1": -2.83,
-   "volume": 674782.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)"
-   ]
-  },
-  {
-   "code": "6672",
-   "name": "騰輝電子-KY",
-   "market": "TWSE",
-   "close": 463.0,
-   "pct1": -2.83,
-   "volume": 9443303.0,
-   "signals": [
-    "近5日持續放量1.6倍",
-    "近10日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "1410",
-   "name": "南染",
-   "market": "TWSE",
-   "close": 25.5,
-   "pct1": -2.86,
-   "volume": 220297.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)",
-    "近5日持續放量2.0倍"
-   ]
-  },
-  {
-   "code": "3691",
-   "name": "碩禾",
-   "market": "TPEX",
-   "close": 135.0,
-   "pct1": -2.88,
-   "volume": 3756434.0,
-   "signals": [
-    "近10日漲幅+36.1%"
-   ]
-  },
-  {
-   "code": "4148",
-   "name": "全宇生技-KY",
-   "market": "TWSE",
-   "close": 28.05,
-   "pct1": -2.94,
-   "volume": 134221.0,
-   "signals": [
-    "爆量(今量/20日均量=4.4倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "7823",
-   "name": "奧義賽博-KY創",
-   "market": "TWSE",
-   "close": 75.6,
-   "pct1": -2.95,
-   "volume": 86084.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "2017",
-   "name": "官田鋼",
-   "market": "TWSE",
-   "close": 7.86,
-   "pct1": -2.96,
-   "volume": 1060298.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)"
-   ]
-  },
-  {
-   "code": "1525",
-   "name": "江申",
-   "market": "TWSE",
-   "close": 62.1,
-   "pct1": -2.97,
-   "volume": 87105.0,
-   "signals": [
-    "爆量(今量/20日均量=5.9倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "1905",
-   "name": "華紙",
-   "market": "TWSE",
-   "close": 11.35,
-   "pct1": -2.99,
-   "volume": 4137734.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "2201",
-   "name": "裕隆",
-   "market": "TWSE",
-   "close": 26.75,
-   "pct1": -3.08,
-   "volume": 5268038.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "6771",
-   "name": "平和環保-創",
-   "market": "TWSE",
-   "close": 36.8,
-   "pct1": -3.16,
-   "volume": 127120.0,
-   "signals": [
-    "爆量(今量/20日均量=5.8倍)",
-    "近5日持續放量2.4倍"
-   ]
-  },
-  {
-   "code": "2885",
-   "name": "元大金",
-   "market": "TWSE",
-   "close": 66.9,
-   "pct1": -3.18,
-   "volume": 57573482.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "3607",
-   "name": "谷崧",
-   "market": "TWSE",
-   "close": 12.15,
-   "pct1": -3.19,
-   "volume": 501358.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)"
-   ]
-  },
-  {
-   "code": "2636",
-   "name": "台驊控股",
-   "market": "TWSE",
-   "close": 66.4,
-   "pct1": -3.21,
-   "volume": 961017.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "3004",
-   "name": "豐達科",
-   "market": "TWSE",
-   "close": 120.5,
-   "pct1": -3.21,
-   "volume": 629646.0,
-   "signals": [
-    "近5日持續放量2.3倍"
-   ]
-  },
-  {
-   "code": "6177",
-   "name": "達麗",
-   "market": "TWSE",
-   "close": 41.9,
-   "pct1": -3.23,
-   "volume": 1975988.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "6951",
-   "name": "青新-創",
-   "market": "TWSE",
-   "close": 62.7,
-   "pct1": -3.24,
-   "volume": 81736.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "4190",
-   "name": "佐登-KY",
-   "market": "TWSE",
-   "close": 22.35,
-   "pct1": -3.25,
-   "volume": 171456.0,
-   "signals": [
-    "爆量(今量/20日均量=6.1倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "3135",
-   "name": "凌航",
-   "market": "TWSE",
-   "close": 118.0,
-   "pct1": -3.28,
-   "volume": 1539506.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2417",
-   "name": "圓剛",
-   "market": "TWSE",
-   "close": 30.8,
-   "pct1": -3.3,
-   "volume": 859443.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "2029",
-   "name": "盛餘",
-   "market": "TWSE",
-   "close": 20.45,
-   "pct1": -3.31,
-   "volume": 660806.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "9946",
-   "name": "三發地產",
-   "market": "TWSE",
-   "close": 14.6,
-   "pct1": -3.31,
-   "volume": 729331.0,
-   "signals": [
-    "爆量(今量/20日均量=2.9倍)"
-   ]
-  },
-  {
-   "code": "2442",
-   "name": "新美齊",
-   "market": "TWSE",
-   "close": 11.65,
-   "pct1": -3.32,
-   "volume": 2676478.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "3011",
-   "name": "今皓",
-   "market": "TWSE",
-   "close": 8.34,
-   "pct1": -3.36,
-   "volume": 1028006.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "1218",
-   "name": "泰山",
-   "market": "TWSE",
-   "close": 12.7,
-   "pct1": -3.42,
-   "volume": 3093189.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2528",
-   "name": "皇普",
-   "market": "TWSE",
-   "close": 16.95,
-   "pct1": -3.42,
-   "volume": 848644.0,
-   "signals": [
-    "近10日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2038",
-   "name": "海光",
-   "market": "TWSE",
-   "close": 10.95,
-   "pct1": -3.52,
-   "volume": 402494.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "6130",
-   "name": "上亞科技",
-   "market": "TPEX",
-   "close": 24.65,
-   "pct1": -3.52,
-   "volume": 294720.0,
-   "signals": [
-    "近5日漲幅+15.2%"
-   ]
-  },
-  {
-   "code": "6722",
-   "name": "輝創",
-   "market": "TWSE",
-   "close": 30.1,
-   "pct1": -3.53,
-   "volume": 226655.0,
-   "signals": [
-    "爆量(今量/20日均量=5.4倍)",
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "3054",
-   "name": "立萬利",
-   "market": "TWSE",
-   "close": 53.9,
-   "pct1": -3.58,
-   "volume": 319722.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2365",
-   "name": "昆盈",
-   "market": "TWSE",
-   "close": 22.85,
-   "pct1": -3.59,
-   "volume": 1944184.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "3043",
-   "name": "科風",
-   "market": "TWSE",
-   "close": 17.45,
-   "pct1": -3.59,
-   "volume": 678751.0,
-   "signals": [
-    "爆量(今量/20日均量=7.5倍)",
-    "近5日持續放量2.2倍"
-   ]
-  },
-  {
-   "code": "2812",
-   "name": "台中銀",
-   "market": "TWSE",
-   "close": 17.4,
-   "pct1": -3.6,
-   "volume": 34218740.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "6272",
-   "name": "驊陞",
-   "market": "TWSE",
-   "close": 20.1,
-   "pct1": -3.6,
-   "volume": 224071.0,
-   "signals": [
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "6235",
-   "name": "華孚",
-   "market": "TWSE",
-   "close": 29.2,
-   "pct1": -3.63,
-   "volume": 1003238.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "9940",
-   "name": "信義",
-   "market": "TWSE",
-   "close": 18.5,
-   "pct1": -3.65,
-   "volume": 919976.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "2850",
-   "name": "新產",
-   "market": "TWSE",
-   "close": 158.0,
-   "pct1": -3.66,
-   "volume": 626804.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "1539",
-   "name": "巨庭",
-   "market": "TWSE",
-   "close": 14.45,
-   "pct1": -3.67,
-   "volume": 150523.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "2331",
-   "name": "精英",
-   "market": "TWSE",
-   "close": 15.7,
-   "pct1": -3.68,
-   "volume": 2358747.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "5538",
-   "name": "東明-KY",
-   "market": "TWSE",
-   "close": 34.05,
-   "pct1": -3.68,
-   "volume": 219410.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "6697",
-   "name": "東捷資訊",
-   "market": "TPEX",
-   "close": 54.9,
-   "pct1": -3.68,
-   "volume": 4598797.0,
-   "signals": [
-    "近10日漲幅+31.5%"
-   ]
-  },
-  {
-   "code": "1338",
-   "name": "廣華-KY",
-   "market": "TWSE",
-   "close": 12.9,
-   "pct1": -3.73,
-   "volume": 205069.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)"
-   ]
-  },
-  {
-   "code": "5531",
-   "name": "鄉林",
-   "market": "TWSE",
-   "close": 6.16,
-   "pct1": -3.75,
-   "volume": 1034158.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "6606",
-   "name": "建德工業",
-   "market": "TWSE",
-   "close": 22.95,
-   "pct1": -3.77,
-   "volume": 170290.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)"
-   ]
-  },
-  {
-   "code": "3588",
-   "name": "通嘉",
-   "market": "TWSE",
-   "close": 42.25,
-   "pct1": -3.87,
-   "volume": 545807.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "2033",
-   "name": "佳大",
-   "market": "TWSE",
-   "close": 71.8,
-   "pct1": -3.88,
-   "volume": 5620554.0,
-   "signals": [
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "1475",
-   "name": "業旺",
-   "market": "TWSE",
-   "close": 23.5,
-   "pct1": -3.89,
-   "volume": 170060.0,
-   "signals": [
-    "爆量(今量/20日均量=5.6倍)",
-    "近5日持續放量1.6倍"
-   ]
-  },
-  {
-   "code": "3019",
-   "name": "亞光",
-   "market": "TWSE",
-   "close": 123.5,
-   "pct1": -3.89,
-   "volume": 13448262.0,
-   "signals": [
-    "爆量(今量/20日均量=4.4倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "6919",
-   "name": "康霈*",
-   "market": "TWSE",
-   "close": 64.0,
-   "pct1": -3.9,
-   "volume": 18893985.0,
-   "signals": [
-    "爆量(今量/20日均量=3.7倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "7736",
-   "name": "虎山",
-   "market": "TWSE",
-   "close": 66.3,
-   "pct1": -3.91,
-   "volume": 120129.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "6412",
-   "name": "群電",
-   "market": "TWSE",
-   "close": 56.1,
-   "pct1": -3.94,
-   "volume": 2592051.0,
-   "signals": [
-    "爆量(今量/20日均量=2.7倍)",
-    "近5日持續放量1.5倍"
-   ]
-  },
-  {
-   "code": "2495",
-   "name": "普安",
-   "market": "TWSE",
-   "close": 27.45,
-   "pct1": -4.02,
-   "volume": 2630579.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "1623",
-   "name": "大東電",
-   "market": "TWSE",
-   "close": 154.5,
-   "pct1": -4.04,
-   "volume": 329869.0,
-   "signals": [
-    "爆量(今量/20日均量=3.0倍)"
-   ]
-  },
-  {
-   "code": "2482",
-   "name": "連宇",
-   "market": "TWSE",
-   "close": 14.2,
-   "pct1": -4.05,
-   "volume": 435985.0,
-   "signals": [
-    "爆量(今量/20日均量=3.6倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "1529",
-   "name": "樂事綠能",
-   "market": "TWSE",
-   "close": 12.95,
-   "pct1": -4.07,
-   "volume": 927479.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "3003",
-   "name": "健和興",
-   "market": "TWSE",
-   "close": 45.7,
-   "pct1": -4.09,
-   "volume": 718987.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)"
-   ]
-  },
-  {
-   "code": "2887",
-   "name": "台新新光金",
-   "market": "TWSE",
-   "close": 38.45,
-   "pct1": -4.11,
-   "volume": 137248228.0,
-   "signals": [
-    "爆量(今量/20日均量=2.5倍)"
-   ]
-  },
-  {
-   "code": "1810",
-   "name": "和成",
-   "market": "TWSE",
-   "close": 19.75,
-   "pct1": -4.13,
-   "volume": 2771433.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
+    "大漲/接近漲停"
    ]
   },
   {
    "code": "1786",
    "name": "科妍",
    "market": "TWSE",
-   "close": 47.05,
-   "pct1": -4.18,
-   "volume": 6062033.0,
+   "close": 51.1,
+   "pct1": 8.61,
+   "volume": 1659803.0,
    "signals": [
-    "爆量(今量/20日均量=8.0倍)",
-    "近5日持續放量3.3倍",
-    "近10日持續放量1.8倍"
+    "大漲/接近漲停",
+    "近10日漲幅+28.7%",
+    "近5日持續放量2.6倍",
+    "近10日持續放量1.8倍",
+    "創23日新高"
    ]
   },
   {
-   "code": "6165",
-   "name": "浪凡",
-   "market": "TWSE",
-   "close": 35.75,
-   "pct1": -4.28,
-   "volume": 2921351.0,
+   "code": "6470",
+   "name": "宇智",
+   "market": "TPEX",
+   "close": 46.7,
+   "pct1": 8.6,
+   "volume": 238915.0,
    "signals": [
-    "爆量(今量/20日均量=3.5倍)"
+    "大漲/接近漲停",
+    "創17日新高"
    ]
   },
   {
-   "code": "4930",
-   "name": "燦星網",
+   "code": "3049",
+   "name": "精金",
    "market": "TWSE",
-   "close": 14.4,
-   "pct1": -4.32,
-   "volume": 390166.0,
+   "close": 12.05,
+   "pct1": 8.56,
+   "volume": 11024078.0,
    "signals": [
-    "爆量(今量/20日均量=8.1倍)",
-    "近5日持續放量1.9倍"
+    "大漲/接近漲停",
+    "爆量(今量/20日均量=3.4倍)",
+    "近5日持續放量1.8倍"
    ]
   },
   {
-   "code": "6698",
-   "name": "旭暉應材",
-   "market": "TWSE",
-   "close": 29.2,
-   "pct1": -4.42,
-   "volume": 783898.0,
+   "code": "3467",
+   "name": "台灣精材",
+   "market": "TPEX",
+   "close": 58.4,
+   "pct1": 8.55,
+   "volume": 81105.0,
    "signals": [
-    "爆量(今量/20日均量=3.3倍)",
-    "近5日持續放量1.9倍"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "4426",
-   "name": "利勤",
+   "code": "8162",
+   "name": "微矽電子-創",
    "market": "TWSE",
-   "close": 8.4,
-   "pct1": -4.44,
-   "volume": 776192.0,
+   "close": 55.9,
+   "pct1": 8.54,
+   "volume": 197358.0,
    "signals": [
-    "爆量(今量/20日均量=2.5倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2072",
-   "name": "世紀能源",
-   "market": "TWSE",
-   "close": 106.5,
-   "pct1": -4.48,
-   "volume": 1186556.0,
+   "code": "4760",
+   "name": "勤凱",
+   "market": "TPEX",
+   "close": 244.0,
+   "pct1": 8.44,
+   "volume": 512912.0,
    "signals": [
-    "爆量(今量/20日均量=3.2倍)",
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "7712",
+   "name": "博盛半導體",
+   "market": "TPEX",
+   "close": 123.0,
+   "pct1": 8.37,
+   "volume": 150219.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "3548",
+   "name": "兆利",
+   "market": "TPEX",
+   "close": 61.0,
+   "pct1": 8.35,
+   "volume": 210128.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "020041",
+   "name": "兆豐半導體氣候N",
+   "market": "TPEX",
+   "close": 14.72,
+   "pct1": 8.31,
+   "volume": 89000.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6525",
+   "name": "捷敏-KY",
+   "market": "TWSE",
+   "close": 102.5,
+   "pct1": 8.24,
+   "volume": 772682.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "8064",
+   "name": "東捷",
+   "market": "TPEX",
+   "close": 90.8,
+   "pct1": 8.22,
+   "volume": 2178203.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6538",
+   "name": "倉和",
+   "market": "TPEX",
+   "close": 316.5,
+   "pct1": 8.21,
+   "volume": 6817843.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日漲幅+15.3%"
+   ]
+  },
+  {
+   "code": "3580",
+   "name": "友威科",
+   "market": "TPEX",
+   "close": 87.4,
+   "pct1": 8.17,
+   "volume": 643090.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "7740",
+   "name": "熙特爾-創",
+   "market": "TWSE",
+   "close": 95.5,
+   "pct1": 8.15,
+   "volume": 663802.0,
+   "signals": [
+    "大漲/接近漲停",
+    "爆量(今量/20日均量=2.6倍)"
+   ]
+  },
+  {
+   "code": "4139",
+   "name": "馬光-KY",
+   "market": "TPEX",
+   "close": 37.85,
+   "pct1": 8.14,
+   "volume": 21169.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "2365",
+   "name": "昆盈",
+   "market": "TWSE",
+   "close": 24.7,
+   "pct1": 8.1,
+   "volume": 832519.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6579",
+   "name": "研揚",
+   "market": "TWSE",
+   "close": 133.5,
+   "pct1": 8.1,
+   "volume": 264536.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "1623",
+   "name": "大東電",
+   "market": "TWSE",
+   "close": 167.0,
+   "pct1": 8.09,
+   "volume": 145520.0,
+   "signals": [
+    "大漲/接近漲停",
     "近5日持續放量1.6倍"
    ]
   },
   {
-   "code": "3051",
-   "name": "力特",
-   "market": "TWSE",
-   "close": 18.05,
-   "pct1": -4.5,
-   "volume": 1237365.0,
+   "code": "5452",
+   "name": "佶優",
+   "market": "TPEX",
+   "close": 26.05,
+   "pct1": 8.09,
+   "volume": 460834.0,
    "signals": [
-    "爆量(今量/20日均量=2.5倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "7749",
-   "name": "意騰-KY",
+   "code": "2388",
+   "name": "威盛",
    "market": "TWSE",
-   "close": 265.0,
-   "pct1": -4.5,
-   "volume": 395311.0,
+   "close": 56.2,
+   "pct1": 8.08,
+   "volume": 2131586.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "2722",
-   "name": "夏都",
-   "market": "TWSE",
-   "close": 18.95,
-   "pct1": -4.53,
-   "volume": 144268.0,
+   "code": "5309",
+   "name": "系統電",
+   "market": "TPEX",
+   "close": 56.2,
+   "pct1": 8.08,
+   "volume": 2702440.0,
    "signals": [
-    "爆量(今量/20日均量=3.5倍)"
+    "大漲/接近漲停"
    ]
   },
   {
-   "code": "6838",
-   "name": "台新藥",
+   "code": "2399",
+   "name": "映泰",
    "market": "TWSE",
-   "close": 21.0,
-   "pct1": -4.55,
-   "volume": 331755.0,
+   "close": 39.65,
+   "pct1": 8.04,
+   "volume": 1271510.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)",
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "6799",
+   "name": "來頡",
+   "market": "TWSE",
+   "close": 71.3,
+   "pct1": 8.03,
+   "volume": 231525.0,
+   "signals": [
+    "大漲/接近漲停",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "7788",
+   "name": "松川精密",
+   "market": "TWSE",
+   "close": 209.0,
+   "pct1": 8.01,
+   "volume": 796425.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "1717",
+   "name": "長興",
+   "market": "TWSE",
+   "close": 62.1,
+   "pct1": 8.0,
+   "volume": 3367801.0,
+   "signals": [
+    "大漲/接近漲停"
+   ]
+  },
+  {
+   "code": "4545",
+   "name": "銘鈺",
+   "market": "TWSE",
+   "close": 34.6,
+   "pct1": 7.96,
+   "volume": 316256.0,
+   "signals": [
+    "爆量(今量/20日均量=3.1倍)"
+   ]
+  },
+  {
+   "code": "6446",
+   "name": "藥華藥",
+   "market": "TWSE",
+   "close": 1370.0,
+   "pct1": 7.87,
+   "volume": 5627041.0,
+   "signals": [
+    "近5日漲幅+15.1%",
+    "爆量(今量/20日均量=2.2倍)",
+    "近5日持續放量1.8倍",
+    "創23日新高"
+   ]
+  },
+  {
+   "code": "2250",
+   "name": "IKKA-KY",
+   "market": "TWSE",
+   "close": 48.1,
+   "pct1": 7.85,
+   "volume": 89045.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "2527",
+   "name": "宏璟",
+   "market": "TWSE",
+   "close": 41.9,
+   "pct1": 7.57,
+   "volume": 772232.0,
+   "signals": [
     "近5日持續放量1.6倍"
    ]
   },
@@ -4207,221 +2218,948 @@
    "code": "2405",
    "name": "輔信",
    "market": "TWSE",
-   "close": 12.45,
-   "pct1": -4.6,
-   "volume": 3293512.0,
+   "close": 13.35,
+   "pct1": 7.23,
+   "volume": 1368563.0,
    "signals": [
-    "爆量(今量/20日均量=3.3倍)",
-    "近5日持續放量1.6倍"
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "3226",
+   "name": "龍鋒",
+   "market": "TPEX",
+   "close": 49.25,
+   "pct1": 7.07,
+   "volume": 2020.0,
+   "signals": [
+    "創1日新高"
+   ]
+  },
+  {
+   "code": "8249",
+   "name": "菱光",
+   "market": "TWSE",
+   "close": 34.75,
+   "pct1": 6.92,
+   "volume": 229671.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "3019",
+   "name": "亞光",
+   "market": "TWSE",
+   "close": 132.0,
+   "pct1": 6.88,
+   "volume": 8398059.0,
+   "signals": [
+    "爆量(今量/20日均量=2.5倍)",
+    "近5日持續放量2.1倍"
    ]
   },
   {
    "code": "8104",
    "name": "錸寶",
    "market": "TWSE",
-   "close": 24.9,
-   "pct1": -4.6,
-   "volume": 1510236.0,
+   "close": 26.6,
+   "pct1": 6.83,
+   "volume": 359823.0,
    "signals": [
-    "爆量(今量/20日均量=5.1倍)",
-    "近5日持續放量1.8倍"
+    "近5日持續放量1.9倍"
    ]
   },
   {
    "code": "3563",
    "name": "牧德",
    "market": "TWSE",
-   "close": 557.0,
-   "pct1": -4.62,
-   "volume": 1326728.0,
+   "close": 595.0,
+   "pct1": 6.82,
+   "volume": 505436.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "8930",
+   "name": "青鋼",
+   "market": "TPEX",
+   "close": 28.6,
+   "pct1": 6.52,
+   "volume": 150023.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "6672",
+   "name": "騰輝電子-KY",
+   "market": "TWSE",
+   "close": 493.0,
+   "pct1": 6.48,
+   "volume": 12033044.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "6165",
+   "name": "浪凡",
+   "market": "TWSE",
+   "close": 38.05,
+   "pct1": 6.43,
+   "volume": 639385.0,
+   "signals": [
+    "近5日持續放量1.6倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6916",
+   "name": "華凌",
+   "market": "TWSE",
+   "close": 19.15,
+   "pct1": 6.39,
+   "volume": 204117.0,
+   "signals": [
+    "爆量(今量/20日均量=3.0倍)",
+    "近5日持續放量2.8倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "4942",
+   "name": "嘉彰",
+   "market": "TWSE",
+   "close": 31.0,
+   "pct1": 6.35,
+   "volume": 685798.0,
+   "signals": [
+    "爆量(今量/20日均量=4.6倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "8415",
+   "name": "大國鋼",
+   "market": "TPEX",
+   "close": 37.8,
+   "pct1": 6.18,
+   "volume": 1506457.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "1541",
+   "name": "錩泰",
+   "market": "TWSE",
+   "close": 19.15,
+   "pct1": 6.09,
+   "volume": 43468.0,
+   "signals": [
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "2331",
+   "name": "精英",
+   "market": "TWSE",
+   "close": 16.65,
+   "pct1": 6.05,
+   "volume": 1275618.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "020000",
+   "name": "富邦特選蘋果N",
+   "market": "TWSE",
+   "close": 25.84,
+   "pct1": 6.03,
+   "volume": 3000.0,
+   "signals": [
+    "創1日新高"
+   ]
+  },
+  {
+   "code": "5490",
+   "name": "同亨",
+   "market": "TPEX",
+   "close": 27.1,
+   "pct1": 5.86,
+   "volume": 4660216.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "3092",
+   "name": "鴻碩",
+   "market": "TWSE",
+   "close": 20.0,
+   "pct1": 5.82,
+   "volume": 196263.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "8409",
+   "name": "商之器",
+   "market": "TPEX",
+   "close": 18.2,
+   "pct1": 5.81,
+   "volume": 3215.0,
+   "signals": [
+    "創5日新高"
+   ]
+  },
+  {
+   "code": "4912",
+   "name": "聯德控股-KY",
+   "market": "TWSE",
+   "close": 84.2,
+   "pct1": 5.78,
+   "volume": 954586.0,
+   "signals": [
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "1213",
+   "name": "大飲",
+   "market": "TWSE",
+   "close": 7.4,
+   "pct1": 5.71,
+   "volume": 96002.0,
+   "signals": [
+    "創6日新高"
+   ]
+  },
+  {
+   "code": "3257",
+   "name": "虹冠電",
+   "market": "TWSE",
+   "close": 41.0,
+   "pct1": 5.53,
+   "volume": 174464.0,
+   "signals": [
+    "近5日持續放量1.7倍"
    ]
   },
   {
    "code": "2352",
    "name": "佳世達",
    "market": "TWSE",
-   "close": 26.7,
-   "pct1": -4.64,
-   "volume": 13096434.0,
+   "close": 28.15,
+   "pct1": 5.43,
+   "volume": 9689259.0,
    "signals": [
     "近10日持續放量1.8倍"
    ]
   },
   {
-   "code": "1568",
-   "name": "倉佑",
+   "code": "2468",
+   "name": "華經",
    "market": "TWSE",
-   "close": 25.55,
-   "pct1": -4.66,
-   "volume": 691571.0,
+   "close": 63.3,
+   "pct1": 5.15,
+   "volume": 45739449.0,
    "signals": [
-    "爆量(今量/20日均量=2.8倍)"
+    "爆量(今量/20日均量=2.0倍)",
+    "近5日持續放量2.0倍",
+    "創23日新高"
    ]
   },
   {
-   "code": "6525",
-   "name": "捷敏-KY",
+   "code": "6873",
+   "name": "泓德能源",
    "market": "TWSE",
-   "close": 94.7,
-   "pct1": -4.73,
-   "volume": 1874815.0,
+   "close": 52.0,
+   "pct1": 5.05,
+   "volume": 1472370.0,
    "signals": [
-    "爆量(今量/20日均量=2.5倍)"
+    "近5日持續放量1.9倍",
+    "近10日持續放量1.6倍"
    ]
   },
   {
-   "code": "8272",
-   "name": "全景軟體",
+   "code": "1338",
+   "name": "廣華-KY",
+   "market": "TWSE",
+   "close": 13.55,
+   "pct1": 5.04,
+   "volume": 228772.0,
+   "signals": [
+    "爆量(今量/20日均量=2.6倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1529",
+   "name": "樂事綠能",
+   "market": "TWSE",
+   "close": 13.6,
+   "pct1": 5.02,
+   "volume": 631063.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "1582",
+   "name": "信錦",
+   "market": "TWSE",
+   "close": 62.5,
+   "pct1": 4.87,
+   "volume": 339420.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "8466",
+   "name": "美吉吉-KY",
+   "market": "TWSE",
+   "close": 13.5,
+   "pct1": 4.65,
+   "volume": 56305.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "8432",
+   "name": "東生華",
    "market": "TPEX",
-   "close": 88.3,
-   "pct1": -4.75,
-   "volume": 289700.0,
+   "close": 61.4,
+   "pct1": 4.6,
+   "volume": 209272.0,
    "signals": [
-    "近10日漲幅+40.6%"
+    "創17日新高"
    ]
   },
   {
-   "code": "1618",
-   "name": "合機",
-   "market": "TWSE",
-   "close": 33.0,
-   "pct1": -4.76,
-   "volume": 845512.0,
+   "code": "6899",
+   "name": "創為精密",
+   "market": "TPEX",
+   "close": 47.9,
+   "pct1": 4.59,
+   "volume": 25010.0,
    "signals": [
-    "爆量(今量/20日均量=2.1倍)"
+    "創4日新高"
    ]
   },
   {
-   "code": "6908",
-   "name": "宏碁遊戲-創",
+   "code": "3043",
+   "name": "科風",
    "market": "TWSE",
-   "close": 20.0,
-   "pct1": -4.76,
-   "volume": 73443.0,
+   "close": 18.25,
+   "pct1": 4.58,
+   "volume": 165143.0,
+   "signals": [
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "6552",
+   "name": "易華電",
+   "market": "TWSE",
+   "close": 19.5,
+   "pct1": 4.56,
+   "volume": 90668.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "020029",
+   "name": "元大ESG高股息N",
+   "market": "TWSE",
+   "close": 18.5,
+   "pct1": 4.4,
+   "volume": 8000.0,
+   "signals": [
+    "創1日新高"
+   ]
+  },
+  {
+   "code": "6781",
+   "name": "AES-KY",
+   "market": "TWSE",
+   "close": 736.0,
+   "pct1": 4.4,
+   "volume": 784207.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6477",
+   "name": "安集",
+   "market": "TWSE",
+   "close": 28.6,
+   "pct1": 4.38,
+   "volume": 866294.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "4755",
+   "name": "三福化",
+   "market": "TWSE",
+   "close": 122.5,
+   "pct1": 4.26,
+   "volume": 593849.0,
+   "signals": [
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "1540",
+   "name": "喬福",
+   "market": "TWSE",
+   "close": 17.9,
+   "pct1": 4.07,
+   "volume": 144744.0,
    "signals": [
     "近5日持續放量1.6倍"
    ]
   },
   {
-   "code": "7631",
-   "name": "聚賢研發-創",
-   "market": "TWSE",
-   "close": 109.5,
-   "pct1": -4.78,
-   "volume": 110465.0,
+   "code": "6649",
+   "name": "台生材",
+   "market": "TPEX",
+   "close": 35.9,
+   "pct1": 4.06,
+   "volume": 25039.0,
    "signals": [
-    "爆量(今量/20日均量=2.0倍)"
+    "創1日新高"
    ]
   },
   {
-   "code": "4532",
-   "name": "瑞智",
+   "code": "3015",
+   "name": "全漢",
    "market": "TWSE",
-   "close": 22.4,
-   "pct1": -4.88,
-   "volume": 2554628.0,
+   "close": 43.8,
+   "pct1": 4.04,
+   "volume": 395370.0,
    "signals": [
-    "爆量(今量/20日均量=2.9倍)"
+    "近5日持續放量1.7倍"
    ]
   },
   {
-   "code": "2476",
-   "name": "鉅祥",
-   "market": "TWSE",
-   "close": 90.4,
-   "pct1": -4.94,
-   "volume": 2781862.0,
+   "code": "4754",
+   "name": "國碳科",
+   "market": "TPEX",
+   "close": 37.55,
+   "pct1": 4.02,
+   "volume": 68194.0,
    "signals": [
-    "爆量(今量/20日均量=2.1倍)"
+    "創17日新高"
    ]
   },
   {
-   "code": "1563",
-   "name": "巧新",
+   "code": "6582",
+   "name": "申豐",
    "market": "TWSE",
-   "close": 67.0,
-   "pct1": -4.96,
-   "volume": 1583222.0,
+   "close": 31.7,
+   "pct1": 3.93,
+   "volume": 116828.0,
    "signals": [
-    "爆量(今量/20日均量=2.1倍)"
+    "近5日持續放量2.2倍"
    ]
   },
   {
-   "code": "1524",
-   "name": "耿鼎",
+   "code": "2498",
+   "name": "宏達電",
    "market": "TWSE",
-   "close": 23.7,
-   "pct1": -5.01,
-   "volume": 925959.0,
+   "close": 36.35,
+   "pct1": 3.86,
+   "volume": 4384193.0,
    "signals": [
-    "爆量(今量/20日均量=2.0倍)"
+    "近5日持續放量1.5倍"
    ]
   },
   {
-   "code": "3550",
-   "name": "聯穎",
+   "code": "4562",
+   "name": "穎漢",
    "market": "TWSE",
-   "close": 17.95,
-   "pct1": -5.03,
-   "volume": 2292275.0,
+   "close": 30.85,
+   "pct1": 3.7,
+   "volume": 637140.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "近5日持續放量2.7倍",
+    "近10日持續放量1.8倍"
    ]
   },
   {
-   "code": "1308",
-   "name": "亞聚",
+   "code": "3150",
+   "name": "鈺寶-創",
    "market": "TWSE",
-   "close": 12.25,
-   "pct1": -5.04,
-   "volume": 3573069.0,
+   "close": 14.55,
+   "pct1": 3.56,
+   "volume": 17000.0,
    "signals": [
-    "爆量(今量/20日均量=2.0倍)"
+    "近5日持續放量1.5倍"
    ]
   },
   {
-   "code": "1522",
-   "name": "堤維西",
+   "code": "1789",
+   "name": "神隆",
    "market": "TWSE",
-   "close": 23.55,
-   "pct1": -5.23,
-   "volume": 990405.0,
+   "close": 20.85,
+   "pct1": 3.47,
+   "volume": 1590316.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)"
+    "爆量(今量/20日均量=2.3倍)",
+    "近5日持續放量1.5倍",
+    "創23日新高"
+   ]
+  },
+  {
+   "code": "6496",
+   "name": "科懋",
+   "market": "TPEX",
+   "close": 23.85,
+   "pct1": 3.47,
+   "volume": 5860.0,
+   "signals": [
+    "創4日新高"
+   ]
+  },
+  {
+   "code": "6906",
+   "name": "現觀科",
+   "market": "TWSE",
+   "close": 69.0,
+   "pct1": 3.45,
+   "volume": 39755.0,
+   "signals": [
+    "近5日持續放量2.4倍"
+   ]
+  },
+  {
+   "code": "1475",
+   "name": "業旺",
+   "market": "TWSE",
+   "close": 24.3,
+   "pct1": 3.4,
+   "volume": 59119.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "6558",
+   "name": "興能高",
+   "market": "TWSE",
+   "close": 19.85,
+   "pct1": 3.39,
+   "volume": 341781.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "3011",
+   "name": "今皓",
+   "market": "TWSE",
+   "close": 8.62,
+   "pct1": 3.36,
+   "volume": 301668.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "4155",
+   "name": "訊映",
+   "market": "TWSE",
+   "close": 18.5,
+   "pct1": 3.35,
+   "volume": 2762550.0,
+   "signals": [
+    "創13日新高"
+   ]
+  },
+  {
+   "code": "6962",
+   "name": "奕力-KY",
+   "market": "TWSE",
+   "close": 30.2,
+   "pct1": 3.25,
+   "volume": 2368944.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "7757",
+   "name": "金色三麥",
+   "market": "TPEX",
+   "close": 89.8,
+   "pct1": 3.22,
+   "volume": 57557.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "9934",
+   "name": "成霖",
+   "market": "TWSE",
+   "close": 9.51,
+   "pct1": 3.15,
+   "volume": 1016344.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "2406",
+   "name": "國碩",
+   "market": "TWSE",
+   "close": 30.1,
+   "pct1": 3.08,
+   "volume": 14916741.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "1451",
+   "name": "年興",
+   "market": "TWSE",
+   "close": 17.0,
+   "pct1": 3.03,
+   "volume": 320728.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "2029",
+   "name": "盛餘",
+   "market": "TWSE",
+   "close": 21.05,
+   "pct1": 2.93,
+   "volume": 420830.0,
+   "signals": [
+    "爆量(今量/20日均量=2.0倍)",
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "1203",
+   "name": "味王",
+   "market": "TWSE",
+   "close": 44.9,
+   "pct1": 2.86,
+   "volume": 54214.0,
+   "signals": [
+    "創23日新高"
+   ]
+  },
+  {
+   "code": "8072",
+   "name": "陞泰",
+   "market": "TWSE",
+   "close": 23.4,
+   "pct1": 2.86,
+   "volume": 153264.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "3027",
+   "name": "盛達",
+   "market": "TWSE",
+   "close": 16.35,
+   "pct1": 2.83,
+   "volume": 303475.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6854",
+   "name": "錼創科技-KY創",
+   "market": "TWSE",
+   "close": 72.6,
+   "pct1": 2.83,
+   "volume": 204504.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "1742",
+   "name": "台蠟",
+   "market": "TPEX",
+   "close": 22.15,
+   "pct1": 2.78,
+   "volume": 621081.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "4148",
+   "name": "全宇生技-KY",
+   "market": "TWSE",
+   "close": 28.8,
+   "pct1": 2.67,
+   "volume": 42006.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "2748",
+   "name": "雲品",
+   "market": "TWSE",
+   "close": 36.8,
+   "pct1": 2.65,
+   "volume": 55813.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "2430",
+   "name": "燦坤",
+   "market": "TWSE",
+   "close": 17.7,
+   "pct1": 2.61,
+   "volume": 124555.0,
+   "signals": [
+    "爆量(今量/20日均量=2.6倍)",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "3040",
+   "name": "遠見",
+   "market": "TWSE",
+   "close": 29.6,
+   "pct1": 2.6,
+   "volume": 1099685.0,
+   "signals": [
+    "爆量(今量/20日均量=3.1倍)"
+   ]
+  },
+  {
+   "code": "8455",
+   "name": "大拓-KY",
+   "market": "TPEX",
+   "close": 32.45,
+   "pct1": 2.53,
+   "volume": 52665.0,
+   "signals": [
+    "創9日新高"
+   ]
+  },
+  {
+   "code": "1527",
+   "name": "鑽全",
+   "market": "TWSE",
+   "close": 30.55,
+   "pct1": 2.52,
+   "volume": 192101.0,
+   "signals": [
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "4119",
+   "name": "旭富",
+   "market": "TWSE",
+   "close": 50.8,
+   "pct1": 2.52,
+   "volume": 149969.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1233",
+   "name": "天仁",
+   "market": "TWSE",
+   "close": 29.1,
+   "pct1": 2.46,
+   "volume": 89861.0,
+   "signals": [
+    "爆量(今量/20日均量=4.3倍)",
+    "近5日持續放量2.6倍",
+    "創23日新高"
+   ]
+  },
+  {
+   "code": "1906",
+   "name": "寶隆",
+   "market": "TWSE",
+   "close": 10.45,
+   "pct1": 2.45,
+   "volume": 190085.0,
+   "signals": [
+    "爆量(今量/20日均量=2.7倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1446",
+   "name": "宏和",
+   "market": "TWSE",
+   "close": 12.7,
+   "pct1": 2.42,
+   "volume": 333387.0,
+   "signals": [
+    "爆量(今量/20日均量=2.7倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "2509",
+   "name": "全坤建",
+   "market": "TWSE",
+   "close": 12.8,
+   "pct1": 2.4,
+   "volume": 321768.0,
+   "signals": [
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "6472",
+   "name": "保瑞",
+   "market": "TWSE",
+   "close": 409.0,
+   "pct1": 2.38,
+   "volume": 1523043.0,
+   "signals": [
+    "連續上漲5天",
+    "爆量(今量/20日均量=2.0倍)",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "8921",
+   "name": "沈氏",
+   "market": "TPEX",
+   "close": 17.35,
+   "pct1": 2.36,
+   "volume": 2000.0,
+   "signals": [
+    "創2日新高"
+   ]
+  },
+  {
+   "code": "5533",
+   "name": "皇鼎",
+   "market": "TWSE",
+   "close": 13.85,
+   "pct1": 2.21,
+   "volume": 557103.0,
+   "signals": [
+    "爆量(今量/20日均量=3.7倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "6881",
+   "name": "潤德",
+   "market": "TPEX",
+   "close": 214.5,
+   "pct1": 2.14,
+   "volume": 5490.0,
+   "signals": [
+    "創4日新高"
+   ]
+  },
+  {
+   "code": "1532",
+   "name": "勤美",
+   "market": "TWSE",
+   "close": 21.65,
+   "pct1": 2.12,
+   "volume": 605285.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "5345",
+   "name": "馥鴻",
+   "market": "TPEX",
+   "close": 19.3,
+   "pct1": 2.12,
+   "volume": 3021.0,
+   "signals": [
+    "創4日新高"
    ]
   },
   {
    "code": "2497",
    "name": "怡利電",
    "market": "TWSE",
-   "close": 36.25,
-   "pct1": -5.23,
-   "volume": 811473.0,
+   "close": 37.0,
+   "pct1": 2.07,
+   "volume": 562328.0,
    "signals": [
-    "爆量(今量/20日均量=3.6倍)",
-    "近5日持續放量1.7倍"
+    "爆量(今量/20日均量=2.3倍)",
+    "近5日持續放量2.0倍"
    ]
   },
   {
-   "code": "2425",
-   "name": "承啟",
+   "code": "6591",
+   "name": "動力-KY",
    "market": "TWSE",
-   "close": 27.15,
-   "pct1": -5.24,
-   "volume": 1333751.0,
+   "close": 36.9,
+   "pct1": 2.07,
+   "volume": 122482.0,
    "signals": [
-    "爆量(今量/20日均量=2.0倍)"
+    "近5日持續放量1.6倍"
    ]
   },
   {
-   "code": "1528",
-   "name": "恩德",
+   "code": "1337",
+   "name": "再生-KY",
    "market": "TWSE",
-   "close": 23.55,
-   "pct1": -5.42,
-   "volume": 9087757.0,
+   "close": 4.0,
+   "pct1": 2.04,
+   "volume": 1600702.0,
+   "signals": [
+    "爆量(今量/20日均量=3.9倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1445",
+   "name": "大宇",
+   "market": "TWSE",
+   "close": 9.56,
+   "pct1": 2.03,
+   "volume": 78515.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "1464",
+   "name": "得力",
+   "market": "TWSE",
+   "close": 9.34,
+   "pct1": 1.97,
+   "volume": 535160.0,
    "signals": [
     "近5日持續放量1.6倍"
    ]
@@ -4430,195 +3168,1140 @@
    "code": "2423",
    "name": "固緯",
    "market": "TWSE",
-   "close": 61.0,
-   "pct1": -5.43,
-   "volume": 233139.0,
+   "close": 62.2,
+   "pct1": 1.97,
+   "volume": 86482.0,
    "signals": [
-    "爆量(今量/20日均量=3.3倍)",
     "近5日持續放量1.7倍"
    ]
   },
   {
-   "code": "2465",
-   "name": "麗臺",
-   "market": "TWSE",
-   "close": 113.0,
-   "pct1": -5.44,
-   "volume": 14668980.0,
+   "code": "6246",
+   "name": "臺龍",
+   "market": "TPEX",
+   "close": 13.75,
+   "pct1": 1.85,
+   "volume": 76515.0,
    "signals": [
-    "近10日漲幅+29.1%",
-    "近5日持續放量2.4倍",
-    "近10日持續放量1.8倍"
+    "創17日新高"
    ]
   },
   {
-   "code": "8105",
-   "name": "凌巨",
+   "code": "5236",
+   "name": "凌陽創新",
    "market": "TWSE",
-   "close": 12.15,
-   "pct1": -5.45,
-   "volume": 4751765.0,
+   "close": 113.0,
+   "pct1": 1.8,
+   "volume": 72434.0,
    "signals": [
-    "爆量(今量/20日均量=3.0倍)"
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "6641",
+   "name": "基士德-KY",
+   "market": "TWSE",
+   "close": 16.95,
+   "pct1": 1.8,
+   "volume": 98224.0,
+   "signals": [
+    "爆量(今量/20日均量=5.2倍)",
+    "近5日持續放量2.2倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "3557",
+   "name": "嘉威",
+   "market": "TWSE",
+   "close": 22.7,
+   "pct1": 1.79,
+   "volume": 97615.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "2462",
+   "name": "良得電",
+   "market": "TWSE",
+   "close": 17.5,
+   "pct1": 1.74,
+   "volume": 380905.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "2704",
+   "name": "國賓",
+   "market": "TWSE",
+   "close": 43.9,
+   "pct1": 1.74,
+   "volume": 169900.0,
+   "signals": [
+    "爆量(今量/20日均量=2.3倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6180",
+   "name": "橘子",
+   "market": "TPEX",
+   "close": 41.0,
+   "pct1": 1.74,
+   "volume": 505688.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "6856",
+   "name": "鑫傳",
+   "market": "TPEX",
+   "close": 40.9,
+   "pct1": 1.74,
+   "volume": 4018.0,
+   "signals": [
+    "創3日新高"
+   ]
+  },
+  {
+   "code": "3010",
+   "name": "華立",
+   "market": "TWSE",
+   "close": 118.0,
+   "pct1": 1.72,
+   "volume": 2269547.0,
+   "signals": [
+    "爆量(今量/20日均量=2.3倍)"
+   ]
+  },
+  {
+   "code": "4536",
+   "name": "拓凱",
+   "market": "TWSE",
+   "close": 148.5,
+   "pct1": 1.71,
+   "volume": 119836.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "2035",
+   "name": "唐榮",
+   "market": "TPEX",
+   "close": 27.4,
+   "pct1": 1.67,
+   "volume": 5004.0,
+   "signals": [
+    "創5日新高"
+   ]
+  },
+  {
+   "code": "3607",
+   "name": "谷崧",
+   "market": "TWSE",
+   "close": 12.35,
+   "pct1": 1.65,
+   "volume": 201771.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2908",
+   "name": "特力",
+   "market": "TWSE",
+   "close": 21.75,
+   "pct1": 1.64,
+   "volume": 786075.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2008",
+   "name": "高興昌",
+   "market": "TWSE",
+   "close": 31.1,
+   "pct1": 1.63,
+   "volume": 55241.0,
+   "signals": [
+    "爆量(今量/20日均量=2.6倍)",
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "3379",
+   "name": "彬台",
+   "market": "TPEX",
+   "close": 31.2,
+   "pct1": 1.63,
+   "volume": 1406721.0,
+   "signals": [
+    "近10日漲幅+27.1%"
+   ]
+  },
+  {
+   "code": "5904",
+   "name": "寶雅*",
+   "market": "TPEX",
+   "close": 75.2,
+   "pct1": 1.62,
+   "volume": 7630489.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "8342",
+   "name": "益張",
+   "market": "TPEX",
+   "close": 83.2,
+   "pct1": 1.59,
+   "volume": 3162.0,
+   "signals": [
+    "創2日新高"
+   ]
+  },
+  {
+   "code": "2516",
+   "name": "新建",
+   "market": "TWSE",
+   "close": 16.45,
+   "pct1": 1.54,
+   "volume": 679936.0,
+   "signals": [
+    "創23日新高"
+   ]
+  },
+  {
+   "code": "2062",
+   "name": "橋椿",
+   "market": "TWSE",
+   "close": 16.65,
+   "pct1": 1.52,
+   "volume": 184774.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "1217",
+   "name": "愛之味",
+   "market": "TWSE",
+   "close": 9.44,
+   "pct1": 1.51,
+   "volume": 668956.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6625",
+   "name": "必應",
+   "market": "TWSE",
+   "close": 68.5,
+   "pct1": 1.48,
+   "volume": 133571.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "2427",
+   "name": "三商電",
+   "market": "TWSE",
+   "close": 21.25,
+   "pct1": 1.43,
+   "volume": 636214.0,
+   "signals": [
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "1477",
+   "name": "聚陽",
+   "market": "TWSE",
+   "close": 216.0,
+   "pct1": 1.41,
+   "volume": 1570873.0,
+   "signals": [
+    "近5日持續放量1.7倍",
+    "創23日新高"
+   ]
+  },
+  {
+   "code": "4173",
+   "name": "久裕",
+   "market": "TPEX",
+   "close": 18.1,
+   "pct1": 1.4,
+   "volume": 98889.0,
+   "signals": [
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "5519",
+   "name": "隆大",
+   "market": "TWSE",
+   "close": 22.25,
+   "pct1": 1.37,
+   "volume": 268875.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "1219",
+   "name": "福壽",
+   "market": "TWSE",
+   "close": 11.3,
+   "pct1": 1.35,
+   "volume": 287127.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "2642",
+   "name": "宅配通",
+   "market": "TWSE",
+   "close": 19.2,
+   "pct1": 1.32,
+   "volume": 76420.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "3609",
+   "name": "三一東林",
+   "market": "TPEX",
+   "close": 29.45,
+   "pct1": 1.2,
+   "volume": 541777.0,
+   "signals": [
+    "近10日漲幅+26.1%",
+    "創17日新高"
+   ]
+  },
+  {
+   "code": "2373",
+   "name": "震旦行",
+   "market": "TWSE",
+   "close": 51.1,
+   "pct1": 1.19,
+   "volume": 211116.0,
+   "signals": [
+    "爆量(今量/20日均量=4.0倍)",
+    "近5日持續放量2.4倍"
+   ]
+  },
+  {
+   "code": "1109",
+   "name": "信大",
+   "market": "TWSE",
+   "close": 13.0,
+   "pct1": 1.17,
+   "volume": 372754.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "2017",
+   "name": "官田鋼",
+   "market": "TWSE",
+   "close": 7.95,
+   "pct1": 1.15,
+   "volume": 507802.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "2496",
+   "name": "卓越",
+   "market": "TWSE",
+   "close": 52.6,
+   "pct1": 1.15,
+   "volume": 33696.0,
+   "signals": [
+    "近5日持續放量2.6倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2812",
+   "name": "台中銀",
+   "market": "TWSE",
+   "close": 17.6,
+   "pct1": 1.15,
+   "volume": 13868072.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "6757",
+   "name": "台灣虎航",
+   "market": "TWSE",
+   "close": 54.8,
+   "pct1": 1.11,
+   "volume": 1218861.0,
+   "signals": [
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "6923",
+   "name": "中台",
+   "market": "TWSE",
+   "close": 66.7,
+   "pct1": 1.06,
+   "volume": 46536.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1432",
+   "name": "大魯閣",
+   "market": "TWSE",
+   "close": 14.4,
+   "pct1": 1.05,
+   "volume": 250829.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "1339",
+   "name": "昭輝",
+   "market": "TWSE",
+   "close": 40.2,
+   "pct1": 1.01,
+   "volume": 166726.0,
+   "signals": [
+    "爆量(今量/20日均量=2.7倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "3501",
+   "name": "維熹",
+   "market": "TWSE",
+   "close": 35.2,
+   "pct1": 1.0,
+   "volume": 203954.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2538",
+   "name": "基泰",
+   "market": "TWSE",
+   "close": 8.2,
+   "pct1": 0.99,
+   "volume": 516604.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "6838",
+   "name": "台新藥",
+   "market": "TWSE",
+   "close": 21.2,
+   "pct1": 0.95,
+   "volume": 134333.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "2038",
+   "name": "海光",
+   "market": "TWSE",
+   "close": 11.05,
+   "pct1": 0.91,
+   "volume": 377413.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6952",
+   "name": "大武山",
+   "market": "TWSE",
+   "close": 39.95,
+   "pct1": 0.88,
+   "volume": 22377.0,
+   "signals": [
+    "創4日新高"
+   ]
+  },
+  {
+   "code": "1734",
+   "name": "杏輝",
+   "market": "TWSE",
+   "close": 30.15,
+   "pct1": 0.84,
+   "volume": 303091.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "2904",
+   "name": "匯僑",
+   "market": "TWSE",
+   "close": 12.4,
+   "pct1": 0.81,
+   "volume": 100857.0,
+   "signals": [
+    "爆量(今量/20日均量=3.2倍)",
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "7855",
+   "name": "和運租車",
+   "market": "TWSE",
+   "close": 39.1,
+   "pct1": 0.77,
+   "volume": 334639.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "9902",
+   "name": "台火",
+   "market": "TWSE",
+   "close": 13.2,
+   "pct1": 0.76,
+   "volume": 218892.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1760",
+   "name": "寶齡富錦",
+   "market": "TWSE",
+   "close": 49.3,
+   "pct1": 0.72,
+   "volume": 129869.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "4438",
+   "name": "廣越",
+   "market": "TWSE",
+   "close": 56.2,
+   "pct1": 0.72,
+   "volume": 161302.0,
+   "signals": [
+    "爆量(今量/20日均量=2.4倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "2520",
+   "name": "冠德",
+   "market": "TWSE",
+   "close": 33.4,
+   "pct1": 0.6,
+   "volume": 2395704.0,
+   "signals": [
+    "爆量(今量/20日均量=2.2倍)"
+   ]
+  },
+  {
+   "code": "3191",
+   "name": "雲嘉南",
+   "market": "TPEX",
+   "close": 17.15,
+   "pct1": 0.59,
+   "volume": 58778.0,
+   "signals": [
+    "創1日新高"
+   ]
+  },
+  {
+   "code": "5215",
+   "name": "科嘉-KY",
+   "market": "TWSE",
+   "close": 34.5,
+   "pct1": 0.58,
+   "volume": 63135.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "1776",
+   "name": "展宇",
+   "market": "TWSE",
+   "close": 17.6,
+   "pct1": 0.57,
+   "volume": 86915.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "3576",
+   "name": "聯合再生",
+   "market": "TWSE",
+   "close": 17.9,
+   "pct1": 0.56,
+   "volume": 62427587.0,
+   "signals": [
+    "爆量(今量/20日均量=3.9倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "9924",
+   "name": "福興",
+   "market": "TWSE",
+   "close": 37.65,
+   "pct1": 0.53,
+   "volume": 204262.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "2701",
+   "name": "萬企",
+   "market": "TWSE",
+   "close": 10.05,
+   "pct1": 0.5,
+   "volume": 208840.0,
+   "signals": [
+    "爆量(今量/20日均量=2.5倍)",
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "2501",
+   "name": "國建",
+   "market": "TWSE",
+   "close": 20.6,
+   "pct1": 0.49,
+   "volume": 2589871.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "1525",
+   "name": "江申",
+   "market": "TWSE",
+   "close": 62.4,
+   "pct1": 0.48,
+   "volume": 20080.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "1731",
+   "name": "美吾華",
+   "market": "TWSE",
+   "close": 20.8,
+   "pct1": 0.48,
+   "volume": 178127.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "8463",
+   "name": "潤泰材",
+   "market": "TWSE",
+   "close": 21.05,
+   "pct1": 0.48,
+   "volume": 111566.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量2.3倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1108",
+   "name": "幸福",
+   "market": "TWSE",
+   "close": 10.75,
+   "pct1": 0.47,
+   "volume": 713294.0,
+   "signals": [
+    "爆量(今量/20日均量=2.6倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "2114",
+   "name": "鑫永銓",
+   "market": "TWSE",
+   "close": 88.7,
+   "pct1": 0.45,
+   "volume": 41306.0,
+   "signals": [
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "2254",
+   "name": "巨鎧精密-創",
+   "market": "TWSE",
+   "close": 110.5,
+   "pct1": 0.45,
+   "volume": 3630529.0,
+   "signals": [
+    "創23日新高"
+   ]
+  },
+  {
+   "code": "4190",
+   "name": "佐登-KY",
+   "market": "TWSE",
+   "close": 22.45,
+   "pct1": 0.45,
+   "volume": 50966.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "1558",
+   "name": "伸興",
+   "market": "TWSE",
+   "close": 113.5,
+   "pct1": 0.44,
+   "volume": 512242.0,
+   "signals": [
+    "爆量(今量/20日均量=2.7倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "2548",
+   "name": "華固",
+   "market": "TWSE",
+   "close": 91.9,
+   "pct1": 0.44,
+   "volume": 1388638.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "9931",
+   "name": "欣高",
+   "market": "TWSE",
+   "close": 34.2,
+   "pct1": 0.44,
+   "volume": 34157.0,
+   "signals": [
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "2442",
+   "name": "新美齊",
+   "market": "TWSE",
+   "close": 11.7,
+   "pct1": 0.43,
+   "volume": 1231636.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1521",
+   "name": "大億",
+   "market": "TWSE",
+   "close": 24.3,
+   "pct1": 0.41,
+   "volume": 39070.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1730",
+   "name": "花仙子",
+   "market": "TWSE",
+   "close": 50.3,
+   "pct1": 0.4,
+   "volume": 40966.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "6281",
+   "name": "全國電",
+   "market": "TWSE",
+   "close": 50.0,
+   "pct1": 0.4,
+   "volume": 133735.0,
+   "signals": [
+    "爆量(今量/20日均量=2.3倍)",
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "1817",
+   "name": "凱撒衛",
+   "market": "TWSE",
+   "close": 39.4,
+   "pct1": 0.38,
+   "volume": 32289.0,
+   "signals": [
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "1236",
+   "name": "宏亞",
+   "market": "TWSE",
+   "close": 26.8,
+   "pct1": 0.37,
+   "volume": 173187.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "3168",
+   "name": "眾福科",
+   "market": "TWSE",
+   "close": 41.0,
+   "pct1": 0.37,
+   "volume": 13000.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "6592",
+   "name": "和潤企業",
+   "market": "TWSE",
+   "close": 56.0,
+   "pct1": 0.36,
+   "volume": 484809.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6768",
+   "name": "志強-KY",
+   "market": "TWSE",
+   "close": 59.5,
+   "pct1": 0.34,
+   "volume": 240402.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "6936",
+   "name": "永鴻生技",
+   "market": "TWSE",
+   "close": 31.6,
+   "pct1": 0.32,
+   "volume": 25412.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "1795",
+   "name": "美時",
+   "market": "TWSE",
+   "close": 166.5,
+   "pct1": 0.3,
+   "volume": 2118838.0,
+   "signals": [
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "1414",
+   "name": "東和",
+   "market": "TWSE",
+   "close": 17.5,
+   "pct1": 0.29,
+   "volume": 267036.0,
+   "signals": [
+    "爆量(今量/20日均量=2.5倍)"
    ]
   },
   {
    "code": "2530",
    "name": "華建",
    "market": "TWSE",
-   "close": 18.15,
-   "pct1": -5.47,
-   "volume": 3850814.0,
+   "close": 18.2,
+   "pct1": 0.28,
+   "volume": 642769.0,
    "signals": [
-    "爆量(今量/20日均量=5.7倍)",
     "近5日持續放量1.7倍"
    ]
   },
   {
-   "code": "2028",
-   "name": "威致",
+   "code": "1806",
+   "name": "冠軍",
    "market": "TWSE",
-   "close": 14.65,
-   "pct1": -5.48,
-   "volume": 232318.0,
+   "close": 7.48,
+   "pct1": 0.27,
+   "volume": 377942.0,
    "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "4582",
-   "name": "聚恆-創",
-   "market": "TWSE",
-   "close": 18.1,
-   "pct1": -5.48,
-   "volume": 289200.0,
-   "signals": [
-    "爆量(今量/20日均量=3.1倍)"
-   ]
-  },
-  {
-   "code": "7768",
-   "name": "頌勝科技",
-   "market": "TWSE",
-   "close": 205.0,
-   "pct1": -5.53,
-   "volume": 190580.0,
-   "signals": [
-    "爆量(今量/20日均量=2.2倍)"
-   ]
-  },
-  {
-   "code": "3338",
-   "name": "泰碩",
-   "market": "TWSE",
-   "close": 52.4,
-   "pct1": -5.59,
-   "volume": 754102.0,
-   "signals": [
-    "爆量(今量/20日均量=2.0倍)"
-   ]
-  },
-  {
-   "code": "2438",
-   "name": "翔耀",
-   "market": "TWSE",
-   "close": 16.85,
-   "pct1": -5.6,
-   "volume": 109237.0,
-   "signals": [
-    "爆量(今量/20日均量=2.3倍)"
-   ]
-  },
-  {
-   "code": "7819",
-   "name": "精誠金融",
-   "market": "TPEX",
-   "close": 37.1,
-   "pct1": -5.6,
-   "volume": 155053.0,
-   "signals": [
-    "近5日漲幅+18.5%"
-   ]
-  },
-  {
-   "code": "8438",
-   "name": "昶昕",
-   "market": "TWSE",
-   "close": 54.4,
-   "pct1": -5.72,
-   "volume": 481287.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)"
-   ]
-  },
-  {
-   "code": "2457",
-   "name": "飛宏",
-   "market": "TWSE",
-   "close": 17.2,
-   "pct1": -5.75,
-   "volume": 3187399.0,
-   "signals": [
-    "爆量(今量/20日均量=2.6倍)",
+    "爆量(今量/20日均量=2.0倍)",
     "近5日持續放量1.6倍"
    ]
   },
   {
-   "code": "3092",
-   "name": "鴻碩",
+   "code": "6674",
+   "name": "鋐寶科技",
    "market": "TWSE",
-   "close": 18.9,
-   "pct1": -5.97,
-   "volume": 425861.0,
+   "close": 18.35,
+   "pct1": 0.27,
+   "volume": 162028.0,
    "signals": [
-    "爆量(今量/20日均量=2.3倍)"
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量1.8倍"
    ]
   },
   {
-   "code": "2250",
-   "name": "IKKA-KY",
+   "code": "9925",
+   "name": "新保",
    "market": "TWSE",
-   "close": 44.6,
-   "pct1": -6.01,
-   "volume": 390464.0,
+   "close": 39.15,
+   "pct1": 0.26,
+   "volume": 489317.0,
    "signals": [
-    "爆量(今量/20日均量=5.4倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1587",
+   "name": "吉茂",
+   "market": "TWSE",
+   "close": 20.05,
+   "pct1": 0.25,
+   "volume": 225923.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "6908",
+   "name": "宏碁遊戲-創",
+   "market": "TWSE",
+   "close": 20.05,
+   "pct1": 0.25,
+   "volume": 48057.0,
+   "signals": [
     "近5日持續放量1.7倍"
    ]
   },
   {
-   "code": "3694",
-   "name": "海華",
+   "code": "2506",
+   "name": "太設",
    "market": "TWSE",
-   "close": 39.1,
-   "pct1": -6.01,
-   "volume": 1440268.0,
+   "close": 8.24,
+   "pct1": 0.24,
+   "volume": 200381.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)"
+    "近5日持續放量2.2倍"
    ]
   },
   {
-   "code": "6552",
-   "name": "易華電",
+   "code": "9905",
+   "name": "大華",
    "market": "TWSE",
-   "close": 18.65,
-   "pct1": -6.05,
-   "volume": 326734.0,
+   "close": 20.85,
+   "pct1": 0.24,
+   "volume": 271400.0,
    "signals": [
-    "爆量(今量/20日均量=4.1倍)",
+    "爆量(今量/20日均量=2.2倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6115",
+   "name": "鎰勝",
+   "market": "TWSE",
+   "close": 43.05,
+   "pct1": 0.23,
+   "volume": 179994.0,
+   "signals": [
     "近5日持續放量1.7倍"
    ]
   },
   {
-   "code": "1445",
-   "name": "大宇",
+   "code": "1470",
+   "name": "大統新創",
    "market": "TWSE",
-   "close": 9.37,
-   "pct1": -6.21,
-   "volume": 601330.0,
+   "close": 23.45,
+   "pct1": 0.21,
+   "volume": 12000.0,
    "signals": [
-    "爆量(今量/20日均量=6.7倍)",
-    "近5日持續放量1.7倍"
+    "連續上漲5天",
+    "創5日新高"
+   ]
+  },
+  {
+   "code": "6887",
+   "name": "寶綠特-KY",
+   "market": "TWSE",
+   "close": 25.35,
+   "pct1": 0.2,
+   "volume": 114036.0,
+   "signals": [
+    "近5日持續放量2.6倍",
+    "近10日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "9926",
+   "name": "新海",
+   "market": "TWSE",
+   "close": 49.5,
+   "pct1": 0.2,
+   "volume": 47108.0,
+   "signals": [
+    "爆量(今量/20日均量=2.7倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "3652",
+   "name": "精聯",
+   "market": "TWSE",
+   "close": 29.8,
+   "pct1": 0.17,
+   "volume": 136269.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "8367",
+   "name": "建新國際",
+   "market": "TWSE",
+   "close": 40.0,
+   "pct1": 0.13,
+   "volume": 17142.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "2431",
+   "name": "聯昌",
+   "market": "TWSE",
+   "close": 9.96,
+   "pct1": 0.1,
+   "volume": 328264.0,
+   "signals": [
+    "近10日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "1410",
+   "name": "南染",
+   "market": "TWSE",
+   "close": 25.5,
+   "pct1": 0.0,
+   "volume": 118934.0,
+   "signals": [
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "1442",
+   "name": "名軒",
+   "market": "TWSE",
+   "close": 25.7,
+   "pct1": 0.0,
+   "volume": 188786.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1463",
+   "name": "強盛新",
+   "market": "TWSE",
+   "close": 17.15,
+   "pct1": 0.0,
+   "volume": 167459.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "2702",
+   "name": "華園",
+   "market": "TWSE",
+   "close": 11.5,
+   "pct1": 0.0,
+   "volume": 159732.0,
+   "signals": [
+    "爆量(今量/20日均量=2.2倍)",
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "4930",
+   "name": "燦星網",
+   "market": "TWSE",
+   "close": 14.4,
+   "pct1": 0.0,
+   "volume": 60008.0,
+   "signals": [
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "4999",
+   "name": "鑫禾",
+   "market": "TWSE",
+   "close": 16.05,
+   "pct1": 0.0,
+   "volume": 95254.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6581",
+   "name": "鋼聯",
+   "market": "TWSE",
+   "close": 108.0,
+   "pct1": 0.0,
+   "volume": 34090.0,
+   "signals": [
+    "近5日持續放量2.2倍"
    ]
   },
   {
@@ -4626,278 +4309,520 @@
    "name": "資拓宏宇",
    "market": "TWSE",
    "close": 31.75,
-   "pct1": -6.34,
-   "volume": 286448.0,
+   "pct1": 0.0,
+   "volume": 94459.0,
    "signals": [
-    "爆量(今量/20日均量=5.2倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "7760",
+   "name": "享溫馨",
+   "market": "TWSE",
+   "close": 32.0,
+   "pct1": 0.0,
+   "volume": 210320.0,
+   "signals": [
+    "爆量(今量/20日均量=4.4倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "7765",
+   "name": "中華資安",
+   "market": "TWSE",
+   "close": 236.0,
+   "pct1": 0.0,
+   "volume": 176754.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "7823",
+   "name": "奧義賽博-KY創",
+   "market": "TWSE",
+   "close": 75.6,
+   "pct1": 0.0,
+   "volume": 22672.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "9942",
+   "name": "茂順",
+   "market": "TWSE",
+   "close": 109.5,
+   "pct1": 0.0,
+   "volume": 77662.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2013",
+   "name": "中鋼構",
+   "market": "TWSE",
+   "close": 40.35,
+   "pct1": -0.12,
+   "volume": 106030.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1512",
+   "name": "瑞利",
+   "market": "TWSE",
+   "close": 6.28,
+   "pct1": -0.16,
+   "volume": 94003.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "1737",
+   "name": "臺鹽",
+   "market": "TWSE",
+   "close": 29.9,
+   "pct1": -0.17,
+   "volume": 211087.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "7705",
+   "name": "三商餐飲",
+   "market": "TWSE",
+   "close": 28.25,
+   "pct1": -0.18,
+   "volume": 47619.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "2901",
+   "name": "欣欣",
+   "market": "TWSE",
+   "close": 25.05,
+   "pct1": -0.2,
+   "volume": 116172.0,
+   "signals": [
+    "爆量(今量/20日均量=2.8倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1438",
+   "name": "三地開發",
+   "market": "TWSE",
+   "close": 21.55,
+   "pct1": -0.23,
+   "volume": 59029.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "3130",
+   "name": "一零四",
+   "market": "TWSE",
+   "close": 203.5,
+   "pct1": -0.25,
+   "volume": 47334.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1210",
+   "name": "大成",
+   "market": "TWSE",
+   "close": 49.95,
+   "pct1": -0.3,
+   "volume": 3171920.0,
+   "signals": [
+    "爆量(今量/20日均量=2.0倍)"
+   ]
+  },
+  {
+   "code": "2387",
+   "name": "精元",
+   "market": "TWSE",
+   "close": 31.05,
+   "pct1": -0.32,
+   "volume": 413274.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1506",
+   "name": "正道",
+   "market": "TWSE",
+   "close": 9.0,
+   "pct1": -0.33,
+   "volume": 373748.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
     "近5日持續放量1.9倍"
    ]
   },
   {
-   "code": "6799",
-   "name": "來頡",
+   "code": "6835",
+   "name": "圓裕",
    "market": "TWSE",
-   "close": 66.0,
-   "pct1": -6.38,
-   "volume": 573859.0,
+   "close": 30.5,
+   "pct1": -0.33,
+   "volume": 38079.0,
    "signals": [
-    "爆量(今量/20日均量=3.1倍)",
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "6412",
+   "name": "群電",
+   "market": "TWSE",
+   "close": 55.9,
+   "pct1": -0.36,
+   "volume": 1089299.0,
+   "signals": [
     "近5日持續放量1.6倍"
    ]
   },
   {
-   "code": "3015",
-   "name": "全漢",
+   "code": "3023",
+   "name": "信邦",
    "market": "TWSE",
-   "close": 42.1,
-   "pct1": -6.44,
-   "volume": 1229969.0,
+   "close": 257.5,
+   "pct1": -0.39,
+   "volume": 1155426.0,
    "signals": [
-    "爆量(今量/20日均量=3.8倍)",
-    "近5日持續放量1.6倍"
+    "近10日持續放量1.5倍"
    ]
   },
   {
-   "code": "4912",
-   "name": "聯德控股-KY",
+   "code": "6776",
+   "name": "展碁國際",
    "market": "TWSE",
-   "close": 79.6,
-   "pct1": -6.46,
-   "volume": 1994753.0,
+   "close": 51.6,
+   "pct1": -0.39,
+   "volume": 125751.0,
    "signals": [
-    "爆量(今量/20日均量=3.3倍)",
-    "近5日持續放量2.4倍"
+    "近5日持續放量2.0倍"
    ]
   },
   {
-   "code": "1541",
-   "name": "錩泰",
+   "code": "9929",
+   "name": "秋雨",
    "market": "TWSE",
-   "close": 18.05,
-   "pct1": -6.48,
-   "volume": 290697.0,
+   "close": 10.7,
+   "pct1": -0.47,
+   "volume": 5020200.0,
    "signals": [
-    "爆量(今量/20日均量=8.8倍)",
-    "近5日持續放量2.2倍"
-   ]
-  },
-  {
-   "code": "3257",
-   "name": "虹冠電",
-   "market": "TWSE",
-   "close": 38.85,
-   "pct1": -6.5,
-   "volume": 909867.0,
-   "signals": [
-    "爆量(今量/20日均量=4.8倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "6854",
-   "name": "錼創科技-KY創",
-   "market": "TWSE",
-   "close": 70.6,
-   "pct1": -6.74,
-   "volume": 548956.0,
-   "signals": [
-    "爆量(今量/20日均量=2.4倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "3528",
-   "name": "安馳",
-   "market": "TWSE",
-   "close": 69.0,
-   "pct1": -6.76,
-   "volume": 652184.0,
-   "signals": [
-    "爆量(今量/20日均量=3.1倍)"
-   ]
-  },
-  {
-   "code": "6215",
-   "name": "和椿",
-   "market": "TWSE",
-   "close": 70.0,
-   "pct1": -6.91,
-   "volume": 1276417.0,
-   "signals": [
-    "爆量(今量/20日均量=2.8倍)"
-   ]
-  },
-  {
-   "code": "6887",
-   "name": "寶綠特-KY",
-   "market": "TWSE",
-   "close": 25.3,
-   "pct1": -6.99,
-   "volume": 301010.0,
-   "signals": [
-    "爆量(今量/20日均量=3.4倍)",
-    "近5日持續放量2.5倍",
+    "爆量(今量/20日均量=17.3倍)",
+    "近5日持續放量3.6倍",
     "近10日持續放量1.8倍"
    ]
   },
   {
-   "code": "4968",
-   "name": "立積",
+   "code": "1614",
+   "name": "三洋電",
    "market": "TWSE",
-   "close": 72.4,
-   "pct1": -7.18,
-   "volume": 1089696.0,
+   "close": 31.4,
+   "pct1": -0.48,
+   "volume": 128931.0,
    "signals": [
-    "爆量(今量/20日均量=2.5倍)",
+    "爆量(今量/20日均量=2.7倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "9908",
+   "name": "大台北",
+   "market": "TWSE",
+   "close": 28.6,
+   "pct1": -0.52,
+   "volume": 308848.0,
+   "signals": [
+    "近10日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "9937",
+   "name": "全國",
+   "market": "TWSE",
+   "close": 54.1,
+   "pct1": -0.55,
+   "volume": 151157.0,
+   "signals": [
+    "爆量(今量/20日均量=4.4倍)",
+    "近5日持續放量2.2倍",
+    "近10日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "1418",
+   "name": "東華",
+   "market": "TWSE",
+   "close": 17.9,
+   "pct1": -0.56,
+   "volume": 90540.0,
+   "signals": [
+    "爆量(今量/20日均量=3.0倍)",
+    "近5日持續放量2.3倍"
+   ]
+  },
+  {
+   "code": "1535",
+   "name": "中宇",
+   "market": "TWSE",
+   "close": 44.6,
+   "pct1": -0.67,
+   "volume": 128874.0,
+   "signals": [
+    "爆量(今量/20日均量=2.9倍)",
     "近5日持續放量1.9倍"
    ]
   },
   {
-   "code": "8499",
-   "name": "鼎炫-KY",
+   "code": "1539",
+   "name": "巨庭",
    "market": "TWSE",
-   "close": 192.0,
-   "pct1": -7.25,
-   "volume": 72560.0,
+   "close": 14.35,
+   "pct1": -0.69,
+   "volume": 146005.0,
    "signals": [
-    "爆量(今量/20日均量=2.6倍)"
+    "爆量(今量/20日均量=2.4倍)",
+    "近5日持續放量2.0倍"
    ]
   },
   {
-   "code": "2527",
-   "name": "宏璟",
+   "code": "2482",
+   "name": "連宇",
    "market": "TWSE",
-   "close": 38.95,
-   "pct1": -7.37,
-   "volume": 1554529.0,
+   "close": 14.1,
+   "pct1": -0.7,
+   "volume": 246639.0,
+   "signals": [
+    "近5日持續放量2.0倍"
+   ]
+  },
+  {
+   "code": "1457",
+   "name": "宜進",
+   "market": "TWSE",
+   "close": 13.9,
+   "pct1": -0.71,
+   "volume": 306094.0,
+   "signals": [
+    "爆量(今量/20日均量=2.2倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "3266",
+   "name": "昇陽",
+   "market": "TWSE",
+   "close": 13.65,
+   "pct1": -0.73,
+   "volume": 70020.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "3038",
+   "name": "全台",
+   "market": "TWSE",
+   "close": 19.15,
+   "pct1": -0.78,
+   "volume": 352919.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "6183",
+   "name": "關貿",
+   "market": "TWSE",
+   "close": 88.7,
+   "pct1": -0.78,
+   "volume": 60662.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "6790",
+   "name": "永豐實",
+   "market": "TWSE",
+   "close": 36.95,
+   "pct1": -0.81,
+   "volume": 307062.0,
+   "signals": [
+    "爆量(今量/20日均量=2.4倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "7721",
+   "name": "微程式",
+   "market": "TWSE",
+   "close": 49.1,
+   "pct1": -0.81,
+   "volume": 108750.0,
+   "signals": [
+    "近5日持續放量2.4倍"
+   ]
+  },
+  {
+   "code": "1805",
+   "name": "寶徠",
+   "market": "TWSE",
+   "close": 9.63,
+   "pct1": -0.82,
+   "volume": 164892.0,
+   "signals": [
+    "爆量(今量/20日均量=2.9倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "5283",
+   "name": "禾聯碩",
+   "market": "TWSE",
+   "close": 48.6,
+   "pct1": -0.82,
+   "volume": 182442.0,
    "signals": [
     "爆量(今量/20日均量=2.3倍)"
    ]
   },
   {
-   "code": "6781",
-   "name": "AES-KY",
+   "code": "1465",
+   "name": "偉全",
    "market": "TWSE",
-   "close": 705.0,
-   "pct1": -7.6,
-   "volume": 704822.0,
+   "close": 11.4,
+   "pct1": -0.87,
+   "volume": 424209.0,
    "signals": [
-    "爆量(今量/20日均量=2.0倍)"
+    "爆量(今量/20日均量=2.5倍)"
+   ]
+  },
+  {
+   "code": "2514",
+   "name": "龍邦",
+   "market": "TWSE",
+   "close": 10.7,
+   "pct1": -0.93,
+   "volume": 168879.0,
+   "signals": [
+    "爆量(今量/20日均量=2.4倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2832",
+   "name": "台產",
+   "market": "TWSE",
+   "close": 53.1,
+   "pct1": -0.93,
+   "volume": 261681.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "3679",
+   "name": "新至陞",
+   "market": "TWSE",
+   "close": 104.0,
+   "pct1": -0.95,
+   "volume": 61823.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "9941",
+   "name": "裕融",
+   "market": "TWSE",
+   "close": 73.2,
+   "pct1": -0.95,
+   "volume": 1150935.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "1220",
+   "name": "台榮",
+   "market": "TWSE",
+   "close": 10.35,
+   "pct1": -0.96,
+   "volume": 341499.0,
+   "signals": [
+    "爆量(今量/20日均量=2.9倍)",
+    "近5日持續放量2.6倍"
    ]
   },
   {
    "code": "1725",
    "name": "元禎",
    "market": "TWSE",
-   "close": 31.3,
-   "pct1": -7.67,
-   "volume": 324516.0,
+   "close": 31.0,
+   "pct1": -0.96,
+   "volume": 186002.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "8249",
-   "name": "菱光",
-   "market": "TWSE",
-   "close": 32.5,
-   "pct1": -7.67,
-   "volume": 810860.0,
-   "signals": [
-    "爆量(今量/20日均量=4.2倍)",
     "近5日持續放量1.8倍"
    ]
   },
   {
-   "code": "4169",
-   "name": "泰宗",
+   "code": "6951",
+   "name": "青新-創",
    "market": "TWSE",
-   "close": 114.5,
-   "pct1": -8.03,
-   "volume": 1036453.0,
+   "close": 62.1,
+   "pct1": -0.96,
+   "volume": 55940.0,
    "signals": [
-    "爆量(今量/20日均量=5.3倍)",
-    "近5日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "6830",
-   "name": "汎銓",
-   "market": "TWSE",
-   "close": 417.5,
-   "pct1": -8.04,
-   "volume": 2416098.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)",
-    "近5日持續放量1.7倍"
-   ]
-  },
-  {
-   "code": "5284",
-   "name": "jpp-KY",
-   "market": "TWSE",
-   "close": 193.5,
-   "pct1": -8.29,
-   "volume": 932116.0,
-   "signals": [
-    "爆量(今量/20日均量=2.1倍)",
     "近5日持續放量1.6倍"
    ]
   },
   {
-   "code": "8466",
-   "name": "美吉吉-KY",
+   "code": "3050",
+   "name": "鈺德",
    "market": "TWSE",
-   "close": 12.9,
-   "pct1": -8.83,
-   "volume": 179302.0,
+   "close": 10.2,
+   "pct1": -0.97,
+   "volume": 1083070.0,
    "signals": [
-    "爆量(今量/20日均量=6.5倍)",
+    "爆量(今量/20日均量=2.1倍)",
     "近5日持續放量1.8倍"
    ]
   },
   {
-   "code": "6205",
-   "name": "詮欣",
+   "code": "6464",
+   "name": "台數科",
    "market": "TWSE",
-   "close": 52.2,
-   "pct1": -9.38,
-   "volume": 990614.0,
+   "close": 76.1,
+   "pct1": -1.04,
+   "volume": 60468.0,
    "signals": [
-    "爆量(今量/20日均量=2.2倍)"
+    "近10日持續放量1.9倍"
    ]
   },
   {
-   "code": "4526",
-   "name": "東台",
+   "code": "2722",
+   "name": "夏都",
    "market": "TWSE",
-   "close": 49.35,
-   "pct1": -9.45,
-   "volume": 9987205.0,
-   "signals": [
-    "近10日漲幅+29.7%",
-    "近10日持續放量1.8倍"
-   ]
-  },
-  {
-   "code": "4755",
-   "name": "三福化",
-   "market": "TWSE",
-   "close": 117.5,
-   "pct1": -9.62,
-   "volume": 1052450.0,
-   "signals": [
-    "近5日持續放量1.9倍"
-   ]
-  },
-  {
-   "code": "7711",
-   "name": "永擎",
-   "market": "TWSE",
-   "close": 565.0,
-   "pct1": -9.89,
-   "volume": 3055477.0,
+   "close": 18.75,
+   "pct1": -1.06,
+   "volume": 106035.0,
    "signals": [
     "爆量(今量/20日均量=2.3倍)",
     "近5日持續放量1.7倍"
@@ -4907,23 +4832,640 @@
    "code": "2103",
    "name": "台橡",
    "market": "TWSE",
-   "close": 23.05,
-   "pct1": -9.96,
-   "volume": 13251399.0,
+   "close": 22.8,
+   "pct1": -1.08,
+   "volume": 10530192.0,
    "signals": [
-    "爆量(今量/20日均量=3.0倍)"
+    "爆量(今量/20日均量=2.3倍)",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "3004",
+   "name": "豐達科",
+   "market": "TWSE",
+   "close": 119.0,
+   "pct1": -1.24,
+   "volume": 378620.0,
+   "signals": [
+    "近5日持續放量1.7倍",
+    "近10日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "5007",
+   "name": "三星",
+   "market": "TWSE",
+   "close": 55.4,
+   "pct1": -1.25,
+   "volume": 66480.0,
+   "signals": [
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "9939",
+   "name": "宏全",
+   "market": "TWSE",
+   "close": 118.0,
+   "pct1": -1.26,
+   "volume": 3667580.0,
+   "signals": [
+    "爆量(今量/20日均量=2.6倍)",
+    "近5日持續放量1.6倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6283",
+   "name": "淳安",
+   "market": "TWSE",
+   "close": 18.5,
+   "pct1": -1.33,
+   "volume": 104724.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "9907",
+   "name": "統一實",
+   "market": "TWSE",
+   "close": 14.0,
+   "pct1": -1.41,
+   "volume": 2406192.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "8272",
+   "name": "全景軟體",
+   "market": "TPEX",
+   "close": 87.0,
+   "pct1": -1.47,
+   "volume": 224360.0,
+   "signals": [
+    "近10日漲幅+28.7%"
+   ]
+  },
+  {
+   "code": "6771",
+   "name": "平和環保-創",
+   "market": "TWSE",
+   "close": 36.25,
+   "pct1": -1.49,
+   "volume": 27090.0,
+   "signals": [
+    "近5日持續放量2.6倍"
+   ]
+  },
+  {
+   "code": "6698",
+   "name": "旭暉應材",
+   "market": "TWSE",
+   "close": 28.75,
+   "pct1": -1.54,
+   "volume": 721925.0,
+   "signals": [
+    "爆量(今量/20日均量=2.8倍)",
+    "近5日持續放量2.2倍"
+   ]
+  },
+  {
+   "code": "1232",
+   "name": "大統益",
+   "market": "TWSE",
+   "close": 158.0,
+   "pct1": -1.56,
+   "volume": 205382.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1201",
+   "name": "味全",
+   "market": "TWSE",
+   "close": 12.3,
+   "pct1": -1.6,
+   "volume": 2313259.0,
+   "signals": [
+    "近10日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "5531",
+   "name": "鄉林",
+   "market": "TWSE",
+   "close": 6.06,
+   "pct1": -1.62,
+   "volume": 1585825.0,
+   "signals": [
+    "爆量(今量/20日均量=2.9倍)",
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "6201",
+   "name": "亞弘電",
+   "market": "TWSE",
+   "close": 45.55,
+   "pct1": -1.62,
+   "volume": 93623.0,
+   "signals": [
+    "近5日持續放量2.0倍"
    ]
   },
   {
    "code": "3321",
    "name": "同泰",
    "market": "TWSE",
-   "close": 18.0,
-   "pct1": -10.0,
-   "volume": 1045801.0,
+   "close": 17.7,
+   "pct1": -1.67,
+   "volume": 1135341.0,
    "signals": [
-    "近5日持續放量1.9倍",
+    "近5日持續放量1.7倍",
     "近10日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "1436",
+   "name": "華友聯",
+   "market": "TWSE",
+   "close": 34.05,
+   "pct1": -1.73,
+   "volume": 243950.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "6606",
+   "name": "建德工業",
+   "market": "TWSE",
+   "close": 22.55,
+   "pct1": -1.74,
+   "volume": 135022.0,
+   "signals": [
+    "爆量(今量/20日均量=2.3倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "9928",
+   "name": "中視",
+   "market": "TWSE",
+   "close": 16.5,
+   "pct1": -1.79,
+   "volume": 38393.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "2543",
+   "name": "皇昌",
+   "market": "TWSE",
+   "close": 29.5,
+   "pct1": -1.83,
+   "volume": 1935279.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "1443",
+   "name": "立益物流",
+   "market": "TWSE",
+   "close": 23.25,
+   "pct1": -1.9,
+   "volume": 12874.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "1324",
+   "name": "地球",
+   "market": "TWSE",
+   "close": 9.77,
+   "pct1": -1.91,
+   "volume": 128578.0,
+   "signals": [
+    "近5日持續放量1.5倍",
+    "近10日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "1467",
+   "name": "南緯",
+   "market": "TWSE",
+   "close": 7.64,
+   "pct1": -1.93,
+   "volume": 178493.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1533",
+   "name": "車王電",
+   "market": "TWSE",
+   "close": 25.15,
+   "pct1": -1.95,
+   "volume": 279258.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)"
+   ]
+  },
+  {
+   "code": "6965",
+   "name": "中傑-KY",
+   "market": "TWSE",
+   "close": 58.6,
+   "pct1": -2.01,
+   "volume": 79147.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)"
+   ]
+  },
+  {
+   "code": "6431",
+   "name": "光麗-KY",
+   "market": "TWSE",
+   "close": 14.55,
+   "pct1": -2.02,
+   "volume": 75001.0,
+   "signals": [
+    "近10日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "4440",
+   "name": "宜新實業",
+   "market": "TWSE",
+   "close": 16.05,
+   "pct1": -2.13,
+   "volume": 166029.0,
+   "signals": [
+    "爆量(今量/20日均量=2.2倍)"
+   ]
+  },
+  {
+   "code": "6722",
+   "name": "輝創",
+   "market": "TWSE",
+   "close": 29.45,
+   "pct1": -2.16,
+   "volume": 93411.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量2.1倍"
+   ]
+  },
+  {
+   "code": "2433",
+   "name": "互盛電",
+   "market": "TWSE",
+   "close": 37.55,
+   "pct1": -2.21,
+   "volume": 152496.0,
+   "signals": [
+    "爆量(今量/20日均量=2.8倍)"
+   ]
+  },
+  {
+   "code": "7722",
+   "name": "LINEPAY",
+   "market": "TWSE",
+   "close": 218.5,
+   "pct1": -2.24,
+   "volume": 104380.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1473",
+   "name": "台南",
+   "market": "TWSE",
+   "close": 17.25,
+   "pct1": -2.54,
+   "volume": 329911.0,
+   "signals": [
+    "爆量(今量/20日均量=3.0倍)",
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "1626",
+   "name": "艾美特-KY",
+   "market": "TWSE",
+   "close": 9.59,
+   "pct1": -2.54,
+   "volume": 130960.0,
+   "signals": [
+    "爆量(今量/20日均量=2.8倍)",
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "7818",
+   "name": "溢泰實業",
+   "market": "TWSE",
+   "close": 52.5,
+   "pct1": -2.6,
+   "volume": 107423.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "1307",
+   "name": "三芳",
+   "market": "TWSE",
+   "close": 29.0,
+   "pct1": -2.68,
+   "volume": 1846320.0,
+   "signals": [
+    "爆量(今量/20日均量=2.7倍)"
+   ]
+  },
+  {
+   "code": "7689",
+   "name": "大鵬科CLMX",
+   "market": "TWSE",
+   "close": 97.2,
+   "pct1": -2.8,
+   "volume": 220324.0,
+   "signals": [
+    "爆量(今量/20日均量=2.2倍)"
+   ]
+  },
+  {
+   "code": "2072",
+   "name": "世紀能源",
+   "market": "TWSE",
+   "close": 103.5,
+   "pct1": -2.82,
+   "volume": 676026.0,
+   "signals": [
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "8940",
+   "name": "新天地",
+   "market": "TWSE",
+   "close": 14.55,
+   "pct1": -3.0,
+   "volume": 119448.0,
+   "signals": [
+    "爆量(今量/20日均量=2.8倍)",
+    "近5日持續放量2.3倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "1110",
+   "name": "東泥",
+   "market": "TWSE",
+   "close": 13.75,
+   "pct1": -3.17,
+   "volume": 443228.0,
+   "signals": [
+    "爆量(今量/20日均量=3.0倍)",
+    "近5日持續放量1.7倍"
+   ]
+  },
+  {
+   "code": "2033",
+   "name": "佳大",
+   "market": "TWSE",
+   "close": 69.5,
+   "pct1": -3.2,
+   "volume": 7130021.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "6890",
+   "name": "來億-KY",
+   "market": "TWSE",
+   "close": 142.0,
+   "pct1": -3.4,
+   "volume": 342463.0,
+   "signals": [
+    "近5日持續放量1.5倍"
+   ]
+  },
+  {
+   "code": "5205",
+   "name": "中茂",
+   "market": "TPEX",
+   "close": 22.15,
+   "pct1": -3.7,
+   "volume": 43677.0,
+   "signals": [
+    "近5日漲幅+20.4%"
+   ]
+  },
+  {
+   "code": "1227",
+   "name": "佳格",
+   "market": "TWSE",
+   "close": 26.2,
+   "pct1": -4.2,
+   "volume": 5401267.0,
+   "signals": [
+    "爆量(今量/20日均量=4.2倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2227",
+   "name": "裕日車",
+   "market": "TWSE",
+   "close": 40.0,
+   "pct1": -4.31,
+   "volume": 160165.0,
+   "signals": [
+    "爆量(今量/20日均量=2.3倍)"
+   ]
+  },
+  {
+   "code": "8404",
+   "name": "百和興業-KY",
+   "market": "TWSE",
+   "close": 12.05,
+   "pct1": -4.37,
+   "volume": 624319.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)"
+   ]
+  },
+  {
+   "code": "1419",
+   "name": "新紡",
+   "market": "TWSE",
+   "close": 60.6,
+   "pct1": -4.42,
+   "volume": 307679.0,
+   "signals": [
+    "爆量(今量/20日均量=4.3倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "8411",
+   "name": "福貞-KY",
+   "market": "TWSE",
+   "close": 10.5,
+   "pct1": -4.55,
+   "volume": 189627.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2849",
+   "name": "安泰銀",
+   "market": "TWSE",
+   "close": 14.9,
+   "pct1": -4.79,
+   "volume": 495488.0,
+   "signals": [
+    "爆量(今量/20日均量=2.5倍)",
+    "近5日持續放量1.8倍"
+   ]
+  },
+  {
+   "code": "2546",
+   "name": "根基",
+   "market": "TWSE",
+   "close": 93.3,
+   "pct1": -4.8,
+   "volume": 702420.0,
+   "signals": [
+    "爆量(今量/20日均量=4.1倍)",
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "2491",
+   "name": "吉祥全",
+   "market": "TWSE",
+   "close": 33.5,
+   "pct1": -4.83,
+   "volume": 1664540.0,
+   "signals": [
+    "近5日持續放量1.6倍",
+    "近10日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "4414",
+   "name": "如興",
+   "market": "TWSE",
+   "close": 7.1,
+   "pct1": -4.95,
+   "volume": 775067.0,
+   "signals": [
+    "爆量(今量/20日均量=4.0倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "6456",
+   "name": "GIS-KY",
+   "market": "TWSE",
+   "close": 76.6,
+   "pct1": -4.96,
+   "volume": 75892733.0,
+   "signals": [
+    "爆量(今量/20日均量=2.2倍)"
+   ]
+  },
+  {
+   "code": "4904",
+   "name": "遠傳",
+   "market": "TWSE",
+   "close": 106.0,
+   "pct1": -5.36,
+   "volume": 18744565.0,
+   "signals": [
+    "爆量(今量/20日均量=2.3倍)"
+   ]
+  },
+  {
+   "code": "5546",
+   "name": "永固-KY",
+   "market": "TWSE",
+   "close": 10.25,
+   "pct1": -6.82,
+   "volume": 172845.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)"
+   ]
+  },
+  {
+   "code": "1225",
+   "name": "福懋油",
+   "market": "TWSE",
+   "close": 23.75,
+   "pct1": -6.86,
+   "volume": 250410.0,
+   "signals": [
+    "爆量(今量/20日均量=2.1倍)",
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "7711",
+   "name": "永擎",
+   "market": "TWSE",
+   "close": 526.0,
+   "pct1": -6.9,
+   "volume": 2707008.0,
+   "signals": [
+    "近5日持續放量1.9倍"
+   ]
+  },
+  {
+   "code": "5225",
+   "name": "東科-KY",
+   "market": "TWSE",
+   "close": 43.95,
+   "pct1": -8.34,
+   "volume": 864348.0,
+   "signals": [
+    "爆量(今量/20日均量=3.3倍)",
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "2923",
+   "name": "鼎固-KY",
+   "market": "TWSE",
+   "close": 28.3,
+   "pct1": -9.87,
+   "volume": 225680.0,
+   "signals": [
+    "近5日持續放量1.6倍"
+   ]
+  },
+  {
+   "code": "4771",
+   "name": "望隼",
+   "market": "TWSE",
+   "close": 180.0,
+   "pct1": -10.0,
+   "volume": 1446881.0,
+   "signals": [
+    "爆量(今量/20日均量=6.0倍)",
+    "近5日持續放量2.1倍"
    ]
   }
  ]
