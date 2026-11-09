@@ -2482,7 +2482,10 @@ async function fetchFinMindData() {
   
   const today = new Date();
   const pastDate = new Date(today);
-  pastDate.setDate(pastDate.getDate() - 25);
+  // 抓近100天(約65~70個交易日)，不是只抓pct10需要的10天——主要是為了「創新高」判斷要
+  // 夠長的比較視窗，不然像只抓25天時，有些股票只是最近25天內的小高點、實際上離真正的
+  // 波段高點還很遠(太早以前的高點已經回不去了)，也會被誤判成「創新高」。
+  pastDate.setDate(pastDate.getDate() - 100);
   const start_date = pastDate.toISOString().split('T')[0];
 
   btn.disabled = true;
@@ -2561,8 +2564,9 @@ async function fetchFinMindData() {
         const latestIsToday = latest.date === todayStr;
         const close5Ref = latestIsToday ? getClose(5) : getClose(4);
         const close10Ref = latestIsToday ? getClose(10) : getClose(9);
-        // 創新高：跟「這次抓到的資料視窗」(近25天)裡、今天以外的其他收盤比，不是真正52週新高，
-        // 只能抓到近期這段區間的高點，資料視窗長度會隨 newHighDays 一起存，畫面上才知道是比幾天。
+        // 創新高：跟「這次抓到的資料視窗」(近100天，約65~70個交易日)裡、今天以外的其他收盤比，
+        // 不是真正52週新高，只能抓到近期這段區間的高點，資料視窗長度會隨 newHighDays 一起存，
+        // 畫面上才知道是比幾天。
         const priorCloses = data.slice(0, -1).map(d => d.close).filter(c => typeof c === "number");
         const newHighDays = priorCloses.length;
         const newHigh = newHighDays > 0 && price > Math.max(...priorCloses);
