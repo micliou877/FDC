@@ -2527,7 +2527,15 @@ async function fetchFinMindData() {
       } catch (e) {}
     }
     if (!isUS && !market) market = 'TWSE'; // 連TaiwanStockInfo都查不到時，維持原本預設猜測
-    let dataset = isUS ? "USStockPrice" : (market === 'TPEX' ? "TaiwanOTCStockPrice" : "TaiwanStockPrice");
+    // 股價資料集：TWSE/TPEX現在共用同一個「TaiwanStockPrice」，FinMind已經沒有獨立的
+    // 「TaiwanOTCStockPrice」了(查FinMind自己回傳的合法dataset清單就知道，那是舊版/已移除的
+    // 名稱，打下去只會收到enum驗證錯誤、沒有msg也沒有data)。舊版用market==='TPEX'去切換成
+    // 這個已經失效的dataset名稱，導致每一檔上櫃股在盤後更新時都查不到東西、stockData永遠停在
+    // 很久以前最後一次成功更新的舊資料，之後盤中更新又拿即時價去套用那組陳舊的close5Ref/
+    // close10Ref，算出來的5日/10日漲跌幅自然離譜到不合理(例如大世科8099一度顯示近10日
+    // +127%、近5日+134%，其實是拿一個多月前的舊基準在算)。改成TWSE/TPEX都查同一個dataset，
+    // 不用再猜、也不用兜底重試另一邊。
+    let dataset = isUS ? "USStockPrice" : "TaiwanStockPrice";
     let url = `https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${start_date}`;
     if (token) url += `&token=${token}`;
 
@@ -2537,14 +2545,6 @@ async function fetchFinMindData() {
       if (json.status === 402 || json.status === 429 ||
           (json.msg && json.msg !== 'success' && /limit|over|too.?many|exceed/i.test(json.msg))) {
         rateLimitHit = true;
-      }
-      // 萬一用已知市場別查詢卻查空(資料本身有缺)，保留原本「再試另一邊」的兜底邏輯
-      if (!isUS && json.msg === "success" && (!json.data || json.data.length === 0)) {
-         market = market === 'TPEX' ? 'TWSE' : 'TPEX';
-         dataset = market === 'TPEX' ? 'TaiwanOTCStockPrice' : 'TaiwanStockPrice';
-         let otcUrl = `https://api.finmindtrade.com/api/v4/data?dataset=${dataset}&data_id=${code}&start_date=${start_date}`;
-         if (token) otcUrl += `&token=${token}`;
-         res = await fetch(otcUrl); json = await res.json();
       }
       if (json.msg === "success" && json.data && json.data.length > 0) {
         const data = json.data; const latest = data[data.length - 1];
