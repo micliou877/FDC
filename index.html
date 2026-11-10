@@ -2569,9 +2569,12 @@ async function fetchFinMindData() {
         // 畫面上才知道是比幾天。
         const priorCloses = data.slice(0, -1).map(d => d.close).filter(c => typeof c === "number");
         const newHighDays = priorCloses.length;
-        const newHigh = newHighDays > 0 && price > Math.max(...priorCloses);
+        const priorHigh = newHighDays > 0 ? Math.max(...priorCloses) : null;
+        const newHigh = priorHigh != null && price > priorHigh;
+        // priorHigh存起來是為了讓盤中更新(fetchLiveQuotes)能拿即時價格跟它比，做出「盤中新高」
+        // (⚡，還沒收盤確認、可能拉回就消失)，跟這裡算出來的「收盤新高」(🆕，當天已確定)分開顯示。
         // 保留舊的 per/eps/qualityTag，只覆蓋行情相關欄位
-        stockData[code] = { ...(stockData[code] || {}), price: price, pct1: parseFloat(pct1.toFixed(2)), pct5: parseFloat(pct5.toFixed(2)), pct10: parseFloat(pct10.toFixed(2)), amount: parseFloat(((price * latest.Trading_Volume / 1000) / 10000).toFixed(2)), volTrend: volTrend, market: market, close5Ref: close5Ref || null, close10Ref: close10Ref || null, newHigh: newHigh, newHighDays: newHighDays };
+        stockData[code] = { ...(stockData[code] || {}), price: price, pct1: parseFloat(pct1.toFixed(2)), pct5: parseFloat(pct5.toFixed(2)), pct10: parseFloat(pct10.toFixed(2)), amount: parseFloat(((price * latest.Trading_Volume / 1000) / 10000).toFixed(2)), volTrend: volTrend, market: market, close5Ref: close5Ref || null, close10Ref: close10Ref || null, newHigh: newHigh, newHighDays: newHighDays, priorHigh: priorHigh, newHighLive: false };
         successCount++;
       }
     } catch (e) {}
@@ -2601,10 +2604,14 @@ async function fetchLiveQuotes() {
       const prev = stockData[code] || {};
       const pct5 = prev.close5Ref ? ((q.price - prev.close5Ref) / prev.close5Ref) * 100 : prev.pct5;
       const pct10 = prev.close10Ref ? ((q.price - prev.close10Ref) / prev.close10Ref) * 100 : prev.pct10;
+      // 盤中新高：拿即時價格跟盤後更新存好的priorHigh(過去100天收盤最高)比，不等收盤——
+      // 跟prev.newHigh(收盤已確認)分開存，因為這個會隨報價反覆變動(盤中衝上去、收盤前拉回就消失)。
+      const newHighLive = prev.priorHigh != null && q.price > prev.priorHigh;
       stockData[code] = {
         ...prev, price: q.price, pct1: q.pct1, amount: q.amount, market: q.market,
         pct5: pct5 != null ? parseFloat(pct5.toFixed(2)) : pct5,
-        pct10: pct10 != null ? parseFloat(pct10.toFixed(2)) : pct10
+        pct10: pct10 != null ? parseFloat(pct10.toFixed(2)) : pct10,
+        newHighLive: newHighLive
       };
     });
     if (json.vixtwn) vixtwn = json.vixtwn;
@@ -4672,7 +4679,7 @@ function computeGain10Snapshot() {
   Object.values(watchlists).forEach(list => list.forEach(c => trackedCodes.add(c)));
   const top20 = Object.entries(stockData)
     .filter(([code, d]) => code !== "0050" && d && d.market !== "US" && typeof d.pct10 === "number" && trackedCodes.has(code))
-    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market, close5Ref: d.close5Ref, close10Ref: d.close10Ref, newHigh: d.newHigh, newHighDays: d.newHighDays }))
+    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market, close5Ref: d.close5Ref, close10Ref: d.close10Ref, newHigh: d.newHigh, newHighDays: d.newHighDays, newHighLive: d.newHighLive }))
     .sort((a, b) => b.pct10 - a.pct10)
     .slice(0, 20);
 
@@ -4732,7 +4739,8 @@ function buildMailInboxHtml(snapshot, currentList) {
     const isUnread = s.isNew || (s.rankChange != null && s.rankChange > 0);
     const sectors = s.sectors.slice(0, 2).join('、');
     const tvLink = getTVLink(s.code, s.market || 'TWSE');
-    const newHighBadge = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>` : '';
+    const newHighBadge = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>`
+      : s.newHighLive ? `<span class="tag" title="盤中價格已突破近期高點，但還沒收盤確認，可能拉回" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">⚡盤中新高</span>` : '';
     return `
       <div class="mail-row">
         <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
@@ -5004,7 +5012,7 @@ function renderStocks() {
   } else {
     rows = rows.filter(s => s.price != null);
   }
-  if (stockNewHighOnly) rows = rows.filter(s => s.newHigh);
+  if (stockNewHighOnly) rows = rows.filter(s => s.newHigh || s.newHighLive);
   rows.sort((a,b) => stockSortDir * (((b[stockSortKey] ?? -999) - (a[stockSortKey] ?? -999))));
 
   const banner = document.getElementById('sectorUSBanner');
@@ -5037,7 +5045,8 @@ function renderStocks() {
     const usTags = STOCK_US[s.code] ? `<span class="tag" style="background:#eff8ff;color:#1d6fa4;border-color:#bae8ff;">🇺🇸 ${STOCK_US[s.code]}</span>` : '';
     const pwrTag = STOCK_POWER_LAYER[s.code] ? `<span class="tag" style="background:#fdf4ff;color:#7c3aed;border-color:#e9d5ff;">${STOCK_POWER_LAYER[s.code]}</span>` : '';
     const dajiaTag = STOCK_DAJIA[s.code] ? `<span class="tag" title="${STOCK_DAJIA[s.code]}" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa;">🏆大甲型</span>` : '';
-    const newHighTag = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>` : '';
+    const newHighTag = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>`
+      : s.newHighLive ? `<span class="tag" title="盤中價格已突破近期高點，但還沒收盤確認，可能拉回" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">⚡盤中新高</span>` : '';
     return `
     <tr>
       <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
@@ -5436,7 +5445,7 @@ function renderWatchlist() {
     return { code, name, market, ...d };
   });
 
-  if (wlNewHighOnly) rows = rows.filter(s => s.newHigh);
+  if (wlNewHighOnly) rows = rows.filter(s => s.newHigh || s.newHighLive);
   if (rows.length === 0) { tbody.innerHTML = `<tr><td colspan="20" style="text-align:center; padding: 40px; color:#666;">分類【${currentWatchGroup}】裡目前沒有創新高的標的</td></tr>`; return; }
 
   if (wlSortKey === 'code') {
@@ -5447,7 +5456,8 @@ function renderWatchlist() {
   tbody.innerHTML = rows.map((s, idx) => {
     const wlUsTag = STOCK_US[s.code] ? `<span class="tag" style="background:#eff8ff;color:#1d6fa4;border-color:#bae8ff;">🇺🇸 ${STOCK_US[s.code]}</span>` : '';
     const wlPwrTag = STOCK_POWER_LAYER[s.code] ? `<span class="tag" style="background:#fdf4ff;color:#7c3aed;border-color:#e9d5ff;">${STOCK_POWER_LAYER[s.code]}</span>` : '';
-    const wlNewHighTag = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>` : '';
+    const wlNewHighTag = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>`
+      : s.newHighLive ? `<span class="tag" title="盤中價格已突破近期高點，但還沒收盤確認，可能拉回" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">⚡盤中新高</span>` : '';
     const hd = (window._t4_data||[]).find(h=>h.code===s.code);
     const hdDays = hd ? Math.floor((Date.now()-new Date(hd.date))/86400000) : null;
     const hdRet  = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
