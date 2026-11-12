@@ -1,7 +1,7 @@
 {
  "date": "2026-11-11",
- "scannedAt": "2026-11-11 21:04:48",
- "historyDaysAvailable": 25,
+ "scannedAt": "2026-11-12 11:11:54",
+ "historyDaysAvailable": 26,
  "criteria": {
   "pctGainThreshold": 8.0,
   "volumeRatioThreshold": 2.0,
@@ -18,7 +18,7 @@
   "單日爆量/近5日近10日持續放量": true,
   "創新高(天數隨歷史增加到60天封頂)": true
  },
- "poolSize": 343,
+ "poolSize": 346,
  "scannedCount": 1979,
  "movers": [
   {
@@ -250,17 +250,6 @@
    "close": 209.5,
    "pct1": 9.97,
    "volume": 7069078.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "5475",
-   "name": "德宏",
-   "market": "TPEX",
-   "close": 204.0,
-   "pct1": 9.97,
-   "volume": 6704064.0,
    "signals": [
     "大漲/接近漲停"
    ]
@@ -589,18 +578,6 @@
    ]
   },
   {
-   "code": "1802",
-   "name": "台玻",
-   "market": "TWSE",
-   "close": 76.7,
-   "pct1": 9.89,
-   "volume": 266744266.0,
-   "signals": [
-    "大漲/接近漲停",
-    "創25日新高"
-   ]
-  },
-  {
    "code": "4551",
    "name": "智伸科",
    "market": "TWSE",
@@ -857,17 +834,6 @@
    "close": 238.5,
    "pct1": 9.4,
    "volume": 25594104.0,
-   "signals": [
-    "大漲/接近漲停"
-   ]
-  },
-  {
-   "code": "5340",
-   "name": "建榮",
-   "market": "TPEX",
-   "close": 96.5,
-   "pct1": 9.16,
-   "volume": 22479931.0,
    "signals": [
     "大漲/接近漲停"
    ]
