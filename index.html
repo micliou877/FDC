@@ -2636,6 +2636,14 @@ function classify_quality(eps, per) {
   return "🟡普通";
 }
 
+// ==================== 高成長乾淨本業標籤（🚀騰雲型）====================
+// 毛利率≥50% AND 營益率≥15% AND 業外佔稅前淨利<20%(本業純度) AND 近3月營收年增≥20% AND EPS>0
+function classify_growth_type(d) {
+  if (d.grossMargin == null || d.opMargin == null || d.nonOpRatio == null || d.rev3moYoy == null || d.eps == null) return null;
+  if (d.grossMargin >= 50 && d.opMargin >= 15 && d.nonOpRatio < 20 && d.rev3moYoy >= 20 && d.eps > 0) return "🚀騰雲型";
+  return null;
+}
+
 // ==================== 免費批次 PER：TWSE + TPEX 官方 API，不需 Token ====================
 // 兩段抓取：
 //   Stage 1（並聯）：TWSE STOCK_DAY_ALL + TPEX stk_quote_result → 全市場收盤價
@@ -2809,7 +2817,11 @@ async function fetchFundamentals() {
   const progBar = document.getElementById("progressBar");
 
   const today = new Date().toISOString().slice(0, 10);
-  const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  // 抓16個月而不是剛好1年：月營收年增率要用「今年某月 vs 去年同月」配對計算(見下方revMap)，
+  // 近3月營收年增又要往前多配3個月份，合計最早要抓到「近3個月中最早那個月」的去年同月，
+  // 先歸零到當月1號再往前推，不然只用「今天日期往前推N個月」算，會因為帶著今天的日/時間，
+  // 剛好卡在去年同月1號之後，導致那一列被FinMind的日期篩選排除、配不到去年同月資料。
+  const oneYearAgo = new Date(); oneYearAgo.setDate(1); oneYearAgo.setMonth(oneYearAgo.getMonth() - 16);
   const startDate = oneYearAgo.toISOString().slice(0, 10);
   const apiBase = "https://api.finmindtrade.com/api/v4/data";
   const isPaid = document.getElementById("finmindPaidPlan")?.checked;
@@ -2925,35 +2937,69 @@ async function fetchFundamentals() {
       await delay();
     } else if (isEtf) { perApiOk = true; }
 
-    // ── EPS（TTL 90天；token 用 epsDateFM 判斷）──
+    // ── EPS + 毛利率/營益率/業外佔稅前淨利（TTL 90天，跟EPS同一次TaiwanStockFinancialStatements
+    // 回應裡一起解析，不用多打API；這幾項是為了判斷「🚀騰雲型」高成長乾淨本業標籤用的）──
     let eps = fc.eps ?? null;
+    let grossMargin = fc.grossMargin ?? null;
+    let opMargin = fc.opMargin ?? null;
+    let nonOpRatio = fc.nonOpRatio ?? null;
     let epsApiOk = false;
     if (!isEtf && (token ? cacheAge(code,"epsDateFM") > 90 : cacheAge(code,"epsDate") > 90)) {
       try {
         const json = await finmindFetch(`${apiBase}?dataset=TaiwanStockFinancialStatements&data_id=${code}&start_date=${startDate}`);
         if (json.msg === "success") {
           epsApiOk = true;
-          const epsRows = (json.data || []).filter(d => d.type === "EPS");
+          const rows = json.data || [];
+          const epsRows = rows.filter(d => d.type === "EPS");
           if (epsRows.length > 0) {
             eps = safeFloat(epsRows[epsRows.length - 1].value);
-            financialsCache[code] = { ...(financialsCache[code] || fc), eps, epsDate: today, epsDateFM: today };
+            // 其他科目跟最新一期EPS用同一個date去抓，避免不同科目筆數不一致時誤配到不同季別
+            const latestDate = epsRows[epsRows.length - 1].date;
+            const byType = t => { const r = rows.filter(d => d.type === t && d.date === latestDate); return r.length ? safeFloat(r[r.length - 1].value) : null; };
+            const revenue = byType("Revenue");
+            const grossProfit = byType("GrossProfit");
+            const operatingIncome = byType("OperatingIncome");
+            const preTaxIncome = byType("PreTaxIncome");
+            const nonOp = byType("TotalNonoperatingIncomeAndExpense");
+            if (revenue) {
+              if (grossProfit != null) grossMargin = safeFloat((grossProfit / revenue * 100).toFixed(1));
+              if (operatingIncome != null) opMargin = safeFloat((operatingIncome / revenue * 100).toFixed(1));
+            }
+            if (preTaxIncome && nonOp != null) nonOpRatio = safeFloat((nonOp / preTaxIncome * 100).toFixed(1));
+            financialsCache[code] = { ...(financialsCache[code] || fc), eps, epsDate: today, epsDateFM: today, grossMargin, opMargin, nonOpRatio };
           }
         } else { console.warn(`[${code}] EPS:`, json.msg); }
       } catch(e) { console.warn(`[${code}] EPS fetch:`, e.message); }
       await delay();
     } else if (isEtf) { epsApiOk = true; }
 
-    // ── 月營收年增率（TTL 32 天）──
+    // ── 月營收年增率 + 近3月營收年增（TTL 32 天，同一次TaiwanStockMonthRevenue回應一起算，
+    // 不用多打API；近3月是為了「🚀騰雲型」標籤，單月yoy雜訊較大，3個月合計比較能看出趨勢）──
+    // FinMind這個dataset現在已經不附「last_year_revenue」這個現成欄位了(回傳的每一列只有
+    // revenue/revenue_month/revenue_year，沒有去年同月營收可以直接拿來用)，要自己用
+    // revenue_year/revenue_month去配對「去年同一個月」那一列、手動算年增率。
     let yoy = fc.yoy ?? null;
+    let rev3moYoy = fc.rev3moYoy ?? null;
     if (cacheAge(code, "yoyDate") > 32) {
       try {
         const json = await finmindFetch(`${apiBase}?dataset=TaiwanStockMonthRevenue&data_id=${code}&start_date=${startDate}`);
         if (json.msg === "success" && json.data?.length > 0) {
-          const row = json.data[json.data.length - 1];
-          if (row.last_year_revenue > 0) {
-            yoy = safeFloat(((row.revenue - row.last_year_revenue) / row.last_year_revenue * 100).toFixed(1));
-            financialsCache[code] = { ...(financialsCache[code] || fc), yoy, yoyDate: today };
+          const data = json.data;
+          const revMap = {};
+          data.forEach(r => { revMap[`${r.revenue_year}-${r.revenue_month}`] = r.revenue; });
+          const row = data[data.length - 1];
+          const priorYearRev = revMap[`${row.revenue_year - 1}-${row.revenue_month}`];
+          if (priorYearRev > 0) {
+            yoy = safeFloat(((row.revenue - priorYearRev) / priorYearRev * 100).toFixed(1));
           }
+          const last3 = data.slice(-3);
+          const priorRevs = last3.map(r => revMap[`${r.revenue_year - 1}-${r.revenue_month}`]);
+          if (last3.length === 3 && priorRevs.every(v => v > 0)) {
+            const sumRev = last3.reduce((s, r) => s + r.revenue, 0);
+            const sumLastYear = priorRevs.reduce((s, v) => s + v, 0);
+            rev3moYoy = safeFloat(((sumRev - sumLastYear) / sumLastYear * 100).toFixed(1));
+          }
+          financialsCache[code] = { ...(financialsCache[code] || fc), yoy, rev3moYoy, yoyDate: today };
         } else if (json.msg !== "success") { console.warn(`[${code}] YOY:`, json.msg); }
       } catch(e) { console.warn(`[${code}] YOY fetch:`, e.message); }
       await delay();
@@ -2965,11 +3011,16 @@ async function fetchFundamentals() {
     if (per !== null) stockData[code].per = per;
     if (eps !== null) stockData[code].eps = eps;
     if (yoy !== null) stockData[code].yoy = yoy;
+    if (grossMargin !== null) stockData[code].grossMargin = grossMargin;
+    if (opMargin !== null) stockData[code].opMargin = opMargin;
+    if (nonOpRatio !== null) stockData[code].nonOpRatio = nonOpRatio;
+    if (rev3moYoy !== null) stockData[code].rev3moYoy = rev3moYoy;
     let tag = classify_quality(stockData[code].eps, stockData[code].per);
     // API 有回應但兩個都沒資料 → 缺財報，不是抓取失敗
     if (tag === "✖️抓取失敗" && perApiOk && epsApiOk) tag = "❓缺財報";
     stockData[code].qualityTag     = tag;
     stockData[code].quality_status = tag;
+    stockData[code].growthTag = classify_growth_type(stockData[code]);
   }
 
   saveLocalOnly();
@@ -4685,7 +4736,7 @@ function computeGain10Snapshot() {
   Object.values(watchlists).forEach(list => list.forEach(c => trackedCodes.add(c)));
   const top20 = Object.entries(stockData)
     .filter(([code, d]) => code !== "0050" && d && d.market !== "US" && typeof d.pct10 === "number" && trackedCodes.has(code))
-    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market, close5Ref: d.close5Ref, close10Ref: d.close10Ref, newHigh: d.newHigh, newHighDays: d.newHighDays, newHighLive: d.newHighLive }))
+    .map(([code, d]) => ({ code, name: STOCK_NAMES[code] || stockMeta[code]?.name || code, price: d.price, pct10: d.pct10, pct5: d.pct5, pct1: d.pct1, market: d.market, close5Ref: d.close5Ref, close10Ref: d.close10Ref, newHigh: d.newHigh, newHighDays: d.newHighDays, newHighLive: d.newHighLive, growthTag: d.growthTag, grossMargin: d.grossMargin, opMargin: d.opMargin, nonOpRatio: d.nonOpRatio, rev3moYoy: d.rev3moYoy, eps: d.eps }))
     .sort((a, b) => b.pct10 - a.pct10)
     .slice(0, 20);
 
@@ -4747,6 +4798,7 @@ function buildMailInboxHtml(snapshot, currentList) {
     const tvLink = getTVLink(s.code, s.market || 'TWSE');
     const newHighBadge = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>`
       : s.newHighLive ? `<span class="tag" title="盤中價格已突破近期高點，但還沒收盤確認，可能拉回" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">⚡盤中新高</span>` : '';
+    const growthBadge = s.growthTag ? `<span class="tag" title="毛利率${s.grossMargin}%・營益率${s.opMargin}%・業外佔稅前淨利${s.nonOpRatio}%・近3月營收年增${s.rev3moYoy}%・EPS ${s.eps}" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;">🚀騰雲型</span>` : '';
     return `
       <div class="mail-row">
         <span class="mail-star ${isHot ? 'active' : ''}">${isHot ? '★' : '☆'}</span>
@@ -4755,6 +4807,7 @@ function buildMailInboxHtml(snapshot, currentList) {
           <span class="mail-sender ${isUnread ? 'unread' : ''}">${s.name}<span class="mail-code">${s.code}</span></span>
         </a>
         ${newHighBadge}
+        ${growthBadge}
         <span class="mail-subject ${isUnread ? 'unread' : ''}">近10日 ${mailPct(s.pct10)}（5日 ${mailPct(s.pct5)}） <span class="mail-snippet">— ${mailRankChangeText(s.code, s.rank, prevRanks)}${sectors ? '・' + sectors : ''}</span></span>
         ${scoreChip(s)}
         ${mailActionsHtml(s.code, s.name, currentList)}
@@ -5053,11 +5106,12 @@ function renderStocks() {
     const dajiaTag = STOCK_DAJIA[s.code] ? `<span class="tag" title="${STOCK_DAJIA[s.code]}" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa;">🏆大甲型</span>` : '';
     const newHighTag = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>`
       : s.newHighLive ? `<span class="tag" title="盤中價格已突破近期高點，但還沒收盤確認，可能拉回" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">⚡盤中新高</span>` : '';
+    const growthTag = s.growthTag ? `<span class="tag" title="毛利率${s.grossMargin}%・營益率${s.opMargin}%・業外佔稅前淨利${s.nonOpRatio}%・近3月營收年增${s.rev3moYoy}%・EPS ${s.eps}" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;">🚀騰雲型</span>` : '';
     return `
     <tr>
       <td style="text-align:center;"><select onchange="addToWatchGroup(this,'${s.code}')" style="font-size:11px;padding:2px 3px;border:1px solid #e2e8f0;border-radius:4px;color:#374151;background:#f8fafc;cursor:pointer;max-width:72px;"><option value="">${currentList.includes(s.code)?'⭐':'☆'} 關注</option>${Object.keys(watchlists).map(k=>`<option value="${k}">${k}</option>`).join('')}</select></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag" onclick="goToSector('${t}',event)">${t}</span>`).join("")}${usTags}${pwrTag}${dajiaTag}${newHighTag}</td>
+      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => `<span class="tag" onclick="goToSector('${t}',event)">${t}</span>`).join("")}${usTags}${pwrTag}${dajiaTag}${newHighTag}${growthTag}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
@@ -5464,6 +5518,7 @@ function renderWatchlist() {
     const wlPwrTag = STOCK_POWER_LAYER[s.code] ? `<span class="tag" style="background:#fdf4ff;color:#7c3aed;border-color:#e9d5ff;">${STOCK_POWER_LAYER[s.code]}</span>` : '';
     const wlNewHighTag = s.newHigh ? `<span class="tag" title="收盤價創近${s.newHighDays}日新高" style="background:#fef3c7;color:#b45309;border-color:#fde68a;">🆕新高</span>`
       : s.newHighLive ? `<span class="tag" title="盤中價格已突破近期高點，但還沒收盤確認，可能拉回" style="background:#eff6ff;color:#2563eb;border-color:#bfdbfe;">⚡盤中新高</span>` : '';
+    const wlGrowthTag = s.growthTag ? `<span class="tag" title="毛利率${s.grossMargin}%・營益率${s.opMargin}%・業外佔稅前淨利${s.nonOpRatio}%・近3月營收年增${s.rev3moYoy}%・EPS ${s.eps}" style="background:#eef2ff;color:#4338ca;border-color:#c7d2fe;">🚀騰雲型</span>` : '';
     const hd = (window._t4_data||[]).find(h=>h.code===s.code);
     const hdDays = hd ? Math.floor((Date.now()-new Date(hd.date))/86400000) : null;
     const hdRet  = hd ? ((s.price??hd.entry)-hd.entry)/hd.entry*100 : null;
@@ -5481,7 +5536,7 @@ function renderWatchlist() {
       </td>
       <td style="text-align:center;"><span style="cursor:pointer; color:#94a3b8; font-size:14px;" onclick="toggleWatchlist('${s.code}')">✕</span></td>
       <td><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.code}</a></td>
-      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => sectorTagHtml(t, sectorColorMap)).join("")}${wlUsTag}${wlPwrTag}${wlNewHighTag}</td>
+      <td class="wrap-cell"><a href="${getTVLink(s.code, s.market)}" target="_blank" style="color: #4a9eff; text-decoration: none; font-weight: bold;">${s.name}</a><br>${(STOCK_SECTORS_MAP[s.code] || []).map(t => sectorTagHtml(t, sectorColorMap)).join("")}${wlUsTag}${wlPwrTag}${wlNewHighTag}${wlGrowthTag}</td>
       <td style="text-align:right;">${s.price?.toFixed(2) ?? "-"}</td>
       <td style="text-align:right;" class="${pctClass(s.pct1)}">${fmtPct(s.pct1)}</td>
       <td style="text-align:right;" class="${pctClass(s.pct5)}">${fmtPct(s.pct5)}</td>
