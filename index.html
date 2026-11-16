@@ -35,9 +35,10 @@
     /* 最多10項時排成兩欄，比單欄一直往下長好讀，欄位靠CSS自動分配(columns)不用自己算該放哪一欄 */
     .checklist-cols { columns: 2; column-gap: 16px; }
     .checklist-item { display: flex; align-items: center; gap: 6px; padding: 3px 0; break-inside: avoid; }
-    .checklist-item input[type="checkbox"] { flex-shrink: 0; width: 15px; height: 15px; cursor: pointer; accent-color: #ca8a04; }
+    .checklist-state { flex-shrink: 0; width: 16px; height: 16px; line-height: 16px; text-align: center; font-size: 14px; cursor: pointer; color: #ca8a04; user-select: none; }
     .checklist-text { flex: 1; font-size: 12px; color: #713f12; cursor: pointer; word-break: break-word; }
     .checklist-text.done { text-decoration: line-through; color: #ca8a04; opacity: 0.7; }
+    .checklist-text.crossed { text-decoration: line-through; color: #b91c1c; opacity: 0.7; }
     .checklist-text-input { flex: 1; font-size: 12px; font-family: inherit; padding: 2px 4px; border: 1px solid #eab308; border-radius: 4px; background: #fffbeb; color: #713f12; }
     .checklist-del { flex-shrink: 0; font-size: 12px; color: #ca8a04; cursor: pointer; padding: 0 4px; opacity: 0.6; }
     .checklist-del:hover { opacity: 1; }
@@ -2203,12 +2204,18 @@ const HEADER_CHECKLIST_MAX = 10; // 最多10項，排成兩欄比較不會把版
 function renderHeaderChecklist() {
   const el = document.getElementById("headerChecklist");
   if (!el) return;
-  const rows = headerChecklist.map(item => `
+  const rows = headerChecklist.map(item => {
+    // state: 0=空白 1=打勾 2=打叉，點一下循環切換；state不存在時(舊資料)用checked推回來
+    const state = item.state != null ? item.state : (item.checked ? 1 : 0);
+    const icon = state === 1 ? '☑' : state === 2 ? '☒' : '☐';
+    const textCls = state === 1 ? 'done' : state === 2 ? 'crossed' : '';
+    return `
     <div class="checklist-item">
-      <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleHeaderChecklistItem('${item.id}')">
-      <span class="checklist-text ${item.checked ? 'done' : ''}" onclick="editHeaderChecklistItem(this,'${item.id}')">${_dEsc(item.text)}</span>
+      <span class="checklist-state" onclick="cycleHeaderChecklistState('${item.id}')" title="點擊切換：空白→✓→✗→空白">${icon}</span>
+      <span class="checklist-text ${textCls}" onclick="editHeaderChecklistItem(this,'${item.id}')">${_dEsc(item.text)}</span>
       <span class="checklist-del" onclick="deleteHeaderChecklistItem('${item.id}')" title="刪除">✕</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   const atMax = headerChecklist.length >= HEADER_CHECKLIST_MAX;
   const addRow = atMax
     ? `<div class="checklist-add-note">已達上限 ${HEADER_CHECKLIST_MAX} 項，刪掉幾項才能再新增</div>`
@@ -2223,13 +2230,14 @@ window.addHeaderChecklistItem = function() {
   const input = document.getElementById("headerChecklistNewInput");
   const text = input.value.trim();
   if (!text) return;
-  headerChecklist.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text, checked: false });
+  headerChecklist.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text, state: 0 });
   saveHeaderChecklist(); renderHeaderChecklist(); _pendingPush = true; pushToCloud();
 };
-window.toggleHeaderChecklistItem = function(id) {
+window.cycleHeaderChecklistState = function(id) {
   const item = headerChecklist.find(i => i.id === id);
   if (!item) return;
-  item.checked = !item.checked;
+  const cur = item.state != null ? item.state : (item.checked ? 1 : 0);
+  item.state = (cur + 1) % 3; // 0空白→1打勾→2打叉→0空白
   saveHeaderChecklist(); renderHeaderChecklist(); _pendingPush = true; pushToCloud();
 };
 window.deleteHeaderChecklistItem = function(id) {
