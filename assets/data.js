@@ -1,39 +1,39 @@
 ﻿// ==================== FDC 靜態股池與對照資料 ====================
 // ==================== 台股 34 大族群分類 ====================
 const SECTORS = {
-  "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"5471",name:"松翰"},{code:"8081",name:"致新"},{code:"3529",name:"力旺"}],
-  "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"3105",name:"穩懋"},{code:"6510",name:"精測"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"3530",name:"晶相光"},{code:"6168",name:"宏齊"}],
+  "1. AI晶片設計與IP": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3443",name:"創意"},{code:"3661",name:"世芯-KY"},{code:"3035",name:"智原"},{code:"6643",name:"M31"},{code:"5274",name:"信驊"},{code:"2379",name:"瑞昱"},{code:"6531",name:"愛普*"},{code:"3529",name:"力旺"}],
+  "2. 先進封裝與封測": [{code:"3711",name:"日月光投控"},{code:"6239",name:"力成"},{code:"2449",name:"京元電"},{code:"6147",name:"頎邦"},{code:"6510",name:"精測"},{code:"6515",name:"穎崴"},{code:"6451",name:"訊芯-KY"},{code:"3189",name:"景碩"},{code:"2329",name:"華泰"}],
   "3. AI伺服器ODM": [{code:"2317",name:"鴻海"},{code:"2382",name:"廣達"},{code:"3231",name:"緯創"},{code:"6669",name:"緯穎"},{code:"2356",name:"英業達"},{code:"2376",name:"技嘉"},{code:"3706",name:"神達"},{code:"2324",name:"仁寶"},{code:"4938",name:"和碩"},{code:"2377",name:"微星"},{code:"2353",name:"宏碁"},{code:"2357",name:"華碩"},{code:"3533",name:"嘉澤"}],
-  "4. 散熱與液冷": [{code:"3017",name:"奇鋐"},{code:"3324",name:"雙鴻"},{code:"3653",name:"健策"},{code:"2308",name:"台達電"},{code:"6805",name:"富世達"},{code:"3013",name:"晟銘電"},{code:"8996",name:"高力"},{code:"2421",name:"建準"},{code:"6230",name:"尼得科超眾"},{code:"6125",name:"廣運"},{code:"2059",name:"川湖"},{code:"3483",name:"力致"},{code:"4943",name:"康控-KY"},{code:"1569",name:"濱川"}],
+  "4. 散熱與液冷": [{code:"3017",name:"奇鋐"},{code:"3324",name:"雙鴻"},{code:"3653",name:"健策"},{code:"2308",name:"台達電"},{code:"6805",name:"富世達"},{code:"3013",name:"晟銘電"},{code:"8996",name:"高力"},{code:"2421",name:"建準"},{code:"6230",name:"尼得科超眾"},{code:"6125",name:"廣運"},{code:"3483",name:"力致"}],
   "5. 記憶體循環": [{code:"2408",name:"南亞科"},{code:"2344",name:"華邦電"},{code:"6770",name:"力積電"},{code:"2337",name:"旺宏"},{code:"3006",name:"晶豪科"},{code:"8299",name:"群聯"},{code:"3260",name:"威剛"},{code:"4967",name:"十銓"},{code:"2451",name:"創見"},{code:"5289",name:"宜鼎"},{code:"8271",name:"宇瞻"},{code:"8110",name:"華東"}],
   "6. 伺服器機殼": [{code:"8210",name:"勤誠"},{code:"3013",name:"晟銘電"},{code:"3693",name:"營邦"},{code:"6117",name:"迎廣"},{code:"3032",name:"偉訓"}],
-  "7. 被動元件": [{code:"2327",name:"國巨*"},{code:"2492",name:"華新科"},{code:"3026",name:"禾伸堂"},{code:"3357",name:"臺慶科"},{code:"2375",name:"凱美"},{code:"2428",name:"興勤"},{code:"2472",name:"立隆電"},{code:"2478",name:"大毅"},{code:"5328",name:"華容"},{code:"6155",name:"鈞寶"},{code:"6173",name:"信昌電"},{code:"6449",name:"鈺邦"},{code:"3686",name:"達能"},{code:"8043",name:"蜜望實"}],
-  "8. PCB與CCL載板": [{code:"8046",name:"南電"},{code:"3037",name:"欣興"},{code:"2368",name:"金像電"},{code:"4958",name:"臻鼎-KY"},{code:"3044",name:"健鼎"},{code:"6213",name:"聯茂"},{code:"2383",name:"台光電"},{code:"6274",name:"台燿"},{code:"2313",name:"華通"},{code:"2367",name:"燿華"},{code:"2355",name:"敬鵬"},{code:"5439",name:"高技"},{code:"8101",name:"華冠"},{code:"6191",name:"精成科"},{code:"8021",name:"尖點"},{code:"8358",name:"金居"}],
-  "9. CPO與光通訊": [{code:"3081",name:"聯亞"},{code:"2455",name:"全新"},{code:"4971",name:"IET-KY"},{code:"3163",name:"波若威"},{code:"3363",name:"上詮"},{code:"6442",name:"光聖"},{code:"4979",name:"華星光"},{code:"3450",name:"聯鈞"},{code:"4977",name:"眾達-KY"},{code:"6271",name:"同欣電"},{code:"3105",name:"穩懋"},{code:"6451",name:"訊芯-KY"},{code:"4906",name:"正文"}],
-  "10. AI電源與BBU": [{code:"2308",name:"台達電"},{code:"2301",name:"光寶科"},{code:"1504",name:"東元"},{code:"1519",name:"華城"},{code:"6282",name:"康舒"},{code:"6125",name:"廣運"},{code:"3211",name:"順達"},{code:"6121",name:"新普"},{code:"6415",name:"矽力-KY"},{code:"6138",name:"茂達"},{code:"6286",name:"立錡⭐"},{code:"8081",name:"致新"}],
-  "11. 機構件與滑軌": [{code:"2059",name:"川湖"},{code:"3376",name:"新日興"},{code:"2474",name:"可成"}],
+  "7. 被動元件": [{code:"2327",name:"國巨*"},{code:"2492",name:"華新科"},{code:"3026",name:"禾伸堂"},{code:"3357",name:"臺慶科"},{code:"2375",name:"凱美"},{code:"2428",name:"興勤"},{code:"2472",name:"立隆電"},{code:"2478",name:"大毅"},{code:"5328",name:"華容"},{code:"6155",name:"鈞寶"},{code:"6173",name:"信昌電"},{code:"6449",name:"鈺邦"},{code:"8043",name:"蜜望實"}],
+  "8. PCB與CCL載板": [{code:"8046",name:"南電"},{code:"3037",name:"欣興"},{code:"3189",name:"景碩"},{code:"2368",name:"金像電"},{code:"4958",name:"臻鼎-KY"},{code:"3044",name:"健鼎"},{code:"6213",name:"聯茂"},{code:"2383",name:"台光電"},{code:"6274",name:"台燿"},{code:"2313",name:"華通"},{code:"2367",name:"燿華"},{code:"2355",name:"敬鵬"},{code:"5439",name:"高技"},{code:"6191",name:"精成科"},{code:"8021",name:"尖點"},{code:"8358",name:"金居"}],
+  "9. CPO與光通訊": [{code:"3081",name:"聯亞"},{code:"2455",name:"全新"},{code:"4971",name:"IET-KY"},{code:"3163",name:"波若威"},{code:"6442",name:"光聖"},{code:"4979",name:"華星光"},{code:"3450",name:"聯鈞"},{code:"4977",name:"眾達-KY"},{code:"4906",name:"正文"}],
+  "10. AI電源與BBU": [{code:"2308",name:"台達電"},{code:"2301",name:"光寶科"},{code:"1504",name:"東元"},{code:"1519",name:"華城"},{code:"6282",name:"康舒"},{code:"6125",name:"廣運"},{code:"3211",name:"順達"},{code:"6121",name:"新普"},{code:"6415",name:"矽力-KY"},{code:"6138",name:"茂達"},{code:"8081",name:"致新"}],
+  "11. 機構件與滑軌": [{code:"2059",name:"川湖"},{code:"3376",name:"新日興"},{code:"2474",name:"可成"},{code:"6805",name:"富世達"},{code:"1569",name:"濱川"}],
   "12. 廠務工程": [{code:"2404",name:"漢唐"},{code:"6139",name:"亞翔"},{code:"6196",name:"帆宣"},{code:"6691",name:"洋基工程"},{code:"5536",name:"聖暉*"},{code:"6667",name:"信紘科"},{code:"7703",name:"銳澤"},{code:"3402",name:"漢科"},{code:"6788",name:"華景電"},{code:"2221",name:"大甲"}],
-  "13. 半導體設備": [{code:"3131",name:"弘塑"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2467",name:"志聖"},{code:"5443",name:"均豪"},{code:"6640",name:"均華"},{code:"3413",name:"京鼎"},{code:"7769",name:"鴻勁"},{code:"6223",name:"旺矽"},{code:"2360",name:"致茂"},{code:"3680",name:"家登"},{code:"1560",name:"中砂"},{code:"3551",name:"世禾"},{code:"3167",name:"大量"},{code:"6739",name:"竹陞科"},{code:"4749",name:"新應材"},{code:"4772",name:"台特化"},{code:"8028",name:"昇陽半"},{code:"5285",name:"界霖"}],
+  "13. 半導體設備": [{code:"3131",name:"弘塑"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2467",name:"志聖"},{code:"5443",name:"均豪"},{code:"6640",name:"均華"},{code:"3413",name:"京鼎"},{code:"7769",name:"鴻勁"},{code:"6223",name:"旺矽"},{code:"2360",name:"致茂"},{code:"3680",name:"家登"},{code:"1560",name:"中砂"},{code:"3551",name:"世禾"},{code:"3167",name:"大量"},{code:"6739",name:"竹陞科"},{code:"4749",name:"新應材"},{code:"4772",name:"台特化"},{code:"8028",name:"昇陽半"},{code:"5285",name:"界霖"},{code:"3030",name:"德律"}],
   "14. 面板與螢幕": [{code:"2409",name:"友達"},{code:"3481",name:"群創"},{code:"6147",name:"頎邦"},{code:"2489",name:"瑞軒"},{code:"3673",name:"TPK-KY"},{code:"8069",name:"元太"},{code:"6116",name:"彩晶"},{code:"3527",name:"聚積"}],
   "15. 資安概念股": [{code:"6690",name:"安碁資訊"},{code:"2471",name:"資通"},{code:"4953",name:"緯軟"},{code:"3558",name:"神準"},{code:"6561",name:"是方"},{code:"6245",name:"立端"}],
   "16. AI軟體與雲端": [{code:"6214",name:"精誠"},{code:"6811",name:"宏碁資訊"},{code:"6689",name:"伊雲谷"},{code:"3029",name:"零壹"},{code:"6112",name:"邁達特"},{code:"2480",name:"敦陽科"},{code:"2453",name:"凌群"},{code:"8099",name:"大世科"},{code:"6870",name:"騰雲"}],
   "17. 工業電腦與邊緣AI": [{code:"2395",name:"研華"},{code:"6414",name:"樺漢"},{code:"6166",name:"凌華"},{code:"8234",name:"新漢"},{code:"3088",name:"艾訊"},{code:"3005",name:"神基"},{code:"6680",name:"鑫創電子"},{code:"6206",name:"飛捷"},{code:"3479",name:"安勤"},{code:"8114",name:"振樺電"},{code:"3564",name:"其陽"},{code:"6416",name:"瑞祺電通"},{code:"8050",name:"廣積"},{code:"3022",name:"威強電"},{code:"2397",name:"友通"},{code:"3416",name:"融程電"},{code:"5258",name:"虹堡"},{code:"3594",name:"磐儀"},{code:"6570",name:"維田"},{code:"5474",name:"聰泰"},{code:"6569",name:"醫揚"}],
-  "18. 軍工與低空經濟": [{code:"2634",name:"漢翔"},{code:"2645",name:"長榮航太"},{code:"2630",name:"亞航"},{code:"8033",name:"雷虎"},{code:"3718",name:"中光電投控"},{code:"7719",name:"碳基"},{code:"2429",name:"銘旺科"},{code:"6753",name:"龍德造船"},{code:"2208",name:"台船"},{code:"2644",name:"中信造船"},{code:"5222",name:"全訊"},{code:"6829",name:"千附精密"},{code:"4541",name:"晟田"},{code:"8222",name:"寶一"},{code:"6163",name:"華電網"},{code:"2419",name:"仲琦"}],
-  "19. 機器人與人形機器人": [{code:"2049",name:"上銀"},{code:"4576",name:"大銀微系統"},{code:"1597",name:"直得"},{code:"1536",name:"和大"},{code:"1590",name:"亞德客-KY"},{code:"2233",name:"宇隆"},{code:"7750",name:"新代"},{code:"6789",name:"采鈺"},{code:"6643",name:"M31"},{code:"4585",name:"達明"},{code:"6188",name:"廣明"},{code:"8374",name:"羅昇"},{code:"2464",name:"盟立"},{code:"6128",name:"上福"},{code:"2359",name:"所羅門"},{code:"1569",name:"濱川"}],
+  "18. 軍工與低空經濟": [{code:"2634",name:"漢翔"},{code:"2645",name:"長榮航太"},{code:"2630",name:"亞航"},{code:"8033",name:"雷虎"},{code:"3718",name:"中光電投控"},{code:"7719",name:"碳基"},{code:"2429",name:"銘旺科"},{code:"6753",name:"龍德造船"},{code:"2208",name:"台船"},{code:"2644",name:"中信造船"},{code:"5222",name:"全訊"},{code:"6829",name:"千附精密"},{code:"4541",name:"晟田"},{code:"8222",name:"寶一"}],
+  "19. 機器人與人形機器人": [{code:"2049",name:"上銀"},{code:"4576",name:"大銀微系統"},{code:"1597",name:"直得"},{code:"4540",name:"全球傳動"},{code:"1536",name:"和大"},{code:"1590",name:"亞德客-KY"},{code:"2233",name:"宇隆"},{code:"7750",name:"新代"},{code:"4585",name:"達明"},{code:"6188",name:"廣明"},{code:"8374",name:"羅昇"},{code:"2464",name:"盟立"},{code:"2359",name:"所羅門"}],
   "20. AI_PC與智慧手機": [{code:"2357",name:"華碩"},{code:"2353",name:"宏碁"},{code:"2376",name:"技嘉"},{code:"2377",name:"微星"},{code:"3515",name:"華擎"},{code:"2382",name:"廣達"},{code:"3231",name:"緯創"},{code:"2317",name:"鴻海"},{code:"2324",name:"仁寶"},{code:"2356",name:"英業達"},{code:"4938",name:"和碩"},{code:"4966",name:"譜瑞-KY"},{code:"6415",name:"矽力-KY"},{code:"6138",name:"茂達"},{code:"4961",name:"天鈺"},{code:"5269",name:"祥碩"},{code:"6121",name:"新普"},{code:"3211",name:"順達"}],
   "21. 低軌衛星與6G": [{code:"3491",name:"昇達科"},{code:"2313",name:"華通"},{code:"6285",name:"啟碁"},{code:"2367",name:"燿華"},{code:"2355",name:"敬鵬"},{code:"6274",name:"台燿"},{code:"2383",name:"台光電"},{code:"6271",name:"同欣電"},{code:"3105",name:"穩懋"},{code:"2455",name:"全新"},{code:"3081",name:"聯亞"},{code:"4977",name:"眾達-KY"},{code:"2419",name:"仲琦"},{code:"6163",name:"華電網"},{code:"4916",name:"事欣科"},{code:"3481",name:"群創"},{code:"6443",name:"元晶"},{code:"7717",name:"萊德光電-KY"}],
-  "22. 車用自駕與EV": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3034",name:"聯詠"},{code:"3008",name:"大立光"},{code:"6488",name:"環球晶"},{code:"2329",name:"華泰"},{code:"2401",name:"凌陽"},{code:"6531",name:"愛普*"},{code:"5347",name:"世界先進"},{code:"2308",name:"台達電"},{code:"3653",name:"健策"},{code:"2327",name:"國巨*"},{code:"2492",name:"華新科"},{code:"1504",name:"東元"},{code:"1536",name:"和大"},{code:"2231",name:"為升"},{code:"2236",name:"百達-KY"},{code:"1503",name:"士電"},{code:"6485",name:"點序"},{code:"2317",name:"鴻海"},{code:"2376",name:"技嘉"},{code:"6515",name:"穎崴"},{code:"4540",name:"全球傳動"},{code:"3030",name:"德律"},{code:"3454",name:"晶睿"},{code:"5269",name:"祥碩"},{code:"2360",name:"致茂"},{code:"6573",name:"虹揚-KY"},{code:"3665",name:"貿聯-KY"}],
-  "23. 矽光子與CPO": [{code:"3081",name:"聯亞"},{code:"2455",name:"全新"},{code:"4971",name:"IET-KY"},{code:"3163",name:"波若威"},{code:"3363",name:"上詮"},{code:"6442",name:"光聖"},{code:"4979",name:"華星光"},{code:"3450",name:"聯鈞"},{code:"4977",name:"眾達-KY"},{code:"6271",name:"同欣電"},{code:"3105",name:"穩懋"},{code:"6451",name:"訊芯-KY"},{code:"4906",name:"正文"},{code:"2330",name:"台積電"},{code:"3711",name:"日月光投控"},{code:"6223",name:"旺矽"},{code:"6515",name:"穎崴"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2345",name:"智邦"},{code:"3443",name:"創意"}],
-  "24. 重電電網與儲能": [{code:"1519",name:"華城"},{code:"1503",name:"士電"},{code:"1513",name:"中興電"},{code:"1514",name:"亞力"},{code:"2371",name:"大同"},{code:"1504",name:"東元"},{code:"6282",name:"康舒"},{code:"1605",name:"華新"},{code:"1612",name:"宏泰"},{code:"1615",name:"大山"},{code:"1604",name:"聲寶"},{code:"1603",name:"華電"},{code:"1611",name:"中電"},{code:"8086",name:"宏捷科"},{code:"1609",name:"大亞"},{code:"6244",name:"茂迪"}],
-  "25. 消費復甦與電商": [{code:"2949",name:"欣新網"},{code:"8044",name:"網家-KY"},{code:"2723",name:"美食-KY"},{code:"4763",name:"材料-KY"},{code:"2912",name:"統一超"},{code:"5903",name:"全家"},{code:"1216",name:"統一"},{code:"9921",name:"巨大"},{code:"9914",name:"美利達"},{code:"2731",name:"雄獅"},{code:"5706",name:"鳳凰"},{code:"2706",name:"第一店"},{code:"2929",name:"淘帝-KY"},{code:"2727",name:"王品"},{code:"2603",name:"長榮"},{code:"2609",name:"陽明"},{code:"2615",name:"萬海"},{code:"2618",name:"長榮航"},{code:"2610",name:"華航"},{code:"2637",name:"慧洋-KY"},{code:"1476",name:"儒鴻"},{code:"9910",name:"豐泰"},{code:"9904",name:"寶成"},{code:"1417",name:"嘉裕"},{code:"1409",name:"新纖"}],
+  "22. 車用自駕與EV": [{code:"2330",name:"台積電"},{code:"2454",name:"聯發科"},{code:"3034",name:"聯詠"},{code:"3008",name:"大立光"},{code:"6488",name:"環球晶"},{code:"2401",name:"凌陽"},{code:"5347",name:"世界先進"},{code:"2308",name:"台達電"},{code:"3653",name:"健策"},{code:"2327",name:"國巨*"},{code:"2492",name:"華新科"},{code:"1504",name:"東元"},{code:"1536",name:"和大"},{code:"2231",name:"為升"},{code:"2236",name:"百達-KY"},{code:"1503",name:"士電"},{code:"2317",name:"鴻海"},{code:"2376",name:"技嘉"},{code:"2360",name:"致茂"},{code:"6573",name:"虹揚-KY"},{code:"3665",name:"貿聯-KY"}],
+  "23. 矽光子與CPO": [{code:"3363",name:"上詮"},{code:"6451",name:"訊芯-KY"},{code:"6271",name:"同欣電"},{code:"2330",name:"台積電"},{code:"3711",name:"日月光投控"},{code:"6223",name:"旺矽"},{code:"6515",name:"穎崴"},{code:"3583",name:"辛耘"},{code:"6187",name:"萬潤"},{code:"2345",name:"智邦"},{code:"3443",name:"創意"}],
+  "24. 重電電網與儲能": [{code:"1519",name:"華城"},{code:"1503",name:"士電"},{code:"1513",name:"中興電"},{code:"1514",name:"亞力"},{code:"2371",name:"大同"},{code:"1504",name:"東元"},{code:"6282",name:"康舒"},{code:"1605",name:"華新"},{code:"1612",name:"宏泰"},{code:"1615",name:"大山"},{code:"1603",name:"華電"},{code:"1611",name:"中電"},{code:"1609",name:"大亞"},{code:"6244",name:"茂迪"}],
+  "25. 消費復甦與電商": [{code:"2949",name:"欣新網"},{code:"8044",name:"網家-KY"},{code:"2723",name:"美食-KY"},{code:"2912",name:"統一超"},{code:"5903",name:"全家"},{code:"1216",name:"統一"},{code:"9921",name:"巨大"},{code:"9914",name:"美利達"},{code:"2731",name:"雄獅"},{code:"5706",name:"鳳凰"},{code:"2706",name:"第一店"},{code:"2929",name:"淘帝-KY"},{code:"2727",name:"王品"},{code:"2618",name:"長榮航"},{code:"2610",name:"華航"},{code:"1476",name:"儒鴻"},{code:"9910",name:"豐泰"},{code:"9904",name:"寶成"},{code:"1417",name:"嘉裕"},{code:"1409",name:"新纖"}],
   "26. ETF權值股核心": [{code:"2330",name:"台積電"},{code:"2317",name:"鴻海"},{code:"2454",name:"聯發科"},{code:"6669",name:"緯穎"},{code:"2382",name:"廣達"},{code:"2308",name:"台達電"},{code:"2891",name:"中信金"},{code:"2881",name:"富邦金"},{code:"2412",name:"中華電"},{code:"2303",name:"聯電"},{code:"3231",name:"緯創"},{code:"3711",name:"日月光投控"},{code:"1303",name:"南亞"},{code:"1301",name:"台塑"},{code:"2882",name:"國泰金"},{code:"2002",name:"中鋼"},{code:"5871",name:"中租-KY"},{code:"3008",name:"大立光"},{code:"1216",name:"統一"},{code:"2207",name:"和泰車"},{code:"2603",name:"長榮"},{code:"2884",name:"玉山金"},{code:"2886",name:"兆豐金"}],
   "27. 功率半導體/第三代半導體": [
     {code:"5347",name:"世界先進"},{code:"3707",name:"漢磊"},{code:"3016",name:"嘉晶"},
     {code:"6488",name:"環球晶"},{code:"6182",name:"合晶"},
     {code:"6415",name:"矽力-KY"},{code:"6138",name:"茂達"},{code:"3105",name:"穩懋"},
-    {code:"8255",name:"朋程"},{code:"8048",name:"德勝"},{code:"8261",name:"富鼎"},
-    {code:"2329",name:"華泰"},{code:"2436",name:"偉詮電"},{code:"6573",name:"虹揚-KY"},
-    {code:"6202",name:"盛群"},{code:"8086",name:"宏捷科"},{code:"2308",name:"台達電"},
+    {code:"8255",name:"朋程"},{code:"3675",name:"德微"},{code:"5425",name:"台半"},{code:"8261",name:"富鼎"},
+    {code:"2436",name:"偉詮電"},{code:"6573",name:"虹揚-KY"},
+    {code:"8086",name:"宏捷科"},{code:"2308",name:"台達電"},
     {code:"6435",name:"大中⭐"},{code:"2481",name:"強茂⭐"},{code:"5299",name:"杰力⭐"}
   ],
   "28. 邊緣運算/Edge AI": [
@@ -43,49 +43,38 @@ const SECTORS = {
     {code:"5471",name:"松翰"},{code:"6531",name:"愛普*"},{code:"6643",name:"M31"},
     {code:"8081",name:"致新"},{code:"6138",name:"茂達"},{code:"3530",name:"晶相光"},
     {code:"3014",name:"聯陽"},{code:"3556",name:"禾瑞亞"},
-    // B. 邊緣 AI 硬體裝置
-    {code:"2395",name:"研華"},{code:"6414",name:"樺漢"},{code:"6166",name:"凌華"},
-    {code:"8234",name:"新漢"},{code:"6245",name:"立端"},{code:"3088",name:"艾訊"},
-    {code:"3005",name:"神基"},{code:"6680",name:"鑫創電子"},{code:"6206",name:"飛捷"},
-    {code:"3479",name:"安勤"},{code:"8114",name:"振樺電"},{code:"3564",name:"其陽"},
-    {code:"6416",name:"瑞祺電通"},{code:"8050",name:"廣積"},{code:"3022",name:"威強電"},
-    {code:"2397",name:"友通"},{code:"3416",name:"融程電"},{code:"5258",name:"虹堡"},
-    {code:"3594",name:"磐儀"},{code:"6570",name:"維田"},{code:"5474",name:"聰泰"},
-    {code:"6569",name:"醫揚"},
-    // C. 邊緣 AI 軟體/平台/應用
+    // B. 邊緣 AI 軟體/平台/應用（工業電腦硬體歸於族群 17，避免重複）
     {code:"6870",name:"騰雲"},{code:"2359",name:"所羅門"},{code:"6214",name:"精誠"},
     {code:"6811",name:"宏碁資訊"},{code:"6689",name:"伊雲谷"},{code:"2480",name:"敦陽科"},
     {code:"2453",name:"凌群"},{code:"6112",name:"邁達特"},
-    // D. 智慧家居/AIoT
+    // C. 智慧家居/AIoT 網通
     {code:"3596",name:"智易"},{code:"6285",name:"啟碁"}
   ],
   "29. IDM整合元件製造商": [
     // A. 記憶體 IDM
     {code:"2408",name:"南亞科"},{code:"2344",name:"華邦電"},
     {code:"6770",name:"力積電"},{code:"2337",name:"旺宏"},{code:"3006",name:"晶豪科"},
-    // B. 功率半導體 IDM（SiC/GaN/MOSFET/整流器）
+    // B. 功率半導體 IDM（自有晶圓廠：SiC/GaN/二極體/整流器）
     {code:"5347",name:"世界先進"},{code:"3707",name:"漢磊"},
     {code:"3016",name:"嘉晶"},{code:"6182",name:"合晶"},
-    {code:"8255",name:"朋程"},{code:"6573",name:"虹揚-KY"},
-    {code:"8261",name:"富鼎"},{code:"8048",name:"德勝"},
-    {code:"2329",name:"華泰"},{code:"2401",name:"凌陽"},
-    // C. 類比IC/電源管理 IDM
-    {code:"6138",name:"茂達"},{code:"8081",name:"致新"},
-    // D. 利基IC IDM
-    {code:"5471",name:"松翰"},{code:"3034",name:"聯詠"},
-    // E. 化合物半導體 IDM
+    {code:"8255",name:"朋程"},{code:"2481",name:"強茂⭐"},{code:"5425",name:"台半"},
+    {code:"3675",name:"德微"},{code:"6573",name:"虹揚-KY"},
+    // C. MCU / 利基 IDM（自有晶圓廠）
+    {code:"4919",name:"新唐"},
+    // D. 化合物半導體 IDM / 磊晶
     {code:"3105",name:"穩懋"},{code:"8086",name:"宏捷科"},
     {code:"2455",name:"全新"},{code:"3081",name:"聯亞"},
-    // F. 矽晶圓/上游材料
+    // E. 矽晶圓/上游材料
     {code:"6488",name:"環球晶"}
   ],
   "30. 半導體通路": [
-    // 核心通路商
+    // 核心 IC 通路商
     {code:"3036",name:"文曄"},   // 全球第二大、ST/onsemi 代理
     {code:"3702",name:"大聯大"}, // 全球第一大、Infineon/MPWR 代理
-    // 二線通路
-    {code:"3060",name:"銘異"},
-    {code:"8121",name:"越峰"},
+    // 二線 IC 通路與半導體材料代理
+    {code:"3048",name:"益登"},
+    {code:"8112",name:"至上"},
+    {code:"3033",name:"威健"},
     {code:"5434",name:"崇越"}
   ],
   "31. MCU微控制器": [
@@ -141,6 +130,12 @@ const SECTORS = {
     {code:"1802",name:"台玻"},   // 玻纖紗/布 + 玻璃
     {code:"5475",name:"德宏"},   // 印刷電路板用玻纖布
     {code:"5340",name:"建榮"}    // 玻纖布
+  ],
+  "35. 航運與海運": [
+    {code:"2603",name:"長榮"},
+    {code:"2609",name:"陽明"},
+    {code:"2615",name:"萬海"},
+    {code:"2637",name:"慧洋-KY"}
   ]
 };
 
@@ -340,6 +335,12 @@ const STOCK_EXCHANGE = {
   "2316":"TWSE","2915":"TWSE","9945":"TWSE","1402":"TWSE","1229":"TWSE",
   "2204":"TWSE","1304":"TWSE","1903":"TWSE","2913":"TWSE","1416":"TWSE",
   "1437":"TWSE","1472":"TWSE",
+  // ── 補齊缺漏標的與本次新增標的（實測驗證）──────
+  "1569":"TPEX","1802":"TWSE","2221":"TPEX","2458":"TWSE","3033":"TWSE",
+  "3048":"TWSE","3122":"TPEX","3527":"TPEX","3529":"TPEX","3533":"TWSE",
+  "3675":"TPEX","4919":"TWSE","4952":"TWSE","5302":"TPEX","5340":"TPEX",
+  "5425":"TPEX","5434":"TWSE","5475":"TPEX","6129":"TPEX","6494":"TPEX",
+  "6716":"TPEX","6949":"TWSE","8112":"TWSE","8996":"TWSE","9904":"TWSE",
 };
 
 // 後備（STOCK_EXCHANGE 未涵蓋的股票才會用到）
@@ -440,19 +441,17 @@ const STOCK_US = {
   "1503":"TSLA/ETN","2236":"TSLA",
   // 族群24 重電電網
   "1519":"ETN/GEV","1513":"ETN/GEV","1514":"NVDA/ETN","2371":"GEV","6443":"FSLR",
-  // 族群10 AI電源補強
-  "6286":"MPWR/ADI",
   // 族群27 功率半導體
   "5347":"STM★/ON★","3707":"WOLF/STM","3016":"WOLF/STM","6488":"WOLF",
-  "6182":"WOLF","8255":"ON★","6573":"ON/VSH","8261":"ON/MPWR",
-  "8048":"ON","6415":"MPWR★","6138":"MPWR/ON","8081":"MPWR",
+  "6182":"WOLF","8255":"ON★","3675":"ON/VSH","5425":"ON/VSH/STM","6573":"ON/VSH","8261":"ON/MPWR",
+  "6415":"MPWR★","6138":"MPWR/ON","8081":"MPWR",
   "6435":"ON/VSH","2481":"ON/VSH/STM","5299":"ON/VSH",
   // 族群28 邊緣運算
   "3530":"AMBA","6870":"NVDA(Metropolis)/PLTR",
   // 族群29 IDM
   "2337":"SNDK/WDC","6770":"INTC","8086":"GaAs代工",
   // 族群30 半導體通路
-  "3036":"ARW/AVT","3702":"ARW/AVT","3060":"ARW/AVT","8121":"ARW/AVT"
+  "3036":"ARW/AVT","3702":"ARW/AVT","3048":"ARW/AVT","8112":"ARW/AVT","3033":"ARW/AVT"
 };
 
 // ==================== 功率元件供應鏈層級（三層架構）====================
@@ -461,13 +460,12 @@ const STOCK_POWER_LAYER = {
   // 上層 功率半導體晶片
   "5347":"功率·上層","3707":"功率·上層","3016":"功率·上層",
   "6488":"功率·上層","6182":"功率·上層","3105":"功率·上層",
-  "8086":"功率·上層","8048":"功率·上層","8261":"功率·上層",
-  "2436":"功率·上層","2329":"功率·上層","8255":"功率·上層","6573":"功率·上層",
+  "8086":"功率·上層","3675":"功率·上層","5425":"功率·上層","8261":"功率·上層",
+  "2436":"功率·上層","8255":"功率·上層","6573":"功率·上層",
   "6435":"功率·上層","2481":"功率·上層","5299":"功率·上層",
   // 中層 PMIC設計
   "6415":"功率·中層","6138":"功率·中層","8081":"功率·中層",
-  "6531":"功率·中層","6643":"功率·中層","6202":"功率·中層","3035":"功率·中層",
-  "6286":"功率·中層",
+  "6531":"功率·中層","6643":"功率·中層","3035":"功率·中層",
   // 下層 電源模組/重電
   "2308":"功率·下層","2301":"功率·下層","6282":"功率·下層",
   "6121":"功率·下層","3211":"功率·下層","1519":"功率·下層",

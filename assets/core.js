@@ -1,5 +1,5 @@
 // ==================== FDC Core: State, Cloud Sync, Fetchers & Calculations ====================
-const APP_VERSION = "2026-11-26.3";
+const APP_VERSION = "2026-11-26.4";
 
 // ==================== 共用工具：跳脫、Toast、主題 ====================
 function _dEsc(s) {
