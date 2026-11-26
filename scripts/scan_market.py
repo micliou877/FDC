@@ -50,8 +50,9 @@ TWSE_MI_INDEX_URL = "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
 TPEX_URL = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes"
 
 # 篩選門檻：集中寫在這裡，之後要調整不用翻邏輯
+MIN_TURNOVER_NTD = 30_000_000  # 最低流動性門檻：今日成交金額 ≥ 3,000 萬元（0.3 億），過濾殭屍冷門股
 PCT_GAIN_THRESHOLD = 8.0       # 當日漲幅（%）達到這個門檻算「大漲／接近漲停」，不另外判斷個股漲停%不同的規則
-VOLUME_RATIO_THRESHOLD = 2.0   # 當日量 ÷ 過去N日均量，達到這個倍數算「爆量」
+VOLUME_RATIO_THRESHOLD = 2.0   # 當日量 ÷ 過去N日均量（不含今天），達到這個倍數且收漲算「多方爆量」
 VOLUME_AVG_DAYS = 20           # 均量取樣天數
 NEW_HIGH_DAYS = 60             # 新高比較的天數（不含當天）
 HISTORY_KEEP_DAYS = 70         # 本地歷史最多保留幾天（留一點緩衝給NEW_HIGH_DAYS=60用）
@@ -258,6 +259,11 @@ def compute_signals(code, today, history_dates, history):
     由今天往回找一定會連續有資料；一旦某天沒有這檔的紀錄就直接跳出，不把不連續的交易日
     誤算進「連續上漲天數」或「近N日」這類需要完整序列的計算裡。"""
     signals = []
+    # 流動性底線：成交金額未達 3,000 萬的冷門殭屍股直接略過，避免幾十萬元就洗版「爆量／創高」
+    turnover = (today.get("close") or 0) * (today.get("volume") or 0)
+    if turnover < MIN_TURNOVER_NTD:
+        return signals
+
     pct1 = today.get("pct1")
     if pct1 is not None and pct1 >= PCT_GAIN_THRESHOLD:
         signals.append("大漲/接近漲停")
@@ -290,19 +296,20 @@ def compute_signals(code, today, history_dates, history):
         if pct10 >= PCT10_GAIN_THRESHOLD:
             signals.append(f"近10日漲幅+{pct10:.1f}%")
 
-    # 量能相關：共用同一組近20日均量當基準，分別檢查「今天單日爆量」跟「近5/10日平均是否持續放量」
-    if len(volumes) >= VOLUME_AVG_DAYS:
-        baseline_window = volumes[:VOLUME_AVG_DAYS]
+    # 量能相關：基準為「過去 20 日（不含今天）」均量，避免把今天的巨量也混進分母稀釋倍數；
+    # 且要求「多方方向」：單日爆量需收紅（pct1 > 0）、持續放量需該區間為正報酬，排除跌停爆量出貨股。
+    if len(volumes) >= VOLUME_AVG_DAYS + 1:
+        baseline_window = volumes[1:VOLUME_AVG_DAYS + 1]
         baseline = sum(baseline_window) / len(baseline_window)
         if baseline > 0:
-            if today["volume"] > baseline * VOLUME_RATIO_THRESHOLD:
-                signals.append(f"爆量(今量/{VOLUME_AVG_DAYS}日均量={today['volume']/baseline:.1f}倍)")
+            if pct1 is not None and pct1 > 0 and today["volume"] > baseline * VOLUME_RATIO_THRESHOLD:
+                signals.append(f"多方爆量(今量/{VOLUME_AVG_DAYS}日均量={today['volume']/baseline:.1f}倍)")
             for n in (5, 10):
-                if len(volumes) >= n:
+                if len(volumes) > n and len(closes) > n and closes[0] > closes[n]:
                     avg_n = sum(volumes[:n]) / n
                     ratio = avg_n / baseline
                     if ratio >= VOL_RATIO_SUSTAINED_THRESHOLD:
-                        signals.append(f"近{n}日持續放量{ratio:.1f}倍")
+                        signals.append(f"近{n}日價漲放量{ratio:.1f}倍")
 
     # 創N日新高(N最多到NEW_HIGH_DAYS，歷史不夠60天時先用現有天數比)
     prior_closes = closes[1:NEW_HIGH_DAYS + 1]
@@ -344,9 +351,11 @@ def main():
         own_history_dates = [d for d in history_dates_all if d != today.get("asOfDate")]
         signals = compute_signals(code, today, own_history_dates, history)
         if signals:
+            amount_yi = round((today["close"] * today["volume"]) / 1e8, 2)
             movers.append({
                 "code": code, "name": today["name"], "market": today["market"],
                 "close": today["close"], "pct1": today["pct1"], "volume": today["volume"],
+                "amount": amount_yi,
                 "signals": signals,
             })
     movers.sort(key=lambda m: m.get("pct1") or 0, reverse=True)

@@ -799,8 +799,9 @@ function renderStrategy() {
     return `<th class="${on ? "sort-active" : ""}" onclick="sortStrat('${t}','${k}')" style="text-align:${align};">${label}${arr}</th>`;
   };
 
-  const longs = [...validStats.filter(([, s]) => s.vsMarket10 > 2 && s.pct5 > 0 && s.volTrend >= 1.1)].sort((a, b) => (b[1].vsMarket10 || 0) - (a[1].vsMarket10 || 0));
-  const reversals = [...validStats.filter(([, s]) => s.pct10 < -5 && s.pct1 > 0)].sort((a, b) => (b[1].pct1 || 0) - (a[1].pct1 || 0));
+  // 推薦族群：要求有效標的 ≥ 3 檔且至少一半個股近 5 日為正（防單檔小族群／單兵飆股誤導）
+  const longs = [...validStats.filter(([, s]) => s.count >= 3 && s.breadth5 >= 0.5 && s.vsMarket10 > 2 && s.pct5 > 0 && s.volTrend >= 1.1)].sort((a, b) => (b[1].vsMarket10 || 0) - (a[1].vsMarket10 || 0));
+  const reversals = [...validStats.filter(([, s]) => s.count >= 3 && s.pct10 < -5 && s.pct1 > 0)].sort((a, b) => (b[1].pct1 || 0) - (a[1].pct1 || 0));
   const hasPct5 = Object.values(stockData).filter(d => d.pct5 != null).length;
 
   let rawTop = [];
@@ -818,10 +819,11 @@ function renderStrategy() {
     list.filter(s => stockData[s.code]).map(s => ({ ...s, ...stockData[s.code], sectorLabel: sector.split(". ")[1] || sector }))
   );
 
-  const tvStocks = sortBy(uniqByCode(allSectorStocks.filter(d => (d.pct10 || 0) >= 3 && (d.pct5 || 0) >= 0 && (d.pct1 || 0) >= -2 && (d.amount || 0) >= 1 && (d.volTrend || 0) >= 1.0)), "v").slice(0, 20);
+  const tvStocks = sortBy(uniqByCode(allSectorStocks.filter(d => (d.pct10 || 0) >= 3 && (d.pct5 || 0) >= 0 && (d.pct1 || 0) >= -2 && (d.pct1 || 0) < 7 && (d.amount || 0) >= 1 && (d.volTrend || 0) >= 1.0)), "v").slice(0, 20);
   const breakouts = sortBy(uniqByCode(allSectorStocks.filter(s => (s.pct10 ?? 999) < 6 && (s.pct5 ?? -999) > 0 && (s.pct1 ?? -999) >= -1 && (s.volTrend ?? 0) >= 1.1 && (s.amount ?? 0) >= 0.5)), "b").slice(0, 25);
   const pullbacks = sortBy(uniqByCode(allSectorStocks.filter(s => (s.pct10 ?? -999) >= 5 && (s.pct5 ?? 999) >= -4 && (s.pct5 ?? 999) <= 1 && (s.pct1 ?? -999) >= -0.5 && (s.volTrend ?? 99) < 1.0 && (s.amount ?? 0) >= 1)), "w").slice(0, 20);
-  const qualityMomentum = sortBy(uniqByCode(allSectorStocks.filter(s => (s.eps ?? 0) > 0 && s.per != null && s.per <= 25 && (s.pct10 ?? -999) >= 3 && (s.pct5 ?? -999) > 0 && (s.volTrend ?? 0) >= 1.0 && (s.amount ?? 0) >= 1)), "q").slice(0, 20);
+  // 質優動能：PER ≤ 25，或高成長救援閥門（PER ≤ 45 且近 3 月／最新營收 YoY ≥ 20%）
+  const qualityMomentum = sortBy(uniqByCode(allSectorStocks.filter(s => (s.eps ?? 0) > 0 && s.per != null && (s.per <= 25 || (s.per <= 45 && (s.rev3moYoy ?? s.yoy ?? 0) >= 20)) && (s.pct10 ?? -999) >= 3 && (s.pct5 ?? -999) > 0 && (s.volTrend ?? 0) >= 1.0 && (s.amount ?? 0) >= 1)), "q").slice(0, 20);
   const hasFundamentals = Object.values(stockData).filter(d => d.per != null).length >= 5;
 
   const rotationSectors = validStats.filter(([, s]) => s.vsMarket10 < 0 && s.pct5 > 1 && s.volTrend >= 1.15);
@@ -904,14 +906,14 @@ function renderStrategy() {
   };
 
   const subTabDefs = [
-    { id: "longs", label: "🚀 推薦族群", cnt: longs.length, hint: "vs大盤>+2%・5日↑・量能≥1.1x" },
+    { id: "longs", label: "🚀 推薦族群", cnt: longs.length, hint: "中位數vs大盤>+2%・5日↑・量能≥1.1x・≥3檔且半數上漲" },
     { id: "top", label: "⭐ 精選個股", cnt: Math.min(topStocks.length, 9), hint: "前3強勢族群・10日排序・5日仍正・成交≥1億" },
     { id: "pullback", label: "🎯 拉回承接", cnt: pullbacks.length, hint: "10日≥+5%・5日-4%~+1%・量縮<1.0x・成交≥1億" },
     { id: "rotation", label: "⚡ 族群輪動", cnt: rotations.length, hint: "族群10日落後但5日轉強>+1%・量能≥1.15x" },
     { id: "breakout", label: "🌱 起漲候選", cnt: breakouts.length, hint: "5日轉正・10日<6%・量能≥1.1x・成交≥0.5億" },
-    { id: "quality", label: "💎 質優動能", cnt: hasFundamentals ? qualityMomentum.length : 0, hint: "EPS>0・PER≤25・10日≥+3%・5日>0・量能≥1.0x" },
-    { id: "tv", label: "📈 TV觀察", cnt: tvStocks.length, hint: "10日≥+3%・5日≥0・量能≥1.0x｜確認 EMA20/60" },
-    { id: "reversal", label: "🔄 翻轉觀察", cnt: reversals.length, hint: "族群10日跌>5%・今日轉正" }
+    { id: "quality", label: "💎 質優動能", cnt: hasFundamentals ? qualityMomentum.length : 0, hint: "EPS>0・PER≤25（或PER≤45且營收YoY≥20%）・10日≥+3%・量能≥1.0x" },
+    { id: "tv", label: "📈 TV觀察", cnt: tvStocks.length, hint: "10日≥+3%・5日≥0・今日<7%(防追高)・量能≥1.0x｜確認 EMA20/60" },
+    { id: "reversal", label: "🔄 翻轉觀察", cnt: reversals.length, hint: "族群10日跌>5%・今日轉正（≥3檔）" }
   ];
 
   const activeDef = subTabDefs.find(x => x.id === stratSubTab) || subTabDefs[0];
@@ -919,13 +921,13 @@ function renderStrategy() {
   if (stratSubTab === "longs") {
     subBodyHtml = longs.length === 0
       ? `<div class="empty-state">目前無符合條件的強勢族群${hasPct5 < 5 ? "<br>⚠️ 尚無5日/10日資料，請先點「盤後更新」" : ""}</div>`
-      : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;">
+      : `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;">
           ${longs.slice(0, 8).map(([sec2, s]) => `
             <div class="data-panel" style="margin:0;padding:12px;cursor:pointer;" onclick="currentSector=${_jsStr(sec2)};switchTab('stocks')">
               <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${_dEsc(sec2.split(". ")[1] || sec2)}</div>
               <div class="num ${pctClass(s.pct10)}" style="font-size:22px;font-weight:700;line-height:1.1;">${fmtPct(s.pct10)}</div>
               <div style="font-size:11.5px;margin-top:6px;color:var(--text-secondary);">vs大盤 <span class="num ${pctClass(s.vsMarket10)}">${fmtPct(s.vsMarket10)}</span></div>
-              <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${volTrendBadge(s.volTrend)} ${s.amount.toFixed(0)}億 · ${s.count}/${s.total}檔</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${volTrendBadge(s.volTrend)} ${s.amount.toFixed(0)}億 · 5日漲 ${s.up5Count}/${s.count}檔</div>
             </div>`).join("")}
         </div>`;
   } else if (stratSubTab === "top") {
@@ -1030,30 +1032,26 @@ function renderRanking() {
   const isPct = sortKey.startsWith("pct"), isVol = sortKey === "volTrend";
   const maxAbs = Math.max(...sorted.map(([, s]) => Math.abs(s[sortKey] || 0)), 1);
 
-  // 複合熱度分數
-  const heatList = Object.entries(SECTORS).map(([name, stocks]) => {
-    const wd = stocks.map(st => stockData[st.code]).filter(d => d && d.price != null);
-    if (!wd.length) return null;
-    const p10 = wd.reduce((s, d) => s + (d.pct10 || 0), 0) / wd.length;
-    const p5 = wd.reduce((s, d) => s + (d.pct5 || 0), 0) / wd.length;
-    const amt = wd.reduce((s, d) => s + (d.amount || 0), 0);
-    return { name, p10, p5, amt, score: 0 };
-  }).filter(Boolean);
+  // 複合熱度分數（改用中位數；Top 3 配置建議限定 ≥3 檔且 5 日上漲家數過半，避免單檔小族群霸榜）
+  const heatList = Object.entries(stats).filter(([, s]) => s).map(([name, s]) => ({
+    name, p10: s.pct10, p5: s.pct5, amt: s.amount, count: s.count, up5Count: s.up5Count, breadth5: s.breadth5, score: 0
+  }));
   const heatMap = {};
   if (heatList.length) {
     const maxAmt = Math.max(...heatList.map(h => h.amt), 1);
     heatList.forEach(h => { h.score = h.p10 * 0.5 + h.p5 * 0.3 + (h.amt / maxAmt * 10) * 0.2; heatMap[h.name] = h.score; });
-    const top3 = [...heatList].sort((a, b) => b.score - a.score).slice(0, 3);
+    const eligible = heatList.filter(h => h.count >= 3 && h.breadth5 >= 0.5);
+    const top3 = [...(eligible.length >= 3 ? eligible : heatList)].sort((a, b) => b.score - a.score).slice(0, 3);
     const hb = document.getElementById("rk_heatBody");
     if (hb) {
       const medals = ["🥇 主力倉", "🥈 次要倉", "🥉 觀察倉"], allocs = ["35-40%", "20-25%", "10-15%"];
-      hb.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:4px;">${
+      hb.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:8px;margin-top:4px;">${
         top3.map((h, i) => `<div style="background:var(--surface-2);border:1px solid var(--amber-border);border-radius:8px;padding:10px 12px;cursor:pointer;" onclick="event.stopPropagation();currentSector=${_jsStr(h.name)};switchTab('stocks')">
-          <div style="font-size:11px;color:var(--text-muted);">${medals[i]}</div>
+          <div style="font-size:11px;color:var(--text-muted);">${medals[i]} · 5日漲 ${h.up5Count}/${h.count}檔</div>
           <div style="font-weight:700;font-size:13.5px;margin:3px 0;color:var(--amber);">${_dEsc(h.name)}</div>
           <div style="font-size:11.5px;color:var(--text-secondary);" class="num">熱度 <strong style="color:var(--text-primary);">${h.score.toFixed(1)}</strong>　建議 <strong>${allocs[i]}</strong></div>
         </div>`).join("")
-      }</div><div style="margin-top:6px;font-size:11px;color:var(--text-muted);">公式：10日漲幅×0.5 + 5日漲幅×0.3 + 成交金額標準化×0.2</div>`;
+      }</div><div style="margin-top:6px;font-size:11px;color:var(--text-muted);">公式：10日中位數×0.5 + 5日中位數×0.3 + 成交金額標準化×0.2（Top 3 限定 ≥3 檔且過半上漲）</div>`;
     }
   }
 
@@ -1375,9 +1373,15 @@ const WL_SORT_LABELS = { code: "代號", price: "收盤價", pct1: "當日%", pc
 
 function wlAdviceRank(code) {
   const s = stockData[code] || {}, hd = (window._t4_data || []).find(h => h.code === code);
+  const hdDays = hd ? Math.floor((Date.now() - new Date(hd.date)) / 86400000) : null;
   const hdRet = hd ? ((s.price ?? hd.entry) - hd.entry) / hd.entry * 100 : null;
-  const label = getActionAdvice(s, hdRet).label;
-  return label === "加碼" ? 3 : label === "獲利了結" ? 2 : label === "觀察" ? 1 : 0;
+  const label = getActionAdvice(s, hdRet, hdDays).label;
+  if (label === "加碼") return 5;
+  if (label === "部分停利") return 4;
+  if (label === "獲利了結") return 3;
+  if (label === "不追高") return 2;
+  if (label === "觀察") return 1;
+  return 0;
 }
 function wlSortValue(code, key) {
   const s = stockData[code] || {};
@@ -1558,7 +1562,8 @@ function renderWatchlist() {
     const hdRet = hd ? ((s.price ?? hd.entry) - hd.entry) / hd.entry * 100 : null;
     const hdValue = hd && hd.shares ? (s.price ?? hd.entry) * hd.shares : null;
     const hdPct = hdValue != null && totalHoldingsValue > 0 ? hdValue / totalHoldingsValue * 100 : null;
-    const adv = getActionAdvice(s, hdRet);
+    const adv = getActionAdvice(s, hdRet, hdDays);
+    const daysOverdue = hdDays !== null && hdDays >= 21;
 
     const dragControls = isCustomOrder
       ? `<div style="cursor:grab;font-size:15px;line-height:1;" onmousedown="document.getElementById('wlr_${idx}').draggable=true" onmouseup="document.getElementById('wlr_${idx}').draggable=false" title="拖曳調整順序">≡</div>
@@ -1586,7 +1591,7 @@ function renderWatchlist() {
       <td class="wl-col-quote-ext num" style="text-align:right;font-size:11.5px;" title="5日 / 10日 對比大盤(0050)">${wlVsCell(vsMarketPct(s.code, "pct5"))} <span style="color:var(--text-faint);">/</span> ${wlVsCell(vsMarketPct(s.code, "pct10"))}</td>
       <td class="wl-col-quote-ext" style="text-align:center;" title="${s.yoy != null ? "YoY: " + s.yoy + "%" : ""}">${s.qualityTag ?? "-"}</td>
       <td class="wl-col-quote-ext" style="text-align:center;"><span class="plan-add-btn" onclick="addToDailyPlan('${_dEsc(s.code)}',${_jsStr(s.name)})" title="加入今日作業清單">＋</span></td>
-      <td class="wl-col-hold num" onclick="editHoldingDays(this,'${_dEsc(s.code)}',${_jsStr(s.name)},${s.price ?? null})" style="text-align:right;cursor:pointer;" title="點擊填持有天數">${hdDays !== null ? `<span class="note-display">${hdDays}天</span>` : '<span class="note-display">&nbsp;</span>'}</td>
+      <td class="wl-col-hold num" onclick="editHoldingDays(this,'${_dEsc(s.code)}',${_jsStr(s.name)},${s.price ?? null})" style="text-align:right;cursor:pointer;" title="${daysOverdue ? "已超過 3 週持有原則，點擊可修改天數" : "點擊填持有天數"}">${hdDays !== null ? `<span class="note-display" style="${daysOverdue ? "color:var(--amber);font-weight:700;" : ""}">${daysOverdue ? "⏰" : ""}${hdDays}天</span>` : '<span class="note-display">&nbsp;</span>'}</td>
       <td class="wl-col-hold num" onclick="editHoldingCost(this,'${_dEsc(s.code)}',${_jsStr(s.name)},${s.price ?? null})" style="text-align:right;cursor:pointer;" title="點擊填成本價">${hd ? `<span class="note-display">${hd.entry}</span>` : '<span class="note-display">&nbsp;</span>'}</td>
       <td class="wl-col-hold num" onclick="editHoldingShares(this,'${_dEsc(s.code)}',${_jsStr(s.name)},${s.price ?? null})" style="text-align:right;cursor:pointer;" title="點擊填股數">${hd && hd.shares ? `<span class="note-display">${hd.shares.toLocaleString()}</span>` : '<span class="note-display">&nbsp;</span>'}</td>
       <td class="wl-col-hold num" style="text-align:right;color:var(--text-secondary);">${hdPct != null ? hdPct.toFixed(1) + "%" : "-"}</td>
@@ -2026,13 +2031,14 @@ function renderMarketScan() {
   const th = (key, label, align = "left") => `<th class="${marketScanSortKey === key ? "sort-active" : ""}" onclick="sortMarketScan('${key}')" style="text-align:${align};">${label}${marketScanSortKey === key ? (marketScanSortDir === 1 ? " ▼" : " ▲") : ""}</th>`;
 
   tableEl.innerHTML = `<div class="table-wrap"><table class="stocks-table">
-    <thead><tr><th style="width:46px;text-align:center;cursor:default;">自選</th>${th("code", "代號")}${th("name", "名稱 / 市場")}${th("close", "收盤", "right")}${th("pct1", "漲跌幅", "right")}<th style="cursor:default;">異動訊號</th></tr></thead>
+    <thead><tr><th style="width:46px;text-align:center;cursor:default;">自選</th>${th("code", "代號")}${th("name", "名稱 / 市場")}${th("close", "收盤", "right")}${th("pct1", "漲跌幅", "right")}${th("amount", "成交(億)", "right")}<th style="cursor:default;">異動訊號</th></tr></thead>
     <tbody>${sorted.map(m => `<tr>
       <td style="text-align:center;">${watchBtnHtml(m.code, m.market, m.name, m.close, m.pct1)}</td>
       <td><a href="${getTVLink(m.code, m.market)}" target="_blank" style="font-weight:700;">${_dEsc(m.code)}</a></td>
       <td class="wrap-cell"><strong style="color:var(--text-primary);">${_dEsc(m.name)}</strong> <span class="tag tag-muted">${_dEsc(m.market)}</span></td>
       <td class="num" style="text-align:right;">${m.close?.toFixed(2) ?? "-"}</td>
       <td class="num ${pctClass(m.pct1)}" style="text-align:right;">${fmtPct(m.pct1)}</td>
+      <td class="num" style="text-align:right;color:var(--text-secondary);">${m.amount != null ? m.amount.toFixed(2) : "-"}</td>
       <td class="wrap-cell">${(m.signals || []).map(sig => `<span class="tag tag-dajia">${_dEsc(sig)}</span>`).join("")}</td>
     </tr>`).join("")}</tbody>
   </table></div>`;

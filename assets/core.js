@@ -1,5 +1,5 @@
 // ==================== FDC Core: State, Cloud Sync, Fetchers & Calculations ====================
-const APP_VERSION = "2026-11-26.1";
+const APP_VERSION = "2026-11-26.2";
 
 // ==================== 共用工具：跳脫、Toast、主題 ====================
 function _dEsc(s) {
@@ -711,8 +711,8 @@ function getWatchGroupsOf(code) {
 // ==================== 基本面品質與動作建議 ====================
 function classify_quality(eps, per) {
   if (eps == null && per == null) return "✖️抓取失敗";
+  if (eps != null && eps <= 0) return "⚫虧損";
   if (eps == null || per == null) return "❓缺財報";
-  if (eps <= 0) return "⚫虧損";
   if (per > 100 || eps < 1) return "🔴題材股";
   if (eps > 3 && per >= 10 && per <= 50) return "🟢業績股";
   return "🟡普通";
@@ -723,9 +723,9 @@ function classify_growth_type(d) {
   return null;
 }
 
-function getActionAdvice(s, hdRet) {
+function getActionAdvice(s, hdRet, hdDays = null) {
   if (s.pct5 == null || s.pct10 == null) {
-    return { label: "觀察", cls: "watch", reason: "尚無5日/10日資料，請先執行盤後更新" };
+    return { label: "觀察", cls: "watch", reason: "尚無5日/10日資料，請先更新報價" };
   }
   if (hdRet !== null && hdRet <= -8) {
     return { label: "減碼", cls: "sell", reason: `持有虧損 ${hdRet.toFixed(1)}%，已超過 8% 停損線` };
@@ -739,8 +739,18 @@ function getActionAdvice(s, hdRet) {
     }
     return { label: "減碼", cls: "sell", reason };
   }
+  if (hdDays != null && hdDays >= 21 && hdRet !== null && hdRet < 0) {
+    return { label: "過期檢視", cls: "sell", reason: `持有已達 ${hdDays} 天（超過3週原則）且仍虧損 ${hdRet.toFixed(1)}%，建議檢視是否換股` };
+  }
+  if (hdRet !== null && hdRet >= 15) {
+    return { label: "部分停利", cls: "profit", reason: `持有獲利達 +${hdRet.toFixed(1)}%（≥15%），建議考慮分批獲利了結` };
+  }
+  if ((s.pct1 != null && s.pct1 >= 7) || (s.pct5 != null && s.pct5 >= 20)) {
+    const why = s.pct1 >= 7 ? `當日已大漲 +${s.pct1.toFixed(1)}%` : `近5日已急漲 +${s.pct5.toFixed(1)}%`;
+    return { label: "不追高", cls: "overheat", reason: `${why}，短線乖離過大（遵守不追高紀律，等拉回確認支撐）` };
+  }
   if (s.pct10 >= 3 && s.pct5 > 0 && (s.pct1 ?? 0) > -2 && (s.volTrend ?? 1) >= 1.0) {
-    return { label: "加碼", cls: "buy", reason: "10日趨勢強、5日動能延續、量能未萎縮" };
+    return { label: "加碼", cls: "buy", reason: "10日趨勢強、5日動能延續、量能未萎縮且未過熱" };
   }
   if (s.pct5 < 0) {
     return { label: "觀察", cls: "watch", reason: "5日動能轉負但10日趨勢仍在，等待回穩" };
@@ -748,17 +758,35 @@ function getActionAdvice(s, hdRet) {
   return { label: "觀察", cls: "watch", reason: "動能不足或漲幅未達加碼門檻，持續觀察" };
 }
 
+function medianOf(arr) {
+  const nums = arr.filter(v => typeof v === "number" && !isNaN(v)).sort((a, b) => a - b);
+  if (!nums.length) return 0;
+  const mid = Math.floor(nums.length / 2);
+  return nums.length % 2 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+}
+
 function calcSectorStats() {
   const stats = {};
   const market = stockData["0050"] || { pct1: 0, pct5: 0, pct10: 0 };
   Object.entries(SECTORS).forEach(([sector, stocks]) => {
-    const valid = stocks.filter(s => stockData[s.code]);
+    const valid = stocks.filter(s => stockData[s.code] && stockData[s.code].price != null);
     if (valid.length === 0) { stats[sector] = null; return; }
     const sum = (key) => valid.reduce((a, s) => a + (stockData[s.code][key] || 0), 0);
-    const avg = (key) => sum(key) / valid.length;
-    const pct1 = avg("pct1"), pct5 = avg("pct5"), pct10 = avg("pct10");
-    const volTrendAvg = parseFloat(avg("volTrend").toFixed(3));
-    stats[sector] = { pct1, pct5, pct10, vsMarket10: pct10 - market.pct10, amount: sum("amount"), volTrend: volTrendAvg, count: valid.length, total: stocks.length };
+    const med = (key) => medianOf(valid.map(s => stockData[s.code][key]).filter(v => v != null));
+    // 用中位數取代單純算術平均，避免族群內單一極端飆股拉高整組造成假強勢
+    const pct1 = med("pct1"), pct5 = med("pct5"), pct10 = med("pct10");
+    const volTrendMed = parseFloat((med("volTrend") || 1).toFixed(3));
+    const up5Count = valid.filter(s => (stockData[s.code].pct5 ?? 0) > 0).length;
+    stats[sector] = {
+      pct1, pct5, pct10,
+      vsMarket10: pct10 - (market.pct10 || 0),
+      amount: sum("amount"),
+      volTrend: volTrendMed,
+      up5Count,
+      breadth5: up5Count / valid.length,
+      count: valid.length,
+      total: stocks.length
+    };
   });
   return stats;
 }
@@ -884,7 +912,7 @@ const MAIL_SCORE_DEFAULTS = {
   elimReturn5dMin: 5.0, elimReturn5dBuffer: 2.0, elimRankDropMax: 5, elimRankDropBuffer: 2,
   rankMaDays: 3, rankLevelBase: 22, rankLevelMult: 2, rankLevelCutoffRank: 10, rankLevelFloorScore: 1,
   rankDeltaWeight: 0.4, rankDeltaCapUp: 4, rankDeltaCapDown: 4,
-  accelPriorMinReturn: 5, accelBreaks: [0.45, 0.35, 0.25, 0.15], accelScores: [20, 14, 8, 3, -5],
+  accelPriorMinReturn: 5, accelBreaks: [1.2, 0.9, 0.65, 0.4], accelScores: [20, 14, 8, 3, -5],
   accelFreshBreakoutFloor: -3, accelFreshBreakoutMinReturn5d: 8, accelFreshBreakoutScore: 8,
   sectorScoreCap: 10, sectorScoreHalfLife: 1.5, sectorMatchMode: "all",
   normalizeMethod: "minmax", weightRank: 50, weightAccel: 30, weightSector: 20,
@@ -894,10 +922,11 @@ const MAIL_SCORE_DEFAULTS = {
 function loadMailScoreParams() {
   try {
     const saved = JSON.parse(localStorage.getItem(MAIL_SCORE_PARAMS_KEY) || "{}");
+    const isOldDefaultBreaks = Array.isArray(saved.accelBreaks) && JSON.stringify(saved.accelBreaks) === JSON.stringify([0.45, 0.35, 0.25, 0.15]);
     return {
       ...MAIL_SCORE_DEFAULTS, ...saved,
-      accelBreaks: saved.accelBreaks || MAIL_SCORE_DEFAULTS.accelBreaks,
-      accelScores: saved.accelScores || MAIL_SCORE_DEFAULTS.accelScores
+      accelBreaks: (!saved.accelBreaks || isOldDefaultBreaks) ? [...MAIL_SCORE_DEFAULTS.accelBreaks] : saved.accelBreaks,
+      accelScores: saved.accelScores || [...MAIL_SCORE_DEFAULTS.accelScores]
     };
   } catch (e) { return JSON.parse(JSON.stringify(MAIL_SCORE_DEFAULTS)); }
 }
@@ -935,6 +964,7 @@ function saveAdviceBacktestHistory(history) {
 function getPureAdviceLabel(s) {
   if (s.pct5 == null || s.pct10 == null) return null;
   if ((s.pct1 != null && s.pct1 <= -5) || (s.pct5 < 0 && s.pct10 < 0)) return "減碼";
+  if ((s.pct1 != null && s.pct1 >= 7) || (s.pct5 != null && s.pct5 >= 20)) return "不追高";
   if (s.pct10 >= 3 && s.pct5 > 0 && (s.pct1 ?? 0) > -2 && (s.volTrend ?? 1) >= 1.0) return "加碼";
   return "觀察";
 }
@@ -1265,8 +1295,14 @@ async function fetchFinMindData() {
         const pct10 = getClose(10) ? ((price - getClose(10)) / getClose(10)) * 100 : 0;
         const getVol = off => { const idx = data.length - 1 - off; return idx >= 0 ? (data[idx].Trading_Volume || 0) : 0; };
         const vol5 = (getVol(0) + getVol(1) + getVol(2) + getVol(3) + getVol(4)) / 5;
-        const vol5p = (getVol(5) + getVol(6) + getVol(7) + getVol(8) + getVol(9)) / 5;
-        const volTrend = vol5p > 0 ? parseFloat((vol5 / vol5p).toFixed(3)) : 1;
+        let volBase = 0;
+        if (data.length >= 20) {
+          for (let k = 0; k < 20; k++) volBase += getVol(k);
+          volBase /= 20;
+        } else {
+          volBase = (getVol(5) + getVol(6) + getVol(7) + getVol(8) + getVol(9)) / 5;
+        }
+        const volTrend = volBase > 0 ? parseFloat((vol5 / volBase).toFixed(3)) : 1;
         const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Taipei" });
         const latestIsToday = latest.date === todayStr;
         const close5Ref = latestIsToday ? getClose(5) : getClose(4);
@@ -1275,11 +1311,15 @@ async function fetchFinMindData() {
         const newHighDays = priorCloses.length;
         const priorHigh = newHighDays > 0 ? Math.max(...priorCloses) : null;
         const newHigh = priorHigh != null && price > priorHigh;
+        // 成交金額（億元）：優先用 FinMind 官方 Trading_money(元)/1e8，無則用 price * 成交股數 / 1e8（修正原本多 10 倍的單位錯誤）
+        const rawMoney = (typeof latest.Trading_money === "number" && latest.Trading_money > 0)
+          ? latest.Trading_money
+          : (price * (latest.Trading_Volume || 0));
 
         stockData[code] = {
           ...(stockData[code] || {}),
           price, pct1: parseFloat(pct1.toFixed(2)), pct5: parseFloat(pct5.toFixed(2)), pct10: parseFloat(pct10.toFixed(2)),
-          amount: parseFloat(((price * latest.Trading_Volume / 1000) / 10000).toFixed(2)),
+          amount: parseFloat((rawMoney / 1e8).toFixed(2)),
           volTrend, market, close5Ref: close5Ref || null, close10Ref: close10Ref || null,
           newHigh, newHighDays, priorHigh, newHighLive: false
         };
@@ -1314,13 +1354,27 @@ async function fetchLiveQuotes() {
     if (!json.quotes) return;
     Object.entries(json.quotes).forEach(([code, q]) => {
       const prev = stockData[code] || {};
-      const pct5 = prev.close5Ref ? ((q.price - prev.close5Ref) / prev.close5Ref) * 100 : prev.pct5;
-      const pct10 = prev.close10Ref ? ((q.price - prev.close10Ref) / prev.close10Ref) * 100 : prev.pct10;
-      const newHighLive = prev.priorHigh != null && q.price > prev.priorHigh;
+      const close5Ref = q.close5Ref ?? prev.close5Ref ?? null;
+      const close10Ref = q.close10Ref ?? prev.close10Ref ?? null;
+      const pct5 = q.pct5 != null ? q.pct5 : (close5Ref ? parseFloat((((q.price - close5Ref) / close5Ref) * 100).toFixed(2)) : prev.pct5);
+      const pct10 = q.pct10 != null ? q.pct10 : (close10Ref ? parseFloat((((q.price - close10Ref) / close10Ref) * 100).toFixed(2)) : prev.pct10);
+      const priorHigh = q.priorHigh ?? prev.priorHigh ?? null;
+      const newHighDays = q.newHighDays ?? prev.newHighDays ?? null;
+      const newHighLive = q.newHigh != null ? Boolean(q.newHigh) : (priorHigh != null && q.price > priorHigh);
       stockData[code] = {
-        ...prev, price: q.price, pct1: q.pct1, amount: q.amount, market: q.market,
-        pct5: pct5 != null ? parseFloat(pct5.toFixed(2)) : pct5,
-        pct10: pct10 != null ? parseFloat(pct10.toFixed(2)) : pct10,
+        ...prev,
+        price: q.price,
+        pct1: q.pct1,
+        pct5,
+        pct10,
+        amount: q.amount,
+        market: q.market,
+        volTrend: q.volTrend ?? prev.volTrend,
+        close5Ref,
+        close10Ref,
+        priorHigh,
+        newHighDays,
+        newHigh: q.newHigh != null ? Boolean(q.newHigh) : prev.newHigh,
         newHighLive
       };
     });
@@ -1553,7 +1607,10 @@ async function fetchFundamentals() {
           epsApiOk = true;
           const rows = json.data || [], epsRows = rows.filter(d => d.type === "EPS");
           if (epsRows.length > 0) {
-            eps = safeFloat(epsRows[epsRows.length - 1].value);
+            // 加總近 4 季 EPS（TTM 年化），與 TWSE/TPEX price÷PER 反推的 TTM EPS 口徑一致
+            const ttmRows = epsRows.slice(-4);
+            const ttmSum = ttmRows.reduce((acc, r) => acc + (safeFloat(r.value) ?? 0), 0);
+            eps = parseFloat(ttmSum.toFixed(2));
             const latestDate = epsRows[epsRows.length - 1].date;
             const byType = t => { const r = rows.filter(d => d.type === t && d.date === latestDate); return r.length ? safeFloat(r[r.length - 1].value) : null; };
             const revenue = byType("Revenue"), grossProfit = byType("GrossProfit"), operatingIncome = byType("OperatingIncome"), preTaxIncome = byType("PreTaxIncome"), nonOp = byType("TotalNonoperatingIncomeAndExpense");
@@ -1752,7 +1809,7 @@ const US_GAIN_HISTORY_KEY = "fdc_us_gain10_rank_history_v1";
 const US_SCORE_PARAMS = {
   rankMaDays: 3, rankLevelBase: 22, rankLevelMult: 2, rankLevelCutoffRank: 10, rankLevelFloorScore: 1,
   rankDeltaWeight: 0.4, rankDeltaCapUp: 4, rankDeltaCapDown: 4,
-  accelPriorMinReturn: 5, accelBreaks: [0.45, 0.35, 0.25, 0.15], accelScores: [20, 14, 8, 3, -5],
+  accelPriorMinReturn: 5, accelBreaks: [1.2, 0.9, 0.65, 0.4], accelScores: [20, 14, 8, 3, -5],
   accelFreshBreakoutFloor: -3, accelFreshBreakoutMinReturn5d: 8, accelFreshBreakoutScore: 8,
   weightRank: 60, weightAccel: 40
 };

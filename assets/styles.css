@@ -774,6 +774,7 @@ button.btn.xs { padding: 2px 7px; font-size: 11px; }
 .advice-buy { background: var(--down-bg); color: var(--down); border: 1px solid var(--down-border); }
 .advice-sell { background: var(--up-bg); color: var(--up); border: 1px solid var(--up-border); }
 .advice-profit { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+.advice-overheat { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-border); }
 .advice-watch { background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border); }
 
 .watch-btn {
