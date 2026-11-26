@@ -165,6 +165,13 @@ button, .tab, .tag, select { -webkit-tap-highlight-color: transparent; }
   gap: 8px;
   flex-wrap: wrap;
 }
+.mobile-head-icons { display: none; margin-left: auto; gap: 6px; align-items: center; }
+.tab-ico { margin-right: 4px; }
+.plan-mobile-list { display: none; }
+.mtb-head { display: flex; align-items: center; gap: 8px; }
+.mtb-kpis { margin-left: auto; display: flex; gap: 14px; flex-wrap: wrap; }
+.mtb-kpi { display: inline-flex; align-items: center; gap: 4px; }
+.mtb-lbl { color: var(--text-muted); font-size: 11.5px; }
 .topbar h1 {
   font-size: 18px;
   margin: 0;
@@ -707,6 +714,9 @@ button.btn.xs { padding: 2px 7px; font-size: 11px; }
   border: 1px solid transparent;
   transition: background .12s, border-color .12s;
 }
+.bar-row.us-bar-row {
+  grid-template-columns: 185px 1fr 66px 46px;
+}
 .bar-row:hover { background: var(--surface-hover); border-color: var(--border); }
 .bar-row.tier-1 { background: var(--tier-1); }
 .bar-row.tier-2 { background: var(--tier-2); }
@@ -1160,13 +1170,104 @@ button.btn.xs { padding: 2px 7px; font-size: 11px; }
 
 /* ==================== Responsive / Mobile ==================== */
 @media (max-width: 768px) {
-  .app-shell { padding: 10px 10px calc(76px + env(safe-area-inset-bottom)); }
-  .memo-body { grid-template-columns: 1fr; }
-  .checklist-cols { columns: 1; }
-  .search-trigger kbd { display: none; }
+  .app-shell {
+    padding: calc(10px + env(safe-area-inset-top)) 10px calc(76px + env(safe-area-inset-bottom));
+  }
+  .desktop-only-inline { display: none !important; }
+  .mobile-head-icons { display: flex; }
+  .mobile-head-icons .icon-nav-btn { padding: 5px 9px; font-size: 14px; min-height: 32px; }
+
+  /* 精簡手機版頁首（由 6 排壓縮到 3.5 排，釋放首屏空間） */
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 7px;
+    padding-bottom: 8px;
+  }
+  .topbar-brand { gap: 5px; }
+  .topbar-title-row { width: 100%; flex-wrap: nowrap; gap: 6px; }
+  .topbar h1 { font-size: 17px; white-space: nowrap; }
+  .app-version { display: none; }
+  .status-pills { gap: 4px; font-size: 11px; }
+  .status-pill { padding: 2px 7px; }
+
+  /* 核心操作列：單排 4 鍵不換行 */
+  .topbar-actions {
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .topbar-actions .btn.primary { flex: 1; padding: 6px 8px; font-size: 12.5px; }
+  .topbar-actions .btn:not(.primary) { padding: 6px 10px; font-size: 13px; }
   .topbar-sep { display: none; }
 
-  /* 底部固定主導覽列（5 鍵免橫向滑動） */
+  /* 備註＆限制清單：並排 50/50 膠囊 */
+  .memo-dock { margin-bottom: 8px; }
+  .memo-dock-bar { flex-wrap: nowrap; gap: 6px; }
+  .memo-chip {
+    flex: 1;
+    min-width: 0;
+    justify-content: space-between;
+    padding: 5px 9px;
+    font-size: 11.5px;
+  }
+  .memo-chip .memo-preview { max-width: 90px; font-size: 11px; }
+  .memo-body { grid-template-columns: 1fr; }
+  .checklist-cols { columns: 1; }
+
+  /* 大盤體溫：3 格等寬 KPI 卡片 */
+  .market-temp-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .mtb-kpis {
+    margin-left: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .mtb-kpi {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 4px;
+    border-radius: 7px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    font-size: 12.5px;
+  }
+
+  /* 今日作業清單：手機切換為零切邊卡片 */
+  .plan-desktop-table { display: none; }
+  .plan-mobile-list { display: flex; flex-direction: column; gap: 8px; }
+  .plan-m-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 10px;
+  }
+  .plan-m-card.row-selected { background: var(--surface-selected); border-color: var(--down-border); }
+  .plan-m-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .plan-m-name { flex: 1; min-width: 0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .plan-m-price { font-weight: 700; font-size: 13.5px; color: var(--text-primary); }
+  .plan-m-actions { display: flex; align-items: center; gap: 4px; }
+  .plan-m-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 5px 6px;
+    text-align: center;
+  }
+  .plan-m-tags { margin-top: 5px; }
+  .plan-m-note { margin-top: 6px; font-size: 11.5px; }
+
+  /* 底部原生雙行導覽列（上圖示、下文字，5 格等寬） */
   .tabs-wrap {
     position: fixed;
     top: auto;
@@ -1174,10 +1275,10 @@ button.btn.xs { padding: 2px 7px; font-size: 11px; }
     left: 0;
     right: 0;
     margin: 0;
-    padding: 4px 6px calc(6px + env(safe-area-inset-bottom));
+    padding: 4px 4px calc(5px + env(safe-area-inset-bottom));
     border-bottom: none;
     border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.28);
   }
   .tabs {
     justify-content: space-around;
@@ -1186,44 +1287,87 @@ button.btn.xs { padding: 2px 7px; font-size: 11px; }
   }
   .tab {
     flex: 1;
-    text-align: center;
-    padding: 9px 4px;
-    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 5px 2px;
+    font-size: 10.5px;
+    line-height: 1.1;
     border-radius: 10px;
     border-bottom: none;
   }
+  .tab-ico { margin-right: 0; font-size: 16px; line-height: 1.1; }
+  .tab:active { transform: scale(0.94); }
   .tab.mobile-secondary { display: none; }
-  .tab-mobile-more { display: inline-block; }
+  .tab-mobile-more { display: flex; }
 
-  #backToTop { bottom: calc(74px + env(safe-area-inset-bottom)); right: 12px; }
-  #toastContainer { bottom: calc(76px + env(safe-area-inset-bottom)); right: 10px; left: 10px; max-width: none; }
+  #backToTop { bottom: calc(70px + env(safe-area-inset-bottom)); right: 12px; width: 38px; height: 38px; }
+  #toastContainer { bottom: calc(72px + env(safe-area-inset-bottom)); right: 10px; left: 10px; max-width: none; }
 
-  /* 排行長條圖縮排 */
-  .bar-row { grid-template-columns: 112px 1fr 54px 36px 22px 40px; gap: 5px; padding: 6px 6px; }
+  /* 收件匣：修掉雙重 58% 限寬，讓股票名稱＋代號完整呈現，標題單行不換行 */
+  .mailbox-head { padding: 9px 11px; gap: 5px; }
+  .mailbox-head .mb-title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mailbox-head .mb-sub { display: none; }
+  .score-gear { font-size: 13px; padding: 2px 3px; }
+  .mail-row, .mail-thread > summary.mail-row { flex-wrap: wrap; row-gap: 4px; column-gap: 7px; padding: 9px 11px; }
+  .mail-star { order: 1; }
+  .mail-avatar, .mail-avatar-stack { order: 2; }
+  .mail-sender-link { order: 3; flex: 1 1 auto; min-width: 0; max-width: none; }
+  .mail-sender { order: 3; width: auto; max-width: 100%; font-size: 13px; }
+  .score-chip { order: 4; margin-left: auto; }
+  .mail-subject { order: 5; flex: 1 1 100%; white-space: normal; padding-left: 34px; font-size: 12px; line-height: 1.45; }
+  .mail-time { order: 6; padding-left: 34px; width: auto; text-align: left; font-size: 10.5px; }
+  .mail-actions { order: 7; margin-left: auto; opacity: 1; }
+
+  /* 進階篩選＆黑馬訊號 chip：手機橫向滑動單排，不堆成多行牆壁 */
+  .strat-subtabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .strat-subtabs::-webkit-scrollbar { display: none; }
+
+  /* 排行長條圖：手機雙行卡片（第1行完整名稱+數據，第2行全寬長條） */
+  .bar-row {
+    grid-template-columns: 1fr auto auto auto auto;
+    grid-template-areas:
+      "name val cnt vol heat"
+      "track track track track track";
+    gap: 5px 6px;
+    padding: 8px 9px;
+  }
+  .bar-row.us-bar-row {
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+      "name val cnt"
+      "track track track";
+  }
+  .bar-name { grid-area: name; font-size: 12.5px; font-weight: 600; }
+  .bar-val { grid-area: val; font-size: 12.5px; }
+  .bar-pct { grid-area: cnt; font-size: 11px; }
+  .bar-row > div:nth-child(5) { grid-area: vol; }
+  .bar-row > div:nth-child(6) { grid-area: heat; }
+  .bar-track { grid-area: track; height: 8px; }
   .bar-sparkline { display: none !important; }
-  .bar-name { font-size: 12px; }
 
-  /* 表格緊縮 */
+  /* 表格緊縮與表單控制項對齊 */
+  .data-panel { padding: 11px 12px; margin-bottom: 10px; }
   .stocks-table th, .stocks-table td { padding: 6px 5px; font-size: 11.5px; }
-  #watchlistTable td.wrap-cell { min-width: 120px; }
+  #watchlistTable td.wrap-cell { min-width: 118px; }
   .wrap-cell .tag { font-size: 9.5px; padding: 1px 4px; }
-
-  /* 明細表手機簡化 */
   #stocksTable th:nth-child(8), #stocksTable td:nth-child(8),
   #stocksTable th:nth-child(9), #stocksTable td:nth-child(9) { display: none; }
 
-  /* 防止 iOS 自動縮放 */
-  input[type="text"], input[type="password"], input[type="number"] { font-size: 16px; }
-  button.btn { min-height: 36px; }
+  /* 防止 iOS 自動縮放，並固定高度讓 input 與按鈕整齊 */
+  input[type="text"], input[type="password"], input[type="number"] { font-size: 16px; min-height: 36px; }
+  button.btn, select { min-height: 36px; }
+  button.btn.xs { min-height: 28px; }
   #apiToken, #ghTriggerToken { width: 100% !important; }
-
-  /* 信箱卡片式換行 */
-  .mail-row, .mail-thread > summary.mail-row { flex-wrap: wrap; row-gap: 4px; }
-  .mail-star { order: 1; }
-  .mail-avatar, .mail-avatar-stack { order: 2; }
-  .mail-sender-link, .mail-sender { order: 3; flex: 0 1 auto; max-width: 58%; width: auto; }
-  .score-chip { order: 4; margin-left: auto; }
-  .mail-subject { order: 5; flex: 1 1 100%; white-space: normal; padding-left: 36px; }
-  .mail-time { order: 6; font-size: 10.5px; }
-  .mail-actions { order: 7; margin-left: auto; opacity: 1; }
+  .section-header { margin: 10px 0 8px; }
+  .controls { width: 100%; }
+  #watchGroupSelect, #sectorSelect { flex: 1; min-width: 0; }
 }

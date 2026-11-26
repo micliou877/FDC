@@ -1,5 +1,5 @@
 // ==================== FDC Core: State, Cloud Sync, Fetchers & Calculations ====================
-const APP_VERSION = "2026-11-26.2";
+const APP_VERSION = "2026-11-26.3";
 
 // ==================== 共用工具：跳脫、Toast、主題 ====================
 function _dEsc(s) {
@@ -29,8 +29,10 @@ function getCurrentTheme() {
 }
 function updateThemeBtnLabel() {
   const btn = document.getElementById("darkModeBtn");
+  const btnMob = document.getElementById("darkModeBtnMobile");
   const isLight = getCurrentTheme() === "light";
   if (btn) btn.textContent = isLight ? "🌙 深色" : "☀️ 淺色";
+  if (btnMob) btnMob.textContent = isLight ? "🌙" : "☀️";
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", isLight ? "#f3f5f9" : "#0f1218");
 }

@@ -12,7 +12,9 @@ function renderStatusPills() {
     pills.push(`<span class="status-pill">尚未匯入盤後資料</span>`);
   }
   if (liveQuoteTime) {
-    pills.push(`<span class="status-pill" title="GitHub Actions 盤中報價">盤中 <strong>${_dEsc(liveQuoteTime)}</strong></span>`);
+    // 精簡顯示 MM/DD HH:MM（完整時間保留在 title），避免手機上把狀態列撐成兩排
+    const shortLive = String(liveQuoteTime).replace(/^\d{4}-(\d{2})-(\d{2})\s+(\d{2}:\d{2}).*$/, "$1/$2 $3");
+    pills.push(`<span class="status-pill" title="GitHub Actions 盤中報價：${_dEsc(liveQuoteTime)}">盤中 <strong>${_dEsc(shortLive)}</strong></span>`);
   }
   if (vixtwn) {
     const vSign = vixtwn.pct1 >= 0 ? "+" : "";
@@ -691,7 +693,7 @@ function buildMailInboxHtml(snapshot) {
   return `
     <details class="mailbox" ${mailUiState.inboxOpen ? "open" : ""} ontoggle="mailUiState.inboxOpen=this.open">
       <summary class="mailbox-head">
-        <span class="mb-title">📥 收件匣（10日強勢動能榜）</span>
+        <span class="mb-title">📥 收件匣<span class="mb-sub">（10日強勢動能榜）</span></span>
         <span class="score-gear" title="說明／調整加權分數參數" onclick="event.preventDefault();event.stopPropagation();toggleMailScorePanel();">ⓘ</span>
         <span class="score-gear" title="切換分數排序" onclick="event.preventDefault();event.stopPropagation();toggleMailScoreSort();">${sortIcon}</span>
         <span class="score-gear" title="匯出當日分數 JSON" onclick="event.preventDefault();event.stopPropagation();downloadMailScoreJson();">⬇</span>
@@ -837,8 +839,30 @@ function renderStrategy() {
   });
   const rotations = sortBy(uniqByCode(rotationRaw), "z");
 
-  // 今日作業清單
+  // 今日作業清單（桌面表格＋手機零切邊卡片）
   const sortedPlan = sortBy(dailyPlan.map(p => ({ ...p, ...stockData[p.code] })), "p");
+  const planMobileCards = sortedPlan.map(p => `
+    <div class="plan-m-card ${selectedPlanCode === p.code ? "row-selected" : ""}" onclick="togglePlanSelect('${_dEsc(p.code)}', event)">
+      <div class="plan-m-top">
+        <div class="plan-m-name">
+          <a href="${getTVLink(p.code, p.market)}" target="_blank" style="font-weight:700;">${_dEsc(p.code)}</a>
+          <a href="${getTVLink(p.code, p.market)}" target="_blank" style="font-weight:600;color:var(--text-primary);margin-left:4px;">${_dEsc(p.name)}</a>
+        </div>
+        <div class="plan-m-price num">${p.price?.toFixed(2) ?? "-"}</div>
+        <div class="plan-m-actions" onclick="event.stopPropagation()">
+          ${watchBtnHtml(p.code, p.market || "TWSE", p.name)}
+          <button class="btn xs" onclick="removePlan('${_dEsc(p.code)}')" title="移除">✕</button>
+        </div>
+      </div>
+      <div class="plan-m-metrics num">
+        <span>10日 <strong class="${pctClass(p.pct10)}">${fmtPct(p.pct10)}</strong></span>
+        <span>5日 <strong class="${pctClass(p.pct5)}">${fmtPct(p.pct5)}</strong></span>
+        <span>今日 <strong class="${pctClass(p.pct1)}">${fmtPct(p.pct1)}</strong></span>
+      </div>
+      ${(STOCK_SECTORS_MAP[p.code] || []).length ? `<div class="plan-m-tags">${(STOCK_SECTORS_MAP[p.code] || []).map(t => `<span class="tag" onclick="goToSector(${_jsStr(t)},event)">${_dEsc(t)}</span>`).join("")}</div>` : ""}
+      <div class="plan-m-note" onclick="event.stopPropagation();editPlanNote(this,'${_dEsc(p.code)}')"><span class="note-display">${p.note ? _dEsc(p.note) : ""}</span></div>
+    </div>`).join("");
+
   const planHtml = `
     <div class="data-panel" style="padding:12px 14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${dailyPlan.length ? "10" : "4"}px;">
@@ -847,7 +871,7 @@ function renderStrategy() {
       </div>
       ${dailyPlan.length === 0
         ? `<div style="font-size:12px;color:var(--text-muted);">從下方清單或快速搜尋（Ctrl+K）點「＋」加入候選標的</div>`
-        : `<div class="table-wrap"><table class="stocks-table">
+        : `<div class="table-wrap plan-desktop-table"><table class="stocks-table">
             <thead><tr>
               ${th("p", "code", "標的", "left")}${th("p", "price", "股價")}${th("p", "pct10", "10日%")}${th("p", "pct5", "5日%")}${th("p", "pct1", "今日%")}
               <th style="text-align:left;cursor:default;">備註</th>
@@ -864,7 +888,8 @@ function renderStrategy() {
                 <td style="text-align:center;">${watchBtnHtml(p.code, p.market || "TWSE", p.name)}</td>
                 <td style="text-align:center;"><span style="cursor:pointer;color:var(--text-muted);" onclick="removePlan('${_dEsc(p.code)}')">✕</span></td>
               </tr>`).join("")}
-            </tbody></table></div>`}
+            </tbody></table></div>
+           <div class="plan-mobile-list">${planMobileCards}</div>`}
     </div>`;
 
   // 進階篩選：統一表格渲染器（子分頁切換）
@@ -963,15 +988,15 @@ function renderStrategy() {
 
   panel.innerHTML = `
     <div class="market-temp-bar">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="width:9px;height:9px;border-radius:50%;background:${dotColor};display:inline-block;"></span>
+      <div class="mtb-head">
+        <span style="width:9px;height:9px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0;"></span>
         <strong style="font-size:13.5px;">大盤體溫：${statusLabel}</strong>
-        <span style="color:var(--text-muted);">${beatCount}/${validStats.length} 族群跑贏大盤</span>
+        <span style="color:var(--text-muted);font-size:12px;">${beatCount}/${validStats.length} 族群跑贏大盤</span>
       </div>
-      <div style="margin-left:auto;display:flex;gap:14px;flex-wrap:wrap;" class="num">
-        <span>0050 10日 <span class="${pctClass(market.pct10)}">${fmtPct(market.pct10)}</span></span>
-        <span>5日 <span class="${pctClass(market.pct5)}">${fmtPct(market.pct5)}</span></span>
-        <span>今日 <span class="${pctClass(market.pct1)}">${fmtPct(market.pct1)}</span></span>
+      <div class="mtb-kpis num">
+        <span class="mtb-kpi"><span class="mtb-lbl">0050 10日</span><strong class="${pctClass(market.pct10)}">${fmtPct(market.pct10)}</strong></span>
+        <span class="mtb-kpi"><span class="mtb-lbl">5日</span><strong class="${pctClass(market.pct5)}">${fmtPct(market.pct5)}</strong></span>
+        <span class="mtb-kpi"><span class="mtb-lbl">今日</span><strong class="${pctClass(market.pct1)}">${fmtPct(market.pct1)}</strong></span>
       </div>
     </div>
 
@@ -1920,7 +1945,7 @@ function renderUsStocks() {
     const barW = Math.max(2, Math.min(100, (Math.abs(val) / maxAbs * 100))).toFixed(1);
     const twSector = matchTwSectorForUs(s.sector);
     let html = `
-      <div class="bar-row ${expanded ? "expanded" : tierCls}" style="grid-template-columns:185px 1fr 66px 46px;" onclick="toggleUsSectorExpand(${_jsStr(s.sector)})">
+      <div class="bar-row us-bar-row ${expanded ? "expanded" : tierCls}" onclick="toggleUsSectorExpand(${_jsStr(s.sector)})">
         <div class="bar-name"><span class="bar-rank">${rank}</span><span style="overflow:hidden;text-overflow:ellipsis;">${_dEsc(s.sector)}</span><span style="font-size:9px;color:var(--text-muted);">${expanded ? "▲" : "▼"}</span></div>
         <div class="bar-track ${val < 0 ? "is-neg" : ""}"><div class="bar-fill ${val < 0 ? "neg" : "pos"}" style="width:${barW}%"></div></div>
         <div class="bar-val ${pctClass(val)}">${fmtPct(val)}</div>

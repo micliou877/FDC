@@ -24,7 +24,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=2026-11-26.2">
+  <link rel="stylesheet" href="assets/styles.css?v=2026-11-26.3">
 </head>
 <body>
 
@@ -36,6 +36,10 @@
         <h1>業績追蹤</h1>
         <span id="appVersion" class="app-version"></span>
         <span id="cloudBadge" class="status-pill cloud-offline" title="雲端同步狀態">本機模式</span>
+        <div class="mobile-head-icons">
+          <button class="icon-nav-btn" onclick="openQuickSearch()" title="搜尋標的">🔍</button>
+          <button class="icon-nav-btn" id="darkModeBtnMobile" onclick="toggleTheme()" title="切換深色／淺色主題">🌙</button>
+        </div>
       </div>
       <div id="statusPills" class="status-pills">
         <span class="status-pill">尚未載入資料</span>
@@ -43,7 +47,7 @@
     </div>
 
     <div class="topbar-actions">
-      <button class="search-trigger" onclick="openQuickSearch()" title="全域快速搜尋（快捷鍵 / 或 Ctrl+K）">
+      <button class="search-trigger desktop-only-inline" onclick="openQuickSearch()" title="全域快速搜尋（快捷鍵 / 或 Ctrl+K）">
         <span>🔍 搜尋標的</span>
         <kbd>Ctrl+K</kbd>
       </button>
@@ -52,9 +56,9 @@
       <button class="btn sm" onclick="forcePushCloud()" title="整包上傳覆蓋雲端（需於設定頁輸入同步代碼）">⬆️</button>
       <button class="btn sm" onclick="forcePullCloud()" title="從雲端整包下載覆蓋本機">⬇️</button>
       <span class="topbar-sep"></span>
-      <button class="icon-nav-btn" id="darkModeBtn" onclick="toggleTheme()" title="切換深色／淺色主題">☀️ 淺色</button>
-      <button class="icon-nav-btn" id="navSopBtn" onclick="switchTab('sop')" title="操作 SOP">📖 SOP</button>
-      <button class="icon-nav-btn" id="navDataBtn" onclick="switchTab('data')" title="設定與同步">⚙️ 設定</button>
+      <button class="icon-nav-btn desktop-only-inline" id="darkModeBtn" onclick="toggleTheme()" title="切換深色／淺色主題">☀️ 淺色</button>
+      <button class="icon-nav-btn desktop-only-inline" id="navSopBtn" onclick="switchTab('sop')" title="操作 SOP">📖 SOP</button>
+      <button class="icon-nav-btn desktop-only-inline" id="navDataBtn" onclick="switchTab('data')" title="設定與同步">⚙️ 設定</button>
     </div>
   </header>
 
@@ -107,15 +111,15 @@
   <!-- 主分頁導覽列 -->
   <nav class="tabs-wrap" aria-label="主導覽">
     <div class="tabs">
-      <button class="tab active" data-tab="strategy">📬 今日精選</button>
-      <button class="tab" data-tab="ranking">🏆 排行</button>
-      <button class="tab" data-tab="stocks">📋 明細</button>
-      <button class="tab" data-tab="watchlist">⭐ 關注</button>
-      <button class="tab mobile-secondary" data-tab="usstocks">🇺🇸 美股FDC</button>
-      <button class="tab mobile-secondary" data-tab="marketscan">🔍 黑馬掃描</button>
-      <button class="tab mobile-secondary" data-tab="diary">📓 交易日記</button>
+      <button class="tab active" data-tab="strategy"><span class="tab-ico">📬</span><span class="tab-lbl">今日精選</span></button>
+      <button class="tab" data-tab="ranking"><span class="tab-ico">🏆</span><span class="tab-lbl">排行</span></button>
+      <button class="tab" data-tab="stocks"><span class="tab-ico">📋</span><span class="tab-lbl">明細</span></button>
+      <button class="tab" data-tab="watchlist"><span class="tab-ico">⭐</span><span class="tab-lbl">關注</span></button>
+      <button class="tab mobile-secondary" data-tab="usstocks"><span class="tab-ico">🇺🇸</span><span class="tab-lbl">美股FDC</span></button>
+      <button class="tab mobile-secondary" data-tab="marketscan"><span class="tab-ico">🔍</span><span class="tab-lbl">黑馬掃描</span></button>
+      <button class="tab mobile-secondary" data-tab="diary"><span class="tab-ico">📓</span><span class="tab-lbl">交易日記</span></button>
       <button class="tab" data-tab="global" style="display:none;">🌐 國際</button>
-      <button class="tab tab-mobile-more" id="mobileMoreBtn" onclick="toggleMobileMore(true)">⋯ 更多</button>
+      <button class="tab tab-mobile-more" id="mobileMoreBtn" onclick="toggleMobileMore(true)"><span class="tab-ico">⋯</span><span class="tab-lbl">更多</span></button>
     </div>
   </nav>
 
@@ -614,8 +618,8 @@
 <div id="toastContainer"></div>
 <button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">↑</button>
 
-<script src="assets/data.js?v=2026-11-26.2"></script>
-<script src="assets/core.js?v=2026-11-26.2"></script>
-<script src="assets/views.js?v=2026-11-26.2"></script>
+<script src="assets/data.js?v=2026-11-26.3"></script>
+<script src="assets/core.js?v=2026-11-26.3"></script>
+<script src="assets/views.js?v=2026-11-26.3"></script>
 </body>
 </html>
