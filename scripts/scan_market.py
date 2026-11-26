@@ -34,6 +34,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+DATA_JS = ROOT / "assets" / "data.js"
 INDEX_HTML = ROOT / "index.html"
 HISTORY_FILE = ROOT / "market_history.json"
 OUTPUT_FILE = ROOT / "market_scan.json"
@@ -65,9 +66,12 @@ CODE_RE = re.compile(r"^\d{4,6}$")  # 排除ETF(00開頭常帶英文字母)/債�
 
 
 def extract_pool_codes():
-    """FDC現有股池：直接從index.html的SECTORS抓code，跟fetch_quotes.py的extract_codes()同邏輯。"""
-    html = INDEX_HTML.read_text(encoding="utf-8")
-    return set(re.findall(r'\{code:"(\d{4,6})"', html))
+    """FDC現有股池：優先從 assets/data.js 讀取，若回退舊版單檔則讀 index.html。"""
+    src = DATA_JS if DATA_JS.exists() else INDEX_HTML
+    codes = set(re.findall(r'\{code:"(\d{4,6})"', src.read_text(encoding="utf-8")))
+    if not codes and src != INDEX_HTML and INDEX_HTML.exists():
+        codes = set(re.findall(r'\{code:"(\d{4,6})"', INDEX_HTML.read_text(encoding="utf-8")))
+    return codes
 
 
 def _to_float(s):

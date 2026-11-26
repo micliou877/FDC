@@ -18,6 +18,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
 ROOT = Path(__file__).resolve().parent.parent
+DATA_JS = ROOT / "assets" / "data.js"
 INDEX_HTML = ROOT / "index.html"
 OUTPUT = ROOT / "quotes.json"
 
@@ -26,8 +27,11 @@ CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval
 
 
 def extract_codes():
-    html = INDEX_HTML.read_text(encoding="utf-8")
-    codes = set(re.findall(r'\{code:"(\d{4,6})"', html))
+    src = DATA_JS if DATA_JS.exists() else INDEX_HTML
+    text = src.read_text(encoding="utf-8")
+    codes = set(re.findall(r'\{code:"(\d{4,6})"', text))
+    if not codes and src != INDEX_HTML and INDEX_HTML.exists():
+        codes = set(re.findall(r'\{code:"(\d{4,6})"', INDEX_HTML.read_text(encoding="utf-8")))
     codes.add("0050")  # 大盤基準，前端用來算族群 vs 大盤強弱，沒有寫在 SECTORS 清單裡
     return sorted(codes)
 
